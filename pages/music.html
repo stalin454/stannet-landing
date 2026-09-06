@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="StanNet.Space · Music Lab para convertir ideas en briefs musicales.">
+<title>Music Lab | StanNet.Space</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+.youtube-section{border-top:1px solid var(--line)}
+.youtube-section .section-heading{align-items:end}
+.youtube-section h2{font-size:clamp(35px,4.5vw,66px);line-height:1;letter-spacing:-.065em;margin:0}
+.youtube-section h2 em{color:var(--pink);font-style:normal}
+.youtube-player{width:min(100%,960px);margin:auto;aspect-ratio:16/9;background:#000;border:1px solid var(--line);box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.youtube-player iframe{display:block;width:100%;height:100%;border:0}
+.youtube-note{max-width:960px;margin:14px auto 0;color:var(--muted);font:10px "DM Mono",monospace;letter-spacing:.04em}
+</style>
+</head>
+<body id="top">
+<header class="site-header">
+<a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a>
+<a href="ai.html">IA</a>
+<a href="cybersecurity.html">Ciberseguridad</a>
+<a class="active" href="music.html">Music Lab</a>
+<a href="cv.html">Perfil</a>
+</nav>
+</header>
+<main>
+<section class="page-hero grid-bg">
+<p class="eyebrow">03 / MUSIC LAB</p>
+<h1>Tu historia,<br><em>en otra frecuencia.</em></h1>
+<p>Cuéntame la idea y crea un brief musical listo para transformar una emoción en canción.</p>
+</section>
+<section class="section">
+<form class="music-form" id="songForm">
+<div class="form-grid">
+<div>
+<label for="nombre">NOMBRE</label>
+<input id="nombre" required placeholder="¿Cómo te llamas?">
+</div>
+<div>
+<label for="genero">GÉNERO</label>
+<select id="genero">
+<option>Pop electrónico</option>
+<option>Rock</option>
+<option>Urbano</option>
+<option>Acústico</option>
+<option>Ambient</option>
+</select>
+</div>
+</div>
+<div style="margin-top:20px">
+<label for="tema">HISTORIA O IDEA</label>
+<textarea id="tema" required placeholder="Describe el momento, la emoción o el mensaje de la canción..."></textarea>
+</div>
+<button class="button primary" type="submit" style="border:0;margin-top:20px">Crear mi brief <span>↗</span></button>
+<div id="resultado" class="form-result" aria-live="polite"></div>
+</form>
+</section>
+<section class="section youtube-section">
+<div class="section-heading">
+<div>
+<p class="eyebrow">04 / YOUTUBE</p>
+<h2>Escucha la<br><em>frecuencia.</em></h2>
+</div>
+<p>Reproduce tus vídeos directamente desde StanNet.Space sin sacar al visitante de la página.</p>
+</div>
+<div class="youtube-player">
+<iframe
+src="https://www.youtube.com/embed?listType=user&list=StanNetSpace"
+title="Canal de YouTube de StanNet.Space"
+loading="lazy"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+allowfullscreen></iframe>
+</div>
+<p class="youtube-note">Canal de StanNet.Space integrado. <a class="card-link" href="https://www.youtube.com/@StanNetSpace" target="_blank" rel="noopener noreferrer">ABRIR CANAL EN YOUTUBE ↗</a></p>
+</section>
+</main>
+<footer>
+<a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a>
+<p>© <span id="year"></span></p>
+<a href="#top">VOLVER ARRIBA ↑</a>
+</footer>
+<script src="../script.js"></script>
+</body>
+</html>
