@@ -30,3 +30,39 @@ if(form){
     result.scrollIntoView({behavior:'smooth',block:'nearest'});
   });
 }
+
+const videoGallery=document.querySelector('#videoGallery');
+const videoPlayer=document.querySelector('.youtube-player iframe');
+
+if(videoGallery&&videoPlayer){
+  fetch('/api/videos')
+    .then((response)=>{
+      if(!response.ok) throw new Error('No se pudo cargar el canal');
+      return response.json();
+    })
+    .then(({videos})=>{
+      if(!videos?.length){
+        videoGallery.textContent='Todavía no hay vídeos públicos en el canal.';
+        return;
+      }
+
+      videoGallery.className='video-gallery';
+      videoGallery.innerHTML='';
+      videos.forEach((video)=>{
+        const card=document.createElement('article');
+        card.className='video-card';
+        const button=document.createElement('button');
+        button.type='button';
+        button.innerHTML=`<img src="${video.thumbnail}" alt="Miniatura de ${video.title}" loading="lazy"><h3>${video.title}</h3>`;
+        button.addEventListener('click',()=>{
+          videoPlayer.src=`https://www.youtube.com/embed/${video.id}`;
+          videoPlayer.scrollIntoView({behavior:'smooth',block:'center'});
+        });
+        card.appendChild(button);
+        videoGallery.appendChild(card);
+      });
+    })
+    .catch(()=>{
+      videoGallery.textContent='No se pudieron cargar los vídeos ahora. Puedes abrir el canal directamente en YouTube.';
+    });
+}
