@@ -77,5 +77,8 @@ const stableClient=window.supabase.createClient('https://beaiuamtvijimwislzeo.su
 <script>
 if(window['pdfjs-dist/build/pdf']&&!window.pdfjsLib)window.pdfjsLib=window['pdfjs-dist/build/pdf'];
 </script>
+<script>
+let vocabularyRetryPending=false;const retryVocabulary=()=>{if(vocabularyRetryPending)return;vocabularyRetryPending=true;setTimeout(()=>{vocabularyRetryPending=false;document.querySelector('#lessonSelect').dispatchEvent(new Event('change'))},8000)};document.querySelector('#bookSelect').addEventListener('change',retryVocabulary);document.querySelector('#lessonSelect').addEventListener('change',retryVocabulary);
+</script>
 </body>
 </html>
