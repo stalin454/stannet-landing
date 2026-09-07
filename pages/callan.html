@@ -16,6 +16,9 @@
 <style>
 .auth-card{max-width:640px;margin:0 auto 18px;padding:26px;border:1px solid var(--lesson-line);background:rgba(16,17,38,.82)}.auth-card h2{margin:8px 0 18px;font-size:28px;letter-spacing:-.05em}.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.auth-card input{background:#080919}.auth-actions{display:flex;gap:10px;margin-top:16px}.auth-actions button{min-height:45px;padding:0 17px;border:0;background:var(--lime);color:#101400;font:500 11px 'DM Mono',monospace;cursor:pointer}.auth-actions button.secondary{border:1px solid var(--lesson-line);background:transparent;color:var(--ink)}.auth-status{margin:14px 0 0;color:var(--muted);font-size:12px}.is-hidden{display:none!important}.user-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 auto 18px;color:var(--muted);font:10px 'DM Mono',monospace}.user-bar button{border:0;background:none;color:var(--lesson-accent);font:inherit;cursor:pointer}@media(max-width:520px){.auth-grid{grid-template-columns:1fr}.auth-actions{flex-direction:column}}
 </style>
+<style>
+.voice-lab{margin-top:18px;padding:16px;border:1px solid var(--lesson-line);background:rgba(89,232,255,.04)}.voice-actions{display:flex;flex-wrap:wrap;gap:10px}.voice-actions button{min-height:42px;padding:0 14px;border:1px solid var(--lesson-line);background:transparent;color:var(--ink);font:500 10px 'DM Mono',monospace;cursor:pointer}.voice-actions button.recording{border-color:#ff6d8f;color:#ff9ab2}.voice-status{margin:11px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.voice-preview{width:100%;margin-top:12px;display:none}.voice-preview.show{display:block}
+</style>
 <script src="../vendor/pdf.min.js"></script>
 </head>
 <body id="top">
@@ -45,6 +48,7 @@
 <div class="question" id="questionText">Do you live in Spain?</div>
 <div class="answer-row"><input id="answer" type="text" placeholder="Escribe tu respuesta en ingles"><button id="checkAnswer" type="button">Comprobar →</button></div>
 <div class="auth-actions"><button id="listenQuestion" class="secondary" type="button">Escuchar pregunta</button><button id="nextQuestion" class="secondary is-hidden" type="button">Siguiente pregunta →</button></div>
+<div class="voice-lab"><p class="side-label">REPETICION ORAL</p><div class="voice-actions"><button id="recordAnswer" type="button">● Grabar respuesta</button><button id="playRecording" type="button" disabled>Escuchar mi voz</button></div><p class="voice-status" id="voiceStatus">Pulsa grabar y repite la respuesta en voz alta. La grabación permanece en este dispositivo.</p><audio id="voicePreview" class="voice-preview" controls></audio></div>
 <div id="feedback" class="feedback" role="status"></div>
 <div class="coach-footer"><span id="lessonProgress">Pregunta 1 de 3 · modo conversacion</span><a href="#vocabulario">Ver vocabulario ↓</a></div>
 </article>
@@ -80,5 +84,9 @@ if(window['pdfjs-dist/build/pdf']&&!window.pdfjsLib)window.pdfjsLib=window['pdfj
 <script>
 let vocabularyRetryPending=false;const retryVocabulary=()=>{if(vocabularyRetryPending)return;vocabularyRetryPending=true;setTimeout(()=>{vocabularyRetryPending=false;document.querySelector('#lessonSelect').dispatchEvent(new Event('change'))},8000)};document.querySelector('#bookSelect').addEventListener('change',retryVocabulary);document.querySelector('#lessonSelect').addEventListener('change',retryVocabulary);
 </script>
+<script>
+const recordButton=document.querySelector('#recordAnswer');const playRecording=document.querySelector('#playRecording');const voiceStatus=document.querySelector('#voiceStatus');const voicePreview=document.querySelector('#voicePreview');let mediaRecorder;let recordedChunks=[];let recordingUrl='';const stopRecording=()=>{if(mediaRecorder?.state==='recording')mediaRecorder.stop()};recordButton.addEventListener('click',async()=>{if(mediaRecorder?.state==='recording'){stopRecording();return}if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){voiceStatus.textContent='Este navegador no permite grabar audio. Puedes responder con el campo de texto.';return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});recordedChunks=[];mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=(event)=>{if(event.data.size)recordedChunks.push(event.data)};mediaRecorder.onstop=()=>{stream.getTracks().forEach((track)=>track.stop());const blob=new Blob(recordedChunks,{type:'audio/webm'});if(recordingUrl)URL.revokeObjectURL(recordingUrl);recordingUrl=URL.createObjectURL(blob);voicePreview.src=recordingUrl;voicePreview.classList.add('show');playRecording.disabled=false;recordButton.classList.remove('recording');recordButton.textContent='● Grabar de nuevo';voiceStatus.textContent='Grabación lista. Escúchate y repite hasta que te resulte natural.'};mediaRecorder.start();recordButton.classList.add('recording');recordButton.textContent='■ Detener grabación';playRecording.disabled=true;voiceStatus.textContent='Te escucho... repite la respuesta completa.'}catch(error){voiceStatus.textContent='No se pudo acceder al micrófono. Revisa el permiso del navegador.'}});playRecording.addEventListener('click',()=>{if(recordingUrl)voicePreview.play()});
+</script>
 </body>
 </html>
+
