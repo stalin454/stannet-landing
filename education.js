@@ -164,7 +164,7 @@ const certificates = [
 ];
 
 const grid = document.querySelector('#certificateGrid');
-const form = document.querySelector('#educationForm');
+const educationForm = document.querySelector('#educationForm');
 const viewerTitle = document.querySelector('#viewerTitle');
 const viewerMeta = document.querySelector('#viewerMeta');
 const frameWrap = document.querySelector('#pdfFrameWrap');
@@ -257,9 +257,9 @@ grid?.addEventListener('click', (event) => {
   document.querySelector('.certificate-viewer-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
-form?.addEventListener('submit', (event) => {
+educationForm?.addEventListener('submit', (event) => {
   event.preventDefault();
-  const data = new FormData(form);
+  const data = new FormData(educationForm);
   const file = data.get('file');
   const message = document.querySelector('#uploadMessage');
 
