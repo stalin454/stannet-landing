@@ -58,5 +58,10 @@ document.addEventListener('DOMContentLoaded',()=>{const topic=document.querySele
 </main><footer><a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a><p>© <span id="year"></span> · StanNet Danish Academy</p><a href="#top">VOLVER ARRIBA ↑</a></footer>
 <script src="../script.js"></script><script src="../danish-expansion.js"></script><script>
 const danishPhrases=[['Hej, jeg hedder Anna.','Hola, me llamo Anna.'],['Jeg bor i Spanien.','Vivo en España.'],['Hvordan har du det?','¿Como estas?'],['Jeg taler lidt dansk.','Hablo un poco de danes.']];let danishIndex=0;const danishPhrase=document.querySelector('#danishPhrase');const danishMeaning=document.querySelector('#danishMeaning');const danishFeedback=document.querySelector('#danishFeedback');const speakDanish=()=>{if(!('speechSynthesis' in window)){danishFeedback.textContent='La voz no esta disponible en este navegador.';return}speechSynthesis.cancel();const speech=new SpeechSynthesisUtterance(danishPhrase.textContent);speech.lang='da-DK';speech.rate=.86;speechSynthesis.speak(speech);danishFeedback.textContent='Escucha el ritmo y repite la frase completa en voz alta.'};document.querySelector('#listenDanish').addEventListener('click',speakDanish);document.querySelector('#showAnswer').addEventListener('click',()=>{danishFeedback.textContent='Pista: '+danishMeaning.textContent+' Repite ahora la frase en danes.'});document.querySelector('#nextDanish').addEventListener('click',()=>{danishIndex=(danishIndex+1)%danishPhrases.length;danishPhrase.textContent=danishPhrases[danishIndex][0];danishMeaning.textContent=danishPhrases[danishIndex][1];danishFeedback.textContent='Nueva frase preparada. Escuchala y repitela sin traducir palabra por palabra.'});
-</script></body></html>
+</script>
+<script type="module">
+  import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/dist/index.mjs';
+  inject();
+</script>
+</body></html>
 
