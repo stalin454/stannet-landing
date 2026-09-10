@@ -1,1 +1,39 @@
-.education-filters{display:flex;gap:8px;margin:34px 0 18px}.filter-button{background:transparent;color:var(--muted);border:1px solid var(--line);padding:10px 14px;font:10px 'DM Mono',monospace;cursor:pointer}.filter-button.active,.filter-button:hover{border-color:var(--lime);color:var(--lime)}.education-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.education-card{min-height:360px;padding:25px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;transition:.3s}.education-card:hover{border-color:var(--lime);transform:translateY(-4px)}.education-icon{font-size:48px;margin:auto 0 18px;color:var(--lime)}.education-card h3{font-size:25px;line-height:1;letter-spacing:-.05em;margin:0 0 8px}.education-card p:not(.education-meta){font-size:13px;line-height:1.65;color:var(--muted);margin:0}.education-meta{font:10px 'DM Mono',monospace;color:var(--violet);margin:0 0 14px}.education-upload{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(30px,7vw,110px);border-top:1px solid var(--line);background:linear-gradient(115deg,rgba(157,123,255,.1),transparent 55%)}.upload-copy h2{font-size:clamp(35px,4.5vw,65px);line-height:1;letter-spacing:-.06em}.upload-copy>p:last-child{color:var(--muted);font-size:14px;line-height:1.7}.upload-form{padding:28px;border:1px solid var(--line);background:rgba(16,17,38,.7)}.upload-form .button{border:0;cursor:pointer;margin-top:8px}.upload-message{display:none;padding:12px;border-left:2px solid var(--lime);color:var(--muted);font-size:13px}.upload-message.show{display:block}.education-card[hidden]{display:none}@media(max-width:850px){.education-grid,.education-upload{grid-template-columns:1fr}}@media(max-width:520px){.education-filters{flex-wrap:wrap}}
+.education-hero{background:radial-gradient(circle at 72% 24%,rgba(89,232,255,.2),transparent 24%),linear-gradient(125deg,rgba(200,255,77,.08),transparent 45%),#070816}
+.education-board{border-top:1px solid var(--line)}
+.education-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.filter-button{min-height:40px;background:rgba(16,17,38,.75);color:var(--muted);border:1px solid var(--line);padding:10px 14px;font:10px "DM Mono",monospace;letter-spacing:.08em;cursor:pointer;transition:.25s}
+.filter-button.active,.filter-button:hover{border-color:var(--lime);color:var(--lime);box-shadow:0 0 22px rgba(200,255,77,.12)}
+.certificate-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.certificate-card{min-height:330px;padding:24px;border:1px solid var(--line);background:linear-gradient(155deg,rgba(16,17,38,.95),rgba(8,9,25,.88));display:flex;flex-direction:column;position:relative;overflow:hidden;transition:.25s}
+.certificate-card:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--lime),var(--cyan),var(--violet))}
+.certificate-card:hover{transform:translateY(-5px);border-color:rgba(200,255,77,.55)}
+.certificate-topline{display:flex;justify-content:space-between;gap:14px;margin-bottom:26px;font:10px "DM Mono",monospace;letter-spacing:.1em;color:var(--lime);text-transform:uppercase}
+.certificate-topline strong{color:var(--muted);font-weight:500;text-align:right}
+.certificate-card h3{font-size:clamp(22px,2.2vw,31px);line-height:1;letter-spacing:-.055em;margin:0 0 10px;color:var(--ink)}
+.certificate-issuer{font:11px "DM Mono",monospace;color:var(--cyan);letter-spacing:.06em;margin:0 0 18px}
+.certificate-card p:not(.certificate-issuer){font-size:13px;line-height:1.65;color:var(--muted);margin:0 0 18px}
+.certificate-status{margin:auto 0 18px;width:max-content;max-width:100%;padding:7px 9px;border:1px solid rgba(89,232,255,.35);color:var(--cyan);font:10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+.certificate-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.certificate-actions .button{border:0;cursor:pointer}
+.certificate-actions .ghost{border:1px solid var(--line)}
+.pending-pdf{font:10px "DM Mono",monospace;color:var(--muted);letter-spacing:.08em}
+.certificate-viewer-section{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:linear-gradient(110deg,rgba(89,232,255,.07),transparent 52%)}
+.viewer-shell{display:grid;grid-template-columns:minmax(260px,.42fr) minmax(320px,1fr);gap:clamp(22px,5vw,70px);align-items:start}
+.viewer-copy{position:sticky;top:104px}
+.viewer-copy h2{font-size:clamp(34px,4vw,58px);line-height:1;letter-spacing:-.06em;margin-bottom:16px}
+.viewer-copy p{color:var(--muted);line-height:1.75;font-size:14px}
+.viewer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.pdf-frame-wrap{min-height:620px;border:1px solid var(--line);background:#080919;position:relative;overflow:hidden}
+.pdf-frame{width:100%;height:min(78vh,760px);min-height:620px;border:0;background:#080919}
+.viewer-empty{min-height:620px;display:grid;place-content:center;text-align:center;padding:24px;color:var(--muted)}
+.viewer-empty span{font:500 clamp(52px,9vw,120px)/1 "DM Mono",monospace;color:rgba(200,255,77,.2);letter-spacing:-.08em}
+.viewer-empty p{max-width:390px;margin:14px auto 0;font-size:14px;line-height:1.7}
+.education-upload{display:grid;grid-template-columns:.78fr 1.22fr;gap:clamp(30px,7vw,110px);background:linear-gradient(115deg,rgba(157,123,255,.1),transparent 55%)}
+.upload-copy h2{font-size:clamp(35px,4.5vw,65px);line-height:1;letter-spacing:-.06em}
+.upload-copy>p:last-child{color:var(--muted);font-size:14px;line-height:1.7}
+.upload-form{padding:28px;border:1px solid var(--line);background:rgba(16,17,38,.7)}
+.upload-form .button{border:0;cursor:pointer;margin-top:8px}
+.upload-message{display:none;padding:12px;border-left:2px solid var(--lime);color:var(--muted);font-size:13px;line-height:1.6;background:rgba(200,255,77,.06)}
+.upload-message.show{display:block}
+@media(max-width:980px){.certificate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.viewer-shell,.education-upload{grid-template-columns:1fr}.viewer-copy{position:static}.pdf-frame,.pdf-frame-wrap,.viewer-empty{min-height:560px}}
+@media(max-width:560px){.certificate-grid{grid-template-columns:1fr}.certificate-card{min-height:300px;padding:20px}.certificate-actions .button{width:100%;justify-content:center}.pdf-frame,.pdf-frame-wrap,.viewer-empty{min-height:70vh}.education-toolbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.filter-button{white-space:nowrap}}
