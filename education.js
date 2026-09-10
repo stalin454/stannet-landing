@@ -1,57 +1,165 @@
 const certificates = [
   {
-    title: 'Cybersecurity Essentials',
-    issuer: 'Cisco Networking Academy',
-    category: 'ciberseguridad',
-    date: 'En curso',
-    status: 'Ruta activa',
-    summary: 'Fundamentos de amenazas, redes, sistemas operativos, defensa, firewall, criptografía, alertas e incidentes.',
-    pdf: ''
-  },
-  {
-    title: 'Ruta de Ciberseguridad 6 Meses',
-    issuer: 'StanNet.Space',
-    category: 'ciberseguridad',
-    date: '2026',
-    status: 'Plan de estudio',
-    summary: 'Mapa personal para avanzar punto por punto hacia un perfil junior en ciberseguridad.',
-    pdf: ''
-  },
-  {
-    title: 'StanNet English Academy',
-    issuer: 'StanNet.Space',
-    category: 'idiomas',
-    date: '2026',
-    status: 'Academia propia',
-    summary: 'Ruta de inglés desde cero hasta C2 con escucha, escritura, vocabulario y práctica guiada.',
-    pdf: ''
-  },
-  {
-    title: 'StanNet Danish Academy',
-    issuer: 'StanNet.Space',
-    category: 'idiomas',
-    date: '2026',
-    status: 'Academia propia',
-    summary: 'Aprendizaje de danés progresivo con voz, vocabulario inmediato y ejercicios por nivel.',
-    pdf: ''
-  },
-  {
-    title: 'Desarrollo Web Portfolio',
-    issuer: 'StanNet.Space',
+    title: 'Certificado de superación',
+    issuer: 'Formación personal',
     category: 'programacion',
     date: '2026',
-    status: 'Proyecto publicado',
-    summary: 'Diseño, estructura responsive, páginas de cliente, automatización y despliegue web.',
-    pdf: ''
+    status: 'Certificado publicado',
+    summary: 'Evidencia académica incorporada al portfolio profesional de StanNet.Space.',
+    pdf: '../assets/certificates/angeles-certificado-superacion.pdf'
   },
   {
-    title: 'Laboratorios IA Aplicados',
-    issuer: 'StanNet.Space',
+    title: 'Certificado de superación - copia',
+    issuer: 'Formación personal',
+    category: 'programacion',
+    date: '2026',
+    status: 'Certificado publicado',
+    summary: 'Segunda versión del certificado conservada como evidencia documental.',
+    pdf: '../assets/certificates/angeles-certificado-superacion-copy.pdf'
+  },
+  {
+    title: 'Certificate 136872-2',
+    issuer: 'Formación online',
     category: 'ia',
     date: '2026',
-    status: 'En desarrollo',
-    summary: 'Academias, asistentes, voz, automatización y herramientas educativas integradas al dominio.',
-    pdf: ''
+    status: 'Certificado publicado',
+    summary: 'Certificado externo integrado al archivo verificable de formación.',
+    pdf: '../assets/certificates/certificate-136872-2.pdf'
+  },
+  {
+    title: 'Certificate 136872-2 - versión adicional',
+    issuer: 'Formación online',
+    category: 'ia',
+    date: '2026',
+    status: 'Certificado publicado',
+    summary: 'Versión adicional del certificado externo conservada para revisión.',
+    pdf: '../assets/certificates/certificate-136872-2-1.pdf'
+  },
+  {
+    title: 'Verbo To Be',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Base esencial de inglés: identidad, descripción y primeras estructuras de comunicación.',
+    pdf: '../assets/certificates/diploma-verbo-to-be.pdf'
+  },
+  {
+    title: 'Presente simple y vocabulario común',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Rutinas, frases frecuentes y vocabulario práctico para comunicación diaria.',
+    pdf: '../assets/certificates/diploma-presente-simple-vocabulario-comun.pdf'
+  },
+  {
+    title: 'Preguntas y respuestas',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Estructuras interrogativas y respuestas breves para conversación guiada.',
+    pdf: '../assets/certificates/diploma-preguntas-respuestas.pdf'
+  },
+  {
+    title: 'Horas y solicitudes',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Uso funcional del idioma para pedir ayuda, solicitar información y hablar de horarios.',
+    pdf: '../assets/certificates/diploma-horas-solicitudes.pdf'
+  },
+  {
+    title: 'Fechas, horas y expresiones simples',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Expresiones de tiempo y frases básicas para sostener interacciones cotidianas.',
+    pdf: '../assets/certificates/diploma-fechas-horas-expresiones-simples.pdf'
+  },
+  {
+    title: 'Adverbios y sustantivos',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Construcción de frases con mayor precisión usando sustantivos y modificadores.',
+    pdf: '../assets/certificates/diploma-adverbios-sustantivos.pdf'
+  },
+  {
+    title: 'A2: preposiciones y presente continuo',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Progreso A2 con ubicación, movimiento y acciones en desarrollo.',
+    pdf: '../assets/certificates/diploma-a2-preposiciones-y-presente-continuo.pdf'
+  },
+  {
+    title: 'Superlativos y adverbios',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Comparación avanzada básica y matices con adverbios de frecuencia e intensidad.',
+    pdf: '../assets/certificates/diploma-superlativos-adverbios.pdf'
+  },
+  {
+    title: 'Superlativos y adverbios 2',
+    issuer: 'Curso de inglés',
+    category: 'idiomas',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Refuerzo de estructuras comparativas y expresiones descriptivas.',
+    pdf: '../assets/certificates/diploma-superlativos-adverbios-2.pdf'
+  },
+  {
+    title: 'Inglés básico para networking',
+    issuer: 'Curso de inglés técnico',
+    category: 'redes',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Vocabulario técnico inicial para redes, soporte e infraestructura digital.',
+    pdf: '../assets/certificates/diploma-ingles-basico-networking.pdf'
+  },
+  {
+    title: 'Computación básica',
+    issuer: 'Formación tecnológica',
+    category: 'redes',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Fundamentos digitales para manejar sistemas, herramientas y conceptos informáticos.',
+    pdf: '../assets/certificates/diploma-computacion-basica.pdf'
+  },
+  {
+    title: 'Guía de seguridad informática',
+    issuer: 'Formación en ciberseguridad',
+    category: 'ciberseguridad',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Buenas prácticas para protección digital, prevención y seguridad personal.',
+    pdf: '../assets/certificates/diploma-guia-seguridad-informatica.pdf'
+  },
+  {
+    title: 'Seguridad en empresas',
+    issuer: 'Formación en ciberseguridad',
+    category: 'ciberseguridad',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Principios de protección corporativa, riesgos comunes y cultura de seguridad.',
+    pdf: '../assets/certificates/diploma-seguridad-empresas.pdf'
+  },
+  {
+    title: 'Economía digital',
+    issuer: 'Formación tecnológica',
+    category: 'ia',
+    date: '2026',
+    status: 'Diploma publicado',
+    summary: 'Comprensión del entorno digital, transformación tecnológica y nuevos modelos económicos.',
+    pdf: '../assets/certificates/diploma-economia-digital.pdf'
   }
 ];
 
