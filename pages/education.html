@@ -1,1 +1,121 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Formación, cursos y certificados de StanNet.Space."><title>Formación | StanNet.Space</title><link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../education.css"></head><body id="top"><header class="site-header"><a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button><nav class="site-nav" aria-label="Navegación principal"><a href="../index.html">Inicio</a><a href="ai.html">IA</a><a href="cybersecurity.html">Ciberseguridad</a><a href="music.html">Music Lab</a><a href="cv.html">Perfil</a><a class="active" href="education.html">Formación</a></nav></header><main><section class="page-hero grid-bg"><p class="eyebrow">05 / FORMACIÓN CONTINUA</p><h1>Aprender.<br><em>Demostrar.</em></h1><p>Una biblioteca personal de estudios, cursos y certificaciones que documenta el camino detrás de cada proyecto.</p></section><section class="section"><div class="section-heading"><div><p class="eyebrow">01 / RECORRIDO</p><h2>Lo que estoy construyendo.</h2></div><p>Organizado por etapa, área y evidencia.</p></div><div class="education-filters"><button class="filter-button active" data-filter="all">Todo</button><button class="filter-button" data-filter="formacion">Formación</button><button class="filter-button" data-filter="curso">Cursos</button><button class="filter-button" data-filter="certificado">Certificados</button></div><div class="education-grid" id="educationGrid"><article class="education-card" data-type="formacion"><span class="card-number">EJEMPLO / FORMACIÓN</span><div class="education-icon">⌬</div><h3>Desarrollo web</h3><p class="education-meta">En curso · 2026</p><p>Interfaces, HTML, CSS, JavaScript y productos digitales.</p></article><article class="education-card" data-type="curso"><span class="card-number">EJEMPLO / CURSO</span><div class="education-icon">✦</div><h3>Inteligencia artificial</h3><p class="education-meta">Aprendizaje continuo · 2026</p><p>Automatización, asistentes y nuevas herramientas.</p></article><article class="education-card" data-type="certificado"><span class="card-number">03 / CERTIFICADO</span><div class="education-icon">▣</div><h3>Certificación pendiente</h3><p class="education-meta">Añade tu primera evidencia</p><p>Sube un PDF o imagen e incorpora la entidad emisora.</p></article></div></section><section class="section education-upload"><div class="upload-copy"><p class="eyebrow">02 / ARCHIVO PERSONAL</p><h2>Añade una nueva evidencia.</h2><p>Los datos se guardan únicamente en este navegador. El archivo seleccionado no se almacena: se registra solo su nombre.</p></div><form id="educationForm" class="upload-form"><label for="title">Nombre del curso o certificado</label><input id="title" name="title" required placeholder="Ej. Fundamentos de ciberseguridad"><div class="form-grid"><div><label for="kind">Tipo</label><select id="kind" name="kind"><option value="curso">Curso</option><option value="certificado">Certificado</option><option value="formacion">Formación</option></select></div><div><label for="educationYear">Año</label><input id="educationYear" name="year" type="number" min="1900" max="2100" placeholder="2026"></div></div><label for="issuer">Entidad o plataforma</label><input id="issuer" name="issuer" placeholder="Ej. Coursera, Cisco..."><label for="file">Archivo (PDF, JPG o PNG)</label><input id="file" name="file" type="file" accept=".pdf,.jpg,.jpeg,.png"><button class="button primary" type="submit">Guardar registro <span>↗</span></button><p id="uploadMessage" class="upload-message" role="status"></p></form></section></main><footer><a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a><p>© <span id="year"></span> · Hecho con curiosidad y código.</p><a href="#top">VOLVER ARRIBA ↑</a></footer><script src="../script.js"></script><script src="../education.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Formación, cursos y certificados verificados de StanNet.Space.">
+<title>Formación y Certificados | StanNet.Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../education.css">
+</head>
+<body id="top">
+<header class="site-header">
+<a class="brand" href="../index.html" aria-label="StanNet.Space, inicio"><span>stan</span><b>net</b><i>.space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a>
+<a href="ai.html">IA</a>
+<a href="cybersecurity.html">Ciberseguridad</a>
+<a href="music.html">Music Lab</a>
+<a href="../index.html#desarrollo-web">Desarrollo Web</a>
+<a href="cv.html">Perfil</a>
+<a class="active" href="education.html">Formación</a>
+</nav>
+</header>
+
+<main>
+<section class="page-hero education-hero">
+<p class="eyebrow">05 / FORMACIÓN Y CERTIFICADOS</p>
+<h1>Aprender.<br><em>Verificar.</em></h1>
+<p>Un archivo profesional para mostrar cursos, rutas y certificados por área: ciberseguridad, idiomas, redes, programación e inteligencia artificial.</p>
+</section>
+
+<section class="section education-board" aria-labelledby="certificados-title">
+<div class="section-heading">
+<div>
+<p class="eyebrow">01 / ARCHIVO VERIFICABLE</p>
+<h2 id="certificados-title">Certificados por categoría.</h2>
+</div>
+<p>Cada evidencia queda presentada como una tarjeta clara, con visor PDF integrado y descarga directa cuando el archivo está disponible.</p>
+</div>
+
+<div class="education-toolbar" aria-label="Filtros de certificados">
+<button class="filter-button active" type="button" data-filter="all">Todo</button>
+<button class="filter-button" type="button" data-filter="ciberseguridad">Ciberseguridad</button>
+<button class="filter-button" type="button" data-filter="idiomas">Idiomas</button>
+<button class="filter-button" type="button" data-filter="redes">Redes</button>
+<button class="filter-button" type="button" data-filter="programacion">Programación</button>
+<button class="filter-button" type="button" data-filter="ia">IA</button>
+</div>
+
+<div class="certificate-grid" id="certificateGrid" aria-live="polite"></div>
+</section>
+
+<section class="section certificate-viewer-section" aria-labelledby="viewerTitle">
+<div class="viewer-shell">
+<div class="viewer-copy">
+<p class="eyebrow">02 / VISOR PDF</p>
+<h2 id="viewerTitle">Selecciona un certificado.</h2>
+<p id="viewerMeta">Cuando pulses Ver certificado, el PDF se abrirá aquí sin salir de StanNet.Space.</p>
+<div class="viewer-actions">
+<a class="button primary" id="downloadCurrent" href="#" download hidden>Descargar PDF <span>↗</span></a>
+<a class="button ghost" id="openCurrent" href="#" target="_blank" rel="noopener noreferrer" hidden>Abrir aparte</a>
+</div>
+</div>
+<div class="pdf-frame-wrap" id="pdfFrameWrap">
+<div class="viewer-empty">
+<span>PDF</span>
+<p>El visor integrado está listo para certificados de Cisco, idiomas, redes, programación y más.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section education-upload" aria-labelledby="uploadTitle">
+<div class="upload-copy">
+<p class="eyebrow">03 / SUBIR EVIDENCIA LOCAL</p>
+<h2 id="uploadTitle">Prueba un certificado antes de publicarlo.</h2>
+<p>Este formulario permite ver un PDF local en el visor. Para que todos lo vean desde el dominio, el archivo debe añadirse al proyecto y publicarse.</p>
+</div>
+<form id="educationForm" class="upload-form">
+<label for="title">Título del curso o certificado</label>
+<input id="title" name="title" required placeholder="Ej. Cybersecurity Essentials">
+<div class="form-grid">
+<div>
+<label for="category">Categoría</label>
+<select id="category" name="category">
+<option value="ciberseguridad">Ciberseguridad</option>
+<option value="idiomas">Idiomas</option>
+<option value="redes">Redes</option>
+<option value="programacion">Programación</option>
+<option value="ia">IA</option>
+</select>
+</div>
+<div>
+<label for="educationDate">Fecha</label>
+<input id="educationDate" name="date" placeholder="2026 o Sep 2026">
+</div>
+</div>
+<label for="issuer">Institución</label>
+<input id="issuer" name="issuer" placeholder="Ej. Cisco Networking Academy">
+<label for="file">Archivo PDF</label>
+<input id="file" name="file" type="file" accept="application/pdf,.pdf">
+<button class="button primary" type="submit">Añadir al visor <span>↗</span></button>
+<p id="uploadMessage" class="upload-message" role="status"></p>
+</form>
+</section>
+</main>
+
+<footer>
+<a class="brand" href="../index.html"><span>stan</span><b>net</b><i>.space</i></a>
+<p>© <span id="year"></span> · Hecho con curiosidad y código.</p>
+<a href="#top">VOLVER ARRIBA ↑</a>
+</footer>
+
+<script src="../script.js"></script>
+<script src="../education.js"></script>
+</body>
+</html>
