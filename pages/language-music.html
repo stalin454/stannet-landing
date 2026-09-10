@@ -5,7 +5,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="description" content="Escucha, canta y aprende inglés con letras sincronizadas y vocabulario en StanNet Music Lab.">
 <title>Language Music Lab | StanNet.Space</title>
-<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../music-sync.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../music-sync.css"><link rel="stylesheet" href="../songlab.css">
 </head>
 <body id="top">
 <header class="site-header"><a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button><nav class="site-nav" aria-label="Navegación principal"><a href="../index.html">Inicio</a><a href="ai.html">Academias IA</a><a href="cybersecurity.html">Ciberseguridad</a><a href="music.html">Mi música</a><a class="active" href="language-music.html">Language Music Lab</a></nav></header>
@@ -14,6 +14,7 @@
 <section class="sync-workspace">
 <article class="sync-player sync-panel">
 <p class="eyebrow">01 / ESCUCHA</p><h2>Conecta una canción</h2>
+<label for="youtubeSearch">Buscar en YouTube</label><div class="sync-row"><input id="youtubeSearch" placeholder="Artista, canción o estilo" autocomplete="off"><button id="youtubeSearchButton" type="button">Buscar</button></div><div id="youtubeResults" class="youtube-results" aria-live="polite"></div>
 <label for="labYoutubeUrl">Enlace de YouTube</label><div class="sync-row"><input id="labYoutubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"><button id="labLoad" type="button">Cargar canción</button></div>
 <div class="video-frame"><div id="labPlayer"></div></div>
 <p id="labStatus" role="status">Pega un enlace y pulsa cargar. El vídeo se reproduce al pulsar play.</p>
@@ -27,6 +28,7 @@
 <div id="karaokeLines" class="karaoke-lines" tabindex="0" aria-label="Letra de la canción"></div><p class="sync-note">Pulsa una frase para escucharla de nuevo. Ajuste positivo: adelanta la letra; negativo: la retrasa.</p>
 </article>
 <article class="sync-panel sync-vocab"><p class="eyebrow">03 / DESCUBRE</p><h2>Palabras de esta canción</h2><p>Selección automática por frecuencia. Pulsa una palabra para consultar su significado en español y pronunciación.</p><div id="labVocab" class="lab-vocab"></div></article>
+<article class="sync-panel sync-chords"><p class="eyebrow">04 / GUITARRA</p><h2>Acordes para cantar</h2><p>Introduce una progresión propia o autorizada y transpórtala para encontrar tu registro.</p><textarea id="songChords" rows="5" placeholder="C   G   Am   F&#10;When the night comes..."></textarea><div class="sync-row"><button id="transposeDown" type="button">- Tono</button><button id="transposeUp" type="button">+ Tono</button><span id="keyStatus" class="key-status">Tono original</span></div><p class="sync-note">Los acordes deben proceder de una fuente con licencia o ser introducidos por ti.</p></article>
 <article class="sync-panel sync-practice"><p class="eyebrow">04 / PRACTICA</p><h2>Escucha y completa</h2><details><summary>Ver o editar el texto del ejercicio</summary><label for="labLyrics">Texto de estudio</label><textarea id="labLyrics" rows="8"></textarea></details><div class="sync-row"><button id="labMake" type="button">Crear ejercicio</button><button id="labClear" type="button">Limpiar letra</button></div><div id="labOutput">Carga una canción para empezar.</div></article>
 </section>
 </main><footer><a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a><p>© <span id="year"></span> · Aprende a tu ritmo</p><a href="#top">VOLVER ARRIBA ↑</a></footer>
