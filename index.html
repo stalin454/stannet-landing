@@ -9,22 +9,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="experience.css">
 <style>.web-showcase{border-top:1px solid var(--line);background:linear-gradient(115deg,rgba(157,123,255,.08),transparent 60%)}.web-showcase .project-grid{grid-template-columns:minmax(260px,420px)}.web-showcase .project-card{min-height:360px}</style>
 <style>.education-labs{border-top:1px solid var(--line);background:linear-gradient(115deg,rgba(89,232,255,.06),transparent 58%)}.education-lab-card{color:var(--cyan)}.education-lab-card:nth-child(2){color:var(--lime)}.education-lab-card:nth-child(3){color:var(--violet)}.education-lab-card:after{background:currentColor}</style>
 </head>
 <body id="top">
 <header class="site-header">
-<a class="brand" href="index.html" aria-label="StanNet.Space, inicio"><span>stan</span><b>net</b><i>.space</i></a>
+<a class="brand brand-lockup" href="index.html" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="assets/brand/stannet-shield.png" alt=""><span>stan</span><b>net</b><i>.space</i></a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
 <nav class="site-nav" aria-label="Navegación principal">
 <a class="active" href="index.html">Inicio</a>
-<a href="pages/ai.html">IA</a>
-<a href="pages/cybersecurity.html">Ciberseguridad</a>
-<a href="pages/music.html">Music Lab</a>
-<a href="#desarrollo-web">Desarrollo Web</a>
-<a href="pages/cv.html">Perfil</a><a href="pages/education.html">Formación</a>
-<a href="pages/blog.html">Blog</a>
-<a href="https://www.youtube.com/@StanNetSpace" target="_blank" rel="noopener noreferrer">YouTube ↗</a>
+<a href="#universo">Explorar</a>
+<a href="#laboratorios-educativos">Aprender</a>
+<a href="pages/blog.html">Bitácora</a>
+<a href="pages/cv.html">Perfil</a>
 </nav>
 </header>
 <main>
@@ -37,11 +35,13 @@
 <a class="button ghost" href="pages/cv.html">Conocer mi perfil</a>
 </div>
 <div class="hero-status"><span class="pulse"></span> SISTEMAS EN LÍNEA <small>· Madrid, ES</small></div>
+<div class="hero-command" data-reveal><span class="command-label">SEÑAL ACTIVA / 2026</span><strong>Construyendo una ruta real<br>hacia analista junior.</strong><a href="pages/cybersecurity.html">Ver misión <b>→</b></a></div>
+<img class="hero-shield" src="assets/brand/stannet-shield.png" alt="Emblema SN de StanNet.Space" fetchpriority="high">
 <div class="orb orb-a"></div>
 <div class="orb orb-b"></div>
 </section>
 
-<section class="section" id="universo">
+<section class="section" id="universo" data-reveal>
 <div class="section-heading">
 <div>
 <p class="eyebrow">02 / ÁREAS DE TRABAJO</p>
@@ -58,7 +58,7 @@
 </div>
 </section>
 
-<section class="section education-labs" id="laboratorios-educativos">
+<section class="section education-labs" id="laboratorios-educativos" data-reveal>
 <div class="section-heading">
 <div>
 <p class="eyebrow">03 / LABORATORIOS EDUCATIVOS</p>
@@ -73,7 +73,7 @@
 </div>
 </section>
 
-<section class="section web-showcase" id="desarrollo-web">
+<section class="section web-showcase" id="desarrollo-web" data-reveal>
 <div class="section-heading">
 <div>
 <p class="eyebrow">04 / DESARROLLO WEB</p>
@@ -86,18 +86,18 @@
 </div>
 </section>
 
-<section class="section education-labs" id="bitacora">
+<section class="section education-labs" id="bitacora" data-reveal>
 <div class="section-heading"><div><p class="eyebrow">05 / BITÁCORA</p><h2>Aprender es<br><em>dejar señales.</em></h2></div><p>Una nueva zona editorial para documentar rutas, proyectos, ideas y aprendizajes que dan forma a StanNet.Space.</p></div>
 <div class="project-grid education-lab-grid"><a class="project-card education-lab-card" href="pages/blog.html"><span class="card-number">01 / ARCHIVO VIVO</span><div class="symbol">⌁</div><h3>Bitácora<br>StanNet</h3><p>Ciberseguridad, IA, idiomas y desarrollo web contados desde el proceso real.</p><span class="card-link">Abrir bitácora <b>→</b></span></a></div>
 </section>
 
-<section class="section manifesto">
+<section class="section manifesto" data-reveal>
 <p class="eyebrow">05 / PRINCIPIO</p>
 <blockquote>“La tecnología es más poderosa cuando <span>amplía</span> lo que somos capaces de imaginar.”</blockquote>
 <div class="manifesto-meta"><span>STANNET.SPACE</span><span>BUILD · LEARN · EVOLVE</span></div>
 </section>
 
-<section class="section contact">
+<section class="section contact" data-reveal>
 <div>
 <p class="eyebrow">06 / CONTACTO</p>
 <h2>¿Construimos<br>algo interesante?</h2>
@@ -111,5 +111,6 @@
 <a href="#top">VOLVER ARRIBA ↑</a>
 </footer>
 <script src="script.js"></script>
+<script src="experience.js"></script>
 </body>
 </html>
