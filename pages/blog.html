@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Bitácora de StanNet.Space: ciberseguridad, IA, idiomas y desarrollo web aprendidos desde la práctica.">
+<title>Bitácora | StanNet.Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../blog.css">
+</head>
+<body id="top">
+<header class="site-header">
+<a class="brand" href="../index.html" aria-label="StanNet.Space, inicio"><span>stan</span><b>net</b><i>.space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a><a href="ai.html">IA</a><a href="cybersecurity.html">Ciberseguridad</a><a href="music.html">Music Lab</a><a href="../index.html#desarrollo-web">Desarrollo Web</a><a class="active" href="blog.html">Blog</a><a href="cv.html">Perfil</a><a href="education.html">Formación</a>
+</nav>
+</header>
+<main>
+<section class="blog-hero">
+<div class="blog-orbit blog-orbit-one"></div><div class="blog-orbit blog-orbit-two"></div>
+<p class="eyebrow">06 / BITÁCORA STANNET</p>
+<p class="blog-kicker">SEÑALES DESDE EL LABORATORIO</p>
+<h1>Ideas que se<br><em>ponen a prueba.</em></h1>
+<p class="blog-intro">Una bitácora de aprendizaje en abierto. Ciberseguridad, inteligencia artificial, idiomas y desarrollo web vistos desde el trabajo real, paso a paso.</p>
+<div class="blog-metrics" aria-label="Resumen de la bitácora"><span><b id="postCount">06</b> publicaciones</span><span><b>04</b> disciplinas</span><span><b>100%</b> aprendizaje real</span></div>
+</section>
+
+<section class="section signal-section" aria-labelledby="featuredTitle">
+<div class="section-heading"><div><p class="eyebrow">01 / SEÑAL DESTACADA</p><h2 id="featuredTitle">Construir mientras<br><em>aprendemos.</em></h2></div><p>Las publicaciones no son teoría aislada: nacen de las academias, los laboratorios y los proyectos que ya viven dentro de StanNet.Space.</p></div>
+<article class="featured-post" data-post="cyber-route" tabindex="0">
+<div class="featured-code"><span>01</span><i>⌬</i><p>CYBER / RUTA ACTIVA</p></div>
+<div class="featured-copy"><p class="post-meta">CIBERSEGURIDAD · 8 MIN DE LECTURA</p><h3>Mi ruta para llegar a analista junior de ciberseguridad.</h3><p>Una hoja de ruta práctica que une fundamentos de red, análisis de alertas, laboratorios y el criterio necesario para entrar al primer puesto.</p><button class="text-link" type="button" data-read="cyber-route">Leer señal <span>→</span></button></div>
+<div class="featured-radar" aria-hidden="true"><span></span><span></span><span></span><b>SCAN<br>READY</b></div>
+</article>
+</section>
+
+<section class="section post-section" aria-labelledby="archiveTitle">
+<div class="section-heading archive-heading"><div><p class="eyebrow">02 / ARCHIVO EDITORIAL</p><h2 id="archiveTitle">Explora el<br><em>proceso.</em></h2></div><label class="blog-search"><span>⌕</span><input id="blogSearch" type="search" placeholder="Buscar una idea, tecnología o proyecto" aria-label="Buscar publicaciones"></label></div>
+<div class="blog-filters" aria-label="Filtrar publicaciones"><button class="blog-filter active" type="button" data-filter="all">Todo</button><button class="blog-filter" type="button" data-filter="ciberseguridad">Ciberseguridad</button><button class="blog-filter" type="button" data-filter="ia">IA</button><button class="blog-filter" type="button" data-filter="idiomas">Idiomas</button><button class="blog-filter" type="button" data-filter="desarrollo">Desarrollo web</button></div>
+<div class="blog-grid" id="blogGrid" aria-live="polite"></div>
+<p class="blog-empty" id="blogEmpty" hidden>No hay señales que coincidan. Prueba otra palabra o categoría.</p>
+</section>
+
+<section class="section blog-subscribe">
+<p class="eyebrow">03 / PRÓXIMA SEÑAL</p><h2>La bitácora acaba de<br><em>encenderse.</em></h2><p>Este espacio crecerá con cada laboratorio, certificado, proyecto y lección convertida en aprendizaje útil.</p><a class="button primary" href="../index.html#universo">Volver al universo <span>↗</span></a>
+</section>
+</main>
+
+<dialog class="article-dialog" id="articleDialog" aria-labelledby="articleTitle">
+<div class="article-shell"><button class="dialog-close" type="button" aria-label="Cerrar artículo">×</button><p class="post-meta" id="articleMeta"></p><h2 id="articleTitle"></h2><p class="article-lead" id="articleLead"></p><div class="article-body" id="articleBody"></div><div class="article-foot"><span>STANNET.SPACE / BITÁCORA</span><button class="text-link" type="button" id="closeArticle">Cerrar lectura <span>×</span></button></div></div>
+</dialog>
+<footer><a class="brand" href="../index.html"><span>stan</span><b>net</b><i>.space</i></a><p>© <span id="year"></span> · Hecho con curiosidad y código.</p><a href="#top">VOLVER ARRIBA ↑</a></footer>
+<script src="../script.js"></script><script src="../blog.js"></script>
+</body>
+</html>
