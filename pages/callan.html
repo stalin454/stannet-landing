@@ -99,5 +99,9 @@ const recordButton=document.querySelector('#recordAnswer');const playRecording=d
 <script>
 const openBookLink=document.querySelector('#bookOpen');const prepareBookLink=async()=>{const book=document.querySelector('#bookSelect').value;const {data,error}=await supabaseClient.storage.from('callan-material').createSignedUrl(`callanproyect/Callan Method ${book}.pdf`,3600);if(!error&&data?.signedUrl){openBookLink.href=data.signedUrl;openBookLink.classList.add('show')}};document.querySelector('#loadBook').addEventListener('click',prepareBookLink);document.querySelector('#bookSelect').addEventListener('change',()=>openBookLink.classList.remove('show'));
 </script>
+<script type="module">
+  import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics@1/dist/index.mjs';
+  inject();
+</script>
 </html>
 
