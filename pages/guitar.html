@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="StanNet Guitar Academy: escalas, modos, mastil, pentagrama, tablatura y audio para guitarristas.">
+<title>StanNet Guitar Academy | StanNet.Space</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../guitar-academy.css">
+</head>
+<body id="top">
+<header class="site-header">
+<a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a>
+<a href="ai.html">IA</a>
+<a href="cybersecurity.html">Ciberseguridad</a>
+<a class="active" href="music.html">Music Lab</a>
+<a href="blog.html">Blog</a>
+<a href="cv.html">Perfil</a>
+</nav>
+</header>
+<main>
+<section class="guitar-hero">
+<p class="eyebrow">MUSIC LAB / STANNET GUITAR ACADEMY</p>
+<h1>Escalas que<br><em>se ven y suenan.</em></h1>
+<p class="guitar-copy">Una herramienta interactiva para comprender la guitarra desde dentro: elige tonalidad, escala o modo y mira al instante sus notas, grados, formula, mastil, pentagrama, tablatura y audio.</p>
+<div class="guitar-actions">
+<a href="#guitar-lab">Abrir generador ↓</a>
+<a class="secondary" href="#theory-map">Ver arquitectura</a>
+</div>
+<div class="guitar-orbit" aria-hidden="true"><div class="guitar-pick"></div></div>
+</section>
+
+<section class="section" id="guitar-lab">
+<div class="section-heading">
+<div>
+<p class="eyebrow">01 / GENERADOR MVP</p>
+<h2>Elige una raiz.<br><em>Explora el mapa.</em></h2>
+</div>
+<p>La escala se calcula en vivo. No usamos imagenes fijas: el mastil, la tablatura y el pentagrama nacen de los datos musicales.</p>
+</div>
+<div class="guitar-shell">
+<aside class="guitar-console">
+<p class="eyebrow">CONTROLES</p>
+<h2>Tu laboratorio.</h2>
+<div class="control-stack">
+<label>TONALIDAD<select id="guitarRoot"></select></label>
+<label>ESCALA<select id="guitarScale"></select></label>
+<label>MODO GRIEGO<select id="guitarMode"></select></label>
+<label>VISTA DEL MASTIL</label>
+<div class="segmented" role="group" aria-label="Vista del mastil">
+<button class="active" data-view="both" type="button">Notas + grados</button>
+<button data-view="notes" type="button">Notas</button>
+<button data-view="degrees" type="button">Grados</button>
+</div>
+<button class="listen-scale" id="listenScale" type="button">ESCUCHAR ESCALA</button>
+</div>
+</aside>
+<article class="guitar-stage">
+<p class="eyebrow">RESULTADO ACTIVO</p>
+<h2 id="scaleTitle">La menor natural</h2>
+<div class="result-grid">
+<div class="metric"><small>NOTAS</small><div class="note-row" id="scaleNotes"></div></div>
+<div class="metric"><small>FORMULA</small><strong id="scaleFormula"></strong><span id="scaleIntervals"></span></div>
+</div>
+<div class="visual-grid">
+<section class="guitar-panel">
+<h3>Mastil interactivo</h3>
+<div class="staff-wrap"><div class="fretboard" id="fretboard"></div><div class="fret-numbers" id="fretNumbers"></div></div>
+</section>
+<section class="guitar-panel">
+<h3>Pentagrama</h3>
+<div class="staff-wrap" id="staff"></div>
+</section>
+<section class="guitar-panel">
+<h3>Tablatura sugerida</h3>
+<pre class="tab-lines" id="tab"></pre>
+</section>
+</div>
+<div class="explain" id="scaleCharacter"></div>
+</article>
+</div>
+</section>
+
+<section class="section" id="theory-map">
+<div class="section-heading">
+<div>
+<p class="eyebrow">02 / SIGUIENTES MODULOS</p>
+<h2>Una academia,<br><em>no una tabla.</em></h2>
+</div>
+<p>Esta base queda preparada para crecer sin rehacerla: acordes, progresiones, tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
+</div>
+<div class="content-grid">
+<article class="info-card"><p class="tag">ACORDES</p><h3>Diagramas y formula</h3><p>Mayores, menores, septimas, sus, add9, disminuidos y extensiones con dedos recomendados.</p></article>
+<article class="info-card"><p class="tag">PROGRESIONES</p><h3>Funcion armonica</h3><p>Cadencias por estilo, circulos armonicos y recursos flamencos explicados para principiantes.</p></article>
+<article class="info-card"><p class="tag">TECNICAS</p><h3>Ejercicios originales</h3><p>Alternate picking, legato, slides, bends, sweep picking, arpegios, secuencias e improvisacion.</p></article>
+</div>
+</section>
+</main>
+<footer>
+<a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a>
+<p>© <span id="year"></span> · StanNet Guitar Academy</p>
+<a href="#top">VOLVER ARRIBA ↑</a>
+</footer>
+<script src="../script.js"></script>
+<script src="../guitar-theory-data.js"></script>
+<script src="../guitar-academy.js"></script>
+</body>
+</html>
