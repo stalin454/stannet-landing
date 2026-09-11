@@ -22,6 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const chordDegrees = $('#chordDegrees');
   const chordQuality = $('#chordQuality');
   const chordDiagram = $('#chordDiagram');
+  const harmonyRoot = $('#harmonyRoot');
+  const harmonyMode = $('#harmonyMode');
+  const progressionSelect = $('#progressionSelect');
+  const harmonyTitle = $('#harmonyTitle');
+  const harmonyCircle = $('#harmonyCircle');
+  const progressionName = $('#progressionName');
+  const progressionFeel = $('#progressionFeel');
+  const progressionStrip = $('#progressionStrip');
+  const functionList = $('#functionList');
+  const harmonyExplain = $('#harmonyExplain');
   let activeView = 'both';
 
   const noteIndex = (note) => data.chromatic.indexOf(note);
@@ -46,6 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
     rootSelect.value = 'A';
     chordRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
     chordRoot.value = 'A';
+    harmonyRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+    harmonyRoot.value = 'A';
     const grouped = Object.entries(data.scales).reduce((acc, [key, scale]) => {
       acc[scale.category] = acc[scale.category] || [];
       acc[scale.category].push([key, scale.name]);
@@ -232,9 +244,99 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  const getHarmonyChords = () => {
+    const harmony = data.harmony[harmonyMode.value];
+    const scale = data.scales[harmony.scale];
+    const offsets = harmony.offsets || scale.intervals;
+    return harmony.degrees.map((degree, index) => {
+      const root = noteAt(harmonyRoot.value, offsets[index]);
+      const type = harmony.qualities[index];
+      const chord = data.chordTypes[type] || data.chordTypes.major;
+      const notes = chord.intervals.map((interval, noteOrder) => ({
+        note: noteAt(root, interval % 12),
+        degree: chord.degrees[noteOrder]
+      }));
+      return {
+        degree,
+        root,
+        type,
+        symbol: `${root}${chord.symbol}`,
+        name: `${data.noteLabels[root]}${chord.symbol}`,
+        functionName: harmony.functions[index],
+        notes
+      };
+    });
+  };
+
+  const activeProgressions = () => data.progressions.filter((item) => item.mode === harmonyMode.value);
+
+  const renderProgressionChoices = (reset = false) => {
+    const selected = reset ? '0' : progressionSelect.value;
+    progressionSelect.innerHTML = activeProgressions().map((item, index) => `<option value="${index}">${item.name} · ${item.degrees.join(' - ')}</option>`).join('');
+    progressionSelect.value = selected || '0';
+  };
+
+  const renderHarmony = (resetProgression = false) => {
+    renderProgressionChoices(resetProgression);
+    const harmony = data.harmony[harmonyMode.value];
+    const chords = getHarmonyChords();
+    const progression = activeProgressions()[Number(progressionSelect.value || 0)] || activeProgressions()[0];
+    const rootLabel = data.noteLabels[harmonyRoot.value];
+    const byDegree = new Map(chords.map((chord) => [chord.degree, chord]));
+    harmonyTitle.textContent = `${rootLabel} ${harmony.name}`;
+    progressionName.textContent = `${progression.name} · ${progression.style}`;
+    progressionFeel.textContent = progression.feel;
+    harmonyExplain.textContent = harmony.explanation;
+    harmonyCircle.innerHTML = chords.map((chord, index) => {
+      const angle = -90 + (index * 360 / chords.length);
+      const radius = 38;
+      const x = 50 + Math.cos(angle * Math.PI / 180) * radius;
+      const y = 50 + Math.sin(angle * Math.PI / 180) * radius;
+      return `<button class="degree-node${index === 0 ? ' tonic' : ''}" type="button" data-chord-root="${chord.root}" data-chord-type="${chord.type}" style="left:${x}%;top:${y}%"><b>${chord.degree}</b><span>${chord.name}</span><small>${chord.functionName}</small></button>`;
+    }).join('');
+    progressionStrip.innerHTML = progression.degrees.map((degree) => {
+      const chord = byDegree.get(degree);
+      return `<span class="progression-step"><b>${chord.name}</b><small>${degree} · ${chord.notes.map((item) => item.note).join('-')}</small></span>`;
+    }).join('');
+    functionList.innerHTML = chords.map((chord) => `<div class="function-item"><b>${chord.degree} · ${chord.name}</b> ${chord.functionName}. Notas: ${chord.notes.map((item) => item.note).join(' - ')}.</div>`).join('');
+    harmonyCircle.querySelectorAll('.degree-node').forEach((button) => button.addEventListener('click', () => {
+      chordRoot.value = button.dataset.chordRoot;
+      chordType.value = button.dataset.chordType;
+      renderChord();
+      document.querySelector('#chord-lab').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  };
+
+  const playProgression = () => {
+    const chords = getHarmonyChords();
+    const progression = activeProgressions()[Number(progressionSelect.value || 0)] || activeProgressions()[0];
+    const byDegree = new Map(chords.map((chord) => [chord.degree, chord]));
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    progression.degrees.forEach((degree, chordIndex) => {
+      const chord = byDegree.get(degree);
+      chord.notes.forEach((item, noteOrder) => {
+        const start = context.currentTime + chordIndex * 1.08 + noteOrder * 0.025;
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(noteOrder / 3));
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.16, start + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.95);
+        osc.connect(gain).connect(context.destination);
+        osc.start(start);
+        osc.stop(start + 1);
+      });
+    });
+  };
+
   fillSelectors();
   [rootSelect, scaleSelect, modeSelect].forEach((select) => select.addEventListener('change', render));
   [chordRoot, chordType].forEach((select) => select.addEventListener('change', renderChord));
+  [harmonyRoot, harmonyMode].forEach((select) => select.addEventListener('change', () => {
+    renderHarmony(true);
+  }));
+  progressionSelect.addEventListener('change', renderHarmony);
   viewButtons.forEach((button) => button.addEventListener('click', () => {
     activeView = button.dataset.view;
     viewButtons.forEach((item) => item.classList.toggle('active', item === button));
@@ -243,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#listenScale').addEventListener('click', playScale);
   $('#listenChord').addEventListener('click', () => playChord(false));
   $('#arpeggiateChord').addEventListener('click', () => playChord(true));
+  $('#listenProgression').addEventListener('click', playProgression);
   $('#compareChordScale').addEventListener('click', () => {
     rootSelect.value = chordRoot.value;
     modeSelect.value = 'none';
@@ -251,4 +354,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   render();
   renderChord();
+  renderHarmony();
 });

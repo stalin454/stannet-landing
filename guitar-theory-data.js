@@ -160,6 +160,41 @@ window.StanNetGuitarData = {
       add9: { base: [null, 0, 2, 2, 0, 0], muted: [6], fingers: ['x', '1', '3', '4', '1', '1'] }
     }
   },
+  harmony: {
+    major: {
+      name: 'Mayor',
+      scale: 'major',
+      degrees: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°'],
+      qualities: ['major', 'minor', 'minor', 'major', 'dominant7', 'minor', 'diminished'],
+      functions: ['Tonica', 'Predominante', 'Tonica suave', 'Subdominante', 'Dominante', 'Relativa menor', 'Dominante inestable'],
+      explanation: 'El circulo mayor organiza tension y reposo. I es casa, IV abre camino, V crea tension y vi aporta color emocional.'
+    },
+    minor: {
+      name: 'Menor',
+      scale: 'naturalMinor',
+      degrees: ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'],
+      qualities: ['minor', 'diminished', 'major', 'minor', 'minor', 'major', 'major'],
+      functions: ['Tonica menor', 'Predominante tenso', 'Relativa mayor', 'Subdominante menor', 'Dominante suave', 'Color dramatico', 'Empuje modal'],
+      explanation: 'El circulo menor natural es expresivo y modal. Para cadencias fuertes se suele convertir V en dominante usando menor armonica.'
+    },
+    flamenco: {
+      name: 'Flamenco / Frigio',
+      scale: 'phrygianDominant',
+      degrees: ['i', 'bVII', 'bVI', 'V'],
+      offsets: [0, 10, 8, 7],
+      qualities: ['minor', 'major', 'major', 'dominant7'],
+      functions: ['Centro modal', 'Descenso frigio', 'Color andaluz', 'Dominante flamenca'],
+      explanation: 'El recurso flamenco clasico baja por grados y resuelve con mucha fuerza hacia el centro tonal.'
+    }
+  },
+  progressions: [
+    { name: 'Pop esencial', mode: 'major', degrees: ['I', 'V', 'vi', 'IV'], style: 'Pop / worship / balada', feel: 'Estable, cantable y muy reconocible.' },
+    { name: 'Cadencia clasica', mode: 'major', degrees: ['I', 'IV', 'V', 'I'], style: 'Clasico / folk / aprendizaje', feel: 'La forma mas clara de sentir casa, salida, tension y regreso.' },
+    { name: 'Rock menor', mode: 'minor', degrees: ['i', 'VI', 'III', 'VII'], style: 'Rock / metal melodico', feel: 'Oscura, epica y facil de convertir en riffs.' },
+    { name: 'Soul menor', mode: 'minor', degrees: ['i', 'iv', 'VII', 'III'], style: 'Soul / R&B / balada', feel: 'Menor con movimiento amplio y emocional.' },
+    { name: 'Andaluza', mode: 'flamenco', degrees: ['i', 'bVII', 'bVI', 'V'], style: 'Flamenco / fusion / metal neoclasico', feel: 'Descenso dramatico con dominante final.' },
+    { name: 'Jazz entrada', mode: 'major', degrees: ['ii', 'V', 'I', 'vi'], style: 'Jazz / neo soul', feel: 'Movimiento funcional con dominante y reposo sofisticado.' }
+  ],
   tuning: [
     { string: 6, note: 'E', octave: 2 },
     { string: 5, note: 'A', octave: 2 },

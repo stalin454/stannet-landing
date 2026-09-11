@@ -29,6 +29,7 @@
 <div class="guitar-actions">
 <a href="#guitar-lab">Abrir generador ↓</a>
 <a class="secondary" href="#chord-lab">Acordes</a>
+<a class="secondary" href="#harmony-lab">Circulos</a>
 <a class="secondary" href="#theory-map">Ver arquitectura</a>
 </div>
 <div class="guitar-orbit" aria-hidden="true"><div class="guitar-pick"></div></div>
@@ -126,13 +127,48 @@
 </div>
 </section>
 
+<section class="section harmony-section" id="harmony-lab">
+<div class="section-heading">
+<div>
+<p class="eyebrow">03 / CIRCULOS ARMONICOS</p>
+<h2>La ruta de<br><em>los acordes.</em></h2>
+</div>
+<p>Visualiza los acordes diatonicos de una tonalidad, entiende su funcion y escucha progresiones reales por estilo.</p>
+</div>
+<div class="harmony-grid">
+<aside class="guitar-console">
+<p class="eyebrow">ARMONIA</p>
+<h2>Mapa tonal.</h2>
+<div class="control-stack">
+<label>TONALIDAD<select id="harmonyRoot"></select></label>
+<label>MODO ARMONICO<select id="harmonyMode"><option value="major">Mayor</option><option value="minor">Menor natural</option><option value="flamenco">Flamenco / frigio</option></select></label>
+<label>PROGRESION<select id="progressionSelect"></select></label>
+<button class="listen-scale" id="listenProgression" type="button">ESCUCHAR PROGRESION</button>
+</div>
+</aside>
+<article class="guitar-stage">
+<p class="eyebrow">CIRCULO ACTIVO</p>
+<h2 class="chord-name" id="harmonyTitle">La menor</h2>
+<div class="circle-wrap">
+<div class="harmony-circle" id="harmonyCircle"></div>
+<div>
+<div class="metric"><small>PROGRESION</small><strong id="progressionName"></strong><span id="progressionFeel"></span></div>
+<div class="progression-strip" id="progressionStrip"></div>
+<div class="function-list" id="functionList"></div>
+<div class="explain" id="harmonyExplain"></div>
+</div>
+</div>
+</article>
+</div>
+</section>
+
 <section class="section" id="theory-map">
 <div class="section-heading">
 <div>
 <p class="eyebrow">02 / SIGUIENTES MODULOS</p>
 <h2>Una academia,<br><em>no una tabla.</em></h2>
 </div>
-<p>La base ya incluye escalas, modos y acordes. El siguiente crecimiento natural sera progresiones, tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
+<p>La base ya incluye escalas, modos, acordes y circulos armonicos. El siguiente crecimiento natural sera tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
 </div>
 <div class="content-grid">
 <article class="info-card"><p class="tag">ACORDES</p><h3>Diagramas y formula</h3><p>Mayores, menores, septimas, sus, add9, disminuidos y extensiones con dedos recomendados.</p></article>
