@@ -28,6 +28,7 @@
 <p class="guitar-copy">Una herramienta interactiva para comprender la guitarra desde dentro: elige tonalidad, escala o modo y mira al instante sus notas, grados, formula, mastil, pentagrama, tablatura y audio.</p>
 <div class="guitar-actions">
 <a href="#guitar-lab">Abrir generador ↓</a>
+<a class="secondary" href="#chord-lab">Acordes</a>
 <a class="secondary" href="#theory-map">Ver arquitectura</a>
 </div>
 <div class="guitar-orbit" aria-hidden="true"><div class="guitar-pick"></div></div>
@@ -84,13 +85,54 @@
 </div>
 </section>
 
+<section class="section chord-section" id="chord-lab">
+<div class="section-heading">
+<div>
+<p class="eyebrow">02 / MODULO DE ACORDES</p>
+<h2>Acordes que<br><em>se entienden.</em></h2>
+</div>
+<p>Selecciona una raiz y un tipo de acorde. La academia calcula notas, formula y muestra una digitacion movible para llevarla por todo el mastil.</p>
+</div>
+<div class="chord-board">
+<aside class="guitar-console">
+<p class="eyebrow">ACORDES</p>
+<h2>Constructor.</h2>
+<div class="control-stack">
+<label>RAIZ<select id="chordRoot"></select></label>
+<label>TIPO DE ACORDE<select id="chordType"></select></label>
+<button class="listen-scale" id="listenChord" type="button">ESCUCHAR ACORDE</button>
+</div>
+</aside>
+<article class="guitar-stage">
+<p class="eyebrow">ACORDE ACTIVO</p>
+<h2 class="chord-name" id="chordName">La menor</h2>
+<div class="chord-result">
+<div>
+<div class="result-grid">
+<div class="metric"><small>NOTAS</small><div class="note-row" id="chordNotes"></div></div>
+<div class="metric"><small>FORMULA</small><strong id="chordFormula"></strong><span id="chordDegrees"></span></div>
+</div>
+<div class="explain" id="chordQuality"></div>
+<div class="chord-audio-row">
+<button class="listen-scale" id="arpeggiateChord" type="button">ESCUCHAR ARPEGIO</button>
+<button id="compareChordScale" type="button">Enviar raiz al generador de escalas</button>
+</div>
+</div>
+<div class="chord-diagram">
+<div id="chordDiagram"></div>
+</div>
+</div>
+</article>
+</div>
+</section>
+
 <section class="section" id="theory-map">
 <div class="section-heading">
 <div>
 <p class="eyebrow">02 / SIGUIENTES MODULOS</p>
 <h2>Una academia,<br><em>no una tabla.</em></h2>
 </div>
-<p>Esta base queda preparada para crecer sin rehacerla: acordes, progresiones, tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
+<p>La base ya incluye escalas, modos y acordes. El siguiente crecimiento natural sera progresiones, tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
 </div>
 <div class="content-grid">
 <article class="info-card"><p class="tag">ACORDES</p><h3>Diagramas y formula</h3><p>Mayores, menores, septimas, sus, add9, disminuidos y extensiones con dedos recomendados.</p></article>

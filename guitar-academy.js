@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const intervalsOut = $('#scaleIntervals');
   const characterOut = $('#scaleCharacter');
   const titleOut = $('#scaleTitle');
+  const chordRoot = $('#chordRoot');
+  const chordType = $('#chordType');
+  const chordName = $('#chordName');
+  const chordNotes = $('#chordNotes');
+  const chordFormula = $('#chordFormula');
+  const chordDegrees = $('#chordDegrees');
+  const chordQuality = $('#chordQuality');
+  const chordDiagram = $('#chordDiagram');
   let activeView = 'both';
 
   const noteIndex = (note) => data.chromatic.indexOf(note);
@@ -36,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const fillSelectors = () => {
     rootSelect.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
     rootSelect.value = 'A';
+    chordRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+    chordRoot.value = 'A';
     const grouped = Object.entries(data.scales).reduce((acc, [key, scale]) => {
       acc[scale.category] = acc[scale.category] || [];
       acc[scale.category].push([key, scale.name]);
@@ -44,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     scaleSelect.innerHTML = Object.entries(grouped).map(([category, scales]) => `<optgroup label="${category}">${scales.map(([key, name]) => `<option value="${key}">${name}</option>`).join('')}</optgroup>`).join('');
     scaleSelect.value = 'naturalMinor';
     modeSelect.innerHTML = '<option value="none">Usar selector de escala</option>' + Object.entries(data.modes).map(([key, mode]) => `<option value="${key}">${mode.name}</option>`).join('');
+    chordType.innerHTML = Object.entries(data.chordTypes).map(([key, chord]) => `<option value="${key}">${chord.name}</option>`).join('');
+    chordType.value = 'minor';
   };
 
   const renderNotes = (notes) => {
@@ -136,13 +148,107 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  const getChordNotes = () => {
+    const chord = data.chordTypes[chordType.value];
+    return chord.intervals.map((interval, index) => ({
+      note: noteAt(chordRoot.value, interval % 12),
+      degree: chord.degrees[index],
+      interval
+    }));
+  };
+
+  const rootFretOnString = (stringNote, root) => {
+    for (let fret = 0; fret <= 12; fret += 1) {
+      if (noteAt(stringNote, fret) === root) return fret;
+    }
+    return 0;
+  };
+
+  const getChordShape = () => {
+    const type = chordType.value;
+    const string6Fret = rootFretOnString('E', chordRoot.value);
+    const string5Fret = rootFretOnString('A', chordRoot.value);
+    const family = string6Fret <= 7 && data.chordShapes.string6[type] ? 'string6' : 'string5';
+    const shape = data.chordShapes[family][type] || data.chordShapes.string5.major;
+    const offset = family === 'string6' ? string6Fret : string5Fret;
+    const frets = shape.base.map((fret) => fret === null ? null : fret + offset);
+    const minFret = Math.min(...frets.filter((fret) => fret && fret > 0));
+    const displayStart = minFret > 4 ? minFret : 1;
+    return { family, shape, frets, displayStart };
+  };
+
+  const renderChordDiagram = (notes) => {
+    const { shape, frets, displayStart } = getChordShape();
+    const noteSet = new Set(notes.map((item) => item.note));
+    const degreeByNote = new Map(notes.map((item) => [item.note, item.degree]));
+    const headers = data.tuning.map((string, index) => {
+      if (shape.muted.includes(string.string) || frets[index] === null) return `<span class="chord-muted">x</span>`;
+      if (frets[index] === 0) return `<span class="chord-open">o</span>`;
+      return '<span></span>';
+    }).join('');
+    const cells = [];
+    for (let row = 0; row < 5; row += 1) {
+      cells.push(`<span class="chord-fret-label">${displayStart + row}</span>`);
+      data.tuning.forEach((string, index) => {
+        const fret = frets[index];
+        const currentFret = displayStart + row;
+        const note = fret === null ? null : noteAt(string.note, fret);
+        const isRoot = note === chordRoot.value;
+        const dot = fret === currentFret && noteSet.has(note) ? `<span class="chord-dot${isRoot ? ' root' : ''}">${degreeByNote.get(note)}</span>` : '';
+        cells.push(`<span class="chord-cell${displayStart === 1 && row === 0 ? ' nut' : ''}">${dot}</span>`);
+      });
+    }
+    const fingers = shape.fingers.map((finger) => `<span class="chord-string-label">${finger}</span>`).join('');
+    chordDiagram.innerHTML = `<div class="chord-grid"><span></span>${headers}${cells.join('')}<span></span>${fingers}</div>`;
+  };
+
+  const renderChord = () => {
+    const chord = data.chordTypes[chordType.value];
+    const notes = getChordNotes();
+    const label = data.noteLabels[chordRoot.value];
+    chordName.textContent = `${label}${chord.symbol}`;
+    chordFormula.textContent = chord.formula;
+    chordDegrees.textContent = chord.degrees.join(' · ');
+    chordQuality.textContent = chord.quality;
+    chordNotes.innerHTML = notes.map((item) => `<span class="note-pill"><b>${item.note}</b><small>${item.degree}</small></span>`).join('');
+    renderChordDiagram(notes);
+  };
+
+  const playChord = (arpeggio = false) => {
+    const notes = getChordNotes();
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    notes.forEach((item, index) => {
+      const start = context.currentTime + (arpeggio ? index * 0.26 : 0);
+      const osc = context.createOscillator();
+      const gain = context.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(index / 3));
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(arpeggio ? 0.24 : 0.18, start + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (arpeggio ? 0.72 : 1.25));
+      osc.connect(gain).connect(context.destination);
+      osc.start(start);
+      osc.stop(start + (arpeggio ? 0.78 : 1.3));
+    });
+  };
+
   fillSelectors();
   [rootSelect, scaleSelect, modeSelect].forEach((select) => select.addEventListener('change', render));
+  [chordRoot, chordType].forEach((select) => select.addEventListener('change', renderChord));
   viewButtons.forEach((button) => button.addEventListener('click', () => {
     activeView = button.dataset.view;
     viewButtons.forEach((item) => item.classList.toggle('active', item === button));
     render();
   }));
   $('#listenScale').addEventListener('click', playScale);
+  $('#listenChord').addEventListener('click', () => playChord(false));
+  $('#arpeggiateChord').addEventListener('click', () => playChord(true));
+  $('#compareChordScale').addEventListener('click', () => {
+    rootSelect.value = chordRoot.value;
+    modeSelect.value = 'none';
+    render();
+    document.querySelector('#guitar-lab').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   render();
+  renderChord();
 });

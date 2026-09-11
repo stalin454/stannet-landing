@@ -127,6 +127,39 @@ window.StanNetGuitarData = {
     aeolian: { name: 'Eolico', intervals: [0, 2, 3, 5, 7, 8, 10], degrees: ['1', '2', 'b3', '4', '5', 'b6', 'b7'], formula: '1 - 2 - b3 - 4 - 5 - b6 - b7', character: 'Menor natural: emocional, directo y muy comun.' },
     locrian: { name: 'Locrio', intervals: [0, 1, 3, 5, 6, 8, 10], degrees: ['1', 'b2', 'b3', '4', 'b5', 'b6', 'b7'], formula: '1 - b2 - b3 - 4 - b5 - b6 - b7', character: 'Inestable por su quinta disminuida. Util para comprender tension extrema.' }
   },
+  chordTypes: {
+    major: { name: 'Mayor', symbol: '', intervals: [0, 4, 7], degrees: ['1', '3', '5'], formula: '1 - 3 - 5', quality: 'Estable, claro y abierto. Es el centro de las progresiones mayores.' },
+    minor: { name: 'Menor', symbol: 'm', intervals: [0, 3, 7], degrees: ['1', 'b3', '5'], formula: '1 - b3 - 5', quality: 'Mas oscuro y emocional por su tercera menor.' },
+    dominant7: { name: 'Septima dominante', symbol: '7', intervals: [0, 4, 7, 10], degrees: ['1', '3', '5', 'b7'], formula: '1 - 3 - 5 - b7', quality: 'Tension que pide resolver. Base del blues, funk, rock y cadencias clasicas.' },
+    major7: { name: 'Maj7', symbol: 'maj7', intervals: [0, 4, 7, 11], degrees: ['1', '3', '5', '7'], formula: '1 - 3 - 5 - 7', quality: 'Mayor sofisticado, suave y cinematografico.' },
+    minor7: { name: 'm7', symbol: 'm7', intervals: [0, 3, 7, 10], degrees: ['1', 'b3', '5', 'b7'], formula: '1 - b3 - 5 - b7', quality: 'Menor redondo y flexible. Muy comun en soul, funk, jazz y pop.' },
+    diminished: { name: 'Disminuido', symbol: 'dim', intervals: [0, 3, 6], degrees: ['1', 'b3', 'b5'], formula: '1 - b3 - b5', quality: 'Inestable y tenso. Sirve como puente dramatico entre acordes.' },
+    augmented: { name: 'Aumentado', symbol: 'aug', intervals: [0, 4, 8], degrees: ['1', '3', '#5'], formula: '1 - 3 - #5', quality: 'Ambiguo y flotante. Abre movimiento cromatico.' },
+    sus2: { name: 'Sus2', symbol: 'sus2', intervals: [0, 2, 7], degrees: ['1', '2', '5'], formula: '1 - 2 - 5', quality: 'Suspendido y limpio. No define mayor o menor.' },
+    sus4: { name: 'Sus4', symbol: 'sus4', intervals: [0, 5, 7], degrees: ['1', '4', '5'], formula: '1 - 4 - 5', quality: 'Suspendido con empuje. Funciona muy bien antes de volver al mayor.' },
+    add9: { name: 'Add9', symbol: 'add9', intervals: [0, 4, 7, 14], degrees: ['1', '3', '5', '9'], formula: '1 - 3 - 5 - 9', quality: 'Mayor con aire moderno y melodico por la novena.' }
+  },
+  chordShapes: {
+    string6: {
+      major: { base: [0, 2, 2, 1, 0, 0], muted: [], fingers: ['1', '3', '4', '2', '1', '1'] },
+      minor: { base: [0, 2, 2, 0, 0, 0], muted: [], fingers: ['1', '3', '4', '1', '1', '1'] },
+      dominant7: { base: [0, 2, 0, 1, 0, 0], muted: [], fingers: ['1', '3', '1', '2', '1', '1'] },
+      major7: { base: [0, 2, 1, 1, 0, 0], muted: [], fingers: ['1', '3', '2', '2', '1', '1'] },
+      minor7: { base: [0, 2, 0, 0, 0, 0], muted: [], fingers: ['1', '3', '1', '1', '1', '1'] },
+      sus2: { base: [0, 2, 2, 4, 0, 0], muted: [], fingers: ['1', '2', '3', '4', '1', '1'] },
+      sus4: { base: [0, 2, 2, 2, 0, 0], muted: [], fingers: ['1', '2', '3', '4', '1', '1'] }
+    },
+    string5: {
+      major: { base: [null, 0, 2, 2, 2, 0], muted: [6], fingers: ['x', '1', '3', '3', '3', '1'] },
+      minor: { base: [null, 0, 2, 2, 1, 0], muted: [6], fingers: ['x', '1', '3', '4', '2', '1'] },
+      dominant7: { base: [null, 0, 2, 0, 2, 0], muted: [6], fingers: ['x', '1', '3', '1', '4', '1'] },
+      major7: { base: [null, 0, 2, 1, 2, 0], muted: [6], fingers: ['x', '1', '3', '2', '4', '1'] },
+      minor7: { base: [null, 0, 2, 0, 1, 0], muted: [6], fingers: ['x', '1', '3', '1', '2', '1'] },
+      diminished: { base: [null, 0, 1, 2, 1, null], muted: [6, 1], fingers: ['x', '1', '2', '4', '3', 'x'] },
+      augmented: { base: [null, 0, 3, 2, 2, null], muted: [6, 1], fingers: ['x', '1', '4', '2', '3', 'x'] },
+      add9: { base: [null, 0, 2, 2, 0, 0], muted: [6], fingers: ['x', '1', '3', '4', '1', '1'] }
+    }
+  },
   tuning: [
     { string: 6, note: 'E', octave: 2 },
     { string: 5, note: 'A', octave: 2 },
