@@ -200,6 +200,7 @@ window.StanNetGuitarData = {
     legato: { name: 'Legato', focus: 'Hammer-ons y pull-offs controlados, usando la pua solo para iniciar grupos.' },
     slides: { name: 'Slides', focus: 'Conectar posiciones manteniendo presion y afinacion durante el desplazamiento.' },
     arpeggios: { name: 'Arpegios', focus: 'Separar notas del acorde con claridad y mantener cada grado consciente.' },
+    sweepPicking: { name: 'Sweep picking neoclasico', focus: 'Barrido controlado sobre arpegios. Inspiracion educativa: sonoridad neoclasica tipo Yngwie, con ejercicios originales de StanNet.' },
     stringSkipping: { name: 'String skipping', focus: 'Saltar cuerdas sin perder precision ni apagar notas importantes.' },
     sequences: { name: 'Secuencias', focus: 'Crear patrones repetibles dentro de la escala para improvisar con direccion.' },
     improvisation: { name: 'Improvisacion guiada', focus: 'Resolver frases hacia la tonica usando notas objetivo y silencios musicales.' }

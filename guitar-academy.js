@@ -381,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const down = up.slice().reverse().slice(1);
     const technique = exerciseTechnique.value;
     if (technique === 'arpeggios') return [scaleNotes[0], scaleNotes[2] || scaleNotes[0], scaleNotes[4] || scaleNotes[0], scaleNotes[6] || scaleNotes[2], scaleNotes[4] || scaleNotes[0], scaleNotes[2] || scaleNotes[0]];
+    if (technique === 'sweepPicking') return [scaleNotes[0], scaleNotes[2] || scaleNotes[0], scaleNotes[4] || scaleNotes[0], scaleNotes[6] || scaleNotes[4], scaleNotes[0], scaleNotes[6] || scaleNotes[4], scaleNotes[4] || scaleNotes[0], scaleNotes[2] || scaleNotes[0], scaleNotes[0]];
     if (technique === 'stringSkipping') return [scaleNotes[0], scaleNotes[2], scaleNotes[4], scaleNotes[1], scaleNotes[3], scaleNotes[5]].filter(Boolean);
     if (technique === 'sequences') return [scaleNotes[0], scaleNotes[1], scaleNotes[2], scaleNotes[1], scaleNotes[2], scaleNotes[3], scaleNotes[2], scaleNotes[3], scaleNotes[4]].filter(Boolean);
     if (technique === 'legato') return up.concat(down).slice(0, span + 3);
@@ -407,14 +408,14 @@ document.addEventListener('DOMContentLoaded', () => {
     exerciseTechniqueOut.textContent = technique.name;
     exerciseLevelOut.textContent = level.name;
     exerciseBpmOut.textContent = exerciseBpm.value;
-    exerciseFingers.textContent = exerciseLevel.value === 'beginner' ? '1-2-3-4' : exerciseLevel.value === 'intermediate' ? '1-2-4 / cambios' : '1-2-3-4 / desplazamientos';
+    exerciseFingers.textContent = exerciseTechnique.value === 'sweepPicking' ? '1-2-4 / barrido' : exerciseLevel.value === 'beginner' ? '1-2-3-4' : exerciseLevel.value === 'intermediate' ? '1-2-4 / cambios' : '1-2-3-4 / desplazamientos';
     exerciseNotes.innerHTML = currentExercise.map((item, index) => `<span class="note-pill"><b>${item.note}</b><small>${index + 1} · ${item.degree}</small></span>`).join('');
     exerciseTab.textContent = tabFromExercise(currentExercise);
     exerciseRoutine.innerHTML = [
       `Toca una vuelta a ${exerciseBpm.value} BPM con sonido limpio.`,
       `Di en voz alta los grados: ${currentExercise.map((item) => item.degree).join(' - ')}.`,
       'Repite cuatro veces, descansa diez segundos y sube 5 BPM solo si no hay tension.',
-      'Termina improvisando una frase corta que resuelva en la tonica.'
+      exerciseTechnique.value === 'sweepPicking' ? 'En sweep picking, deja que la pua caiga como un solo movimiento y separa cada nota con la mano izquierda.' : 'Termina improvisando una frase corta que resuelva en la tonica.'
     ].map((item) => `<li>${item}</li>`).join('');
     exerciseExplain.textContent = `${technique.focus} Material original construido desde la formula ${pattern.formula}. ${level.explanation}`;
   };
