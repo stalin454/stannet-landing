@@ -30,6 +30,7 @@
 <a href="#guitar-lab">Abrir generador ↓</a>
 <a class="secondary" href="#chord-lab">Acordes</a>
 <a class="secondary" href="#harmony-lab">Circulos</a>
+<a class="secondary" href="#exercise-lab">Ejercicios</a>
 <a class="secondary" href="#theory-map">Ver arquitectura</a>
 </div>
 <div class="guitar-orbit" aria-hidden="true"><div class="guitar-pick"></div></div>
@@ -162,13 +163,65 @@
 </div>
 </section>
 
+<section class="section exercise-section" id="exercise-lab">
+<div class="section-heading">
+<div>
+<p class="eyebrow">04 / GENERADOR DE EJERCICIOS</p>
+<h2>Practica con<br><em>material original.</em></h2>
+</div>
+<p>Selecciona tecnica, nivel, tonalidad, escala y BPM. La academia crea un ejercicio propio con TAB, digitacion, rutina y audio.</p>
+</div>
+<div class="guitar-shell">
+<aside class="guitar-console">
+<p class="eyebrow">PRACTICA</p>
+<h2>Diseña tu reto.</h2>
+<div class="control-stack">
+<label>TONALIDAD<select id="exerciseRoot"></select></label>
+<label>ESCALA / MODO<select id="exercisePattern"></select></label>
+<label>TECNICA<select id="exerciseTechnique"></select></label>
+<label>NIVEL<select id="exerciseLevel"></select></label>
+<label class="range-row">BPM <span id="bpmValue">90</span><input id="exerciseBpm" type="range" min="50" max="160" value="90"></label>
+<button class="listen-scale" id="generateExercise" type="button">GENERAR EJERCICIO</button>
+<button class="listen-scale" id="listenExercise" type="button">ESCUCHAR EJERCICIO</button>
+</div>
+</aside>
+<article class="guitar-stage">
+<p class="eyebrow">EJERCICIO ACTIVO</p>
+<h2 class="chord-name" id="exerciseTitle">Alternate picking en La menor</h2>
+<div class="exercise-meta">
+<div class="exercise-chip"><small>TECNICA</small><b id="exerciseTechniqueOut"></b></div>
+<div class="exercise-chip"><small>NIVEL</small><b id="exerciseLevelOut"></b></div>
+<div class="exercise-chip"><small>BPM</small><b id="exerciseBpmOut"></b></div>
+<div class="exercise-chip"><small>DIGITACION</small><b id="exerciseFingers"></b></div>
+</div>
+<div class="exercise-output">
+<div>
+<div class="guitar-panel">
+<h3>Notas del ejercicio</h3>
+<div class="exercise-notes" id="exerciseNotes"></div>
+</div>
+<div class="guitar-panel" style="margin-top:18px">
+<h3>Tablatura</h3>
+<pre class="exercise-tab" id="exerciseTab"></pre>
+</div>
+</div>
+<aside class="practice-card">
+<h3>Rutina de practica</h3>
+<ol id="exerciseRoutine"></ol>
+</aside>
+</div>
+<div class="explain" id="exerciseExplain"></div>
+</article>
+</div>
+</section>
+
 <section class="section" id="theory-map">
 <div class="section-heading">
 <div>
-<p class="eyebrow">02 / SIGUIENTES MODULOS</p>
+<p class="eyebrow">05 / EXPANSION FUTURA</p>
 <h2>Una academia,<br><em>no una tabla.</em></h2>
 </div>
-<p>La base ya incluye escalas, modos, acordes y circulos armonicos. El siguiente crecimiento natural sera tecnicas, guitarristas como referencia educativa y ejercicios originales por nivel.</p>
+<p>La base ya incluye escalas, modos, acordes, circulos armonicos y generador de ejercicios. El siguiente crecimiento natural sera expandir bibliotecas, guardar progreso y añadir rutinas diarias.</p>
 </div>
 <div class="content-grid">
 <article class="info-card"><p class="tag">ACORDES</p><h3>Diagramas y formula</h3><p>Mayores, menores, septimas, sus, add9, disminuidos y extensiones con dedos recomendados.</p></article>

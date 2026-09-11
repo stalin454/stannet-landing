@@ -195,6 +195,20 @@ window.StanNetGuitarData = {
     { name: 'Andaluza', mode: 'flamenco', degrees: ['i', 'bVII', 'bVI', 'V'], style: 'Flamenco / fusion / metal neoclasico', feel: 'Descenso dramatico con dominante final.' },
     { name: 'Jazz entrada', mode: 'major', degrees: ['ii', 'V', 'I', 'vi'], style: 'Jazz / neo soul', feel: 'Movimiento funcional con dominante y reposo sofisticado.' }
   ],
+  exerciseTechniques: {
+    alternate: { name: 'Alternate picking', focus: 'Pulso firme con pua abajo-arriba, limpieza entre cuerdas y acento constante.' },
+    legato: { name: 'Legato', focus: 'Hammer-ons y pull-offs controlados, usando la pua solo para iniciar grupos.' },
+    slides: { name: 'Slides', focus: 'Conectar posiciones manteniendo presion y afinacion durante el desplazamiento.' },
+    arpeggios: { name: 'Arpegios', focus: 'Separar notas del acorde con claridad y mantener cada grado consciente.' },
+    stringSkipping: { name: 'String skipping', focus: 'Saltar cuerdas sin perder precision ni apagar notas importantes.' },
+    sequences: { name: 'Secuencias', focus: 'Crear patrones repetibles dentro de la escala para improvisar con direccion.' },
+    improvisation: { name: 'Improvisacion guiada', focus: 'Resolver frases hacia la tonica usando notas objetivo y silencios musicales.' }
+  },
+  exerciseLevels: {
+    beginner: { name: 'Principiante', bpm: 70, span: 5, explanation: 'Toca despacio, mirando grados. Prioriza sonido limpio antes que velocidad.' },
+    intermediate: { name: 'Intermedio', bpm: 95, span: 7, explanation: 'Mantén el tempo, cambia de cuerda con control y acentua cada grupo.' },
+    advanced: { name: 'Avanzado', bpm: 125, span: 9, explanation: 'Busca fluidez, dinamica y desplazamientos sin perder la referencia tonal.' }
+  },
   tuning: [
     { string: 6, note: 'E', octave: 2 },
     { string: 5, note: 'A', octave: 2 },

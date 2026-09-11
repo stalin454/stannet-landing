@@ -32,7 +32,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressionStrip = $('#progressionStrip');
   const functionList = $('#functionList');
   const harmonyExplain = $('#harmonyExplain');
+  const exerciseRoot = $('#exerciseRoot');
+  const exercisePattern = $('#exercisePattern');
+  const exerciseTechnique = $('#exerciseTechnique');
+  const exerciseLevel = $('#exerciseLevel');
+  const exerciseBpm = $('#exerciseBpm');
+  const bpmValue = $('#bpmValue');
+  const exerciseTitle = $('#exerciseTitle');
+  const exerciseTechniqueOut = $('#exerciseTechniqueOut');
+  const exerciseLevelOut = $('#exerciseLevelOut');
+  const exerciseBpmOut = $('#exerciseBpmOut');
+  const exerciseFingers = $('#exerciseFingers');
+  const exerciseNotes = $('#exerciseNotes');
+  const exerciseTab = $('#exerciseTab');
+  const exerciseRoutine = $('#exerciseRoutine');
+  const exerciseExplain = $('#exerciseExplain');
   let activeView = 'both';
+  let currentExercise = [];
 
   const noteIndex = (note) => data.chromatic.indexOf(note);
   const noteAt = (root, semitones) => data.chromatic[(noteIndex(root) + semitones) % 12];
@@ -58,6 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chordRoot.value = 'A';
     harmonyRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
     harmonyRoot.value = 'A';
+    exerciseRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+    exerciseRoot.value = 'A';
     const grouped = Object.entries(data.scales).reduce((acc, [key, scale]) => {
       acc[scale.category] = acc[scale.category] || [];
       acc[scale.category].push([key, scale.name]);
@@ -68,6 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
     modeSelect.innerHTML = '<option value="none">Usar selector de escala</option>' + Object.entries(data.modes).map(([key, mode]) => `<option value="${key}">${mode.name}</option>`).join('');
     chordType.innerHTML = Object.entries(data.chordTypes).map(([key, chord]) => `<option value="${key}">${chord.name}</option>`).join('');
     chordType.value = 'minor';
+    exercisePattern.innerHTML = '<optgroup label="Escalas">' + Object.entries(data.scales).map(([key, scale]) => `<option value="scale:${key}">${scale.name}</option>`).join('') + '</optgroup><optgroup label="Modos griegos">' + Object.entries(data.modes).map(([key, mode]) => `<option value="mode:${key}">${mode.name}</option>`).join('') + '</optgroup>';
+    exercisePattern.value = 'scale:naturalMinor';
+    exerciseTechnique.innerHTML = Object.entries(data.exerciseTechniques).map(([key, item]) => `<option value="${key}">${item.name}</option>`).join('');
+    exerciseLevel.innerHTML = Object.entries(data.exerciseLevels).map(([key, item]) => `<option value="${key}">${item.name}</option>`).join('');
+    exerciseLevel.value = 'intermediate';
   };
 
   const renderNotes = (notes) => {
@@ -330,6 +353,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  const getExercisePattern = () => {
+    const [kind, key] = exercisePattern.value.split(':');
+    return kind === 'mode' ? data.modes[key] : data.scales[key];
+  };
+
+  const findPlayablePosition = (note, targetFret = 5) => {
+    const positions = [];
+    data.tuning.forEach((string) => {
+      for (let fret = 0; fret <= 12; fret += 1) {
+        if (noteAt(string.note, fret) === note) positions.push({ string: string.string, stringNote: string.note, fret });
+      }
+    });
+    return positions.sort((a, b) => Math.abs(a.fret - targetFret) - Math.abs(b.fret - targetFret))[0];
+  };
+
+  const makeExerciseSequence = () => {
+    const pattern = getExercisePattern();
+    const level = data.exerciseLevels[exerciseLevel.value];
+    const scaleNotes = pattern.intervals.map((interval, index) => ({
+      note: noteAt(exerciseRoot.value, interval),
+      degree: pattern.degrees[index],
+      interval
+    }));
+    const span = Math.min(level.span, scaleNotes.length + 2);
+    const up = Array.from({ length: span }, (_, index) => scaleNotes[index % scaleNotes.length]);
+    const down = up.slice().reverse().slice(1);
+    const technique = exerciseTechnique.value;
+    if (technique === 'arpeggios') return [scaleNotes[0], scaleNotes[2] || scaleNotes[0], scaleNotes[4] || scaleNotes[0], scaleNotes[6] || scaleNotes[2], scaleNotes[4] || scaleNotes[0], scaleNotes[2] || scaleNotes[0]];
+    if (technique === 'stringSkipping') return [scaleNotes[0], scaleNotes[2], scaleNotes[4], scaleNotes[1], scaleNotes[3], scaleNotes[5]].filter(Boolean);
+    if (technique === 'sequences') return [scaleNotes[0], scaleNotes[1], scaleNotes[2], scaleNotes[1], scaleNotes[2], scaleNotes[3], scaleNotes[2], scaleNotes[3], scaleNotes[4]].filter(Boolean);
+    if (technique === 'legato') return up.concat(down).slice(0, span + 3);
+    if (technique === 'slides') return [scaleNotes[0], scaleNotes[1], scaleNotes[3], scaleNotes[4], scaleNotes[2], scaleNotes[5], scaleNotes[4]].filter(Boolean);
+    if (technique === 'improvisation') return [scaleNotes[0], scaleNotes[2], scaleNotes[1], scaleNotes[4], scaleNotes[3], scaleNotes[2], scaleNotes[0]].filter(Boolean);
+    return up.concat(down);
+  };
+
+  const tabFromExercise = (items) => {
+    const positions = items.map((item, index) => ({ ...item, position: findPlayablePosition(item.note, 3 + (index % 5)) }));
+    return data.tuning.slice().reverse().map((string) => {
+      const chunks = positions.map((item) => item.position.string === string.string ? String(item.position.fret).padStart(2, '-') : '--');
+      return `${string.note}|-${chunks.join('-')}-|`;
+    }).join('\n');
+  };
+
+  const renderExercise = () => {
+    const pattern = getExercisePattern();
+    const technique = data.exerciseTechniques[exerciseTechnique.value];
+    const level = data.exerciseLevels[exerciseLevel.value];
+    const rootLabel = data.noteLabels[exerciseRoot.value];
+    currentExercise = makeExerciseSequence();
+    exerciseTitle.textContent = `${technique.name} en ${rootLabel}`;
+    exerciseTechniqueOut.textContent = technique.name;
+    exerciseLevelOut.textContent = level.name;
+    exerciseBpmOut.textContent = exerciseBpm.value;
+    exerciseFingers.textContent = exerciseLevel.value === 'beginner' ? '1-2-3-4' : exerciseLevel.value === 'intermediate' ? '1-2-4 / cambios' : '1-2-3-4 / desplazamientos';
+    exerciseNotes.innerHTML = currentExercise.map((item, index) => `<span class="note-pill"><b>${item.note}</b><small>${index + 1} · ${item.degree}</small></span>`).join('');
+    exerciseTab.textContent = tabFromExercise(currentExercise);
+    exerciseRoutine.innerHTML = [
+      `Toca una vuelta a ${exerciseBpm.value} BPM con sonido limpio.`,
+      `Di en voz alta los grados: ${currentExercise.map((item) => item.degree).join(' - ')}.`,
+      'Repite cuatro veces, descansa diez segundos y sube 5 BPM solo si no hay tension.',
+      'Termina improvisando una frase corta que resuelva en la tonica.'
+    ].map((item) => `<li>${item}</li>`).join('');
+    exerciseExplain.textContent = `${technique.focus} Material original construido desde la formula ${pattern.formula}. ${level.explanation}`;
+  };
+
+  const playExercise = () => {
+    if (!currentExercise.length) renderExercise();
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const beat = 60 / Number(exerciseBpm.value);
+    currentExercise.forEach((item, index) => {
+      const start = context.currentTime + index * beat;
+      const osc = context.createOscillator();
+      const gain = context.createGain();
+      osc.type = exerciseTechnique.value === 'legato' ? 'sine' : 'triangle';
+      osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(index / 6));
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.25, start + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + beat * 0.82);
+      osc.connect(gain).connect(context.destination);
+      osc.start(start);
+      osc.stop(start + beat * 0.86);
+    });
+  };
+
   fillSelectors();
   [rootSelect, scaleSelect, modeSelect].forEach((select) => select.addEventListener('change', render));
   [chordRoot, chordType].forEach((select) => select.addEventListener('change', renderChord));
@@ -337,6 +445,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderHarmony(true);
   }));
   progressionSelect.addEventListener('change', renderHarmony);
+  [exerciseRoot, exercisePattern, exerciseTechnique, exerciseLevel].forEach((select) => select.addEventListener('change', renderExercise));
+  exerciseBpm.addEventListener('input', () => {
+    bpmValue.textContent = exerciseBpm.value;
+    renderExercise();
+  });
   viewButtons.forEach((button) => button.addEventListener('click', () => {
     activeView = button.dataset.view;
     viewButtons.forEach((item) => item.classList.toggle('active', item === button));
@@ -346,6 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#listenChord').addEventListener('click', () => playChord(false));
   $('#arpeggiateChord').addEventListener('click', () => playChord(true));
   $('#listenProgression').addEventListener('click', playProgression);
+  $('#generateExercise').addEventListener('click', renderExercise);
+  $('#listenExercise').addEventListener('click', playExercise);
   $('#compareChordScale').addEventListener('click', () => {
     rootSelect.value = chordRoot.value;
     modeSelect.value = 'none';
@@ -355,4 +470,5 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
   renderChord();
   renderHarmony();
+  renderExercise();
 });
