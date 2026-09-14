@@ -6,6 +6,27 @@
 <meta name="description" content="StanNet.Space · Perfil profesional en desarrollo web, IA y ciberseguridad.">
 <title>Perfil | StanNet.Space</title>
 <link rel="stylesheet" href="../style.css">
+<style>
+.about-story{display:grid;grid-template-columns:minmax(260px,.88fr) minmax(280px,1.12fr);gap:18px;align-items:start}
+.about-panel{border:1px solid var(--line);background:rgba(16,17,38,.72);padding:clamp(24px,4vw,42px)}
+.about-panel h2{font-size:clamp(32px,4.2vw,58px);line-height:1;letter-spacing:-.055em;margin:0 0 20px}
+.about-panel p{color:var(--muted);line-height:1.8}
+.study-links{display:grid;gap:10px}
+.study-link{display:grid;gap:8px;padding:18px;border:1px solid rgba(194,205,255,.14);background:rgba(7,8,22,.44);transition:.25s}
+.study-link:hover{border-color:var(--lime);transform:translateY(-2px)}
+.study-link strong{font-size:15px;color:var(--ink)}
+.study-link span{color:var(--muted);font-size:13px;line-height:1.55}
+.study-link small{color:var(--lime);font:10px "DM Mono",monospace;letter-spacing:.08em}
+.credential-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.credential{padding:15px;border:1px solid rgba(194,205,255,.14);background:rgba(7,8,22,.38)}
+.credential small{display:block;margin-bottom:8px;color:var(--cyan);font:10px "DM Mono",monospace;letter-spacing:.08em}
+.credential span{color:var(--muted);font-size:13px;line-height:1.55}
+.study-plan{margin-top:18px;border:1px solid var(--line);overflow:auto;background:rgba(7,8,22,.35)}
+.study-plan table{width:100%;min-width:620px;border-collapse:collapse}
+.study-plan th,.study-plan td{padding:13px 14px;border-bottom:1px solid rgba(194,205,255,.1);text-align:left;font-size:13px;color:var(--muted)}
+.study-plan th{color:var(--lime);font:10px "DM Mono",monospace;letter-spacing:.08em}
+@media(max-width:850px){.about-story{grid-template-columns:1fr}.about-panel{padding:24px}.study-link{padding:16px}.credential-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body id="top">
 <header class="site-header">
@@ -15,7 +36,7 @@
 <a href="../index.html">Inicio</a>
 <a href="ai.html">IA</a>
 <a href="cybersecurity.html">Ciberseguridad</a>
-<a href="music.html">Music Lab</a>
+<a href="music.html">YouTube Lab</a>
 <a class="active" href="cv.html">Perfil</a><a href="education.html">Formación</a>
 </nav>
 </header>
@@ -30,6 +51,55 @@
 <article><p class="tag">ENFOQUE</p><h3>Desarrollo web</h3><p>Interfaces responsive, semánticas y accesibles que priorizan la experiencia de uso.</p></article>
 <article><p class="tag">APRENDIZAJE</p><h3>IA y automatización</h3><p>Herramientas y flujos para resolver problemas con creatividad y criterio técnico.</p></article>
 <article><p class="tag">COMPROMISO</p><h3>Seguridad por diseño</h3><p>Una práctica digital consciente, ética y centrada en proteger a las personas.</p></article>
+</div>
+</section>
+<section class="section" id="acerca-de-mi">
+<div class="section-heading">
+<div>
+<p class="eyebrow">05 / ACERCA DE MÍ</p>
+<h2>La ruta que<br><em>me trajo hasta aquí.</em></h2>
+</div>
+<p>Un espacio para conservar la primera historia digital de StanNet y convertirla en una biografía profesional más clara.</p>
+</div>
+<div class="about-story">
+<article class="about-panel">
+<p class="tag">ORIGEN</p>
+<h2>De la curiosidad al oficio.</h2>
+<p>Mi primera página web nació cuando empezaba a estudiar desarrollo web y buscaba ordenar lo que estaba aprendiendo: HTML, CSS, JavaScript, herramientas de despliegue y el deseo de construir interfaces útiles.</p>
+<p>Ese camino creció con formación profesional en desarrollo web a través de ILERNA y continúa actualmente en Jobie FP, donde estoy cursando el último ciclo. Antes de llegar a la tecnología estudié bachillerato en Química y Biología, pasé por la Universidad de Cuenca y viví procesos de aprendizaje de idiomas en Reino Unido y Suecia.</p>
+<p>Los diplomas que conservo en StanNet.Space muestran una ruta práctica: inglés, computación básica, economía digital, seguridad informática y seguridad para empresas. Esa mezcla de ciencia, idiomas, código y ciberseguridad sigue dando forma al proyecto.</p>
+</article>
+<article class="about-panel">
+<p class="tag">FORMACIÓN Y ENLACES</p>
+<div class="study-links">
+<a class="study-link" href="https://www.ilerna.es/es/fp-a-distancia" target="_blank" rel="noopener noreferrer"><small>FORMACIÓN PROFESIONAL</small><strong>ILERNA</strong><span>Formación profesional oficial a distancia dentro del recorrido de desarrollo web.</span></a>
+<a class="study-link" href="https://jobiefp.es/contacto/" target="_blank" rel="noopener noreferrer"><small>FORMACIÓN ACTUAL</small><strong>Jobie FP</strong><span>Actualmente cursando el último ciclo de la formación profesional.</span></a>
+<a class="study-link" href="https://www.ihlondon.com" target="_blank" rel="noopener noreferrer"><small>REINO UNIDO</small><strong>International House London</strong><span>Curso de inglés en Londres, parte del camino de aprendizaje de idiomas.</span></a>
+<a class="study-link" href="https://www.hermods.se/utbildningar-tjanster/sfi-och-integration/sfi-kurs-3c-hermods/" target="_blank" rel="noopener noreferrer"><small>SUECIA</small><strong>Hermods · SFI Stockholm</strong><span>Curso de sueco SFI en Estocolmo, nivel C3 indicado en el CV original.</span></a>
+<a class="study-link" href="https://es.wikipedia.org/wiki/Bernardo_Valdivieso" target="_blank" rel="noopener noreferrer"><small>ECUADOR</small><strong>Colegio Bernardo Valdivieso</strong><span>Bachillerato en el área de Química y Biología.</span></a>
+<a class="study-link" href="https://www.ucuenca.edu.ec/" target="_blank" rel="noopener noreferrer"><small>ECUADOR</small><strong>Universidad de Cuenca</strong><span>Estudios universitarios previos en la Facultad de Odontología.</span></a>
+<a class="study-link" href="http://briandademendoza.es/e-learning/" target="_blank" rel="noopener noreferrer"><small>ESPAÑA</small><strong>INS Brianda de Mendoza</strong><span>Formación profesional a distancia en Desarrollo de Aplicaciones Web.</span></a>
+</div>
+</article>
+</div>
+<div class="credential-grid" aria-label="Diplomas destacados">
+<article class="credential"><small>INGLÉS</small><span>Verbo to be, presente simple, vocabulario común, preguntas, respuestas, horas y solicitudes.</span></article>
+<article class="credential"><small>IDIOMAS Y REDES</small><span>Inglés básico para networking, expresiones simples, preposiciones y presente continuo.</span></article>
+<article class="credential"><small>TECNOLOGÍA</small><span>Computación básica, economía digital, guía de seguridad informática y seguridad para empresas.</span></article>
+</div>
+<div class="study-plan" aria-label="Plan de estudios de Desarrollo de Aplicaciones Web">
+<table>
+<thead><tr><th>Primer curso</th><th>Horas</th><th>Segundo curso</th><th>Horas</th></tr></thead>
+<tbody>
+<tr><td>Sistemas Informáticos</td><td>180</td><td>Desarrollo Web en entorno cliente</td><td>140</td></tr>
+<tr><td>Bases de datos</td><td>185</td><td>Desarrollo Web en entorno servidor</td><td>180</td></tr>
+<tr><td>Programación</td><td>205</td><td>Despliegue de aplicaciones web</td><td>94</td></tr>
+<tr><td>Lenguajes de marcas y sistemas de información</td><td>134</td><td>Diseño de interfaces web</td><td>120</td></tr>
+<tr><td>Entornos de desarrollo</td><td>110</td><td>Proyecto de desarrollo de aplicaciones web</td><td>40</td></tr>
+<tr><td>Inglés técnico</td><td>64</td><td>Empresa e iniciativa emprendedora</td><td>66</td></tr>
+<tr><td>Formación y orientación laboral</td><td>82</td><td>Formación en centros de trabajo</td><td>400</td></tr>
+</tbody>
+</table>
 </div>
 </section>
 </main>
