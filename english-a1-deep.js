@@ -1,0 +1,222 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const lessons = [
+    {
+      id: 'a1-01',
+      title: 'Saludos y presentaciones',
+      objective: 'Saludar, despedirte, decir tu nombre y preguntar informacion basica con seguridad.',
+      theory: 'En A1 las frases deben ser cortas y claras. Usa Hello, Good morning y Goodbye para abrir y cerrar conversaciones. Para presentarte, usa My name is... o I am...',
+      structure: ['Hello, my name is + nombre.', 'I am from + pais/ciudad.', 'Nice to meet you.', 'What is your name?'],
+      vocab: ['hello = hola', 'good morning = buenos dias', 'goodbye = adios', 'name = nombre', 'from = de / desde'],
+      phrases: [['Hello, my name is Sara.', 'Hola, me llamo Sara.'], ['I am from Colombia.', 'Soy de Colombia.'], ['Nice to meet you.', 'Encantado/a de conocerte.'], ['What is your name?', 'Como te llamas?']],
+      practice: 'Escribe cuatro frases: saludo, nombre, origen y despedida.',
+      test: { question: 'Choose the correct introduction.', options: ['My name is Ana.', 'Name my Ana is.', 'I name Ana.'], answer: 0 }
+    },
+    {
+      id: 'a1-02',
+      title: 'Verbo to be en presente',
+      objective: 'Usar am, is y are para identidad, edad, origen, estado y profesion.',
+      theory: 'To be significa ser o estar segun el contexto. I usa am; he, she, it usan is; you, we, they usan are.',
+      structure: ['I am a student.', 'She is happy.', 'They are at home.', 'Are you ready?'],
+      vocab: ['student = estudiante', 'teacher = profesor/a', 'happy = contento/a', 'ready = listo/a', 'at home = en casa'],
+      phrases: [['I am a student.', 'Soy estudiante.'], ['She is a teacher.', 'Ella es profesora.'], ['They are happy.', 'Estan contentos.'], ['Are you ready?', 'Estas listo/a?']],
+      practice: 'Completa cinco frases usando am, is o are.',
+      test: { question: 'Complete: She ___ from Spain.', options: ['am', 'is', 'are'], answer: 1 }
+    },
+    {
+      id: 'a1-03',
+      title: 'Pronombres y posesivos',
+      objective: 'Sustituir nombres por pronombres y hablar de pertenencia basica.',
+      theory: 'Los pronombres evitan repetir nombres. My, your, his, her, our y their indican posesion antes de un sustantivo.',
+      structure: ['I am Luis. My phone is here.', 'She is Marta. Her bag is blue.', 'They are friends. Their house is big.'],
+      vocab: ['my = mi', 'your = tu / su', 'his = su de el', 'her = su de ella', 'their = su de ellos'],
+      phrases: [['This is my book.', 'Este es mi libro.'], ['Her name is Laura.', 'Su nombre es Laura.'], ['Their car is red.', 'Su coche es rojo.'], ['Our teacher is kind.', 'Nuestro profesor es amable.']],
+      practice: 'Transforma nombres en pronombres: Ana is happy -> She is happy.',
+      test: { question: 'Choose the correct possessive: Pedro has a car. ___ car is white.', options: ['Her', 'His', 'Their'], answer: 1 }
+    },
+    {
+      id: 'a1-04',
+      title: 'Articulos y sustantivos',
+      objective: 'Usar a, an y the con objetos comunes y diferenciar contables e incontables.',
+      theory: 'Usa a antes de sonido consonante y an antes de sonido vocal. The señala algo conocido o especifico.',
+      structure: ['a book', 'an apple', 'the door', 'some water'],
+      vocab: ['book = libro', 'apple = manzana', 'water = agua', 'chair = silla', 'table = mesa'],
+      phrases: [['I have a book.', 'Tengo un libro.'], ['She eats an apple.', 'Ella come una manzana.'], ['The door is open.', 'La puerta esta abierta.'], ['I drink water.', 'Bebo agua.']],
+      practice: 'Elige a, an o the para diez objetos de casa.',
+      test: { question: 'Choose the correct article: ___ orange.', options: ['a', 'an', 'thee'], answer: 1 }
+    },
+    {
+      id: 'a1-05',
+      title: 'Numeros, fechas y colores',
+      objective: 'Decir numeros, colores, dias, meses y fechas simples.',
+      theory: 'Los numeros cardinales cuentan; los ordinales ordenan. Para fechas, se combinan dias, meses y ordinales.',
+      structure: ['one, two, three', 'first, second, third', 'Monday, Tuesday', 'It is blue.'],
+      vocab: ['one = uno', 'first = primero', 'Monday = lunes', 'January = enero', 'blue = azul'],
+      phrases: [['My phone number is 555 230.', 'Mi numero es 555 230.'], ['Today is Monday.', 'Hoy es lunes.'], ['My birthday is in May.', 'Mi cumpleanos es en mayo.'], ['The bag is blue.', 'La bolsa es azul.']],
+      practice: 'Di tu numero, tu color favorito y tu mes de cumpleanos.',
+      test: { question: 'What comes after Monday?', options: ['Friday', 'Tuesday', 'Sunday'], answer: 1 }
+    },
+    {
+      id: 'a1-06',
+      title: 'Presente simple',
+      objective: 'Hablar de rutinas, habitos y hechos generales.',
+      theory: 'Usa present simple para acciones habituales. Con he, she e it, normalmente anades -s al verbo.',
+      structure: ['I work every day.', 'She works every day.', 'Do you study English?', 'He does not drink coffee.'],
+      vocab: ['work = trabajar', 'study = estudiar', 'live = vivir', 'like = gustar', 'every day = cada dia'],
+      phrases: [['I study English every day.', 'Estudio ingles cada dia.'], ['She lives in Madrid.', 'Ella vive en Madrid.'], ['Do you like coffee?', 'Te gusta el cafe?'], ['He does not work on Sundays.', 'El no trabaja los domingos.']],
+      practice: 'Escribe tu rutina con cinco verbos en presente simple.',
+      test: { question: 'Complete: She ___ English.', options: ['study', 'studies', 'studying'], answer: 1 }
+    },
+    {
+      id: 'a1-07',
+      title: 'Presente continuo',
+      objective: 'Describir acciones que ocurren ahora.',
+      theory: 'El presente continuo se forma con to be + verbo en -ing. Sirve para acciones en progreso.',
+      structure: ['I am studying.', 'She is cooking.', 'They are listening.', 'Are you working?'],
+      vocab: ['now = ahora', 'listen = escuchar', 'cook = cocinar', 'read = leer', 'write = escribir'],
+      phrases: [['I am learning English now.', 'Estoy aprendiendo ingles ahora.'], ['She is reading a book.', 'Ella esta leyendo un libro.'], ['They are listening.', 'Ellos estan escuchando.'], ['Are you working?', 'Estas trabajando?']],
+      practice: 'Mira a tu alrededor y describe tres acciones con -ing.',
+      test: { question: 'Choose the present continuous sentence.', options: ['I am study.', 'I studying.', 'I am studying.'], answer: 2 }
+    },
+    {
+      id: 'a1-08',
+      title: 'Preposiciones basicas',
+      objective: 'Indicar lugar y tiempo con in, on, at, under y next to.',
+      theory: 'In suele indicar dentro; on, sobre; at, punto concreto; under, debajo; next to, al lado.',
+      structure: ['in the room', 'on the table', 'at school', 'under the chair'],
+      vocab: ['in = en / dentro', 'on = sobre', 'at = en punto concreto', 'under = debajo', 'next to = al lado de'],
+      phrases: [['The phone is on the table.', 'El telefono esta sobre la mesa.'], ['I am at school.', 'Estoy en la escuela.'], ['The bag is under the chair.', 'La bolsa esta debajo de la silla.'], ['She is in the kitchen.', 'Ella esta en la cocina.']],
+      practice: 'Describe donde estan cinco objetos de tu habitacion.',
+      test: { question: 'Complete: The book is ___ the table.', options: ['on', 'happy', 'go'], answer: 0 }
+    },
+    {
+      id: 'a1-09',
+      title: 'Familia, casa y comida',
+      objective: 'Nombrar personas cercanas, espacios de la casa y alimentos basicos.',
+      theory: 'Este vocabulario permite hablar de tu vida diaria. Combinalo con there is y there are para describir lugares.',
+      structure: ['This is my mother.', 'There is a kitchen.', 'There are two bedrooms.', 'I like rice.'],
+      vocab: ['mother = madre', 'father = padre', 'kitchen = cocina', 'bedroom = dormitorio', 'rice = arroz'],
+      phrases: [['This is my family.', 'Esta es mi familia.'], ['There is a kitchen.', 'Hay una cocina.'], ['There are two bedrooms.', 'Hay dos dormitorios.'], ['I like bread and cheese.', 'Me gusta el pan y el queso.']],
+      practice: 'Describe tu casa y tres alimentos que te gustan.',
+      test: { question: 'Choose the house word.', options: ['kitchen', 'Monday', 'blue'], answer: 0 }
+    },
+    {
+      id: 'a1-10',
+      title: 'Imperativos y condicional cero',
+      objective: 'Dar instrucciones simples y expresar consecuencias siempre verdaderas.',
+      theory: 'El imperativo usa el verbo base para dar instrucciones. El condicional cero usa if + presente, presente o imperativo.',
+      structure: ['Open the door.', 'Listen and repeat.', 'If you are ill, go to the doctor.', 'If water is hot, it boils.'],
+      vocab: ['open = abrir', 'close = cerrar', 'listen = escuchar', 'repeat = repetir', 'doctor = medico/a'],
+      phrases: [['Open your book.', 'Abre tu libro.'], ['Listen and repeat.', 'Escucha y repite.'], ['If you are ill, go to the doctor.', 'Si estas enfermo, ve al medico.'], ['If it rains, take an umbrella.', 'Si llueve, lleva un paraguas.']],
+      practice: 'Escribe cinco instrucciones para estudiar ingles y dos frases con if.',
+      test: { question: 'Choose the correct imperative.', options: ['To open the door.', 'Open the door.', 'Opening the door.'], answer: 1 }
+    }
+  ];
+
+  const route = document.querySelector('#academy-route');
+  if (!route) return;
+
+  const section = document.createElement('section');
+  section.className = 'section a1-course';
+  section.id = 'a1-course';
+  section.innerHTML = `
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">BLOQUE A / A1 PROFUNDO</p>
+        <h2>Empieza desde cero,<br><em>paso a paso.</em></h2>
+      </div>
+      <p>Diez capitulos con teoria breve, ejemplos con audio, practica activa y mini test. Pensado primero para telefono.</p>
+    </div>
+    <div class="a1-shell">
+      <aside class="a1-sidebar">
+        <h3>Capitulos A1</h3>
+        <div class="a1-chapters" id="a1Chapters"></div>
+      </aside>
+      <article class="a1-panel">
+        <div class="a1-topline"><span id="a1Label">A1 · CAPITULO 01</span><span id="a1Progress">0% A1</span></div>
+        <h2 id="a1Title"></h2>
+        <p class="a1-objective" id="a1Objective"></p>
+        <div class="a1-grid">
+          <div class="a1-card"><h4>TEORIA</h4><p id="a1Theory"></p></div>
+          <div class="a1-card"><h4>ESTRUCTURA</h4><ul id="a1Structure"></ul></div>
+          <div class="a1-card"><h4>VOCABULARIO</h4><ul id="a1Vocab"></ul></div>
+          <div class="a1-card"><h4>PRACTICA</h4><p id="a1Practice"></p></div>
+        </div>
+        <div class="a1-card" style="margin-top:14px"><h4>ESCUCHA Y REPITE</h4><div class="a1-phrase-list" id="a1Phrases"></div></div>
+        <div class="a1-card" style="margin-top:14px"><h4>MINI TEST</h4><div class="a1-test" id="a1Test"></div><div class="a1-result" id="a1Result"></div><div class="a1-actions"><button class="a1-primary" id="a1Check" type="button">Comprobar</button><button class="a1-secondary" id="a1Complete" type="button">Marcar capitulo completado</button><button class="a1-secondary" id="a1Next" type="button">Siguiente capitulo</button></div></div>
+      </article>
+    </div>
+  `;
+  route.after(section);
+
+  const storeKey = 'stannetA1DeepProgress';
+  const state = JSON.parse(localStorage.getItem(storeKey) || '{"current":0,"done":{}}');
+  const save = () => localStorage.setItem(storeKey, JSON.stringify(state));
+  let current = Math.min(Number(state.current || 0), lessons.length - 1);
+  let selected = null;
+
+  const speak = (text, button) => {
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      const voice = new SpeechSynthesisUtterance(text);
+      voice.lang = 'en-US';
+      voice.rate = .86;
+      speechSynthesis.speak(voice);
+      button.textContent = 'Repetir audio';
+    }
+  };
+
+  const render = () => {
+    const lesson = lessons[current];
+    selected = null;
+    state.current = current;
+    save();
+    const doneCount = Object.values(state.done).filter(Boolean).length;
+    document.querySelector('#a1Progress').textContent = `${Math.round((doneCount / lessons.length) * 100)}% A1`;
+    document.querySelector('#a1Label').textContent = `A1 · CAPITULO ${String(current + 1).padStart(2, '0')}`;
+    document.querySelector('#a1Title').textContent = lesson.title;
+    document.querySelector('#a1Objective').textContent = lesson.objective;
+    document.querySelector('#a1Theory').textContent = lesson.theory;
+    document.querySelector('#a1Practice').textContent = lesson.practice;
+    document.querySelector('#a1Structure').innerHTML = lesson.structure.map((item) => `<li>${item}</li>`).join('');
+    document.querySelector('#a1Vocab').innerHTML = lesson.vocab.map((item) => `<li>${item}</li>`).join('');
+    document.querySelector('#a1Phrases').innerHTML = lesson.phrases.map(([en, es], index) => `<div class="a1-phrase"><div><strong>${en}</strong><span>${es}</span></div><button class="a1-audio" data-audio="${index}" type="button">Escuchar</button></div>`).join('');
+    document.querySelector('#a1Test').innerHTML = `<p>${lesson.test.question}</p>${lesson.test.options.map((option, index) => `<button class="a1-option" data-option="${index}" type="button">${option}</button>`).join('')}`;
+    document.querySelector('#a1Result').textContent = 'Elige una respuesta y comprueba.';
+    document.querySelector('#a1Chapters').innerHTML = lessons.map((item, index) => `<button class="a1-chapter${index === current ? ' active' : ''}${state.done[item.id] ? ' done' : ''}" data-chapter="${index}" type="button">${String(index + 1).padStart(2, '0')} · ${item.title}</button>`).join('');
+    document.querySelector('#a1Complete').textContent = state.done[lesson.id] ? 'Capitulo completado' : 'Marcar capitulo completado';
+
+    document.querySelectorAll('.a1-chapter').forEach((button) => button.addEventListener('click', () => {
+      current = Number(button.dataset.chapter);
+      render();
+    }));
+    document.querySelectorAll('.a1-audio').forEach((button) => button.addEventListener('click', () => speak(lesson.phrases[Number(button.dataset.audio)][0], button)));
+    document.querySelectorAll('.a1-option').forEach((button) => button.addEventListener('click', () => {
+      selected = Number(button.dataset.option);
+      document.querySelectorAll('.a1-option').forEach((item) => item.classList.remove('selected'));
+      button.classList.add('selected');
+    }));
+  };
+
+  document.querySelector('#a1Check').addEventListener('click', () => {
+    const lesson = lessons[current];
+    const result = document.querySelector('#a1Result');
+    if (selected === null) {
+      result.textContent = 'Selecciona una respuesta primero.';
+      return;
+    }
+    result.innerHTML = selected === lesson.test.answer ? '<strong>Correcto.</strong> Puedes marcar el capitulo como completado.' : `<strong>Revisa la teoria.</strong> La respuesta correcta es: ${lesson.test.options[lesson.test.answer]}`;
+  });
+
+  document.querySelector('#a1Complete').addEventListener('click', () => {
+    state.done[lessons[current].id] = true;
+    save();
+    render();
+  });
+
+  document.querySelector('#a1Next').addEventListener('click', () => {
+    current = (current + 1) % lessons.length;
+    render();
+  });
+
+  render();
+});
