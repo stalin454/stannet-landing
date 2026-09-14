@@ -1,0 +1,235 @@
+.a1-course {
+  background: linear-gradient(180deg, rgba(7, 21, 37, .96), rgba(9, 26, 43, .96));
+}
+
+.a1-shell {
+  display: grid;
+  grid-template-columns: minmax(230px, .42fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.a1-sidebar,
+.a1-panel {
+  border: 1px solid rgba(139, 216, 255, .2);
+  background: rgba(7, 21, 37, .86);
+}
+
+.a1-sidebar {
+  padding: 18px;
+}
+
+.a1-sidebar h3,
+.a1-panel h3 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 24px;
+}
+
+.a1-chapters {
+  display: grid;
+  gap: 8px;
+}
+
+.a1-chapter {
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid rgba(139, 216, 255, .14);
+  background: transparent;
+  color: #b7cad8;
+  text-align: left;
+  font: 700 11px 'DM Mono', monospace;
+  cursor: pointer;
+}
+
+.a1-chapter.active,
+.a1-chapter:hover {
+  border-color: #ffb45e;
+  color: #fff;
+  background: rgba(255, 180, 94, .1);
+}
+
+.a1-chapter.done::after {
+  content: "COMPLETADO";
+  display: block;
+  margin-top: 6px;
+  color: #8bd8ff;
+  font-size: 9px;
+}
+
+.a1-panel {
+  padding: clamp(20px, 4vw, 38px);
+}
+
+.a1-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  color: #8bd8ff;
+  font: 700 10px 'DM Mono', monospace;
+}
+
+.a1-panel h2 {
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 1;
+  letter-spacing: -.06em;
+}
+
+.a1-objective {
+  max-width: 760px;
+  color: #b7cad8;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.a1-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.a1-card {
+  padding: 16px;
+  border: 1px solid rgba(139, 216, 255, .16);
+  background: rgba(139, 216, 255, .05);
+}
+
+.a1-card h4 {
+  margin: 0 0 10px;
+  color: #ffb45e;
+  font: 700 11px 'DM Mono', monospace;
+}
+
+.a1-card p,
+.a1-card li {
+  color: #c9d8e0;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.a1-card ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.a1-phrase-list {
+  display: grid;
+  gap: 10px;
+}
+
+.a1-phrase {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-left: 2px solid #8bd8ff;
+  background: rgba(139, 216, 255, .06);
+}
+
+.a1-phrase strong {
+  display: block;
+  color: #fff;
+  font-size: 18px;
+}
+
+.a1-phrase span {
+  display: block;
+  margin-top: 4px;
+  color: #b7cad8;
+  font-size: 13px;
+}
+
+.a1-audio,
+.a1-primary,
+.a1-secondary {
+  min-height: 44px;
+  border: 1px solid rgba(139, 216, 255, .28);
+  background: transparent;
+  color: #fff;
+  font: 700 10px 'DM Mono', monospace;
+  cursor: pointer;
+}
+
+.a1-audio {
+  min-width: 104px;
+  color: #8bd8ff;
+}
+
+.a1-primary {
+  padding: 0 16px;
+  border: 0;
+  background: #ffb45e;
+  color: #071525;
+}
+
+.a1-secondary {
+  padding: 0 16px;
+}
+
+.a1-test {
+  display: grid;
+  gap: 10px;
+}
+
+.a1-option {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(139, 216, 255, .16);
+  background: transparent;
+  color: #d7e5eb;
+  text-align: left;
+  cursor: pointer;
+}
+
+.a1-option.selected {
+  border-color: #ffb45e;
+  background: rgba(255, 180, 94, .1);
+}
+
+.a1-result {
+  min-height: 44px;
+  color: #b7cad8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.a1-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .a1-shell,
+  .a1-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .a1-course {
+    padding-inline: 16px;
+  }
+
+  .a1-sidebar,
+  .a1-panel {
+    margin-inline: -4px;
+  }
+
+  .a1-phrase {
+    grid-template-columns: 1fr;
+  }
+
+  .a1-audio,
+  .a1-primary,
+  .a1-secondary {
+    width: 100%;
+    font-size: 12px;
+  }
+}
