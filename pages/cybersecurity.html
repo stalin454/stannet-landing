@@ -7,6 +7,7 @@
 <title>StanNet Cyber Academy | Laboratorios practicos</title>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="../cyber-academy.css">
+<link rel="stylesheet" href="../cyber-docker.css">
 </head>
 <body id="top">
 <header class="site-header">
@@ -38,12 +39,12 @@
 <p class="eyebrow">RUTAS / BLOQUE 1</p>
 <h2>Una academia para crear experiencia demostrable.</h2>
 </div>
-<p>La plataforma empieza con practica guiada y crece por fases: login, ranking, laboratorios Docker y modulos premium sin perder orden.</p>
+<p>La plataforma empieza con practica guiada y ya incluye el primer laboratorio Docker descargable. Login real, ranking global y premium quedan como fases ordenadas.</p>
 </div>
 <div class="cyber-track-grid">
 <article class="cyber-track active"><span>01</span><h3>Network Analyst</h3><p>Wireshark, tcpdump, DNS, HTTP, puertos, ACL y lectura de trafico.</p></article>
 <article class="cyber-track active"><span>02</span><h3>SOC Analyst</h3><p>Triage, logs, severidad, timeline, evidencias e informe de incidente.</p></article>
-<article class="cyber-track"><span>03</span><h3>Web Pentesting</h3><p>OWASP Top 10, APIs, autenticacion, IDOR, XSS y reporte profesional.</p></article>
+<article class="cyber-track active"><span>03</span><h3>Web Pentesting</h3><p>OWASP Top 10, APIs, autenticacion, IDOR, XSS y reporte profesional.</p></article>
 <article class="cyber-track"><span>04</span><h3>Cloud Security</h3><p>IAM, secretos, buckets, logs cloud y hardening en entornos simulados.</p></article>
 <article class="cyber-track"><span>05</span><h3>Tool Builder</h3><p>Python y JavaScript para crear scanners, parsers y generadores de informes.</p></article>
 <article class="cyber-track"><span>06</span><h3>Remote Career Lab</h3><p>Write-ups, CV tecnico, entrevistas, ingles profesional y portfolio publico.</p></article>
@@ -53,7 +54,7 @@
 <div class="console-header">
 <div>
 <p class="eyebrow">MISSION CONSOLE</p>
-<h2>Bloque 1: fundamentos operativos.</h2>
+<h2>Bloques 1-2: fundamentos y Docker Lab.</h2>
 </div>
 <div class="console-score"><strong id="cyberScore">0</strong><span>XP local</span></div>
 </div>
@@ -88,19 +89,27 @@
 <a class="lab-card" href="../assets/labs/stannet-auth-events.log" download><span>LOG</span><h3>Eventos de autenticacion</h3><p>Triage de fallos, acceso correcto y decision de escalado.</p></a>
 <a class="lab-card" href="../assets/labs/stannet-http-sample.log" download><span>WEB</span><h3>HTTP access sample</h3><p>Practica lectura de metodos, codigos, rutas y user agents.</p></a>
 <a class="lab-card" href="../assets/labs/stannet-report-template.md" download><span>MD</span><h3>Plantilla de informe</h3><p>Formato profesional para write-ups y entregas de portfolio.</p></a>
+<a class="lab-card" href="../assets/labs/stannet-cyber-lab-block-2.zip" download><span>ZIP</span><h3>Docker Cyber Lab</h3><p>Aplicacion Flask vulnerable, logs, compose y plantilla de informe local.</p></a>
 </div>
 </section>
 <section class="section docker-lab" id="docker">
 <div class="docker-panel">
-<p class="eyebrow">DOCKER / FASE PREPARADA</p>
-<h2>Laboratorios reproducibles, seguros y locales.</h2>
-<p>Desde el principio queda definida la ruta Docker: servicios vulnerables controlados, SIEM local y ejercicios de hardening. El primer bloque publica la guia; los contenedores se activaran en la siguiente entrega para evitar laboratorios inseguros o incompletos.</p>
+<p class="eyebrow">DOCKER / BLOQUE 2 ACTIVO</p>
+<h2>Primer laboratorio reproducible, seguro y local.</h2>
+<p>El paquete descargable incluye una web vulnerable de entrenamiento, logs generados y plantilla de informe. Sirve para practicar pentesting web basico, analisis SOC y documentacion profesional con alcance controlado.</p>
 <pre>mkdir stannet-cyber-labs
 cd stannet-cyber-labs
+unzip stannet-cyber-lab-block-2.zip
+cd stannet-cyber-lab
 docker compose up --build
 
 # Regla principal:
 # atacar solo tus contenedores, tus VMs o entornos con permiso escrito.</pre>
+<div class="docker-checklist">
+<article><strong>1</strong><span>Levanta localhost:8080 y verifica cabeceras HTTP.</span></article>
+<article><strong>2</strong><span>Prueba login, busqueda e invoices con usuarios de laboratorio.</span></article>
+<article><strong>3</strong><span>Analiza logs/access.log y redacta el informe final.</span></article>
+</div>
 </div>
 </section>
 <section class="section rank-board" id="ranking">

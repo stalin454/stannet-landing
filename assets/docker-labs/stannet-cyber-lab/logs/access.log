@@ -1,0 +1,6 @@
+2026-09-15T12:00:00Z ip=127.0.0.1 method=GET path=/ query=- status=200 agent=Mozilla/5.0
+2026-09-15T12:01:12Z ip=127.0.0.1 method=GET path=/search query=q=network status=200 agent=Mozilla/5.0
+2026-09-15T12:02:41Z ip=127.0.0.1 method=POST path=/login query=- status=401 agent=Mozilla/5.0
+2026-09-15T12:03:02Z ip=127.0.0.1 method=POST path=/login query=- status=200 agent=Mozilla/5.0
+2026-09-15T12:04:20Z ip=127.0.0.1 method=GET path=/invoice/1001 query=- status=200 agent=Mozilla/5.0
+2026-09-15T12:04:36Z ip=127.0.0.1 method=GET path=/invoice/1002 query=- status=200 agent=Mozilla/5.0

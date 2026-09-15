@@ -84,6 +84,48 @@ document.addEventListener("DOMContentLoaded", () => {
         ["Comunicacion", "Anade executive summary breve en ingles."],
       ],
     },
+    {
+      id: "DOCKER-001",
+      title: "Levantar laboratorio vulnerable",
+      track: "Docker Cyber Lab",
+      level: "Junior",
+      xp: 180,
+      objective: "Descargar el laboratorio Docker, levantarlo en localhost y verificar que la aplicacion vulnerable responde.",
+      tools: ["Docker", "docker compose", "curl", "README"],
+      steps: [
+        ["Descarga", "Baja stannet-cyber-lab-block-2.zip desde Lab Vault y descomprimelo en una carpeta de trabajo."],
+        ["Ejecucion", "Ejecuta docker compose up --build y abre http://localhost:8080."],
+        ["Evidencia", "Documenta version de Docker, URL local, respuesta HTTP y una captura o salida de comprobacion."],
+      ],
+    },
+    {
+      id: "WEB-002",
+      title: "Pentesting web local controlado",
+      track: "Web Pentesting",
+      level: "Junior",
+      xp: 190,
+      objective: "Analizar el laboratorio vulnerable buscando reflejo de entrada, control de acceso debil y exposicion de rutas.",
+      tools: ["navegador", "curl", "Burp opcional", "informe"],
+      steps: [
+        ["Alcance", "Trabaja solo contra http://localhost:8080 y los endpoints listados en el README."],
+        ["Pruebas", "Revisa /search?q=, /login y /invoice/<id> con usuarios de laboratorio."],
+        ["Reporte", "Explica impacto, evidencia y mitigacion sin incluir payloads contra terceros ni instrucciones fuera de alcance."],
+      ],
+    },
+    {
+      id: "SOC-002",
+      title: "Analizar logs del contenedor",
+      track: "SOC Analyst",
+      level: "Junior",
+      xp: 170,
+      objective: "Usar logs/access.log del laboratorio para construir una cronologia de actividad y detectar patrones sospechosos.",
+      tools: ["logs", "timeline", "Python opcional", "Markdown"],
+      steps: [
+        ["Recolecta", "Abre logs/access.log despues de navegar por el laboratorio."],
+        ["Agrupa", "Cuenta metodos, rutas, codigos de estado y secuencia temporal."],
+        ["Conclusiones", "Separa evidencia de hipotesis y propone una regla defensiva simple."],
+      ],
+    },
   ];
 
   const storeKey = "stannetCyberAcademyBlock1";
