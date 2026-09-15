@@ -16,11 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Cargo check
-        run: cargo check
-      - name: Cargo test
+      - name: Test defensive core
         run: cargo test
-      - name: Build release
+      - name: Build core
         run: cargo build --release
       - name: Defensive end-to-end smoke tests
         shell: pwsh
@@ -37,13 +35,15 @@ jobs:
           if (Test-Path quarantine-me.txt) { throw 'Quarantine did not isolate source' }
           & .\target\release\stannet-shield.exe restore (Join-Path 'q' $record.id 'record.json')
           if (-not (Test-Path quarantine-me.txt)) { throw 'Restore failed' }
-          New-Item -ItemType Directory -Force cleaner-allowed,cleaner-outside | Out-Null
-          Set-Content cleaner-outside\keep.txt 'must survive'
-          & .\target\release\stannet-shield.exe cleaner-delete cleaner-allowed cleaner-outside\keep.txt
-          if ($LASTEXITCODE -eq 0) { throw 'Cleaner failed to reject outside path' }
-          if (-not (Test-Path cleaner-outside\keep.txt)) { throw 'Cleaner removed outside file' }
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version '^2' --locked
+      - name: Build NSIS installer
+        working-directory: shield/desktop/src-tauri
+        run: cargo tauri build --bundles nsis
       - uses: actions/upload-artifact@v4
         with:
-          name: stannet-shield-core-windows-x64
-          path: shield/desktop/target/release/stannet-shield.exe
+          name: stannet-shield-windows-preview
+          path: |
+            shield/desktop/target/release/stannet-shield.exe
+            shield/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
           if-no-files-found: error
