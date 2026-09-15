@@ -8,6 +8,7 @@ use walkdir::WalkDir;
 
 const MAX_FILE_BYTES: u64 = 1024 * 1024 * 1024;
 const MAX_YARA_BYTES: u64 = 64 * 1024 * 1024;
+const READ_BUFFER_BYTES: usize = 64 * 1024;
 const RULES: &str = include_str!("../rules/default.yar");
 
 #[derive(Serialize)]
@@ -19,7 +20,7 @@ fn scan_file(path:&Path,rules:&yara_x::Rules)->Result<ScanResult,Box<dyn std::er
  if !meta.is_file(){return Err(io::Error::new(io::ErrorKind::InvalidInput,"not a regular file").into())}
  if meta.len()>MAX_FILE_BYTES{return Ok(ScanResult{path:path.display().to_string(),size:meta.len(),sha256:String::new(),status:"skipped".into(),matches:vec![],note:"file exceeds 1 GiB safety limit".into()})}
  let yara_enabled=meta.len()<=MAX_YARA_BYTES;
- let mut f=File::open(path)?;let mut hasher=Sha256::new();let mut bytes=if yara_enabled{Vec::with_capacity(meta.len() as usize)}else{Vec::new()};let mut buf=[0u8;1024*1024];
+ let mut f=File::open(path)?;let mut hasher=Sha256::new();let mut bytes=if yara_enabled{Vec::with_capacity(meta.len() as usize)}else{Vec::new()};let mut buf=[0u8;READ_BUFFER_BYTES];
  loop{let n=f.read(&mut buf)?;if n==0{break}hasher.update(&buf[..n]);if yara_enabled{bytes.extend_from_slice(&buf[..n]);}}
  let sha256=format!("{:x}",hasher.finalize());
  if !yara_enabled{return Ok(ScanResult{path:path.display().to_string(),size:meta.len(),sha256,status:"hashed-yara-skipped".into(),matches:vec![],note:"SHA-256 completed. YARA-X skipped above the 64 MiB in-memory safety limit.".into()})}
