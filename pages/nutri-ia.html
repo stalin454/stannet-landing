@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Nutri IA by StanNet: nutricion, entrenamiento, sueño, suplementos y seguimiento personal.">
+<title>Nutri IA | StanNet.Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../nutri-ia.css">
+</head>
+<body id="top" class="nutri-page">
+<header class="site-header">
+<a class="brand" href="../index.html" aria-label="StanNet.Space, inicio"><span>stan</span><b>net</b><i>.space</i></a>
+<button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+<nav class="site-nav" aria-label="Navegacion principal">
+<a href="../index.html">Inicio</a>
+<a href="ai.html">IA</a>
+<a class="active" href="nutri-ia.html">Nutri IA</a>
+<a href="cybersecurity.html">Ciberseguridad</a>
+<a href="music.html">Music Lab</a>
+<a href="education.html">Formacion</a>
+</nav>
+</header>
+<main>
+<section class="nutri-hero">
+<div>
+<p class="eyebrow">NUTRI IA / BY STANNET</p>
+<h1>Tu salud diaria, ordenada en un panel.</h1>
+<p>Nutricion, entrenamiento, sueño, suplementos, despensa y compra con perfiles multiples y seguimiento diario.</p>
+<div class="nutri-actions">
+<button class="button primary" type="button" data-start>Empezar ahora <span>↗</span></button>
+<button class="button ghost" type="button" data-demo>Cargar demo</button>
+</div>
+</div>
+<aside class="hero-console" aria-label="Resumen rapido de Nutri IA">
+<span>Modo Bestia</span>
+<strong id="heroScore">0%</strong>
+<p>Constancia semanal estimada segun comidas, entrenos, sueño y registro diario.</p>
+</aside>
+</section>
+
+<section class="nutri-shell" aria-live="polite">
+<aside class="nutri-sidebar">
+<div class="auth-card" id="authCard">
+<p class="eyebrow">Acceso local</p>
+<h2>Login y perfiles</h2>
+<form id="loginForm">
+<label for="email">Usuario o email</label>
+<input id="email" name="email" autocomplete="username" required placeholder="tu@email.com">
+<label for="pin">PIN local</label>
+<input id="pin" name="pin" type="password" inputmode="numeric" minlength="4" required placeholder="Minimo 4 digitos">
+<button class="button primary" type="submit">Entrar <span>→</span></button>
+</form>
+<p class="micro">Los datos se guardan en este navegador por usuario. No sustituyen una historia clinica ni diagnostico medico.</p>
+</div>
+<div class="profile-card hidden" id="profileCard">
+<p class="eyebrow">Perfil activo</p>
+<select id="profileSelect" aria-label="Seleccionar perfil"></select>
+<button class="button ghost" type="button" id="addProfile">Nuevo perfil</button>
+<button class="mini-danger" type="button" id="logout">Cerrar sesion</button>
+</div>
+<nav class="app-tabs" aria-label="Modulos Nutri IA">
+<button class="active" data-tab="dashboard" type="button">Dashboard</button>
+<button data-tab="profile" type="button">Perfil</button>
+<button data-tab="nutrition" type="button">Nutricion</button>
+<button data-tab="training" type="button">Entreno</button>
+<button data-tab="pantry" type="button">Despensa</button>
+<button data-tab="recovery" type="button">Sueño + suplementos</button>
+<button data-tab="beast" type="button">Modo Bestia</button>
+</nav>
+</aside>
+
+<div class="nutri-content">
+<div class="notice"><strong>Aviso:</strong> Nutri IA ofrece organizacion y sugerencias generales. Para lesiones, alergias, embarazo, medicacion, trastornos alimentarios o suplementos, consulta con un profesional sanitario.</div>
+<section class="tab-panel active" id="dashboard"></section>
+<section class="tab-panel" id="profile"></section>
+<section class="tab-panel" id="nutrition"></section>
+<section class="tab-panel" id="training"></section>
+<section class="tab-panel" id="pantry"></section>
+<section class="tab-panel" id="recovery"></section>
+<section class="tab-panel" id="beast"></section>
+</div>
+</section>
+</main>
+<footer>
+<a class="brand" href="../index.html"><span>stan</span><b>net</b><i>.space</i></a>
+<p>© <span id="year"></span> · Nutri IA by StanNet.</p>
+<a href="#top">VOLVER ARRIBA ↑</a>
+</footer>
+<script src="../script.js"></script>
+<script src="../nutri-ia.js"></script>
+</body>
+</html>
