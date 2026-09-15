@@ -58,7 +58,8 @@ mod tests {
         assert!(!source.exists());
         let record_path = qroot.join(&record.id).join("record.json");
         let restored = restore_file(&record_path).unwrap();
-        assert_eq!(restored, source); assert_eq!(fs::read(&source).unwrap(), b"benign quarantine fixture");
+        assert_eq!(restored.canonicalize().unwrap(), source.canonicalize().unwrap());
+        assert_eq!(fs::read(&restored).unwrap(), b"benign quarantine fixture");
         let _ = fs::remove_dir_all(base);
     }
 }
