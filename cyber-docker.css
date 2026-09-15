@@ -70,9 +70,132 @@
   text-transform: uppercase;
 }
 
+.chapter-classroom {
+  border-top: 1px solid var(--line);
+  background: radial-gradient(ellipse at top right, rgba(22, 55, 53, .72), transparent 62%);
+}
+
+.cyber-shell {
+  padding: 40px clamp(20px, 6vw, 100px);
+  background: radial-gradient(ellipse at top right, #163735, transparent 65%);
+}
+
+.cyber-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+}
+
+.cyber-panel {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #365155;
+  border-radius: 12px;
+  background: #101c24;
+  overflow-wrap: anywhere;
+}
+
+.cyber-panel h2 {
+  font-size: 30px;
+}
+
+.cyber-panel p,
+.cyber-panel li {
+  color: #d0e3e1;
+  line-height: 1.8;
+}
+
+.cyber-panel button,
+.cyber-panel select {
+  margin: 4px 0;
+  padding: 12px;
+  border: 1px solid #598385;
+  border-radius: 6px;
+  background: #203b40;
+  color: #fff;
+  cursor: pointer;
+}
+
+.cyber-panel select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.cyber-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.cyber-menu button[aria-pressed="true"] {
+  border-color: #cfff4f;
+  color: #cfff4f;
+}
+
+.cyber-panel textarea {
+  width: 100%;
+  min-height: 170px;
+  padding: 12px;
+  border: 1px solid #598385;
+  box-sizing: border-box;
+  background: #091219;
+  color: white;
+}
+
+.cyber-panel pre {
+  padding: 18px;
+  background: #091219;
+  color: #b9f7db;
+  white-space: pre-wrap;
+}
+
+.cyber-panel label {
+  display: block;
+  margin: 14px 0;
+}
+
+.cyber-panel fieldset {
+  min-width: 0;
+}
+
+.cyber-panel summary {
+  cursor: pointer;
+}
+
+.cyber-progress {
+  width: 100%;
+  accent-color: #cfff4f;
+}
+
+.cyber-diagram {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.cyber-diagram li {
+  flex: 1 1 120px;
+  padding: 18px;
+  border: 1px solid #70c8ad;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #163735, #101c24);
+  counter-increment: step;
+}
+
+.cyber-diagram li:before {
+  content: counter(step) " / ";
+  display: block;
+  color: #cfff4f;
+  font-size: 24px;
+}
+
 @media (max-width: 900px) {
   .docker-checklist,
-  .theory-grid {
+  .theory-grid,
+  .cyber-layout {
     grid-template-columns: 1fr;
   }
 }
