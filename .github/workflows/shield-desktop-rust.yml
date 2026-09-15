@@ -1,0 +1,38 @@
+name: Shield Desktop Rust
+on:
+  pull_request:
+    paths:
+      - 'shield/desktop/**'
+      - '.github/workflows/shield-desktop-rust.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-rust:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: shield/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cargo check
+        run: cargo check --locked
+      - name: Cargo test
+        run: cargo test --locked
+      - name: Build release
+        run: cargo build --release --locked
+      - name: Smoke test scanner
+        shell: pwsh
+        run: |
+          Set-Content -Path shield-smoke.txt -Value 'StanNet Shield defensive smoke test'
+          $out = & .\target\release\stannet-shield.exe shield-smoke.txt
+          $report = $out | ConvertFrom-Json
+          if ($report.status -ne 'hashed') { throw 'Unexpected scanner status' }
+          if ($report.sha256.Length -ne 64) { throw 'Invalid SHA-256 output' }
+          Write-Host $out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stannet-shield-core-windows-x64
+          path: shield/desktop/target/release/stannet-shield.exe
+          if-no-files-found: error
