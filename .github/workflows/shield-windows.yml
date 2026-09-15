@@ -1,0 +1,30 @@
+name: StanNet Shield Windows
+
+on:
+  pull_request:
+    paths:
+      - 'shield/desktop/**'
+      - '.github/workflows/shield-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop-contract:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Shield desktop contract
+        shell: pwsh
+        run: |
+          $required = @(
+            'shield/desktop/README.md',
+            'shield/release-manifest.json'
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "Missing required file: $path" }
+          }
+          $manifest = Get-Content 'shield/release-manifest.json' -Raw | ConvertFrom-Json
+          if ($manifest.windows.status -ne 'not-released') { throw 'Windows release must remain gated until a tested installer exists.' }
+          Write-Host 'Shield desktop release gate passed.'
