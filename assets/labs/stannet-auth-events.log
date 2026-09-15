@@ -1,0 +1,7 @@
+2026-09-15T10:00:00Z host=linux-lab source=auth user=ana src_ip=192.0.2.10 result=failed reason=bad_password
+2026-09-15T10:01:00Z host=linux-lab source=auth user=ana src_ip=192.0.2.10 result=failed reason=bad_password
+2026-09-15T10:02:00Z host=linux-lab source=auth user=ana src_ip=192.0.2.10 result=success session=interactive
+2026-09-15T10:06:00Z host=linux-lab source=auth user=ana src_ip=192.0.2.10 result=command command="cat /etc/hostname"
+2026-09-15T10:17:00Z host=linux-lab source=auth user=backup src_ip=198.51.100.23 result=failed reason=unknown_user
+2026-09-15T10:17:03Z host=linux-lab source=auth user=backup src_ip=198.51.100.23 result=failed reason=unknown_user
+2026-09-15T10:17:06Z host=linux-lab source=auth user=backup src_ip=198.51.100.23 result=failed reason=unknown_user

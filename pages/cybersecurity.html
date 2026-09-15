@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="StanNet.Space · Ciberseguridad, redes, sistemas y defensa digital.">
-<title>Ciberseguridad | StanNet.Space</title>
+<meta name="description" content="StanNet Cyber Academy · laboratorios practicos de redes, SOC, pentesting web, cloud security y herramientas propias.">
+<title>StanNet Cyber Academy | Laboratorios practicos</title>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="../cyber-academy.css">
 </head>
@@ -22,28 +22,108 @@
 </nav>
 </header>
 <main>
-<section class="page-hero grid-bg">
-<p class="eyebrow">02 / CIBERSEGURIDAD</p>
-<h1>StanNet Cyber<br><em>Defense Academy.</em></h1>
-<p>Aprende a investigar, decidir y documentar: cuatro lecciones de base y 27 unidades de práctica hacia SOC junior. Contenidos propios, cuaderno exportable y simulaciones con datos ficticios. Una base formativa en expansión, no una certificación profesional.</p>
-<a href="#cyber-classroom">Empezar mi formación ↓</a>
+<section class="page-hero grid-bg cyber-academy-hero">
+<p class="eyebrow">02 / CYBER ACADEMY</p>
+<h1>Entrena como analista.<br><em>Construye como pentester.</em></h1>
+<p>Laboratorios practicos para avanzar desde redes y SOC hasta pentesting web, cloud security y desarrollo de herramientas propias. Cada bloque termina con evidencias, informe y entregable para portfolio remoto.</p>
+<div class="hero-actions">
+<a class="button primary" href="#mission-console">Abrir Mission Console <span>↓</span></a>
+<a class="button ghost" href="#labs">Descargar labs</a>
+<a class="button ghost" href="../sentinel/">Abrir Sentinel</a>
+</div>
 </section>
-<section class="section">
-<div class="content-grid">
-<article class="info-card"><p class="tag">FUNDAMENTOS</p><h3>Seguridad digital</h3><p>Buenas prácticas, gestión de identidades y protección de la información.</p></article>
-<article class="info-card"><p class="tag">INFRAESTRUCTURA</p><h3>Redes y sistemas</h3><p>Protocolos, arquitectura de red y administración de entornos Linux.</p></article>
-<article class="info-card"><p class="tag">HERRAMIENTA DEFENSIVA</p><h3>StanNet Sentinel</h3><p>Analiza archivos con YARA-X en tu navegador, revisa evidencias y prueba reglas propias. Tus archivos permanecen en tu dispositivo.</p><a href="../sentinel/">Abrir Sentinel →</a></article>
+<section class="section cyber-roadmap" id="rutas">
+<div class="section-heading">
+<div>
+<p class="eyebrow">RUTAS / BLOQUE 1</p>
+<h2>Una academia para crear experiencia demostrable.</h2>
+</div>
+<p>La plataforma empieza con practica guiada y crece por fases: login, ranking, laboratorios Docker y modulos premium sin perder orden.</p>
+</div>
+<div class="cyber-track-grid">
+<article class="cyber-track active"><span>01</span><h3>Network Analyst</h3><p>Wireshark, tcpdump, DNS, HTTP, puertos, ACL y lectura de trafico.</p></article>
+<article class="cyber-track active"><span>02</span><h3>SOC Analyst</h3><p>Triage, logs, severidad, timeline, evidencias e informe de incidente.</p></article>
+<article class="cyber-track"><span>03</span><h3>Web Pentesting</h3><p>OWASP Top 10, APIs, autenticacion, IDOR, XSS y reporte profesional.</p></article>
+<article class="cyber-track"><span>04</span><h3>Cloud Security</h3><p>IAM, secretos, buckets, logs cloud y hardening en entornos simulados.</p></article>
+<article class="cyber-track"><span>05</span><h3>Tool Builder</h3><p>Python y JavaScript para crear scanners, parsers y generadores de informes.</p></article>
+<article class="cyber-track"><span>06</span><h3>Remote Career Lab</h3><p>Write-ups, CV tecnico, entrevistas, ingles profesional y portfolio publico.</p></article>
+</div>
+</section>
+<section class="section mission-console" id="mission-console">
+<div class="console-header">
+<div>
+<p class="eyebrow">MISSION CONSOLE</p>
+<h2>Bloque 1: fundamentos operativos.</h2>
+</div>
+<div class="console-score"><strong id="cyberScore">0</strong><span>XP local</span></div>
+</div>
+<div class="console-layout">
+<aside class="mission-list" id="missionList" aria-label="Misiones de StanNet Cyber Academy"></aside>
+<article class="mission-detail">
+<p class="mission-status" id="missionStatus">Selecciona una mision</p>
+<h3 id="missionTitle"></h3>
+<p id="missionObjective"></p>
+<div class="mission-meta" id="missionMeta"></div>
+<div class="mission-steps" id="missionSteps"></div>
+<label for="missionEvidence">Evidencia del alumno</label>
+<textarea id="missionEvidence" placeholder="Documenta procedimiento, resultado, limitaciones y siguiente paso."></textarea>
+<div class="cyber-actions">
+<button id="saveEvidence" type="button">Guardar evidencia</button>
+<button id="completeMission" type="button">Completar mision</button>
+<button id="exportReport" type="button">Exportar informe</button>
+</div>
+<p class="cyber-status" id="missionFeedback" role="status"></p>
+</article>
+</div>
+</section>
+<section class="section lab-vault" id="labs">
+<div class="section-heading">
+<div>
+<p class="eyebrow">LAB VAULT</p>
+<h2>Descargas para practicar fuera de la web.</h2>
+</div>
+<p>Archivos de practica con datos ficticios. Usalos en tu maquina virtual, cuaderno y repositorio personal.</p>
+</div>
+<div class="lab-grid">
+<a class="lab-card" href="../assets/labs/stannet-auth-events.log" download><span>LOG</span><h3>Eventos de autenticacion</h3><p>Triage de fallos, acceso correcto y decision de escalado.</p></a>
+<a class="lab-card" href="../assets/labs/stannet-http-sample.log" download><span>WEB</span><h3>HTTP access sample</h3><p>Practica lectura de metodos, codigos, rutas y user agents.</p></a>
+<a class="lab-card" href="../assets/labs/stannet-report-template.md" download><span>MD</span><h3>Plantilla de informe</h3><p>Formato profesional para write-ups y entregas de portfolio.</p></a>
+</div>
+</section>
+<section class="section docker-lab" id="docker">
+<div class="docker-panel">
+<p class="eyebrow">DOCKER / FASE PREPARADA</p>
+<h2>Laboratorios reproducibles, seguros y locales.</h2>
+<p>Desde el principio queda definida la ruta Docker: servicios vulnerables controlados, SIEM local y ejercicios de hardening. El primer bloque publica la guia; los contenedores se activaran en la siguiente entrega para evitar laboratorios inseguros o incompletos.</p>
+<pre>mkdir stannet-cyber-labs
+cd stannet-cyber-labs
+docker compose up --build
+
+# Regla principal:
+# atacar solo tus contenedores, tus VMs o entornos con permiso escrito.</pre>
+</div>
+</section>
+<section class="section rank-board" id="ranking">
+<div class="section-heading">
+<div>
+<p class="eyebrow">RANKING / LOCAL</p>
+<h2>Progreso visible desde el primer dia.</h2>
+</div>
+<p>Este ranking inicial vive en el navegador. En fases posteriores pasara a login real, perfiles, insignias y modulos premium.</p>
+</div>
+<div class="rank-grid">
+<article><strong id="rankMissions">0</strong><span>Misiones completadas</span></article>
+<article><strong id="rankReports">0</strong><span>Informes exportables</span></article>
+<article><strong>Junior</strong><span>Rango actual</span></article>
 </div>
 </section>
 </main>
-<script src="../cyber-curriculum.js" defer></script>
-<script src="../cyber-academy.js" defer></script>
-<script src="../cyber-network-lab.js" defer></script>
 <footer>
 <a class="brand" href="../index.html">stan<b>net</b><i>.space</i></a>
 <p>© <span id="year"></span></p>
 <a href="#top">VOLVER ARRIBA ↑</a>
 </footer>
+<script src="../cyber-academy.js"></script>
 <script src="../script.js"></script>
 </body>
 </html>
