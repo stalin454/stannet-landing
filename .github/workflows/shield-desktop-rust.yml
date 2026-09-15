@@ -22,19 +22,26 @@ jobs:
         run: cargo test
       - name: Build release
         run: cargo build --release
-      - name: Smoke test clean file and YARA-X fixture
+      - name: Defensive end-to-end smoke tests
         shell: pwsh
         run: |
-          Set-Content -Path shield-clean.txt -Value 'StanNet Shield ordinary defensive smoke test'
-          $clean = (& .\target\release\stannet-shield.exe shield-clean.txt) | ConvertFrom-Json
-          if ($clean.status -ne 'no-rule-match') { throw 'Unexpected clean scanner status' }
-          if ($clean.sha256.Length -ne 64) { throw 'Invalid SHA-256 output' }
-
-          Set-Content -Path shield-yara.txt -Value 'STANNET_SHIELD_DEMO'
-          $fixture = (& .\target\release\stannet-shield.exe shield-yara.txt) | ConvertFrom-Json
-          if ($fixture.status -ne 'review') { throw 'YARA-X fixture did not trigger review status' }
-          if ($fixture.matches -notcontains 'Shield_Demo') { throw 'Expected Shield_Demo rule match missing' }
-          Write-Host ($fixture | ConvertTo-Json -Compress)
+          Set-Content shield-clean.txt 'StanNet Shield ordinary defensive smoke test'
+          $clean = (& .\target\release\stannet-shield.exe scan shield-clean.txt) | ConvertFrom-Json
+          if ($clean.status -ne 'no-rule-match' -or $clean.sha256.Length -ne 64) { throw 'Clean scan failed' }
+          Set-Content shield-yara.txt 'STANNET_SHIELD_DEMO'
+          $fixture = (& .\target\release\stannet-shield.exe scan shield-yara.txt) | ConvertFrom-Json
+          if ($fixture.status -ne 'review' -or $fixture.matches -notcontains 'Shield_Demo') { throw 'YARA-X fixture failed' }
+          New-Item -ItemType Directory -Force q | Out-Null
+          Set-Content quarantine-me.txt 'benign quarantine roundtrip fixture'
+          $record = (& .\target\release\stannet-shield.exe quarantine quarantine-me.txt q 'test only') | ConvertFrom-Json
+          if (Test-Path quarantine-me.txt) { throw 'Quarantine did not isolate source' }
+          & .\target\release\stannet-shield.exe restore (Join-Path 'q' $record.id 'record.json')
+          if (-not (Test-Path quarantine-me.txt)) { throw 'Restore failed' }
+          New-Item -ItemType Directory -Force cleaner-allowed,cleaner-outside | Out-Null
+          Set-Content cleaner-outside\keep.txt 'must survive'
+          & .\target\release\stannet-shield.exe cleaner-delete cleaner-allowed cleaner-outside\keep.txt
+          if ($LASTEXITCODE -eq 0) { throw 'Cleaner failed to reject outside path' }
+          if (-not (Test-Path cleaner-outside\keep.txt)) { throw 'Cleaner removed outside file' }
       - uses: actions/upload-artifact@v4
         with:
           name: stannet-shield-core-windows-x64
