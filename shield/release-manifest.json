@@ -1,0 +1,16 @@
+{
+  "product": "StanNet Shield",
+  "channel": "preview",
+  "version": "0.3.0",
+  "windows": {
+    "status": "not-released",
+    "download": null,
+    "sha256": null,
+    "signed": false
+  },
+  "rules": {
+    "engine": "YARA-X",
+    "source": "StanNet Sentinel"
+  },
+  "notice": "No Windows installer is published until the desktop security contract and release tests pass."
+}
