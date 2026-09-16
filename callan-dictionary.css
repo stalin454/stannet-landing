@@ -1,0 +1,46 @@
+.dictionary-panel{
+  margin-top:18px;
+  padding:22px;
+  border:1px solid var(--lesson-line);
+  background:linear-gradient(180deg,rgba(89,232,255,.08),rgba(8,9,25,.96));
+}
+.dictionary-panel h3{margin:6px 0 10px;font-size:22px;letter-spacing:-.04em}
+.dictionary-copy{margin:0 0 18px;color:var(--muted);font-size:12px;line-height:1.6}
+.dictionary-search{display:grid;grid-template-columns:1fr auto;gap:9px}
+.dictionary-search input{min-width:0}
+.dictionary-search button,.dictionary-save,.dictionary-audio{
+  border:0;
+  background:var(--lesson-accent);
+  color:#071019;
+  font:600 10px var(--font-main);
+  cursor:pointer;
+  min-height:44px;
+  padding:0 14px;
+}
+.dictionary-result{margin-top:16px;display:grid;gap:12px}
+.dictionary-word{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.dictionary-word strong{font-size:24px;letter-spacing:-.04em;color:var(--ink)}
+.dictionary-word span{display:block;margin-top:4px;color:var(--lesson-accent);font-size:12px}
+.dictionary-audio{min-width:44px;padding:0}
+.dictionary-audio[disabled],.dictionary-save[disabled]{opacity:.5;cursor:not-allowed}
+.dictionary-meta{display:flex;flex-wrap:wrap;gap:7px}
+.dictionary-meta span{padding:7px 9px;border:1px solid var(--lesson-line);color:var(--muted);font-size:10px}
+.dictionary-block{padding:12px;background:#080919;border:1px solid rgba(194,205,255,.12)}
+.dictionary-block small{display:block;margin-bottom:6px;color:var(--lime);font:10px var(--font-main);letter-spacing:.08em}
+.dictionary-block p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+.dictionary-save{width:100%;background:var(--lime);margin-top:2px}
+.dictionary-status{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.dictionary-drawer-toggle{display:none;width:100%;margin:0 0 12px;border:1px solid var(--lesson-line);background:#080919;color:var(--lesson-accent);font:600 11px var(--font-main);min-height:46px}
+.word.dictionary-open{cursor:pointer}
+.word.dictionary-open:hover{border-color:var(--lesson-accent)}
+@media(max-width:850px){
+  .dictionary-panel{grid-column:1/-1}
+}
+@media(max-width:520px){
+  .dictionary-drawer-toggle{display:block}
+  .dictionary-panel{display:none}
+  .dictionary-panel.open{display:block}
+  .dictionary-search{grid-template-columns:1fr}
+  .dictionary-search button{width:100%}
+  .dictionary-word{align-items:center}
+}
