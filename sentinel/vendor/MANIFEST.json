@@ -1,0 +1,15 @@
+{
+  "name": "@virustotal/yara-x",
+  "version": "1.20.0",
+  "license": "BSD-3-Clause",
+  "npm_integrity": "sha512-JaDD6twvaTAqsUhW5wNq+iua7+H4epNUOUO3sqk6dvmdCMjGG9n8hfVDURbq3/HNKsYfQ2b1k0YbLH8qTEu4OQ==",
+  "upstream": "https://github.com/VirusTotal/yara-x",
+  "wasm_sha256": "fbee0d2495826bac5c62f5e77a0199f1f3e08339e153a76dcac338fc6d7067b5",
+  "gzip_sha256": "6f21e8cb288e5693ef2cfd608b36716598ea0242047c76b1ad118ccb9c5d6492",
+  "delivery": {
+    "format": "gzip split into 41 binary parts",
+    "part_bytes": 49152,
+    "parts": 41,
+    "compressed_bytes": 2008818
+  }
+}
