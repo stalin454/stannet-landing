@@ -1,0 +1,22 @@
+(()=>{'use strict';
+const specs={
+JS01:[['Usa const',c=>/\bconst\b/.test(c),'Declara al menos un valor que no necesite reasignación con const.'],['Calcula un total',c=>/\b(precio|price)\b/i.test(c)&&/\b(cantidad|quantity)\b/i.test(c)&&/\*/.test(c),'Crea precio y cantidad y multiplícalos.']],
+JS06:[['Existe una decisión',c=>/\bif\s*\(/.test(c),'Usa if para evaluar la nota.'],['Cubre alternativas',c=>/\belse\b/.test(c),'Añade else/else if para cubrir los demás rangos.']],
+JS08:[['Usa for',c=>/\bfor\s*\(/.test(c),'Necesitas un bucle for.'],['Detecta pares',c=>/%\s*2/.test(c),'El resto de dividir entre 2 permite detectar pares.'],['Límite 20',c=>/(<=\s*20|<\s*21)/.test(c),'Haz que el recorrido llegue hasta 20.']],
+JS09:[['Usa while',c=>/\bwhile\s*\(/.test(c),'Resuelve el reto con while.'],['Acumula',c=>/(\+=|=\s*\w+\s*\+)/.test(c),'Necesitas una variable acumuladora.'],['Alcanza 100',c=>/100/.test(c),'El ejercicio pide sumar hasta 100.']],
+JS10:[['Usa for...of',c=>/for\s*\([^)]*\bof\b/.test(c),'Recorre los valores con for...of.'],['Acumula total',c=>/(total|suma)/i.test(c)&&/\+=/.test(c),'Acumula cada precio en un total.']],
+JS11:[['Busca divisibilidad',c=>/%\s*(7|5)/.test(c),'Usa módulo para comprobar divisibilidad.'],['Ambas condiciones',c=>/%\s*7/.test(c)&&/%\s*5/.test(c),'Debe ser divisible por 7 y por 5.'],['Termina al encontrar',c=>/\bbreak\b/.test(c),'Detén el bucle al encontrar el primero.']],
+JS12:[['Declara calcularIVA',c=>/function\s+calcularIVA\s*\(/i.test(c)||/(const|let)\s+calcularIVA\s*=/.test(c),'Crea una función llamada calcularIVA.'],['Devuelve resultado',c=>/\breturn\b/.test(c),'La función debe devolver el total.'],['Usa dos entradas',c=>/calcularIVA\s*\([^,]+,[^)]+\)/.test(c),'Trabaja con precio y tasa.']],
+JS16:[['Usa un array',c=>/\[[^\]]*\]/.test(c),'Crea o utiliza un array.'],['Añade o elimina',c=>/\.(push|pop|shift|unshift|splice)\s*\(/.test(c),'Practica un método de modificación.'],['Copia sin alias',c=>/(\.slice\s*\(|\.concat\s*\(|\[\s*\.\.\.)/.test(c),'Crea una copia independiente con slice/spread/concat.']],
+JS17:[['Filtra',c=>/\.filter\s*\(/.test(c),'Selecciona primero los precios mayores de 10 con filter.'],['Reduce',c=>/\.reduce\s*\(/.test(c),'Acumula el resultado con reduce.']],
+JS18:[['Objeto',c=>/\{[^}]*:[^}]*\}/s.test(c),'Modela el producto con un objeto.'],['Destructuring',c=>/(const|let)\s*\{[^}]+\}\s*=/.test(c),'Extrae nombre y precio mediante destructuring.']],
+JS19:[['Usa Set',c=>/new\s+Set\s*\(/.test(c),'Crea un Set a partir del array.'],['Vuelve a array',c=>/(\[\s*\.\.\.|Array\.from)/.test(c),'Convierte el Set a array.']],
+JS25:[['Lanza Error',c=>/throw\s+new\s+Error/.test(c),'Lanza un Error para una edad inválida.'],['Valida rango',c=>/[<>]=?/.test(c),'Comprueba límites válidos de edad.']],
+JS27:[['Combina promesas',c=>/Promise\.(all|allSettled)\s*\(/.test(c),'Usa un combinador de Promise para varias tareas.'],['Maneja rechazo',c=>/(\.catch\s*\(|try\s*\{)/.test(c),'Incluye manejo explícito del fallo.']],
+JS28:[['Usa async',c=>/\basync\b/.test(c),'Declara una función async.'],['Espera',c=>/\bawait\b/.test(c),'Usa await.'],['Concurrencia',c=>/Promise\.all\s*\(/.test(c),'Las dos esperas independientes deben iniciarse juntas con Promise.all.']],
+JS29:[['Usa fetch',c=>/\bfetch\s*\(/.test(c),'Realiza la petición con fetch.'],['Comprueba HTTP',c=>/\.ok\b|status\b/.test(c),'fetch no rechaza automáticamente por 404/500: comprueba ok/status.'],['Maneja fallo',c=>/(catch\s*\(|try\s*\{)/.test(c),'Muestra un estado de error controlado.']]
+};
+function generic(lesson,code){const checks=[['Has escrito una solución',c=>c.trim().length>20,'Escribe tu solución antes de comprobar.'],['No es solo el starter',c=>c.trim()!==String(lesson.starter||'').trim(),'Modifica el código inicial para resolver el reto.']];return checks}
+function runChecks(lesson,code){const checks=specs[lesson.id]||generic(lesson,code);return checks.map(([name,test,hint])=>{let pass=false;try{pass=!!test(code)}catch(e){}return{name,pass,hint}})}
+window.StanNetJSGrader={grade(lesson,code){if(!lesson||lesson.track!=='JavaScript')return null;const results=runChecks(lesson,code),passed=results.filter(x=>x.pass).length;return{passed,total:results.length,ok:passed===results.length,results}}};
+})();
