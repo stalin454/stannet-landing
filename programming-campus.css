@@ -1,0 +1,31 @@
+/* StanNet Campus — study-first light interface */
+:root{--campus-bg:#f4f7fb;--campus-surface:#fff;--campus-text:#172033;--campus-muted:#64748b;--campus-line:#dbe4ee;--campus-blue:#075ea8;--campus-cyan:#0891b2;--campus-violet:#6d5ce7;--campus-green:#15803d;--campus-orange:#c65d13;--campus-code:#111827}
+body.programming-campus{background:var(--campus-bg)!important;color:var(--campus-text)!important;font-family:var(--font-body,'Inter',system-ui,sans-serif)!important}
+.programming-campus .academy-shell,.programming-campus .lab-shell{background:var(--campus-bg)!important;color:var(--campus-text)!important}
+.programming-campus .academy-sidebar,.programming-campus .lab-sidebar{background:#fff!important;border-right:1px solid var(--campus-line)!important;box-shadow:4px 0 18px rgba(15,23,42,.04)}
+.programming-campus .academy-sidebar a,.programming-campus .lab-sidebar button,.programming-campus .courseware-sidebar button{color:#334155!important}
+.programming-campus .courseware-sidebar button.active,.programming-campus .lab-sidebar button.active{background:#e8f2fb!important;color:#064f8b!important;border-left:4px solid var(--campus-blue)!important}
+.programming-campus main,.programming-campus .academy-main,.programming-campus .lab-main{background:var(--campus-bg)!important}
+.programming-campus .lesson-card,.programming-campus .academy-card,.programming-campus .courseware-card,.programming-campus .lab-card{background:var(--campus-surface)!important;color:var(--campus-text)!important;border:1px solid var(--campus-line)!important;box-shadow:0 8px 24px rgba(15,23,42,.06)!important;border-radius:14px!important}
+.programming-campus .lesson-body,.programming-campus #cw-material{max-width:900px;margin-inline:auto;line-height:1.72;font-size:1rem}
+.programming-campus #cw-material p,.programming-campus #cw-material li{color:#273449!important}
+.programming-campus #cw-material h2,.programming-campus #cw-material h3{color:#0b477a!important;font-family:var(--font-body,'Inter',sans-serif)!important;letter-spacing:0}
+.programming-campus #cw-material h3{margin-top:1.75rem;padding-top:.25rem;border-top:1px solid #edf2f7}
+.programming-campus pre,.programming-campus code{font-family:'Cascadia Code',Consolas,monospace}
+.programming-campus pre{background:var(--campus-code)!important;color:#e5eef8!important;border:1px solid #263449!important;border-radius:10px!important;padding:1rem!important;overflow:auto}
+.programming-campus :not(pre)>code{background:#e9f1f8!important;color:#0b477a!important;padding:.12rem .32rem;border-radius:4px}
+.programming-campus input,.programming-campus textarea,.programming-campus select{background:#fff!important;color:#172033!important;border:1px solid #b8c6d6!important}
+.programming-campus button,.programming-campus .btn{border-radius:8px}
+.programming-campus .btn-primary,.programming-campus button.primary{background:var(--campus-blue)!important;color:#fff!important}
+.programming-campus .eyebrow,.programming-campus .badge{color:var(--campus-blue)!important}
+.campus-studybar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--campus-line);backdrop-filter:blur(8px)}
+.campus-studybar strong{font-family:var(--font-display,'Orbitron',sans-serif);font-size:.85rem;color:#075ea8}
+.campus-studybar .campus-path{font-size:.88rem;color:var(--campus-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.campus-studybar button{margin-left:auto;background:#fff;color:#334155;border:1px solid #cbd5e1;padding:7px 10px}
+.programming-campus .cw-section-title{background:linear-gradient(90deg,#075ea8,#087f9e);color:white;padding:.8rem 1rem;border-radius:10px}
+body.campus-dark{--campus-bg:#0b1120;--campus-surface:#111827;--campus-text:#e5edf7;--campus-muted:#94a3b8;--campus-line:#273449}
+body.campus-dark.programming-campus,body.campus-dark.programming-campus main,body.campus-dark.programming-campus .academy-main,body.campus-dark.programming-campus .lab-main{background:#0b1120!important;color:#e5edf7!important}
+body.campus-dark .academy-sidebar,body.campus-dark .lab-sidebar,body.campus-dark .lesson-card,body.campus-dark .academy-card,body.campus-dark .courseware-card,body.campus-dark .lab-card,body.campus-dark .campus-studybar{background:#111827!important;color:#e5edf7!important;border-color:#273449!important}
+body.campus-dark.programming-campus #cw-material p,body.campus-dark.programming-campus #cw-material li{color:#d7e0ec!important}
+body.campus-dark.programming-campus #cw-material h2,body.campus-dark.programming-campus #cw-material h3{color:#7dd3fc!important}
+@media(max-width:800px){.programming-campus .lesson-body,.programming-campus #cw-material{max-width:100%}.campus-studybar{padding:8px 12px}.campus-studybar .campus-path{max-width:55vw}}
