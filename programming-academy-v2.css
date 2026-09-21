@@ -1,0 +1,10 @@
+
+/* Programming Academy v2 additions */
+.pa-body{font-family:var(--font-main);padding:2rem}
+.pa-module-list{margin:1rem 0 1.25rem;padding-left:1.25rem;color:var(--muted);font-size:.82rem;line-height:1.8}
+.pa-module-list li::marker{color:var(--lime)}
+.pa-card code{color:var(--cyan);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.pa-badge-live{color:var(--lime);border:1px solid rgba(200,255,77,.35);background:rgba(200,255,77,.08)}
+.pa-badge-planned{color:var(--violet);border:1px solid rgba(157,123,255,.35);background:rgba(157,123,255,.08)}
+.pa-card-footer{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin-top:auto}
+.pa-meta-lessons{font-size:.72rem;color:var(--muted)}
