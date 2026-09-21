@@ -1,0 +1,55 @@
+(()=>{const C={
+'HTTP/HTTPS':{sections:[
+['De una URL a una respuesta','Cuando introduces una URL, el navegador necesita resolver el host, establecer transporte y enviar una petición HTTP. HTTP define la semántica del mensaje: método, destino, cabeceras y cuerpo opcional. El servidor responde con un código de estado, cabeceras y representación. HTTP es stateless por diseño: cada petición debe contener el contexto necesario, aunque cookies o tokens permiten construir sesiones por encima.'],
+['Métodos y semántica','GET solicita una representación y debe ser seguro; HEAD pide metadatos equivalentes sin cuerpo; POST suele crear o ejecutar procesamiento; PUT reemplaza de forma idempotente una representación; PATCH modifica parcialmente; DELETE solicita eliminación y es idempotente en su efecto esperado. La semántica importa para cachés, reintentos, proxies y clientes.'],
+['Estados, cabeceras y caché','2xx indica éxito, 3xx redirección, 4xx un problema relacionado con la petición y 5xx fallo del servidor. Content-Type describe el formato; Accept expresa preferencias; Authorization transporta credenciales según esquema; Cache-Control gobierna almacenamiento/reutilización. No memorices todos los códigos: aprende familias y los códigos que realmente usa tu API.'],
+['Qué añade HTTPS','HTTPS es HTTP protegido por TLS. TLS autentica normalmente al servidor mediante certificados y negocia claves para cifrar e integrar los datos en tránsito. Evita que un intermediario lea o modifique fácilmente el tráfico, pero no corrige XSS, SQL injection, autorización incorrecta ni un servidor comprometido.']],
+lab:'En DevTools > Network abre una página, identifica método, status, request headers, response headers, Content-Type y Cache-Control. Repite con una ruta inexistente y explica qué cambió.',
+challenge:'Diseña el intercambio HTTP de un formulario de alta de usuario: endpoint, método, cuerpo, respuestas de éxito/validación/conflicto y qué datos nunca registrarías.'},
+'DNS':{sections:[
+['Jerarquía y resolución','DNS es una base de datos distribuida y jerárquica. Un nombre se interpreta desde la raíz hacia TLD y zonas delegadas. Normalmente tu equipo pregunta a un resolver recursivo, que usa caché o consulta servidores autoritativos hasta obtener una respuesta.'],
+['Registros fundamentales','A relaciona nombre con IPv4; AAAA con IPv6; CNAME crea un alias hacia otro nombre; MX indica servidores de correo; TXT transporta texto usado entre otras cosas para verificaciones y políticas; NS identifica servidores autoritativos de una zona. Cada registro tiene TTL, que condiciona cuánto puede reutilizarse una respuesta en caché.'],
+['DNS no es hosting','Comprar un dominio, resolver DNS y servir una aplicación son tareas distintas. DNS indica dónde buscar; el servidor/plataforma debe aceptar el host, servir contenido y disponer de TLS. Cambiar un registro puede tardar en observarse debido a cachés, no por una misteriosa “propagación” uniforme.']],
+lab:'Usa nslookup o Resolve-DnsName sobre tu dominio. Identifica A/AAAA/CNAME si existen, servidor que respondió y TTL cuando esté disponible. Dibuja dominio → DNS → plataforma → aplicación.',
+challenge:'Explica cómo migrarías un dominio a un nuevo hosting reduciendo el riesgo de interrupción y qué papel juega el TTL.'},
+'URLs':{sections:[
+['Anatomía','Una URL puede contener esquema, autoridad (host y puerto), path, query y fragment. En https://example.com:443/products/42?tab=reviews#top, HTTPS define esquema, example.com host, 443 puerto, /products/42 path, tab=reviews query y top fragment. El fragmento normalmente no se envía al servidor.'],
+['Resolución y codificación','URLs relativas se resuelven respecto a una base. Caracteres reservados tienen significado sintáctico y otros deben codificarse mediante percent-encoding. URLSearchParams evita concatenaciones manuales defectuosas al trabajar con query strings.'],
+['Diseño','Una URL estable identifica recursos y estados navegables. No coloques secretos en query strings: pueden terminar en historial, logs o analytics. Diferencia parámetros de ruta que identifican recursos de query que filtra, ordena o modifica una vista.']],
+lab:'Construye cinco URLs con new URL() y URLSearchParams. Lee pathname, searchParams, origin y hash; cambia un parámetro sin concatenar strings.',
+challenge:'Diseña URLs para catálogo, detalle, búsqueda, paginación y filtros de una tienda y justifica qué información va en path y cuál en query.'},
+'browser rendering':{sections:[
+['Parsing','El navegador recibe bytes, interpreta HTML y construye DOM. CSS se analiza y participa en el cálculo de estilos. El motor combina estructura y estilos para determinar geometría (layout) y después pintar/componer píxeles.'],
+['JavaScript y el pipeline','JavaScript puede leer o modificar DOM y estilos. Scripts clásicos encontrados durante parsing pueden bloquearlo según cómo se carguen; defer permite descargar en paralelo y ejecutar tras el parsing; modules son diferidos por defecto. Leer geometría después de múltiples escrituras puede forzar trabajo síncrono de layout.'],
+['Rendimiento percibido','No todo coste es red. HTML enorme, CSS complejo, JavaScript pesado, imágenes grandes y trabajo en main thread pueden retrasar interacción. Optimizar exige medir con DevTools y Core Web Vitals pertinentes, no aplicar trucos al azar.']],
+lab:'Abre Performance/Network. Recarga una página y localiza documento, CSS, JS, imágenes y eventos de renderizado. Cambia un script entre carga normal y defer en un ejemplo local y observa el orden.',
+challenge:'Diagnostica una página que muestra contenido tarde pese a que el HTML llega rápido. Propón hipótesis medibles antes de optimizar.'},
+'HTML semantics':{sections:[
+['Significado antes que apariencia','HTML define estructura y significado. Un button es una acción; a es navegación; nav agrupa navegación; main identifica contenido principal; article representa contenido autocontenido; heading establece jerarquía. CSS decide apariencia.'],
+['Semántica y accesibilidad','Los elementos nativos aportan roles, estados y comportamiento de teclado que tecnologías de asistencia pueden interpretar. Un div con onclick no se convierte mágicamente en botón: habría que reconstruir foco, teclado y semántica que button ya proporciona.'],
+['Estructura mantenible','Usa una jerarquía de headings coherente, landmarks con propósito y listas cuando realmente haya colecciones. Valida HTML. Evita escoger etiquetas por estilo predeterminado: los estilos pueden cambiar, la semántica describe el contrato del documento.']],
+lab:'Reescribe una interfaz hecha solo con div/span usando header, nav, main, section/article, headings, button, ul/li y footer. Navega únicamente con teclado.',
+challenge:'Audita la portada de una aplicación y justifica cada landmark y control interactivo por su significado, no por su aspecto.'},
+'forms':{sections:[
+['Controles y nombres','form agrupa controles que pueden enviarse. label debe asociarse al control; name define la clave enviada; type aporta semántica y comportamiento; fieldset/legend agrupan opciones relacionadas. Placeholder no sustituye una etiqueta.'],
+['Validación en dos fronteras','required, min/max, pattern y tipos específicos mejoran feedback del navegador. Pero el cliente es controlado por el usuario: el servidor debe validar nuevamente estructura, límites y reglas de negocio antes de confiar en los datos.'],
+['Envío y experiencia','GET es apropiado para búsquedas navegables sin efectos; POST para operaciones que cambian estado o envían datos que no deben formar parte de la URL. Los errores deben asociarse al campo, ser comprensibles y no borrar innecesariamente información válida.']],
+lab:'Crea registro con nombre, email, contraseña, fecha y aceptación. Añade labels, autocomplete apropiado y validación nativa. Simula errores del servidor y muéstralos junto al campo.',
+challenge:'Diseña un formulario accesible de checkout con errores múltiples, resumen de errores y foco correcto tras un envío fallido.'},
+'accessibility':{sections:[
+['Principios','Una interfaz accesible debe poder percibirse, operarse y comprenderse en diferentes condiciones. Empieza con HTML semántico, orden lógico, teclado, foco visible, texto alternativo y formularios etiquetados.'],
+['Teclado y foco','Todo control interactivo debe ser alcanzable y operable sin ratón. El orden de foco debería seguir el documento; evita tabindex positivos. Cuando una interacción mueve contexto, como abrir un diálogo, gestiona foco y retorno de manera predecible.'],
+['ARIA con criterio','ARIA comunica roles, estados y relaciones cuando HTML nativo no basta. Una mala ARIA puede empeorar la experiencia. Prefiere el elemento nativo y usa aria-label/labelledby/describedby o patrones complejos solo cuando el significado no puede expresarse adecuadamente de otro modo.'],
+['Prueba','Automatización detecta parte de los problemas; también prueba teclado, zoom, lector de pantalla cuando sea posible, contraste y estados de error. Accesibilidad es un requisito de diseño y QA, no un parche final.']],
+lab:'Audita una página solo con teclado: Tab/Shift+Tab, Enter/Espacio y foco visible. Comprueba headings, labels, alt y zoom 200%. Registra cada fallo y corrígelo.',
+challenge:'Construye un modal accesible con nombre, cierre por botón/Escape, gestión de foco y retorno al disparador; explica las decisiones.'},
+'SEO fundamentals':{sections:[
+['Descubrimiento e interpretación','SEO técnico comienza haciendo que contenido importante sea accesible mediante URLs y enlaces rastreables. HTML significativo, title único y contenido útil ayudan a interpretar cada página. Robots y sitemaps orientan rastreo, pero no garantizan indexación ni posición.'],
+['Metadatos y duplicados','title y meta description describen la página; canonical puede señalar una URL preferida entre duplicados equivalentes. Datos estructurados deben representar contenido real y seguir el vocabulario aplicable; no son un atajo para ranking.'],
+['Rendimiento y usuarios','Experiencia, rendimiento y accesibilidad mejoran el producto y pueden relacionarse con señales de búsqueda, pero SEO no debe sacrificar contenido para perseguir métricas. Mide con herramientas actuales y prioriza problemas reales.']],
+lab:'Audita title, description, headings, enlaces, canonical, robots y sitemap de una página. Comprueba que el contenido principal siga siendo comprensible sin depender de metadatos.',
+challenge:'Diseña la estrategia técnica para un catálogo con filtros que puede generar miles de combinaciones de URL; explica rastreo, canonicalización y qué páginas merecen indexarse.'}
+};
+const old=window.stannetTextbook;
+window.stannetTextbook={...old,expand(topic,phase){const b=old.expand(topic,phase),x=phase==='FS01'&&C[topic];return x?{...b,chapterSections:x.sections,guidedLab:x.lab,challenge:x.challenge}:b;}};
+})();
