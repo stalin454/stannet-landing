@@ -1,7 +1,7 @@
 window.stannetFullStack=[
 {phase:'FS01',title:'Web Platform Foundations',topics:['HTTP/HTTPS','DNS','URLs','browser rendering','HTML semantics','forms','accessibility','SEO fundamentals']},
 {phase:'FS02',title:'Professional CSS',topics:['cascade','specificity','box model','Flexbox','Grid','responsive design','custom properties','animations','architecture','accessibility']},
-{phase:'FS03',title:'JavaScript Engineering',topics:['types','scope','functions','arrays','objects','DOM','events','modules','errors','promises','async/await','fetch','OOP','functional patterns','testing']},
+{phase:'FS03',title:'JavaScript Engineering',topics:['JavaScript runtime','variables let const','types','operators','strings and template literals','coercion and equality','conditionals if else','switch','ternary operator','loops fundamentals','for loop','while loop','do while loop','for of','for in','break and continue','nested loops','functions','callbacks','scope','closures','recursion','arrays','array methods map filter find reduce','objects','destructuring and spread','DOM','events','modules','errors','promises','async await','fetch','event loop','OOP','functional patterns','testing']},
 {phase:'FS04',title:'TypeScript',topics:['type system','interfaces','unions','generics','narrowing','utility types','modules','tsconfig','typed APIs']},
 {phase:'FS05',title:'React',topics:['JSX','components','props','state','events','forms','hooks','context','routing','data fetching','performance','testing','architecture']},
 {phase:'FS06',title:'Next.js',topics:['App Router','layouts','server/client components','route handlers','data fetching','caching','metadata','auth patterns','deployment']},
