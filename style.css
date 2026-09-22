@@ -203,3 +203,19 @@ input,select,textarea{background:#0d131a;border-color:var(--line);font-family:va
 .pa-card:hover,.pa-lang-card:hover,.pa-build-card:hover{border-color:rgba(244,247,251,.28);transform:translateY(-2px)}
 .pa-badge{background:rgba(105,183,214,.09);color:var(--cyan);border-radius:5px}
 .pa-btn-primary{background:var(--ink);color:var(--bg)}.pa-btn-primary:hover{background:#dfe6ed}.pa-btn-secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+
+/* Portfolio engineering layer */
+.case-studies{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.case-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.case-study{padding:30px;background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:520px}
+.case-meta{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font:600 10px var(--font-display);letter-spacing:.08em}
+.case-study h3{font-size:clamp(25px,2.2vw,36px);letter-spacing:-.045em;margin:42px 0 14px}
+.case-study>p{color:var(--muted);line-height:1.7;min-height:72px}
+.case-study dl{margin:20px 0 28px;display:grid;gap:16px}.case-study dl div{border-top:1px solid var(--line);padding-top:13px}
+.case-study dt{font:700 10px var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+.case-study dd{margin:0;color:#b4bdc8;font-size:13px;line-height:1.6}.case-actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap}
+.profile-proof{border-bottom:1px solid var(--line)}
+.professional-academy{padding:0}.professional-academy .site-header{margin-bottom:0}.academy-hero{padding:72px clamp(22px,8vw,110px);max-width:1400px;margin:0 auto}
+.academy-hero .pa-main-title{font-size:clamp(42px,6vw,82px);line-height:1;max-width:900px}.academy-hero .pa-main-title em{font-style:normal;color:var(--cyan)}
+.academy-hero .pa-card-desc{max-width:720px;font-size:16px}.academy-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+@media(max-width:950px){.case-grid{grid-template-columns:1fr}.case-study{min-height:auto}.case-study>p{min-height:0}}
