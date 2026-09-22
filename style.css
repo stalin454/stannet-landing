@@ -140,3 +140,23 @@
 .pa-card-desc,.pa-theory,.pa-output,.pa-code-editor,.pa-card li,.pa-card p{font-family:var(--font-body)}
 input,select,textarea{font-family:var(--font-body)}
 code,pre,.pa-code-editor{font-family:'Cascadia Code','SFMono-Regular',Consolas,'Liberation Mono',monospace}
+
+/* StanNet Professional UI — restrained portfolio layer */
+:root{--surface:#0d1020;--surface-2:#12162a;--accent:var(--cyan)}
+.site-header{position:sticky;top:0}
+.site-nav{align-items:center}
+.site-nav .nav-cta{color:#071019;background:var(--cyan);padding:10px 14px;border:1px solid var(--cyan)}
+.site-nav .nav-cta:hover{color:#071019;box-shadow:0 0 20px rgba(89,232,255,.22)}
+.hero{min-height:720px}
+.hero-copy{font-size:17px;max-width:620px}
+.project-grid{gap:16px}
+.project-card{border-radius:8px;background:linear-gradient(180deg,rgba(16,17,38,.92),rgba(10,12,27,.92));min-height:350px}
+.project-card:hover{transform:translateY(-4px)}
+.project-card:after{opacity:.12}
+.section-heading h2 em{font-style:normal;color:var(--violet)}
+.section-heading>p{width:min(420px,100%);font-size:15px}
+.pa-body{font-family:var(--font-body)}
+.pa-main-title,.pa-section-title,.pa-card-title,.pa-badge,.pa-btn,.pa-back-link{font-family:var(--font-display)}
+.pa-card h3{letter-spacing:-.025em}
+.pa-card p,.pa-card li,.pa-card-desc{font-family:var(--font-body);line-height:1.7}
+@media(max-width:1100px){.site-nav{gap:16px}.site-nav a{font-size:10px}}
