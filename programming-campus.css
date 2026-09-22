@@ -29,26 +29,3 @@ body.campus-dark .academy-sidebar,body.campus-dark .lab-sidebar,body.campus-dark
 body.campus-dark.programming-campus #cw-material p,body.campus-dark.programming-campus #cw-material li{color:#d7e0ec!important}
 body.campus-dark.programming-campus #cw-material h2,body.campus-dark.programming-campus #cw-material h3{color:#7dd3fc!important}
 @media(max-width:800px){.programming-campus .lesson-body,.programming-campus #cw-material{max-width:100%}.campus-studybar{padding:8px 12px}.campus-studybar .campus-path{max-width:55vw}}
-
-/* Campus v2: academic progress + semantic learning blocks */
-.programming-campus .courseware-sidebar{background:#fff!important;border-right:1px solid var(--campus-line)!important}
-.programming-campus .courseware-sidebar button{position:relative;padding-left:2.15rem!important;border-radius:8px!important;margin:2px 6px!important;width:calc(100% - 12px)!important}
-.programming-campus .courseware-sidebar button::before{content:'○';position:absolute;left:.72rem;color:#94a3b8;font-size:1rem}
-.programming-campus .courseware-sidebar button.active::before{content:'●';color:var(--campus-blue)}
-.programming-campus .courseware-sidebar button.campus-complete::before{content:'✓';color:var(--campus-green);font-weight:800}
-.campus-progress-card{margin:12px;padding:12px;background:#f8fbfe;border:1px solid var(--campus-line);border-radius:12px}
-.campus-progress-row{display:flex;justify-content:space-between;gap:12px;font-size:.82rem;color:var(--campus-muted);margin-bottom:7px}
-.campus-progress-track{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden}
-.campus-progress-fill{height:100%;background:linear-gradient(90deg,var(--campus-blue),var(--campus-cyan));border-radius:999px;transition:width .25s ease}
-.programming-campus #cw-material h3{position:relative;padding:12px 14px 12px 44px!important;border:1px solid var(--campus-line)!important;border-radius:10px!important;background:#f8fafc!important;margin-top:1.6rem!important}
-.programming-campus #cw-material h3::before{position:absolute;left:14px;top:11px;font-size:1.05rem}
-.programming-campus #cw-material h3:nth-of-type(4n+1)::before{content:'📖'}
-.programming-campus #cw-material h3:nth-of-type(4n+2)::before{content:'💡'}
-.programming-campus #cw-material h3:nth-of-type(4n+3)::before{content:'🧪'}
-.programming-campus #cw-material h3:nth-of-type(4n)::before{content:'🧠'}
-.programming-campus #cw-material pre{border-left:4px solid var(--campus-cyan)!important}
-.programming-campus #cw-material details{background:#fff;border:1px solid var(--campus-line);border-radius:10px;padding:.8rem 1rem;margin:1rem 0}
-.programming-campus #cw-material details summary{font-weight:700;color:#075ea8;cursor:pointer}
-body.campus-dark .campus-progress-card,body.campus-dark.programming-campus #cw-material h3,body.campus-dark.programming-campus #cw-material details{background:#162033!important;border-color:#334155!important}
-body.campus-dark .campus-progress-track{background:#334155}
-@media(max-width:800px){.programming-campus .courseware-sidebar button{padding-left:2rem!important}.campus-progress-card{margin:8px}}
