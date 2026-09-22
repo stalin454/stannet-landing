@@ -30,6 +30,15 @@
 <p class="sync-note">Pulsa una frase para escucharla de nuevo. Ajuste positivo adelanta la letra; negativo la retrasa.</p>
 <nav class="sync-tools" aria-label="Herramientas de la canción"><button type="button" data-jump="karaokeLines">▣ Letra completa</button><button type="button" data-jump="labVocab">文 Traducción</button><button type="button" data-jump="labVocab">▤ Vocabulario</button><button type="button" data-jump="labOutput">☷ Ejercicios</button></nav>
 </article>
+<aside id="musicDictionary" class="music-dictionary" hidden aria-live="polite" aria-label="Diccionario de la canción">
+<button id="dictionaryClose" class="music-dictionary-close" type="button" aria-label="Cerrar diccionario">×</button>
+<p class="eyebrow">STANNET DICTIONARY</p>
+<div class="music-dictionary-head"><div><h3 id="dictionaryWord">Word</h3><p id="dictionaryPhonetic" class="dictionary-phonetic"></p></div><button id="dictionarySpeak" class="dictionary-speak" type="button" aria-label="Escuchar pronunciación">🔊</button></div>
+<p id="dictionaryTranslation" class="dictionary-translation">Selecciona una palabra.</p>
+<p id="dictionaryMeaning" class="dictionary-meaning"></p>
+<p id="dictionaryExample" class="dictionary-example"></p>
+<div class="music-dictionary-actions"><button id="dictionarySave" type="button">♡ Guardar palabra</button><a id="dictionaryExternal" href="#" target="_blank" rel="noopener noreferrer">Más detalles ↗</a></div>
+</aside>
 <article class="sync-panel sync-vocab" id="vocabSection"><p class="eyebrow">03 / DESCUBRE</p><h2>Palabras de esta canción</h2><p>Selección automática por frecuencia. Pulsa una palabra para consultar su significado en español y pronunciación.</p><div id="labVocab" class="lab-vocab"></div></article>
 <article class="sync-panel sync-practice" id="practiceSection"><p class="eyebrow">04 / PRACTICA</p><h2>Escucha y completa</h2><details><summary>Ver o editar el texto del ejercicio</summary><label for="labLyrics">Texto de estudio</label><textarea id="labLyrics" rows="8"></textarea></details><div class="sync-row"><button id="labMake" type="button">Crear ejercicio</button><button id="labClear" type="button">Limpiar letra</button></div><div id="labOutput">Carga una canción para empezar.</div></article>
 </section>
