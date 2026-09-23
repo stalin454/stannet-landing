@@ -171,6 +171,10 @@ const frameWrap = document.querySelector('#pdfFrameWrap');
 const downloadCurrent = document.querySelector('#downloadCurrent');
 const openCurrent = document.querySelector('#openCurrent');
 let localPdfUrl = '';
+let adminMode = false;
+const adminToggle = document.querySelector('#adminToggle');
+const adminPanel = document.querySelector('#educationAdminPanel');
+const adminStatus = document.querySelector('#adminStatus');
 
 function escapeText(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -211,9 +215,13 @@ function setViewer(record) {
   openCurrent.hidden = false;
 }
 
+function recordId(record) { return record.pdf || (record.title + '|' + record.issuer); }
+function removedIds() { return JSON.parse(localStorage.getItem('stannetEducationRemoved') || '[]'); }
+
 function renderCards(filter = 'all') {
   grid.innerHTML = '';
-  const visible = certificates.filter((record) => filter === 'all' || record.category === filter);
+  const removed = removedIds();
+  const visible = certificates.filter((record) => !removed.includes(recordId(record)) && (filter === 'all' || record.category === filter));
 
   visible.forEach((record, index) => {
     const card = document.createElement('article');
@@ -231,10 +239,52 @@ function renderCards(filter = 'all') {
       <div class="certificate-actions">
         <button class="button primary" type="button" data-view="${index}" ${record.pdf ? '' : 'data-missing="true"'}>Ver certificado <span>↗</span></button>
         ${record.pdf ? `<a class="button ghost" href="${record.pdf}" download>Descargar PDF</a>` : '<span class="pending-pdf">PDF pendiente</span>'}
-      </div>`;
+      </div>
+      ${adminMode ? '<div class="certificate-admin-actions"><button type="button" data-admin-edit>Editar</button><button type="button" class="danger" data-admin-delete>Eliminar</button></div>' : ''}`;
     grid.append(card);
   });
 }
+
+
+adminToggle?.addEventListener('click', () => {
+  adminMode = !adminMode;
+  adminPanel.hidden = !adminMode;
+  adminStatus.textContent = adminMode ? 'Modo administrador local' : 'Modo público';
+  adminToggle.textContent = adminMode ? 'Cerrar administración' : '⚙ Administrar';
+  renderCards(document.querySelector('.filter-button.active')?.dataset.filter || 'all');
+});
+
+grid?.addEventListener('click', (event) => {
+  const del = event.target.closest('[data-admin-delete]');
+  const edit = event.target.closest('[data-admin-edit]');
+  if (!adminMode || (!del && !edit)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  const filter = document.querySelector('.filter-button.active')?.dataset.filter || 'all';
+  const removed = removedIds();
+  const visible = certificates.filter((record) => !removed.includes(recordId(record)) && (filter === 'all' || record.category === filter));
+  const index = [...grid.querySelectorAll('.certificate-card')].indexOf(event.target.closest('.certificate-card'));
+  const record = visible[index];
+  if (!record) return;
+  if (del) {
+    if (!confirm('¿Eliminar "' + record.title + '" de esta vista?\n\nLa eliminación permanente del servidor se activará al conectar el backend autenticado.')) return;
+    removed.push(recordId(record));
+    localStorage.setItem('stannetEducationRemoved', JSON.stringify(removed));
+    renderCards(filter);
+    return;
+  }
+  educationForm.elements.title.value = record.title || '';
+  educationForm.elements.category.value = record.category || 'ciberseguridad';
+  educationForm.elements.date.value = record.date || '';
+  educationForm.elements.issuer.value = record.issuer || '';
+  document.querySelector('#cancelEdit').hidden = false;
+  adminPanel.scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.querySelector('#cancelEdit')?.addEventListener('click', () => {
+  educationForm.reset();
+  document.querySelector('#cancelEdit').hidden = true;
+});
 
 document.querySelectorAll('.filter-button').forEach((button) => {
   button.addEventListener('click', () => {
@@ -283,7 +333,7 @@ educationForm?.addEventListener('submit', (event) => {
   };
 
   setViewer(localRecord);
-  message.textContent = 'PDF cargado en el visor. Para publicarlo en stannet.space hay que añadir el archivo al proyecto.';
+  message.textContent = 'PDF cargado en vista previa. Para escritura permanente hace falta conectar el backend autenticado.';
   message.classList.add('show');
   document.querySelector('.certificate-viewer-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
