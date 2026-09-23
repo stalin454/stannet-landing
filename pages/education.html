@@ -44,6 +44,7 @@
 <button class="filter-button" type="button" data-filter="ia">IA</button>
 </div>
 
+<div class="education-admin-bar" id="educationAdminBar"><div><strong>Administración de certificados</strong><span id="adminStatus">Modo público</span></div><button class="button ghost" id="adminToggle" type="button">⚙ Administrar</button></div>
 <div class="certificate-grid" id="certificateGrid" aria-live="polite"></div>
 </section>
 
@@ -67,11 +68,11 @@
 </div>
 </section>
 
-<section class="section education-upload" aria-labelledby="uploadTitle">
+<section class="section education-upload" id="educationAdminPanel" aria-labelledby="uploadTitle" hidden>
 <div class="upload-copy">
-<p class="eyebrow">03 / SUBIR EVIDENCIA LOCAL</p>
-<h2 id="uploadTitle">Prueba un certificado antes de publicarlo.</h2>
-<p>Este formulario permite ver un PDF local en el visor. Para que todos lo vean desde el dominio, el archivo debe añadirse al proyecto y publicarse.</p>
+<p class="eyebrow">03 / PANEL DE ADMINISTRACIÓN</p>
+<h2 id="uploadTitle">Gestiona tus certificados.</h2>
+<p>El panel permite preparar altas, ediciones y eliminaciones. La persistencia remota se activará mediante un backend autenticado; nunca se expondrán credenciales privadas en el navegador.</p>
 </div>
 <form id="educationForm" class="upload-form">
 <label for="title">Título del curso o certificado</label>
@@ -96,7 +97,8 @@
 <input id="issuer" name="issuer" placeholder="Ej. Cisco Networking Academy">
 <label for="file">Archivo PDF</label>
 <input id="file" name="file" type="file" accept="application/pdf,.pdf">
-<button class="button primary" type="submit">Añadir al visor <span>↗</span></button>
+<button class="button primary" type="submit">Previsualizar certificado <span>↗</span></button>
+<button class="button ghost" id="cancelEdit" type="button" hidden>Cancelar edición</button>
 <p id="uploadMessage" class="upload-message" role="status"></p>
 </form>
 </section>
