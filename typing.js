@@ -84,7 +84,7 @@
       span.className = i < value.length ? value[i] === target[i] ? 'correct' : 'incorrect' : i === value.length ? 'next' : '';
     });
   }
-  function stats() {
+  function stats(repaint = false) {
     const value = $('typingInput').value, { correct } = comparison(value);
     const totalCorrect = completedCorrect + correct, totalTyped = completedTyped + value.length;
     const accuracy = totalTyped ? Math.round(totalCorrect / totalTyped * 100) : 100;
@@ -94,7 +94,7 @@
     $('liveWpm').textContent = wpm;
     $('liveAccuracy').textContent = accuracy;
     $('charCount').textContent = totalTyped;
-    paint(value);
+    if (repaint) paint(value);
     if (start && elapsed >= Number($('duration').value)) finish(elapsed, totalCorrect, totalTyped, accuracy, wpm);
     else if (start && value === target) {
       completedCorrect += target.length; completedTyped += target.length;
@@ -146,7 +146,7 @@
     completedCorrect = 0; completedTyped = 0;
     prepareTarget(); $('typingInput').disabled = false; $('typingInput').value = '';
     $('typingHint').textContent = 'Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.';
-    $('result').hidden = true; stats(); renderProgress();
+    $('result').hidden = true; stats(true); renderProgress();
   }
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
     mode = button.dataset.mode;
@@ -164,8 +164,8 @@
   });
   $('typingInput').addEventListener('input', () => {
     if (finished) return;
-    if (!start && $('typingInput').value) { start = Date.now(); timer = setInterval(stats, 100); }
-    stats();
+    if (!start && $('typingInput').value) { start = Date.now(); timer = setInterval(stats, 250); }
+    stats(true);
   });
   reset();
 })();
