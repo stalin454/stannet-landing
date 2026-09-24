@@ -53,17 +53,10 @@ function load(f){
   status.textContent='Pista preparada. La separación se hará gratis y localmente en tu navegador.';
 }
 
-async function ensureProcessor(){
-  if(modelReady&&processor)return processor;
-  const useWebGPU=!!navigator.gpu;
-  modelStatus.textContent=useWebGPU
-    ?'Preparando WebGPU y descargando el modelo local (~172 MB) la primera vez…'
-    :'WebGPU no disponible: se intentará modo WASM, bastante más lento.';
-  progress.hidden=false; progressBar.style.width='2%';
-
-  processor=new DemucsProcessor({
+function makeProcessor(provider){
+  return new DemucsProcessor({
     ort,
-    sessionOptions:{executionProviders:useWebGPU?['webgpu']:['wasm'],graphOptimizationLevel:'basic'},
+    sessionOptions:{executionProviders:[provider],graphOptimizationLevel:'basic'},
     onDownloadProgress:(loaded,total)=>{
       const pct=Math.max(2,Math.min(45,(loaded/total)*45));
       progressBar.style.width=pct.toFixed(1)+'%';
@@ -76,10 +69,40 @@ async function ensureProcessor(){
     },
     onLog:()=>{}
   });
-  await processor.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
-  modelReady=true;
-  modelStatus.textContent='Modelo local preparado. No se usa ningún servicio de pago.';
-  return processor;
+}
+
+async function ensureProcessor(){
+  if(modelReady&&processor)return processor;
+  progress.hidden=false; progressBar.style.width='2%';
+
+  let firstError=null;
+  if(navigator.gpu){
+    try{
+      modelStatus.textContent='Probando aceleración WebGPU y descargando el modelo local (~172 MB)…';
+      processor=makeProcessor('webgpu');
+      await processor.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
+      modelReady=true;
+      modelStatus.textContent='Modelo preparado con WebGPU.';
+      return processor;
+    }catch(e){
+      firstError=e;
+      console.warn('WebGPU falló; se intenta WASM.',e);
+      processor=null;
+      modelStatus.textContent='WebGPU no pudo iniciar. Probando modo compatible WASM…';
+    }
+  }
+
+  try{
+    processor=makeProcessor('wasm');
+    await processor.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
+    modelReady=true;
+    modelStatus.textContent='Modelo preparado en modo compatible WASM. Será más lento.';
+    return processor;
+  }catch(e){
+    const a=String(firstError?.message||firstError||'');
+    const b=String(e?.message||e||'');
+    throw new Error('WebGPU/WASM no pudieron iniciar. '+(a?('WebGPU: '+a+'. '):'')+'WASM: '+b);
+  }
 }
 
 async function decodeTo44100Stereo(f){
@@ -148,8 +171,10 @@ separate.onclick=async()=>{
   }catch(e){
     console.error(e);
     const msg=String(e?.message||e||'Error desconocido');
+    const mem=navigator.deviceMemory?(' · RAM navegador aprox.: '+navigator.deviceMemory+' GB'):'';
+    const gpu=navigator.gpu?'WebGPU detectado':'WebGPU no detectado';
     status.textContent='No se pudo separar localmente: '+msg;
-    modelStatus.textContent=navigator.gpu?'Comprueba memoria/GPU y vuelve a intentarlo.':'Tu navegador no ofrece WebGPU; prueba Chrome o Edge actualizado.';
+    modelStatus.textContent=gpu+mem+' · Si falla WebGPU, Vocal Studio intenta WASM automáticamente.';
   }finally{
     separate.disabled=false;
     setTimeout(()=>{progress.hidden=true;progressBar.style.width='0%'},1200);
