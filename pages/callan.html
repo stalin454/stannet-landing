@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do 
 <p class="coach-copy">Un entrenador conversacional inspirado en el metodo Callan: pregunta, escucha, corrige y vuelve a practicar contigo desde el nivel inicial hasta el avanzado.</p>
 </section>
 <section class="section">
-<div class="auth-card" id="authCard"><p class="eyebrow">ACCESO PRIVADO</p><h2>Entra en tu aula.</h2><div class="auth-grid"><input id="authEmail" type="email" placeholder="Tu email"><input id="authPassword" type="password" placeholder="Contraseña"></div><div class="auth-actions"><button id="signIn" type="button">Iniciar sesión →</button><button id="signUp" class="secondary" type="button">Crear cuenta</button></div><p class="auth-status" id="authStatus">Solo usuarios autorizados pueden acceder al contenido de estudio.</p></div>
+<div class="auth-card" id="authCard"><p class="eyebrow">ACCESO PRIVADO</p><h2>Entra en tu aula.</h2><div id="loginFields"><div class="auth-grid"><input id="authEmail" type="email" placeholder="Tu email"><input id="authPassword" type="password" placeholder="Contraseña"></div><div class="auth-actions"><button id="signIn" type="button">Iniciar sesión →</button><button id="signUp" class="secondary" type="button">Crear cuenta</button><button id="forgotPassword" class="secondary" type="button">¿Olvidaste tu contraseña?</button></div></div><div id="recoveryPanel" class="is-hidden"><p class="auth-status">Escribe una contraseña nueva para tu cuenta.</p><div class="auth-grid"><input id="newPassword" type="password" placeholder="Nueva contraseña"><input id="confirmPassword" type="password" placeholder="Repite la contraseña"></div><div class="auth-actions"><button id="updatePassword" type="button">Guardar nueva contraseña →</button><button id="cancelRecovery" class="secondary" type="button">Cancelar</button></div></div><p class="auth-status" id="authStatus">Solo usuarios autorizados pueden acceder al contenido de estudio.</p></div>
 <div class="user-bar is-hidden" id="userBar"><span id="userEmail"></span><button id="signOut" type="button">Cerrar sesión</button></div>
 <div id="lessonArea" class="is-hidden">
 <section class="callan-memory" id="callanMemory"><div class="callan-memory-head"><div><p class="eyebrow">PRACTICA ESCRITA · CADENA CALLAN</p><h3>Escucha, escribe y repite.</h3><p class="callan-memory-copy">Esta práctica es auxiliar: el audio original conserva el método. Escribe la respuesta completa de memoria, comprueba el modelo y vuelve a decirla en voz alta.</p></div><span class="level-pill">MEMORIA ACTIVA</span></div><div class="callan-memory-prompt"><small>RESPONDE POR ESCRITO</small><strong id="callanMemoryPrompt">Do you live in Spain?</strong></div><input id="callanMemoryAnswer" type="text" autocomplete="off" placeholder="Escribe la respuesta completa en ingles"><div class="callan-memory-actions"><button class="memory-check" id="callanMemoryCheck" type="button">Comprobar respuesta →</button><button id="callanMemoryListen" type="button">Escuchar modelo</button><button id="callanMemoryReveal" type="button">Mostrar modelo</button></div><div class="callan-memory-result" id="callanMemoryResult" role="status">Primero escucha el audio original. Después intenta escribir la respuesta sin mirar.</div></section>
@@ -96,6 +96,13 @@ const authPassword=document.querySelector('#authPassword');
 const signInButton=document.querySelector('#signIn');
 const signUpButton=document.querySelector('#signUp');
 const signOutButton=document.querySelector('#signOut');
+const forgotPasswordButton=document.querySelector('#forgotPassword');
+const loginFields=document.querySelector('#loginFields');
+const recoveryPanel=document.querySelector('#recoveryPanel');
+const newPasswordInput=document.querySelector('#newPassword');
+const confirmPasswordInput=document.querySelector('#confirmPassword');
+const updatePasswordButton=document.querySelector('#updatePassword');
+const cancelRecoveryButton=document.querySelector('#cancelRecovery');
 
 const setSession=(session)=>{
   const user=session?.user;
@@ -140,7 +147,25 @@ const restoreSession=async()=>{
 };
 restoreSession();
 
-supabaseClient.auth.onAuthStateChange((_event,session)=>setSession(session));
+const showRecovery=()=>{
+  authCard.classList.remove('is-hidden');
+  lessonArea.classList.add('is-hidden');
+  userBar.classList.add('is-hidden');
+  loginFields.classList.add('is-hidden');
+  recoveryPanel.classList.remove('is-hidden');
+  authStatus.textContent='Enlace de recuperación validado. Crea tu nueva contraseña.';
+  setTimeout(()=>newPasswordInput.focus(),0);
+};
+const hideRecovery=()=>{
+  recoveryPanel.classList.add('is-hidden');
+  loginFields.classList.remove('is-hidden');
+  newPasswordInput.value='';
+  confirmPasswordInput.value='';
+};
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){showRecovery();return}
+  setSession(session);
+});
 
 const signIn=async()=>{
   const email=authEmail.value.trim();
@@ -161,6 +186,49 @@ const signIn=async()=>{
     setAuthBusy(false);
   }
 };
+
+forgotPasswordButton.addEventListener('click',async()=>{
+  const email=authEmail.value.trim();
+  if(!email){authStatus.textContent='Escribe primero tu email para enviarte el enlace de recuperación.';authEmail.focus();return}
+  forgotPasswordButton.disabled=true;
+  authStatus.textContent='Enviando enlace de recuperación…';
+  try{
+    const redirectTo=window.location.origin+window.location.pathname;
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error)throw error;
+    authStatus.textContent='Te enviamos un enlace para cambiar la contraseña. Revisa tu correo y también la carpeta de spam.';
+  }catch(error){
+    authStatus.textContent=authMessage(error);
+  }finally{
+    forgotPasswordButton.disabled=false;
+  }
+});
+
+updatePasswordButton.addEventListener('click',async()=>{
+  const password=newPasswordInput.value;
+  const confirm=confirmPasswordInput.value;
+  if(password.length<6){authStatus.textContent='La nueva contraseña debe tener al menos 6 caracteres.';return}
+  if(password!==confirm){authStatus.textContent='Las contraseñas no coinciden.';return}
+  updatePasswordButton.disabled=true;
+  authStatus.textContent='Actualizando contraseña…';
+  try{
+    const {error}=await supabaseClient.auth.updateUser({password});
+    if(error)throw error;
+    authStatus.textContent='Contraseña actualizada correctamente.';
+    hideRecovery();
+    const {data}=await supabaseClient.auth.getSession();
+    setSession(data.session);
+  }catch(error){
+    authStatus.textContent=authMessage(error);
+  }finally{
+    updatePasswordButton.disabled=false;
+  }
+});
+
+cancelRecoveryButton.addEventListener('click',()=>{
+  hideRecovery();
+  authStatus.textContent='Puedes iniciar sesión o solicitar otro enlace de recuperación.';
+});
 
 signInButton.addEventListener('click',signIn);
 authPassword.addEventListener('keydown',(event)=>{if(event.key==='Enter')signIn()});
