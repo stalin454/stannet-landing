@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Aprende atajos de Windows, macOS, Chrome y Visual Studio Code con el catálogo y las tarjetas de práctica de StanNet.">
+<title>Atajos de teclado | StanNet Typing Lab</title>
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../shortcuts.css">
+</head>
+<body class="shortcuts-page" id="top">
+<header class="site-header"><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button><nav class="site-nav" aria-label="Navegación principal"><a href="../index.html">Inicio</a><a href="programming.html">Programming Academy</a><a href="typing.html">Typing Lab</a><a class="active" aria-current="page" href="shortcuts.html">Atajos</a></nav></header>
+<main class="shortcuts-shell">
+<div class="shortcuts-heading"><p class="eyebrow">STANNET / TYPING LAB</p><h1>Atajos que <em>ahorran tiempo.</em></h1><p>Busca una acción, aprende la combinación y practícala con tarjetas. Los atajos de aplicaciones pueden variar si has cambiado su configuración.</p></div>
+<section class="shortcut-controls" aria-label="Buscar atajos"><div class="system-switch" role="group" aria-label="Sistema operativo"><button type="button" data-system="windows" aria-pressed="true">Windows</button><button type="button" data-system="mac" aria-pressed="false">Mac</button></div><label for="shortcutSearch">Buscar acción o combinación<input type="search" id="shortcutSearch" placeholder="Ej.: captura, pestaña, terminal, Ctrl + P" autocomplete="off"></label><label for="shortcutCategory">Área<select id="shortcutCategory"><option value="all">Todas las áreas</option><option value="basics">Edición y escritura</option><option value="system">Sistema y ventanas</option><option value="browser">Chrome</option><option value="vscode">VS Code</option></select></label><label class="favorites-toggle"><input type="checkbox" id="onlyFavorites"> Solo favoritos</label></section>
+<div class="shortcut-overview"><p id="resultCount" role="status"></p><p id="masteryCount"></p></div>
+<div class="shortcut-layout"><section class="shortcut-catalog" aria-label="Catálogo de atajos"><div id="shortcutList"></div><p id="noShortcuts" hidden>Sin resultados. Prueba otra palabra o cambia el filtro.</p></section>
+<aside class="shortcut-practice" aria-labelledby="practiceTitle"><p class="eyebrow">PRACTICA SIN SALIR DE AQUÍ</p><h2 id="practiceTitle">Tarjetas de memoria</h2><p id="practiceHint">Intenta recordar el atajo antes de revelar la respuesta. El navegador puede reservar algunas teclas; no necesitas pulsarlas aquí.</p><div class="practice-card"><span id="practiceCategory"></span><h3 id="practiceAction"></h3><div id="practiceAnswer" hidden></div><button type="button" id="revealShortcut">Mostrar atajo</button></div><div class="practice-actions"><button type="button" id="practiceAgain" disabled>Repetir después</button><button type="button" id="practiceLearned" disabled>Ya lo sé ✓</button></div><button type="button" id="nextShortcut" class="next-practice">Otra tarjeta →</button><p class="practice-note">Tu progreso y favoritos se guardan en este navegador.</p></aside></div>
+<section class="shortcut-sources"><h2>Referencias completas</h2><p>Este catálogo reúne una selección práctica. Para consultar todas las combinaciones disponibles y sus variantes, utiliza las guías oficiales:</p><div><a href="https://support.microsoft.com/es-es/accessibility/windows/keyboard-shortcuts-in-windows" target="_blank" rel="noopener noreferrer">Windows · Microsoft ↗</a><a href="https://support.apple.com/es-es/102650" target="_blank" rel="noopener noreferrer">Mac · Apple ↗</a><a href="https://support.google.com/chrome/answer/157179?hl=es" target="_blank" rel="noopener noreferrer">Chrome · Google ↗</a><a href="https://code.visualstudio.com/docs/reference/default-keybindings" target="_blank" rel="noopener noreferrer">VS Code · Microsoft ↗</a></div></section>
+<a class="shortcut-back" href="typing.html">← Volver a Typing Lab</a>
+</main>
+<footer><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><p>© <span id="year"></span></p><a href="#top">VOLVER ARRIBA ↑</a></footer>
+<script src="../script.js"></script><script src="../shortcuts.js"></script>
+</body></html>
