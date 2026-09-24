@@ -295,3 +295,13 @@ body{background:var(--bg);color:var(--ink)}.site-header{background:rgba(6,19,31,
 .brand .brand-stan{color:#f8fbff!important;font:inherit}
 .brand .brand-net{color:#b48cff!important;font:inherit;text-shadow:0 0 16px rgba(180,140,255,.22)}
 .brand>i{color:#35d7e8!important}
+
+/* Hero title — balanced technological composition */
+.editorial-hero .tech-hero-title{font-family:var(--font-brand)!important;font-style:normal!important;font-weight:500!important;letter-spacing:-.045em!important;line-height:.88!important;display:flex;flex-direction:column;align-items:flex-start;width:min(100%,980px);margin:34px 0 44px}
+.tech-hero-title .hero-line{display:block;font-family:var(--font-brand)!important;font-style:normal!important;white-space:nowrap}
+.tech-hero-title .hero-line-build{font-size:clamp(46px,5.8vw,96px);color:#f8fbff}
+.tech-hero-title .hero-line-systems{font-size:clamp(60px,7.2vw,120px);color:#f8fbff;margin-left:clamp(24px,5vw,88px)}
+.tech-hero-title .hero-line-digital{font-size:clamp(42px,5vw,84px);color:#b48cff;margin-left:clamp(5px,1vw,18px);margin-top:10px}
+.tech-hero-title .hero-line-secure{font-size:clamp(52px,6.4vw,106px);color:#35d7e8;margin-left:clamp(70px,9vw,155px);margin-top:5px}
+@media(max-width:900px){.tech-hero-title .hero-line-systems{margin-left:7vw}.tech-hero-title .hero-line-secure{margin-left:12vw}}
+@media(max-width:560px){.editorial-hero .tech-hero-title{letter-spacing:-.04em!important}.tech-hero-title .hero-line-build{font-size:clamp(39px,12vw,58px)}.tech-hero-title .hero-line-systems{font-size:clamp(47px,14vw,68px);margin-left:4vw}.tech-hero-title .hero-line-digital{font-size:clamp(36px,10.5vw,52px)}.tech-hero-title .hero-line-secure{font-size:clamp(43px,12.5vw,62px);margin-left:9vw}}
