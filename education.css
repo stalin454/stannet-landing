@@ -37,3 +37,9 @@
 .upload-message.show{display:block}
 @media(max-width:980px){.certificate-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.viewer-shell,.education-upload{grid-template-columns:1fr}.viewer-copy{position:static}.pdf-frame,.pdf-frame-wrap,.viewer-empty{min-height:560px}}
 @media(max-width:560px){.certificate-grid{grid-template-columns:1fr}.certificate-card{min-height:300px;padding:20px}.certificate-actions .button{width:100%;justify-content:center}.pdf-frame,.pdf-frame-wrap,.viewer-empty{min-height:70vh}.education-toolbar{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}.filter-button{white-space:nowrap}}
+
+.education-admin{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 20px;padding:16px;border:1px solid var(--line);background:rgba(6,19,31,.72)}
+.education-admin .is-hidden{display:none!important}.admin-login{display:grid;grid-template-columns:minmax(190px,1fr) minmax(150px,1fr) auto;gap:10px;align-items:center;flex:1 1 620px}
+.admin-login input{margin:0}.admin-login .upload-message{grid-column:1/-1;margin:0}.admin-session{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--cyan);font:600 11px var(--font-main)}
+.admin-delete{background:transparent!important;color:#ff9d9d!important;border:1px solid rgba(255,120,120,.35)!important;cursor:pointer}.admin-delete:hover{border-color:#ff9d9d!important}
+@media(max-width:760px){.admin-login{grid-template-columns:1fr}.admin-login .upload-message{grid-column:auto}}
