@@ -108,7 +108,7 @@ export default {
 async function musicDictionaryLookup(word) {
   try {
     const response = await fetch('https://stannet-landing.vercel.app/api/music-dictionary?word=' + encodeURIComponent(word), {
-      signal: AbortSignal.timeout(5500), headers: { Accept: 'application/json' }
+      signal: AbortSignal.timeout(9500), headers: { Accept: 'application/json' }
     });
     if (!response.ok) return { word, translation:'', meaning:'' };
     const data = await response.json();
