@@ -10,7 +10,7 @@ assert(html.includes('NUTRI IA / BY STANNET'));
 assert(html.includes('id="loginForm"'));
 assert(js.includes('stannet.nutriia.v1'));
 assert(js.includes('Alergias/intolerancias activas'));
-assert(js.includes('Entrenamiento adaptativo'));
+assert(js.includes('Pizarra de entrenamiento'));
 assert(js.includes('Modo Bestia'));
 assert(css.includes('@media(max-width:560px)'));
 
