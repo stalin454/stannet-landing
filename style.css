@@ -285,3 +285,8 @@ body{background:var(--bg);color:var(--ink)}.site-header{background:rgba(6,19,31,
 .editorial-contact{padding:clamp(90px,12vw,170px) clamp(24px,7vw,110px)}.editorial-contact h2{font-size:clamp(54px,7vw,110px);line-height:.9;margin:32px 0 50px}
 @media(max-width:900px){.editorial-hero{grid-template-columns:1fr}.editorial-hero-art{min-height:500px;border-left:0;border-top:1px solid var(--line)}.editorial-intro,.editorial-feature,.editorial-feature.reverse{grid-template-columns:1fr}.editorial-feature.reverse .feature-copy,.editorial-feature.reverse .feature-visual{order:initial}.feature-visual,.editorial-feature.reverse .feature-visual{border-left:0;border-right:0;border-top:1px solid var(--line);min-height:520px}.editorial-intro{gap:38px}.academy-list a{grid-template-columns:45px 1fr 24px}.academy-list em{display:none}}
 @media(max-width:560px){.editorial-hero h1{font-size:clamp(54px,16vw,78px)}.editorial-hero-copy{padding-top:75px}.editorial-hero-art{min-height:390px}.editorial-hero-art img{width:65%}.feature-copy h2,.editorial-intro h2,.editorial-contact h2{font-size:clamp(48px,14vw,70px)}.feature-visual{min-height:390px}.code-lines{width:82%;padding:30px}.academy-list a{padding:22px 0}.editorial-statement>div{flex-direction:column}}
+
+/* Editorial serif refinement — inspired by the reference's high-fashion typography */
+.editorial-home{--font-editorial:'Cormorant Garamond',Georgia,'Times New Roman',serif}
+.editorial-home h1,.editorial-home h2,.editorial-home blockquote,.academy-list strong{font-family:var(--font-editorial);font-weight:400;letter-spacing:-.035em}
+.editorial-home h1 em,.editorial-home h2 em,.editorial-home blockquote em{font-family:var(--font-editorial);font-weight:400}
