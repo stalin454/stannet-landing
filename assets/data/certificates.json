@@ -30,16 +30,6 @@
     "id": "cert-003"
   },
   {
-    "title": "Certificate 136872-2 - versión adicional",
-    "issuer": "Formación online",
-    "category": "ia",
-    "date": "2026",
-    "status": "Certificado publicado",
-    "summary": "Versión adicional del certificado externo conservada para revisión.",
-    "pdf": "../assets/certificates/certificate-136872-2-1.pdf",
-    "id": "cert-004"
-  },
-  {
     "title": "Verbo To Be",
     "issuer": "Curso de inglés",
     "category": "idiomas",
