@@ -48,6 +48,44 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/admin/session') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const admin = await requireAdmin(request, env);
+      return admin.ok ? json({ ok: true, email: admin.email }) : json({ error: admin.error }, admin.status);
+    }
+
+    if (url.pathname.startsWith('/api/admin/certificates/')) {
+      if (request.method !== 'DELETE') return json({ error: 'Método no permitido.' }, 405);
+      const admin = await requireAdmin(request, env);
+      if (!admin.ok) return json({ error: admin.error }, admin.status);
+      if (!env.GITHUB_TOKEN) return json({ error: 'Falta configurar GITHUB_TOKEN en Cloudflare.' }, 503);
+      const id = decodeURIComponent(url.pathname.split('/').pop() || '');
+      if (!/^cert-\d{3}$/.test(id)) return json({ error: 'Identificador de certificado no válido.' }, 400);
+      try {
+        const repo = 'stalin454/stannet-landing';
+        const manifestPath = 'assets/data/certificates.json';
+        const current = await githubFile(repo, manifestPath, env.GITHUB_TOKEN);
+        const records = JSON.parse(decodeBase64Utf8(current.content));
+        const record = records.find(item => item.id === id);
+        if (!record) return json({ error: 'El certificado ya no existe.' }, 404);
+        const next = records.filter(item => item.id !== id);
+        await githubPut(repo, manifestPath, JSON.stringify(next, null, 2) + '\n', current.sha, 'Remove certificate ' + id, env.GITHUB_TOKEN);
+
+        let fileDeleted = false;
+        if (typeof record.pdf === 'string' && /^\.\.\/assets\/certificates\/[A-Za-z0-9._-]+\.pdf$/i.test(record.pdf)) {
+          const filePath = record.pdf.replace(/^\.\.\//, '');
+          try {
+            const pdf = await githubFile(repo, filePath, env.GITHUB_TOKEN);
+            await githubDelete(repo, filePath, pdf.sha, 'Delete PDF for ' + id, env.GITHUB_TOKEN);
+            fileDeleted = true;
+          } catch {}
+        }
+        return json({ ok: true, id, fileDeleted });
+      } catch {
+        return json({ error: 'No se pudo actualizar el catálogo en GitHub.' }, 502);
+      }
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
@@ -57,4 +95,50 @@ function json(body, status = 200, extraHeaders = {}) {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8', ...extraHeaders }
   });
+}
+
+
+const SUPABASE_URL = 'https://beaiuamtvijimwislzeo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_70O5MsxRonx5rDCPq4-3fw_zGGUIrvg';
+
+async function requireAdmin(request, env) {
+  const auth = request.headers.get('authorization') || '';
+  if (!auth.startsWith('Bearer ')) return { ok:false, status:401, error:'Sesión requerida.' };
+  try {
+    const response = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: { Authorization: auth, apikey: SUPABASE_KEY }
+    });
+    if (!response.ok) return { ok:false, status:401, error:'Sesión no válida.' };
+    const user = await response.json();
+    const allowed = String(env.ADMIN_EMAILS || '').split(',').map(v=>v.trim().toLowerCase()).filter(Boolean);
+    if (!allowed.length) return { ok:false, status:503, error:'Falta configurar ADMIN_EMAILS en Cloudflare.' };
+    if (!user.email || !allowed.includes(user.email.toLowerCase())) return { ok:false, status:403, error:'Cuenta sin permisos de administrador.' };
+    return { ok:true, email:user.email };
+  } catch {
+    return { ok:false, status:502, error:'No se pudo verificar la sesión.' };
+  }
+}
+function githubHeaders(token) {
+  return { Authorization:'Bearer '+token, Accept:'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28', 'User-Agent':'StanNet-Admin' };
+}
+async function githubFile(repo, path, token) {
+  const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path+'?ref=main',{headers:githubHeaders(token)});
+  if(!r.ok) throw new Error('github read'); return r.json();
+}
+async function githubPut(repo, path, content, sha, message, token) {
+  const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'PUT',headers:{...githubHeaders(token),'content-type':'application/json'},body:JSON.stringify({message,content:encodeBase64Utf8(content),sha,branch:'main'})});
+  if(!r.ok) throw new Error('github put'); return r.json();
+}
+async function githubDelete(repo, path, sha, message, token) {
+  const r=await fetch('https://api.github.com/repos/'+repo+'/contents/'+path,{method:'DELETE',headers:{...githubHeaders(token),'content-type':'application/json'},body:JSON.stringify({message,sha,branch:'main'})});
+  if(!r.ok) throw new Error('github delete');
+}
+function encodeBase64Utf8(value) {
+  const bytes=new TextEncoder().encode(value); let binary='';
+  for(const byte of bytes) binary+=String.fromCharCode(byte);
+  return btoa(binary);
+}
+function decodeBase64Utf8(value) {
+  const binary=atob(value.replace(/\s/g,'')); const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
