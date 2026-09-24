@@ -63,6 +63,11 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/vocal-separate') {
+      if (request.method !== 'POST') return json({ message: 'Método no permitido.' }, 405);
+      return handleVocalSeparation(request, env);
+    }
+
     if (url.pathname === '/api/admin/session') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const admin = await requireAdmin(request, env);
@@ -104,6 +109,74 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+
+
+const VOCAL_DEMUCS_VERSION = 'd5de8c46b626a46ba6258f685454750c54197420435f9990846fd27a2e2dfa5f';
+
+async function handleVocalSeparation(request, env) {
+  try {
+    if (!env.REPLICATE_API_TOKEN) return json({ message:'Falta REPLICATE_API_TOKEN en Cloudflare.' }, 500);
+    const type = request.headers.get('content-type') || '';
+    if (!type.includes('multipart/form-data')) return json({ message:'Formato de petición no válido.' }, 400);
+    const form = await request.formData();
+    const file = form.get('audio');
+    if (!file || typeof file.arrayBuffer !== 'function' || !file.size) return json({ message:'No llegó ningún archivo de audio al servidor.' }, 400);
+    if (file.size > 12 * 1024 * 1024) return json({ message:'Archivo demasiado grande para esta versión. Prueba una pista de hasta 12 MB.' }, 413);
+
+    const mime = file.type || (/\.wav$/i.test(file.name || '') ? 'audio/wav' : 'audio/mpeg');
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const audio = 'data:' + mime + ';base64,' + bytesToBase64(bytes);
+
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method:'POST',
+      headers:{
+        Authorization:'Bearer ' + env.REPLICATE_API_TOKEN,
+        'Content-Type':'application/json',
+        Prefer:'wait=60'
+      },
+      body:JSON.stringify({
+        version:VOCAL_DEMUCS_VERSION,
+        input:{ audio, model:'htdemucs_ft', stem:'vocals', shifts:1 }
+      })
+    });
+
+    const raw = await response.text();
+    let prediction = {};
+    try { prediction = raw ? JSON.parse(raw) : {}; }
+    catch { return json({ message:'Replicate devolvió una respuesta no válida (HTTP ' + response.status + ').' }, 502); }
+
+    if (!response.ok) return json({
+      message: prediction.detail || prediction.title || prediction.error || 'Replicate rechazó la solicitud.',
+      replicateStatus: response.status
+    }, response.status);
+
+    if (prediction.status !== 'succeeded') return json({
+      status: prediction.status,
+      message: prediction.error || 'El modelo sigue procesando. Vuelve a intentarlo en unos segundos.',
+      predictionId: prediction.id
+    }, 202);
+
+    const output = prediction.output || {};
+    const instrumental = output.no_vocals || output.instrumental || output.accompaniment || output.other;
+    if (!output.vocals || !instrumental) return json({
+      message:'El modelo terminó pero no devolvió los dos stems esperados.',
+      output
+    }, 502);
+
+    return json({ status:'succeeded', vocals:output.vocals, instrumental });
+  } catch (error) {
+    return json({ message:'Error del servidor: ' + (error?.message || 'desconocido') }, 500);
+  }
+}
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
 
 async function musicDictionaryLookup(word) {
   try {
