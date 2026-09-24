@@ -290,3 +290,8 @@ body{background:var(--bg);color:var(--ink)}.site-header{background:rgba(6,19,31,
 .editorial-home{--font-editorial:'Cormorant Garamond',Georgia,'Times New Roman',serif}
 .editorial-home h1,.editorial-home h2,.editorial-home blockquote,.academy-list strong{font-family:var(--font-editorial);font-weight:400;letter-spacing:-.035em}
 .editorial-home h1 em,.editorial-home h2 em,.editorial-home blockquote em{font-family:var(--font-editorial);font-weight:400}
+
+/* StanNet semantic wordmark: Stan = identity, Net = technology, Space = environment */
+.brand .brand-stan{color:#f8fbff!important;font:inherit}
+.brand .brand-net{color:#b48cff!important;font:inherit;text-shadow:0 0 16px rgba(180,140,255,.22)}
+.brand>i{color:#35d7e8!important}
