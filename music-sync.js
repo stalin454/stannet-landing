@@ -16,15 +16,35 @@ document.addEventListener('DOMContentLoaded', () => {
     $('labVocab').replaceChildren();
     for(const [word,count] of [...counts].sort((a,b)=>b[1]-a[1]).slice(0,24)){const button=document.createElement('button');button.type='button';button.className='vocab-word';button.textContent=`${word} · ${count}`;button.dataset.word=word;button.title='Abrir diccionario sin salir de la canción';$('labVocab').append(button);}
   }
-  const dictionaryCache=new Map(), savedWords=new Set(JSON.parse(localStorage.getItem('stannetMusicWords')||'[]'));
+  const dictionaryCache=new Map(), dictionaryPending=new Map(), savedWords=new Set(JSON.parse(localStorage.getItem('stannetMusicWords')||'[]'));
+  let dictionaryRequest=0;
+  try{const stored=JSON.parse(localStorage.getItem('stannetMusicDictionaryV2')||'{}');for(const [word,record] of Object.entries(stored))if(record.at>Date.now()-7*86400000&&record.data)dictionaryCache.set(word,record.data);}catch{}
   const cleanWord=value=>(value||'').toLowerCase().replace(/^[^a-z]+|[^a-z']+$/g,'');
-  async function openDictionary(raw,source){
-    const word=cleanWord(raw);if(!word)return;const panel=$('musicDictionary');panel.hidden=false;$('dictionaryWord').textContent=word;$('dictionaryPhonetic').textContent='';$('dictionaryTranslation').textContent='Buscando significado…';$('dictionaryMeaning').textContent='';$('dictionaryExample').textContent='';$('dictionaryExternal').href='https://dictionary.cambridge.org/dictionary/english-spanish/'+encodeURIComponent(word);$('dictionarySave').textContent=savedWords.has(word)?'♥ Guardada':'♡ Guardar palabra';
-    if(source){const r=source.getBoundingClientRect(),w=Math.min(380,innerWidth-24);panel.style.width=w+'px';panel.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';panel.style.top=Math.min(innerHeight-panel.offsetHeight-12,r.bottom+10)+'px';}
-    if(dictionaryCache.has(word)){showDictionary(dictionaryCache.get(word));return;}
-    try{const [en,es]=await Promise.allSettled([fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word)).then(r=>r.ok?r.json():Promise.reject()),fetch('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:word,langpair:'en|es'})).then(r=>r.ok?r.json():Promise.reject())]);const entry=en.status==='fulfilled'?en.value?.[0]:null;const definition=entry?.meanings?.[0]?.definitions?.[0];const data={word,phonetic:entry?.phonetic||entry?.phonetics?.find(x=>x.text)?.text||'',audio:entry?.phonetics?.find(x=>x.audio)?.audio||'',translation:es.status==='fulfilled'?es.value?.responseData?.translatedText||'':'',meaning:definition?.definition||'No encontramos una definición breve.',example:definition?.example||''};dictionaryCache.set(word,data);showDictionary(data);}catch{$('dictionaryTranslation').textContent='No se pudo consultar el diccionario ahora.';$('dictionaryMeaning').textContent='Puedes seguir escuchando la canción y probar de nuevo.';}
+  async function lookupDictionary(word){
+    const curated=window.StanNetMusicWords?.[word];
+    if(curated)return {...curated,curated:true};
+    if(dictionaryCache.has(word))return dictionaryCache.get(word);
+    if(dictionaryPending.has(word))return dictionaryPending.get(word);
+    const task=(async()=>{
+      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),4200);
+      try{
+        const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal});
+        const data=await response.json();
+        if(!response.ok||(!data.translation&&!data.meaning))throw new Error('not-found');
+        dictionaryCache.set(word,data);
+        try{const recent=[...dictionaryCache].slice(-120);localStorage.setItem('stannetMusicDictionaryV2',JSON.stringify(Object.fromEntries(recent.map(([w,d])=>[w,{at:Date.now(),data:d}]))));}catch{}
+        return data;
+      }finally{clearTimeout(timeout);dictionaryPending.delete(word)}
+    })();
+    dictionaryPending.set(word,task);
+    return task;
   }
-  function showDictionary(data){$('dictionaryWord').textContent=data.word;$('dictionaryPhonetic').textContent=data.phonetic;$('dictionaryTranslation').textContent=data.translation?('ES · '+data.translation):'Traducción no disponible';$('dictionaryMeaning').textContent=data.meaning;$('dictionaryExample').textContent=data.example?('Ejemplo · '+data.example):'';$('dictionarySpeak').dataset.audio=data.audio||'';}
+  async function openDictionary(raw,source){
+    const word=cleanWord(raw);if(!word)return;const token=++dictionaryRequest,panel=$('musicDictionary');panel.hidden=false;$('dictionaryWord').textContent=word;$('dictionaryPhonetic').textContent='';$('dictionaryTranslation').textContent='Buscando significado…';$('dictionaryMeaning').textContent='';$('dictionaryExample').textContent='';$('dictionarySpeak').dataset.audio='';$('dictionaryExternal').href='https://dictionary.cambridge.org/dictionary/english-spanish/'+encodeURIComponent(word);$('dictionarySave').textContent=savedWords.has(word)?'♥ Guardada':'♡ Guardar palabra';
+    if(source){const r=source.getBoundingClientRect(),w=Math.min(380,innerWidth-24);panel.style.width=w+'px';panel.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';panel.style.top=Math.max(12,Math.min(innerHeight-panel.offsetHeight-12,r.bottom+10))+'px';}
+    try{const data=await lookupDictionary(word);if(token===dictionaryRequest&&!panel.hidden)showDictionary(data);}catch{if(token!==dictionaryRequest||panel.hidden)return;$('dictionaryTranslation').textContent='No se encontró una traducción fiable ahora.';$('dictionaryMeaning').textContent='Comprueba la palabra o abre «Más detalles».';}
+  }
+  function showDictionary(data){$('dictionaryWord').textContent=data.word;$('dictionaryPhonetic').textContent=data.phonetic||'';$('dictionaryTranslation').textContent=data.translation?('ES · '+data.translation):'Traducción no disponible';$('dictionaryMeaning').textContent=data.meaning?(data.curated?'Uso habitual · ':'Definición en inglés · ')+data.meaning:'';$('dictionaryExample').textContent=data.example?('Ejemplo · '+data.example):'';$('dictionarySpeak').dataset.audio=data.audio||'';}
   function speakDictionary(){const audio=$('dictionarySpeak').dataset.audio;if(audio){new Audio(audio).play().catch(()=>{});return;}const word=$('dictionaryWord').textContent;if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(word);u.lang='en-US';speechSynthesis.speak(u);}}
   function saveDictionaryWord(){const word=cleanWord($('dictionaryWord').textContent);if(!word)return;if(savedWords.has(word))savedWords.delete(word);else savedWords.add(word);localStorage.setItem('stannetMusicWords',JSON.stringify([...savedWords]));$('dictionarySave').textContent=savedWords.has(word)?'♥ Guardada':'♡ Guardar palabra';}
   function makeLyricsClickable(){for(const row of $('karaokeLines').children){const text=row.textContent;row.replaceChildren();for(const part of text.split(/(\s+)/)){if(/^\s+$/.test(part)){row.append(document.createTextNode(part));continue;}const word=cleanWord(part);if(!word){row.append(document.createTextNode(part));continue;}const button=document.createElement('span');button.className='lyric-word';button.tabIndex=0;button.role='button';button.dataset.word=word;button.textContent=part;row.append(button);}}}
@@ -55,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('labVocab')?.addEventListener('click',event=>{const button=event.target.closest('[data-word]');if(button)openDictionary(button.dataset.word,button);});
   $('karaokeLines')?.addEventListener('click',event=>{const word=event.target.closest('.lyric-word');if(word){event.stopPropagation();openDictionary(word.dataset.word,word);}});
   $('karaokeLines')?.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.matches('.lyric-word')){event.preventDefault();openDictionary(event.target.dataset.word,event.target);}});
-  $('dictionaryClose')?.addEventListener('click',()=>{$('musicDictionary').hidden=true;});
+  $('dictionaryClose')?.addEventListener('click',()=>{dictionaryRequest++;$('musicDictionary').hidden=true;});
   $('dictionarySpeak')?.addEventListener('click',speakDictionary);
   $('dictionarySave')?.addEventListener('click',saveDictionaryWord);
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('musicDictionary'))$('musicDictionary').hidden=true;});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('musicDictionary')){dictionaryRequest++;$('musicDictionary').hidden=true;}});
 });

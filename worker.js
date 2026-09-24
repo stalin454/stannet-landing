@@ -2,6 +2,21 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === '/api/music-dictionary') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const word = (url.searchParams.get('word') || '').trim().toLowerCase();
+      if (!/^[a-z]+(?:'[a-z]+)?$/.test(word) || word.length > 48) return json({ error: 'Escribe una palabra inglesa válida.' }, 400);
+      const cache = typeof caches !== 'undefined' ? caches.default : null;
+      const key = new Request(url.origin + '/api/music-dictionary?word=' + encodeURIComponent(word));
+      if (cache) { try { const hit = await cache.match(key); if (hit) return hit; } catch {} }
+      const data = await musicDictionaryLookup(word);
+      const response = json(data, data.translation || data.meaning ? 200 : 404, {
+        'Cache-Control': data.translation || data.meaning ? 'public, max-age=86400, s-maxage=604800' : 'public, max-age=60'
+      });
+      if (cache && response.ok) { try { await cache.put(key, response.clone()); } catch {} }
+      return response;
+    }
+
     if (url.pathname === '/api/youtube-search') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const query = (url.searchParams.get('q') || '').trim().slice(0, 120);
@@ -89,6 +104,36 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+
+async function musicDictionaryLookup(word) {
+  const read = async (target, ms) => {
+    const response = await fetch(target, { signal: AbortSignal.timeout(ms), headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('upstream');
+    return response.json();
+  };
+  const translationUrl = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=' + encodeURIComponent(word);
+  const definitionUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word);
+  const [translated, defined] = await Promise.allSettled([read(translationUrl, 2300), read(definitionUrl, 2300)]);
+  const translation = translated.status === 'fulfilled'
+    ? String(translated.value?.[0]?.map(part => part?.[0] || '').join('') || '').trim()
+    : '';
+  const item = defined.status === 'fulfilled' && Array.isArray(defined.value) ? defined.value[0] : null;
+  const meanings = (item?.meanings || []).flatMap(group =>
+    (group.definitions || []).map(sense => ({ part: group.partOfSpeech, definition: sense.definition, example: sense.example }))
+  );
+  const useful = meanings.find(sense => typeof sense.definition === 'string' && sense.definition.length > 8 &&
+    !/^(?:a |an |the )?(?:surname|given name|place|village|town|city|county|municipality|acronym|abbreviation|initialism)\b/i.test(sense.definition));
+  const sense = useful;
+  return {
+    word, translation: translation.toLowerCase() === word && !item ? '' : translation,
+    meaning: sense?.definition || '', example: sense?.example || '',
+    phonetic: item?.phonetics?.find(p => p.text)?.text || item?.phonetic || '',
+    audio: item?.phonetics?.find(p => p.audio && /uk|gb/i.test(p.audio))?.audio ||
+      item?.phonetics?.find(p => p.audio)?.audio || '',
+    partOfSpeech: sense?.part || '',
+    source: 'dictionary'
+  };
+}
 
 function json(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
