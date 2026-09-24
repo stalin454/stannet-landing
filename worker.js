@@ -28,7 +28,7 @@ export default {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const id = url.searchParams.get('videoId') || '';
       const query = (url.searchParams.get('q') || '').trim().slice(0, 180);
-      if (!query && !/^[\\w-]{11}$/.test(id)) return json({ error: 'Enlace no válido.' }, 400);
+      if (!query && !/^[\w-]{11}$/.test(id)) return json({ error: 'Enlace no válido.' }, 400);
       const read = async target => {
         const response = await fetch(target, { headers: { 'User-Agent': 'StanNetMusicLab/1.0 (https://www.stannet.space)' } });
         if (!response.ok) throw new Error('provider');
