@@ -1,5 +1,15 @@
 const valid = /^[a-z]+(?:'[a-z]+)?$/;
 const proper = /^(?:a |an |the )?(?:surname|given name|place|village|town|city|county|municipality|acronym|abbreviation|initialism)\b/i;
+const nearCopy = (a,b) => {
+  if (a === b) return true;
+  if (Math.abs(a.length-b.length)>1) return false;
+  for(let i=0,j=0,misses=0;i<a.length&&j<b.length;) {
+    if(a[i]===b[j]){i++;j++;continue;}
+    if(++misses>1)return false;
+    if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}
+  }
+  return true;
+};
 
 async function read(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(1900), headers: { Accept:'application/json' } });
@@ -25,7 +35,7 @@ module.exports = async function handler(req, res) {
   const fromGoogle = google.status === 'fulfilled' ? google.value?.[0]?.map(part => part?.[0] || '').join('').trim() : '';
   const fromMemory = memory.status === 'fulfilled' ? memory.value?.responseData?.translatedText?.trim() : '';
   const translation = fromGoogle || (!/^(?:NO QUERY SPECIFIED|MYMEMORY WARNING|QUERY LENGTH LIMIT)/i.test(fromMemory || '') ? fromMemory : '');
-  if (!sense && (!translation || translation.toLowerCase() === word)) {
+  if (!sense && (!translation || nearCopy(translation.toLowerCase(),word))) {
     res.setHeader('Cache-Control','no-store');
     return res.status(404).json({ error:'Palabra no encontrada.' });
   }

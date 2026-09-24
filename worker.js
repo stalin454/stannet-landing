@@ -7,7 +7,7 @@ export default {
       const word = (url.searchParams.get('word') || '').trim().toLowerCase();
       if (!/^[a-z]+(?:'[a-z]+)?$/.test(word) || word.length > 48) return json({ error: 'Escribe una palabra inglesa válida.' }, 400);
       const cache = typeof caches !== 'undefined' ? caches.default : null;
-      const key = new Request(url.origin + '/api/music-dictionary?word=' + encodeURIComponent(word));
+      const key = new Request(url.origin + '/api/music-dictionary?v=2&word=' + encodeURIComponent(word));
       if (cache) { try { const hit = await cache.match(key); if (hit) return hit; } catch {} }
       const data = await musicDictionaryLookup(word);
       const response = json(data, data.translation || data.meaning ? 200 : 404, {

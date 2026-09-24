@@ -75,5 +75,11 @@ window.StanNetMusicWords = Object.fromEntries([
   ['singing','cantando','Forma continua de cantar.'],
   ['beautiful','hermoso/a','Que tiene belleza.'],
   ['friend','amigo/a','Persona con quien se tiene amistad.'],
-  ['friends','amigos/as','Plural de amigo o amiga.']
+  ['friends','amigos/as','Plural de amigo o amiga.'],
+  ["don't",'no','Contracción de «do not»; expresa negación con un verbo.'],
+  ["can't",'no puedo / no puede','Contracción de «cannot»; la persona depende de la frase.'],
+  ["won't",'no lo haré / no lo hará','Contracción de «will not»; negación de futuro.'],
+  ["i'm",'soy / estoy','Contracción de «I am»; depende del contexto.'],
+  ["you're",'eres / estás','Contracción de «you are»; también «ustedes son/están».'],
+  ["it's",'es / está','Contracción de «it is» o «it has»; depende del contexto.']
 ].map(([word,translation,meaning])=>[word,{word,translation,meaning,example:'',phonetic:'',audio:''}]));
