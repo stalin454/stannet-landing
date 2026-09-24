@@ -60,7 +60,7 @@ function makeProcessor(provider){
     onDownloadProgress:(loaded,total)=>{
       const pct=Math.max(2,Math.min(45,(loaded/total)*45));
       progressBar.style.width=pct.toFixed(1)+'%';
-      modelStatus.textContent='Descargando modelo local… '+Math.round((loaded/total)*100)+'%';
+      modelStatus.textContent='Descargando modelo Demucs desde StanNet… '+Math.round((loaded/total)*100)+'%';
     },
     onProgress:info=>{
       const pct=45+(info.progress*55);
@@ -80,7 +80,7 @@ async function ensureProcessor(){
     try{
       modelStatus.textContent='Probando aceleración WebGPU y descargando el modelo local (~172 MB)…';
       processor=makeProcessor('webgpu');
-      await processor.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
+      await processor.loadModel('/api/vocal-model');
       modelReady=true;
       modelStatus.textContent='Modelo preparado con WebGPU.';
       return processor;
@@ -94,7 +94,7 @@ async function ensureProcessor(){
 
   try{
     processor=makeProcessor('wasm');
-    await processor.loadModel(CONSTANTS.DEFAULT_MODEL_URL);
+    await processor.loadModel('/api/vocal-model');
     modelReady=true;
     modelStatus.textContent='Modelo preparado en modo compatible WASM. Será más lento.';
     return processor;

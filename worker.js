@@ -63,6 +63,23 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/vocal-model') {
+      if (request.method !== 'GET') return json({ message:'Método no permitido.' }, 405);
+      try {
+        const upstream = await fetch('https://huggingface.co/timcsy/demucs-web-onnx/resolve/main/htdemucs_embedded.onnx?download=true', {
+          headers: { 'User-Agent':'StanNet-Vocal-Studio/1.0' }
+        });
+        if (!upstream.ok) return json({ message:'No se pudo descargar el modelo Demucs.', upstreamStatus:upstream.status }, 502);
+        const headers = new Headers(upstream.headers);
+        headers.set('content-type','application/octet-stream');
+        headers.set('cache-control','public, max-age=604800, s-maxage=2592000');
+        headers.set('access-control-allow-origin','*');
+        return new Response(upstream.body,{status:200,headers});
+      } catch (error) {
+        return json({ message:'No se pudo conectar con el modelo Demucs: '+(error?.message||'error') }, 502);
+      }
+    }
+
     if (url.pathname === '/api/vocal-separate') {
       if (request.method !== 'POST') return json({ message: 'Método no permitido.' }, 405);
       return handleVocalSeparation(request, env);
