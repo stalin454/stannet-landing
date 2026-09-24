@@ -15,10 +15,10 @@
 <fieldset class="typing-mode"><legend>Modo</legend><button type="button" data-mode="text" class="selected" aria-pressed="true">Texto</button><button type="button" data-mode="code" aria-pressed="false">Código</button></fieldset>
 <label>Idioma del texto<select id="textLanguage"><option value="es">Español</option><option value="en">English</option></select></label>
 <label id="codeLanguageLabel" hidden>Lenguaje<select id="codeLanguage"><option value="javascript">JavaScript</option><option value="python">Python</option><option value="html">HTML</option><option value="css">CSS</option></select></label>
-<label>Duración<select id="duration"><option value="30">30 segundos</option><option value="60" selected>60 segundos</option><option value="120">120 segundos</option></select></label>
+<label>Duración<select id="duration"><option value="60" selected>1 minuto</option><option value="120">2 minutos</option><option value="300">5 minutos</option><option value="600">10 minutos</option><option value="900">15 minutos</option><option value="1800">30 minutos</option></select></label>
 <button class="typing-restart" id="restart" type="button">↻ Nuevo ejercicio</button>
 </div>
-<div class="typing-status"><span>TIEMPO <strong id="timeLeft">60</strong><small>s</small></span><span>VELOCIDAD <strong id="liveWpm">0</strong><small>PPM</small></span><span>PRECISIÓN <strong id="liveAccuracy">100</strong><small>%</small></span><span>CARACTERES <strong id="charCount">0</strong><small id="targetCount">/ 0</small></span></div>
+<div class="typing-status"><span>TIEMPO RESTANTE <strong id="timeLeft">01:00</strong></span><span>VELOCIDAD <strong id="liveWpm">0</strong><small>PPM</small></span><span>PRECISIÓN <strong id="liveAccuracy">100</strong><small>%</small></span><span>CARACTERES <strong id="charCount">0</strong><small>acumulados</small></span></div>
 <div class="typing-target" id="target" aria-label="Texto que debes escribir"></div>
 <label class="typing-input-label" for="typingInput">Escribe aquí el texto de arriba</label>
 <textarea id="typingInput" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="typingHint" placeholder="Haz clic aquí y empieza a escribir…"></textarea>

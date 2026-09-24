@@ -57,10 +57,15 @@
     ]
   };
   let mode = 'text', target = '', spans = [], start = 0, timer = 0, finished = false;
+  let completedCorrect = 0, completedTyped = 0;
   let records = [];
   try { const saved = JSON.parse(localStorage.getItem(STORAGE) || '[]'); if (Array.isArray(saved)) records = saved.filter(x => x && Number.isFinite(x.wpm)).slice(-100); } catch {}
   const language = () => mode === 'text' ? $('textLanguage').value : $('codeLanguage').value;
   const currentKey = () => mode + ':' + language();
+  const formatTime = seconds => {
+    const whole = Math.max(0, Math.ceil(seconds));
+    return String(Math.floor(whole / 60)).padStart(2,'0') + ':' + String(whole % 60).padStart(2,'0');
+  };
   const shuffle = values => values.slice().sort(() => Math.random() - .5);
   function buildTarget() {
     const items = mode === 'text' ? lessons[language()] : code[language()];
@@ -72,7 +77,7 @@
   function comparison(value) {
     let correct = 0;
     for (let i = 0; i < value.length && i < target.length; i++) if (value[i] === target[i]) correct++;
-    return { correct, accuracy: value.length ? Math.round(correct / value.length * 100) : 100 };
+    return { correct };
   }
   function paint(value) {
     spans.forEach((span, i) => {
@@ -80,15 +85,23 @@
     });
   }
   function stats() {
-    const value = $('typingInput').value, { correct, accuracy } = comparison(value);
+    const value = $('typingInput').value, { correct } = comparison(value);
+    const totalCorrect = completedCorrect + correct, totalTyped = completedTyped + value.length;
+    const accuracy = totalTyped ? Math.round(totalCorrect / totalTyped * 100) : 100;
     const elapsed = start ? Math.min((Date.now() - start) / 1000, Number($('duration').value)) : 0;
-    const wpm = elapsed >= 1 ? Math.round(correct / 5 / (elapsed / 60)) : 0;
-    $('timeLeft').textContent = Math.max(0, Math.ceil(Number($('duration').value) - elapsed));
+    const wpm = elapsed >= 1 ? Math.round(totalCorrect / 5 / (elapsed / 60)) : 0;
+    $('timeLeft').textContent = formatTime(Number($('duration').value) - elapsed);
     $('liveWpm').textContent = wpm;
     $('liveAccuracy').textContent = accuracy;
-    $('charCount').textContent = value.length;
+    $('charCount').textContent = totalTyped;
     paint(value);
-    if (start && (elapsed >= Number($('duration').value) || value === target)) finish(elapsed, correct, accuracy, wpm);
+    if (start && elapsed >= Number($('duration').value)) finish(elapsed, totalCorrect, totalTyped, accuracy, wpm);
+    else if (start && value === target) {
+      completedCorrect += target.length; completedTyped += target.length;
+      prepareTarget(); $('typingInput').value = '';
+      $('charCount').textContent = completedTyped; paint('');
+      $('typingHint').textContent = 'Fragmento completado. Continúa con el siguiente; el cronómetro y tus resultados siguen acumulándose.';
+    }
   }
   function renderProgress() {
     const relevant = records.filter(x => x.key === currentKey());
@@ -110,26 +123,29 @@
       value.textContent = entry.wpm + ' PPM · ' + entry.accuracy + '%'; row.append(date, bar, value); history.append(row);
     }
   }
-  function finish(elapsed, correct, accuracy, wpm) {
+  function finish(elapsed, correct, typed, accuracy, wpm) {
     if (finished) return;
     finished = true; clearInterval(timer); timer = 0; $('typingInput').disabled = true;
     const result = $('result'); result.hidden = false;
-    if (elapsed >= 5 && $('typingInput').value.length >= 10) {
+    if (elapsed >= 5 && typed >= 10) {
       records.push({ key:currentKey(), date:new Date().toISOString(), wpm, accuracy, duration:Math.round(elapsed), correct });
       records = records.slice(-100);
       try { localStorage.setItem(STORAGE, JSON.stringify(records)); } catch {}
-      result.textContent = 'Práctica terminada · ' + wpm + ' PPM · ' + accuracy + '% de precisión · ' + Math.round(elapsed) + ' s. Resultado guardado en este navegador.';
+      result.textContent = 'Práctica terminada · ' + wpm + ' PPM · ' + accuracy + '% de precisión · ' + formatTime(elapsed) + ' min. Resultado guardado en este navegador.';
       renderProgress();
     } else result.textContent = 'Práctica muy corta para registrar una marca. Pulsa «Nuevo ejercicio» e inténtalo de nuevo.';
   }
-  function reset() {
-    clearInterval(timer); timer = 0; start = 0; finished = false;
+  function prepareTarget() {
     target = buildTarget(); const area = $('target'); area.replaceChildren();
     const fragment = document.createDocumentFragment();
     spans = Array.from(target, character => { const span = document.createElement('span'); span.textContent = character; fragment.append(span); return span; });
     area.append(fragment); area.setAttribute('aria-label', target);
-    $('typingInput').disabled = false; $('typingInput').value = '';
-    $('targetCount').textContent = '/ ' + target.length;
+  }
+  function reset() {
+    clearInterval(timer); timer = 0; start = 0; finished = false;
+    completedCorrect = 0; completedTyped = 0;
+    prepareTarget(); $('typingInput').disabled = false; $('typingInput').value = '';
+    $('typingHint').textContent = 'Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.';
     $('result').hidden = true; stats(); renderProgress();
   }
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => {
