@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(dictionaryCache.has(word))return dictionaryCache.get(word);
     if(dictionaryPending.has(word))return dictionaryPending.get(word);
     const task=(async()=>{
-      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),4200);
+      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),11000);
       try{
         const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal});
         const data=await response.json();
