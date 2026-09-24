@@ -106,33 +106,16 @@ export default {
 };
 
 async function musicDictionaryLookup(word) {
-  const read = async (target, ms) => {
-    const response = await fetch(target, { signal: AbortSignal.timeout(ms), headers: { Accept: 'application/json' } });
-    if (!response.ok) throw new Error('upstream');
-    return response.json();
-  };
-  const translationUrl = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=' + encodeURIComponent(word);
-  const definitionUrl = 'https://api.dictionaryapi.dev/api/v2/entries/en/' + encodeURIComponent(word);
-  const [translated, defined] = await Promise.allSettled([read(translationUrl, 2300), read(definitionUrl, 2300)]);
-  const translation = translated.status === 'fulfilled'
-    ? String(translated.value?.[0]?.map(part => part?.[0] || '').join('') || '').trim()
-    : '';
-  const item = defined.status === 'fulfilled' && Array.isArray(defined.value) ? defined.value[0] : null;
-  const meanings = (item?.meanings || []).flatMap(group =>
-    (group.definitions || []).map(sense => ({ part: group.partOfSpeech, definition: sense.definition, example: sense.example }))
-  );
-  const useful = meanings.find(sense => typeof sense.definition === 'string' && sense.definition.length > 8 &&
-    !/^(?:a |an |the )?(?:surname|given name|place|village|town|city|county|municipality|acronym|abbreviation|initialism)\b/i.test(sense.definition));
-  const sense = useful;
-  return {
-    word, translation: translation.toLowerCase() === word && !item ? '' : translation,
-    meaning: sense?.definition || '', example: sense?.example || '',
-    phonetic: item?.phonetics?.find(p => p.text)?.text || item?.phonetic || '',
-    audio: item?.phonetics?.find(p => p.audio && /uk|gb/i.test(p.audio))?.audio ||
-      item?.phonetics?.find(p => p.audio)?.audio || '',
-    partOfSpeech: sense?.part || '',
-    source: 'dictionary'
-  };
+  try {
+    const response = await fetch('https://stannet-landing.vercel.app/api/music-dictionary?word=' + encodeURIComponent(word), {
+      signal: AbortSignal.timeout(5500), headers: { Accept: 'application/json' }
+    });
+    if (!response.ok) return { word, translation:'', meaning:'' };
+    const data = await response.json();
+    return { word, translation:data.translation || '', meaning:data.meaning || '',
+      example:data.example || '', phonetic:data.phonetic || '', audio:data.audio || '',
+      partOfSpeech:data.partOfSpeech || '', source:'dictionary' };
+  } catch { return { word, translation:'', meaning:'' }; }
 }
 
 function json(body, status = 200, extraHeaders = {}) {
