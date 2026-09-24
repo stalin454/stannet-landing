@@ -10,11 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     for(const row of text.split('\n'))for(const stamp of row.matchAll(/\[(\d+):(\d{2}(?:\.\d+)?)\]/g))result.push({time:Math.max(0,Number(stamp[1])*60+Number(stamp[2])+offset),text:row.replace(/\[[^\]]*\]/g,'').trim()});
     return result.sort((a,b)=>a.time-b.time);
   };
+  let vocabularyGeneration=0;
   function vocabulary(text){
     const counts=new Map(),stop=new Set('the and that this with have your from they were what when where there their would could should about into just been dont youre its for are but not you all can her his she him our out was'.split(' '));
     for(const word of text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g)||[])if(word.length>3&&!stop.has(word.replaceAll("'",'')))counts.set(word,(counts.get(word)||0)+1);
     $('labVocab').replaceChildren();
-    for(const [word,count] of [...counts].sort((a,b)=>b[1]-a[1]).slice(0,24)){const button=document.createElement('button');button.type='button';button.className='vocab-word';button.textContent=`${word} · ${count}`;button.dataset.word=word;button.title='Abrir diccionario sin salir de la canción';$('labVocab').append(button);}
+    const ranked=[...counts].sort((a,b)=>b[1]-a[1]).slice(0,24);
+    for(const [word,count] of ranked){const button=document.createElement('button');button.type='button';button.className='vocab-word';button.textContent=`${word} · ${count}`;button.dataset.word=word;button.title='Abrir diccionario sin salir de la canción';$('labVocab').append(button);}
+    const version=++vocabularyGeneration;
+    const candidates=ranked.map(([word])=>word).filter(word=>!window.StanNetMusicWords?.[word]&&!dictionaryCache.has(word)).slice(0,8);
+    const prefetch=async words=>{for(const word of words){if(version!==vocabularyGeneration)return;try{await lookupDictionary(word);}catch{}}};
+    if(candidates.length)setTimeout(()=>{prefetch(candidates.filter((_,i)=>i%2===0));prefetch(candidates.filter((_,i)=>i%2===1));},300);
   }
   const dictionaryCache=new Map(), dictionaryPending=new Map(), savedWords=new Set(JSON.parse(localStorage.getItem('stannetMusicWords')||'[]'));
   let dictionaryRequest=0;
