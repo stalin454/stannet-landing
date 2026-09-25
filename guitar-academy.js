@@ -57,6 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const studySource = $('#studySource');
   const studyTab = $('#studyTab');
   const studyNote = $('#studyNote');
+  const guitarSongQuery = $('#guitarSongQuery');
+  const guitarSongSearch = $('#guitarSongSearch');
+  const guitarSongStatus = $('#guitarSongStatus');
+  const guitarSongResults = $('#guitarSongResults');
+  const guitarSongWorkspace = $('#guitarSongWorkspace');
+  const guitarSongPlayer = $('#guitarSongPlayer');
+  const guitarSongTitle = $('#guitarSongTitle');
+  const guitarSongChannel = $('#guitarSongChannel');
+  const songPracticeRoot = $('#songPracticeRoot');
+  const songPracticeMode = $('#songPracticeMode');
+  const songPracticeProgression = $('#songPracticeProgression');
+  const songPracticeLevel = $('#songPracticeLevel');
+  const songPracticeBpm = $('#songPracticeBpm');
+  const songPracticeBpmValue = $('#songPracticeBpmValue');
+  const songPracticeOutput = $('#songPracticeOutput');
+  const songPracticeChords = $('#songPracticeChords');
+  const songPracticeTab = $('#songPracticeTab');
+  const songPracticeSteps = $('#songPracticeSteps');
   let activeView = 'both';
   let currentExercise = [];
 
@@ -192,6 +210,10 @@ document.addEventListener('DOMContentLoaded', () => {
     harmonyRoot.value = 'A';
     exerciseRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
     exerciseRoot.value = 'A';
+    if (songPracticeRoot) {
+      songPracticeRoot.innerHTML = data.roots.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+      songPracticeRoot.value = 'A';
+    }
     const grouped = Object.entries(data.scales).reduce((acc, [key, scale]) => {
       acc[scale.category] = acc[scale.category] || [];
       acc[scale.category].push([key, scale.name]);
@@ -571,6 +593,139 @@ document.addEventListener('DOMContentLoaded', () => {
     })));
   };
 
+  const songDegreeMaps = {
+    major: {
+      I: [0, 'major'], ii: [2, 'minor'], iii: [4, 'minor'], IV: [5, 'major'],
+      V: [7, 'dominant7'], vi: [9, 'minor'], 'vii°': [11, 'diminished']
+    },
+    minor: {
+      i: [0, 'minor'], 'ii°': [2, 'diminished'], III: [3, 'major'], iv: [5, 'minor'],
+      v: [7, 'minor'], V: [7, 'dominant7'], VI: [8, 'major'], VII: [10, 'major']
+    }
+  };
+
+  const progressionTokens = (value) => value.split('-').filter(Boolean);
+
+  const buildSongPractice = () => {
+    const root = songPracticeRoot?.value || 'A';
+    const mode = songPracticeMode?.value || 'major';
+    const tokens = progressionTokens(songPracticeProgression?.value || 'I-V-vi-IV');
+    const map = songDegreeMaps[mode];
+    const chords = tokens.map((degree) => {
+      const spec = map[degree] || songDegreeMaps.major[degree] || songDegreeMaps.minor[degree];
+      if (!spec) return null;
+      const [offset, type] = spec;
+      const chord = data.chordTypes[type];
+      const chordRootNote = noteAt(root, offset);
+      return {
+        degree,
+        root: chordRootNote,
+        type,
+        name: chordRootNote + chord.symbol,
+        notes: chord.intervals.map((interval) => noteAt(chordRootNote, interval % 12))
+      };
+    }).filter(Boolean);
+
+    songPracticeChords.innerHTML = chords.map((chord) =>
+      `<button class="progression-step song-chord-step" type="button" data-root="${chord.root}" data-type="${chord.type}"><b>${chord.name}</b><small>${chord.degree} · ${chord.notes.join('-')}</small></button>`
+    ).join('');
+
+    const roots = chords.map((chord) => ({ note: chord.root }));
+    songPracticeTab.textContent = formatTabPositions(chooseCompactPositions(roots, songPracticeLevel?.value === 'advanced' ? 9 : 5));
+
+    const level = songPracticeLevel?.value || 'intermediate';
+    const bpm = Number(songPracticeBpm?.value || 90);
+    const instructions = level === 'beginner'
+      ? [
+          `Toca cada acorde durante 4 pulsos a ${bpm} BPM.`,
+          'Practica primero solo los cambios de acorde sin ritmo.',
+          'Después toca únicamente las fundamentales siguiendo la TAB.',
+          'Por último acompaña el vídeo y escucha dónde cambia la armonía.'
+        ]
+      : level === 'advanced'
+        ? [
+            `Practica a ${bpm} BPM y después sube 5 BPM por vuelta limpia.`,
+            'Arpegia cada acorde y localiza 3ª y 7ª antes del siguiente cambio.',
+            'Crea una segunda voz usando notas de la escala de la tonalidad.',
+            'Improvisa 8 compases y resuelve cada frase sobre una nota del acorde.'
+          ]
+        : [
+            `Toca la progresión a ${bpm} BPM con rasgueo constante.`,
+            'Alterna una vuelta de acordes y una vuelta de arpegios.',
+            'Usa la TAB de raíces para memorizar el movimiento armónico.',
+            'Toca con el vídeo y ajusta manualmente tonalidad/BPM si hace falta.'
+          ];
+    songPracticeSteps.innerHTML = instructions.map((item) => `<li>${item}</li>`).join('');
+    songPracticeOutput.hidden = false;
+
+    songPracticeChords.querySelectorAll('.song-chord-step').forEach((button) => {
+      button.addEventListener('click', () => {
+        chordRoot.value = button.dataset.root;
+        chordType.value = button.dataset.type;
+        renderChord();
+        document.querySelector('#chord-lab')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    return chords;
+  };
+
+  const playSongPractice = () => {
+    const chords = buildSongPractice();
+    const beat = 60 / Number(songPracticeBpm?.value || 90);
+    const events = [];
+    chords.forEach((chord, chordIndex) => {
+      const chordData = data.chordTypes[chord.type];
+      chordData.intervals.forEach((interval, noteIndexInChord) => {
+        events.push({
+          frequency: noteFrequency(noteAt(chord.root, interval % 12), 3 + Math.floor(noteIndexInChord / 3)),
+          offset: chordIndex * beat * 4 + noteIndexInChord * 0.025,
+          duration: Math.max(1.0, beat * 3.7),
+          velocity: 0.16
+        });
+      });
+    });
+    playGuitarSequence(events);
+  };
+
+  const selectSongResult = (result) => {
+    guitarSongWorkspace.hidden = false;
+    guitarSongPlayer.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(result.id)}?rel=0`;
+    guitarSongTitle.textContent = result.title;
+    guitarSongChannel.textContent = result.channel;
+    guitarSongWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const searchSongs = async () => {
+    const query = guitarSongQuery?.value.trim();
+    if (!query) {
+      guitarSongStatus.textContent = 'Escribe una canción o artista.';
+      guitarSongQuery?.focus();
+      return;
+    }
+    guitarSongSearch.disabled = true;
+    guitarSongStatus.textContent = 'Buscando en YouTube…';
+    guitarSongResults.innerHTML = '';
+    try {
+      const response = await fetch('/api/youtube-search?q=' + encodeURIComponent(query));
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'No se pudo buscar.');
+      const results = Array.isArray(payload.results) ? payload.results : [];
+      guitarSongStatus.textContent = results.length ? `${results.length} resultados. Elige uno para practicar.` : 'No se encontraron resultados.';
+      guitarSongResults.innerHTML = results.map((item, index) => `
+        <button class="song-result-card" type="button" data-song-index="${index}">
+          <img src="${item.thumbnail}" alt="" loading="lazy">
+          <span><b>${item.title}</b><small>${item.channel}</small></span>
+        </button>`).join('');
+      guitarSongResults.querySelectorAll('.song-result-card').forEach((button) => {
+        button.addEventListener('click', () => selectSongResult(results[Number(button.dataset.songIndex)]));
+      });
+    } catch (error) {
+      guitarSongStatus.textContent = error.message || 'No se pudo buscar en YouTube.';
+    } finally {
+      guitarSongSearch.disabled = false;
+    }
+  };
+
   const getActiveStudies = () => data.referenceStudies.filter((study) => !studyCategory.value || study.category === studyCategory.value);
 
   const renderStudyChoices = () => {
@@ -632,6 +787,22 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#listenProgression').addEventListener('click', playProgression);
   $('#generateExercise').addEventListener('click', renderExercise);
   $('#listenExercise').addEventListener('click', playExercise);
+  if (guitarSongSearch && guitarSongQuery) {
+    guitarSongSearch.addEventListener('click', searchSongs);
+    guitarSongQuery.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') searchSongs();
+    });
+    songPracticeBpm?.addEventListener('input', () => { songPracticeBpmValue.textContent = songPracticeBpm.value; });
+    $('#generateSongPractice')?.addEventListener('click', buildSongPractice);
+    $('#playSongPractice')?.addEventListener('click', playSongPractice);
+    songPracticeMode?.addEventListener('change', () => {
+      const minor = songPracticeMode.value === 'minor';
+      songPracticeProgression.innerHTML = minor
+        ? '<option value="i-VI-III-VII">i – VI – III – VII</option><option value="i-VII-VI-V">i – VII – VI – V</option>'
+        : '<option value="I-V-vi-IV">I – V – vi – IV</option><option value="I-IV-V-I">I – IV – V – I</option><option value="ii-V-I-vi">ii – V – I – vi</option>';
+    });
+  }
+
   if (studyCategory && studySelect && studyBpm) {
     studyCategory.addEventListener('change', renderStudyChoices);
     studySelect.addEventListener('change', renderStudy);
