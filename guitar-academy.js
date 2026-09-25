@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rootSelect = $('#guitarRoot');
   const scaleSelect = $('#guitarScale');
   const modeSelect = $('#guitarMode');
+  const guitarTone = $('#guitarTone');
   const viewButtons = document.querySelectorAll('[data-view]');
   const fretboard = $('#fretboard');
   const fretNumbers = $('#fretNumbers');
@@ -65,6 +66,112 @@ document.addEventListener('DOMContentLoaded', () => {
   const noteFrequency = (note, octave = 4) => {
     const midi = (octave + 1) * 12 + noteIndex(note);
     return 440 * Math.pow(2, (midi - 69) / 12);
+  };
+
+  const makeDriveCurve = (amount = 18) => {
+    const samples = 2048;
+    const curve = new Float32Array(samples);
+    const k = typeof amount === 'number' ? amount : 18;
+    for (let i = 0; i < samples; i += 1) {
+      const x = i * 2 / samples - 1;
+      curve[i] = ((3 + k) * x * 20 * Math.PI / 180) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  };
+
+  const createGuitarBus = (context, tone = 'acoustic') => {
+    const input = context.createGain();
+    const compressor = context.createDynamicsCompressor();
+    compressor.threshold.value = -18;
+    compressor.knee.value = 16;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.2;
+
+    if (tone === 'electricDrive') {
+      const drive = context.createWaveShaper();
+      drive.curve = makeDriveCurve(28);
+      drive.oversample = '4x';
+      const lowpass = context.createBiquadFilter();
+      lowpass.type = 'lowpass';
+      lowpass.frequency.value = 4200;
+      lowpass.Q.value = 0.8;
+      input.connect(drive).connect(lowpass).connect(compressor).connect(context.destination);
+    } else {
+      const body = context.createBiquadFilter();
+      body.type = 'peaking';
+      body.frequency.value = tone === 'acoustic' ? 190 : 1100;
+      body.Q.value = tone === 'acoustic' ? 1.2 : 0.8;
+      body.gain.value = tone === 'acoustic' ? 5 : 2;
+      const lowpass = context.createBiquadFilter();
+      lowpass.type = 'lowpass';
+      lowpass.frequency.value = tone === 'acoustic' ? 6500 : 5200;
+      input.connect(body).connect(lowpass).connect(compressor).connect(context.destination);
+    }
+    return input;
+  };
+
+  const pluckGuitarNote = (context, destination, frequency, start, duration = 1.15, velocity = 0.22, tone = 'acoustic') => {
+    const master = context.createGain();
+    master.gain.setValueAtTime(0.0001, start);
+    master.gain.exponentialRampToValueAtTime(Math.max(0.03, velocity), start + 0.008);
+    master.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    master.connect(destination);
+
+    const fundamental = context.createOscillator();
+    fundamental.type = tone === 'acoustic' ? 'triangle' : 'sawtooth';
+    fundamental.frequency.setValueAtTime(frequency, start);
+    fundamental.detune.setValueAtTime(tone === 'electricDrive' ? -3 : 0, start);
+    fundamental.connect(master);
+    fundamental.start(start);
+    fundamental.stop(start + duration + 0.03);
+
+    const harmonic = context.createOscillator();
+    const harmonicGain = context.createGain();
+    harmonic.type = 'sine';
+    harmonic.frequency.setValueAtTime(frequency * 2, start);
+    harmonicGain.gain.setValueAtTime(tone === 'acoustic' ? 0.11 : 0.075, start);
+    harmonicGain.gain.exponentialRampToValueAtTime(0.0001, start + duration * 0.52);
+    harmonic.connect(harmonicGain).connect(master);
+    harmonic.start(start);
+    harmonic.stop(start + duration * 0.58);
+
+    const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.03), context.sampleRate);
+    const noise = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noise.length; i += 1) noise[i] = (Math.random() * 2 - 1) * (1 - i / noise.length);
+    const pick = context.createBufferSource();
+    const pickFilter = context.createBiquadFilter();
+    const pickGain = context.createGain();
+    pick.buffer = noiseBuffer;
+    pickFilter.type = 'bandpass';
+    pickFilter.frequency.value = tone === 'acoustic' ? 2400 : 3200;
+    pickFilter.Q.value = 0.7;
+    pickGain.gain.setValueAtTime(tone === 'acoustic' ? 0.35 : 0.18, start);
+    pickGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.035);
+    pick.connect(pickFilter).connect(pickGain).connect(master);
+    pick.start(start);
+  };
+
+  const playGuitarSequence = (events, options = {}) => {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const context = new AudioCtx();
+    const tone = guitarTone?.value || 'acoustic';
+    const bus = createGuitarBus(context, tone);
+    const baseTime = context.currentTime + 0.03;
+    events.forEach((event) => {
+      pluckGuitarNote(
+        context,
+        bus,
+        event.frequency,
+        baseTime + (event.offset || 0),
+        event.duration || (tone === 'acoustic' ? 1.05 : 1.35),
+        event.velocity || 0.2,
+        tone
+      );
+    });
+    const end = Math.max(0, ...events.map(event => (event.offset || 0) + (event.duration || 1.3)));
+    setTimeout(() => context.close().catch(() => {}), Math.ceil((end + 0.6) * 1000));
   };
 
   const fillSelectors = () => {
@@ -167,20 +274,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playScale = () => {
     const notes = getNotes();
-    const context = new (window.AudioContext || window.webkitAudioContext)();
-    notes.concat(notes.slice().reverse().slice(1)).forEach((item, index) => {
-      const start = context.currentTime + index * 0.42;
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = noteFrequency(item.note, index > notes.length - 1 ? 4 : 3);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.28, start + 0.03);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.36);
-      osc.connect(gain).connect(context.destination);
-      osc.start(start);
-      osc.stop(start + 0.4);
-    });
+    const sequence = notes.concat(notes.slice().reverse().slice(1));
+    playGuitarSequence(sequence.map((item, index) => ({
+      frequency: noteFrequency(item.note, index > notes.length - 1 ? 4 : 3),
+      offset: index * 0.42,
+      duration: 1.0,
+      velocity: 0.22
+    })));
   };
 
   const getChordNotes = () => {
@@ -251,20 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playChord = (arpeggio = false) => {
     const notes = getChordNotes();
-    const context = new (window.AudioContext || window.webkitAudioContext)();
-    notes.forEach((item, index) => {
-      const start = context.currentTime + (arpeggio ? index * 0.26 : 0);
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(index / 3));
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(arpeggio ? 0.24 : 0.18, start + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + (arpeggio ? 0.72 : 1.25));
-      osc.connect(gain).connect(context.destination);
-      osc.start(start);
-      osc.stop(start + (arpeggio ? 0.78 : 1.3));
-    });
+    playGuitarSequence(notes.map((item, index) => ({
+      frequency: noteFrequency(item.note, 3 + Math.floor(index / 3)),
+      offset: arpeggio ? index * 0.24 : index * 0.018,
+      duration: arpeggio ? 1.25 : 1.55,
+      velocity: arpeggio ? 0.22 : 0.17
+    })));
   };
 
   const getHarmonyChords = () => {
@@ -334,23 +426,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const chords = getHarmonyChords();
     const progression = activeProgressions()[Number(progressionSelect.value || 0)] || activeProgressions()[0];
     const byDegree = new Map(chords.map((chord) => [chord.degree, chord]));
-    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const events = [];
     progression.degrees.forEach((degree, chordIndex) => {
       const chord = byDegree.get(degree);
       chord.notes.forEach((item, noteOrder) => {
-        const start = context.currentTime + chordIndex * 1.08 + noteOrder * 0.025;
-        const osc = context.createOscillator();
-        const gain = context.createGain();
-        osc.type = 'triangle';
-        osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(noteOrder / 3));
-        gain.gain.setValueAtTime(0.0001, start);
-        gain.gain.exponentialRampToValueAtTime(0.16, start + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.95);
-        osc.connect(gain).connect(context.destination);
-        osc.start(start);
-        osc.stop(start + 1);
+        events.push({
+          frequency: noteFrequency(item.note, 3 + Math.floor(noteOrder / 3)),
+          offset: chordIndex * 1.08 + noteOrder * 0.028,
+          duration: 1.05,
+          velocity: 0.16
+        });
       });
     });
+    playGuitarSequence(events);
   };
 
   const getExercisePattern = () => {
@@ -422,21 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playExercise = () => {
     if (!currentExercise.length) renderExercise();
-    const context = new (window.AudioContext || window.webkitAudioContext)();
     const beat = 60 / Number(exerciseBpm.value);
-    currentExercise.forEach((item, index) => {
-      const start = context.currentTime + index * beat;
-      const osc = context.createOscillator();
-      const gain = context.createGain();
-      osc.type = exerciseTechnique.value === 'legato' ? 'sine' : 'triangle';
-      osc.frequency.value = noteFrequency(item.note, 3 + Math.floor(index / 6));
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.25, start + 0.025);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + beat * 0.82);
-      osc.connect(gain).connect(context.destination);
-      osc.start(start);
-      osc.stop(start + beat * 0.86);
-    });
+    playGuitarSequence(currentExercise.map((item, index) => ({
+      frequency: noteFrequency(item.note, 3 + Math.floor(index / 6)),
+      offset: index * beat,
+      duration: Math.max(0.38, beat * 0.92),
+      velocity: exerciseTechnique.value === 'legato' ? 0.18 : 0.23
+    })));
   };
 
   fillSelectors();
