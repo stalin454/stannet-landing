@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Cloudflare / local tooling
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+
+# Temporary editor / agent files
+tmp/
+temp/
+.codex-remote-attachments/
+.cursor/
+*.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# Build / coverage artifacts
+coverage/
+dist/
+.cache/
