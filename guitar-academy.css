@@ -23,3 +23,19 @@
 .tab-legend{margin:12px 0 0;color:#8fa5b3;font-size:12px;line-height:1.65}
 .tab-legend strong{color:var(--guitar-gold)}
 @media(max-width:930px){.study-grid{grid-template-columns:1fr}}
+
+.chord-theory-section{background:linear-gradient(145deg,rgba(245,199,107,.06),rgba(114,246,199,.035),transparent)}
+.chord-theory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.chord-reading-guide{margin-top:18px}
+.diagram-guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.diagram-guide-grid>div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:12px;border:1px solid rgba(245,199,107,.16);background:rgba(255,255,255,.025)}
+.diagram-guide-grid b{min-width:44px;color:var(--guitar-gold);font:800 13px var(--font-main)}
+.diagram-guide-grid span{color:#c9c1b2;font-size:12px;line-height:1.5}
+.chord-root-family{margin:0 0 12px;color:var(--guitar-mint);font:700 10px var(--font-main);letter-spacing:.08em}
+.diagram-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px;color:#9aa3ad;font-size:11px}
+.diagram-legend span{padding:8px 10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}
+.diagram-warning{display:grid;gap:8px;padding:18px;border:1px solid rgba(230,111,79,.35);background:rgba(230,111,79,.07)}
+.diagram-warning strong{color:#ff9a7f}
+.diagram-warning span{color:#c9c1b2;line-height:1.6}
+@media(max-width:930px){.chord-theory-grid{grid-template-columns:1fr 1fr}.diagram-guide-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.chord-theory-grid,.diagram-guide-grid,.diagram-legend{grid-template-columns:1fr}}

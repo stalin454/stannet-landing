@@ -137,7 +137,11 @@ window.StanNetGuitarData = {
     augmented: { name: 'Aumentado', symbol: 'aug', intervals: [0, 4, 8], degrees: ['1', '3', '#5'], formula: '1 - 3 - #5', quality: 'Ambiguo y flotante. Abre movimiento cromatico.' },
     sus2: { name: 'Sus2', symbol: 'sus2', intervals: [0, 2, 7], degrees: ['1', '2', '5'], formula: '1 - 2 - 5', quality: 'Suspendido y limpio. No define mayor o menor.' },
     sus4: { name: 'Sus4', symbol: 'sus4', intervals: [0, 5, 7], degrees: ['1', '4', '5'], formula: '1 - 4 - 5', quality: 'Suspendido con empuje. Funciona muy bien antes de volver al mayor.' },
-    add9: { name: 'Add9', symbol: 'add9', intervals: [0, 4, 7, 14], degrees: ['1', '3', '5', '9'], formula: '1 - 3 - 5 - 9', quality: 'Mayor con aire moderno y melodico por la novena.' }
+    add9: { name: 'Add9', symbol: 'add9', intervals: [0, 4, 7, 14], degrees: ['1', '3', '5', '9'], formula: '1 - 3 - 5 - 9', quality: 'Mayor con aire moderno y melodico por la novena.' },
+    power5: { name: 'Power chord / quinta', symbol: '5', intervals: [0, 7], degrees: ['1', '5'], formula: '1 - 5', quality: 'Sonido potente y neutro porque omite la tercera. Muy usado en rock y metal.' },
+    major6: { name: 'Sexta mayor', symbol: '6', intervals: [0, 4, 7, 9], degrees: ['1', '3', '5', '6'], formula: '1 - 3 - 5 - 6', quality: 'Mayor con sexta añadida: cálido, clásico y muy útil en acompañamiento.' },
+    diminished7: { name: 'Disminuido 7', symbol: 'dim7', intervals: [0, 3, 6, 9], degrees: ['1', 'b3', 'b5', 'bb7'], formula: '1 - b3 - b5 - bb7', quality: 'Acorde simétrico de mucha tensión. Sus notas están separadas por terceras menores.' },
+    halfDiminished: { name: 'Semidisminuido', symbol: 'm7b5', intervals: [0, 3, 6, 10], degrees: ['1', 'b3', 'b5', 'b7'], formula: '1 - b3 - b5 - b7', quality: 'Menor séptima con quinta disminuida. Muy común en armonía menor y jazz.' }
   },
   chordShapes: {
     string6: {
@@ -147,7 +151,8 @@ window.StanNetGuitarData = {
       major7: { base: [0, 2, 1, 1, 0, 0], muted: [], fingers: ['1', '3', '2', '2', '1', '1'] },
       minor7: { base: [0, 2, 0, 0, 0, 0], muted: [], fingers: ['1', '3', '1', '1', '1', '1'] },
       sus2: { base: [0, 2, 2, 4, 0, 0], muted: [], fingers: ['1', '2', '3', '4', '1', '1'] },
-      sus4: { base: [0, 2, 2, 2, 0, 0], muted: [], fingers: ['1', '2', '3', '4', '1', '1'] }
+      sus4: { base: [0, 2, 2, 2, 0, 0], muted: [], fingers: ['1', '2', '3', '4', '1', '1'] },
+      power5: { base: [0, 2, 2, null, null, null], muted: [3, 2, 1], fingers: ['1', '3', '4', 'x', 'x', 'x'] }
     },
     string5: {
       major: { base: [null, 0, 2, 2, 2, 0], muted: [6], fingers: ['x', '1', '3', '3', '3', '1'] },
@@ -157,7 +162,8 @@ window.StanNetGuitarData = {
       minor7: { base: [null, 0, 2, 0, 1, 0], muted: [6], fingers: ['x', '1', '3', '1', '2', '1'] },
       diminished: { base: [null, 0, 1, 2, 1, null], muted: [6, 1], fingers: ['x', '1', '2', '4', '3', 'x'] },
       augmented: { base: [null, 0, 3, 2, 2, null], muted: [6, 1], fingers: ['x', '1', '4', '2', '3', 'x'] },
-      add9: { base: [null, 0, 2, 2, 0, 0], muted: [6], fingers: ['x', '1', '3', '4', '1', '1'] }
+      add9: { base: [null, 0, 2, 2, 0, 0], muted: [6], fingers: ['x', '1', '3', '4', '1', '1'] },
+      power5: { base: [null, 0, 2, 2, null, null], muted: [6, 2, 1], fingers: ['x', '1', '3', '4', 'x', 'x'] }
     }
   },
   harmony: {
