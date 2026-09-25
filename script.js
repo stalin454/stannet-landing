@@ -1,3 +1,21 @@
+// Global StanNet favicon / app identity
+(()=>{
+  const head=document.head;
+  if(!head)return;
+  const links=[
+    ['icon','/favicon.svg','image/svg+xml'],
+    ['shortcut icon','/favicon.svg','image/svg+xml'],
+    ['manifest','/site.webmanifest','']
+  ];
+  links.forEach(([rel,href,type])=>{
+    if(head.querySelector('link[data-stannet-favicon][rel="'+rel+'"]'))return;
+    const link=document.createElement('link');
+    link.rel=rel; link.href=href; link.dataset.stannetFavicon='true';
+    if(type)link.type=type;
+    head.append(link);
+  });
+})();
+
 const toggle=document.querySelector('.menu-toggle');
 const nav=document.querySelector('.site-nav');
 
