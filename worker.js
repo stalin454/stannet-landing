@@ -2,6 +2,53 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === '/api/speech') {
+      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+
+      let body;
+      try { body = await request.json(); }
+      catch { return json({ error: 'Solicitud no válida.' }, 400); }
+
+      const text = typeof body?.text === 'string' ? body.text.trim() : '';
+      const voiceMap = {
+        'da-DK': 'da-DK-ChristelNeural',
+        'en-US': 'en-US-JennyNeural',
+        'en-GB': 'en-GB-SoniaNeural'
+      };
+      const language = voiceMap[body?.lang] ? body.lang : 'da-DK';
+      const voice = voiceMap[language];
+      const region = env.AZURE_SPEECH_REGION;
+      const key = env.AZURE_SPEECH_KEY;
+
+      if (!text || text.length > 500) return json({ error: 'Texto no válido.' }, 400);
+      if (!region || !key) return json({ error: 'El servicio de voz no está configurado.' }, 503);
+
+      const safeText = text.replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
+      }[char]));
+      const ssml = `<speak version="1.0" xml:lang="${language}"><voice name="${voice}"><prosody rate="-8%">${safeText}</prosody></voice></speak>`;
+
+      try {
+        const azureResponse = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+          method: 'POST',
+          headers: {
+            'Ocp-Apim-Subscription-Key': key,
+            'Content-Type': 'application/ssml+xml',
+            'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
+            'User-Agent': 'stannet-language-academies'
+          },
+          body: ssml
+        });
+        if (!azureResponse.ok) return json({ error: 'Azure no pudo generar el audio.' }, 502);
+        const headers = new Headers();
+        headers.set('Content-Type', 'audio/mpeg');
+        headers.set('Cache-Control', 'public, max-age=86400');
+        return new Response(azureResponse.body, { status: 200, headers });
+      } catch {
+        return json({ error: 'No se pudo conectar con el servicio de voz.' }, 502);
+      }
+    }
+
     if (url.pathname === '/api/music-dictionary') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const word = (url.searchParams.get('word') || '').trim().toLowerCase();
