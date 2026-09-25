@@ -1,0 +1,12 @@
+# Cloudflare static assets: deploy the public site, not tooling/source internals
+node_modules/
+.git/
+.github/
+tests/
+output/
+api/
+functions/
+wrangler.jsonc
+worker.js
+package.json
+package-lock.json
