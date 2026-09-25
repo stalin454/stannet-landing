@@ -13,3 +13,5 @@
 @media(max-width:930px){.guitar-shell{grid-template-columns:1fr}.guitar-console{position:static}.guitar-orbit{opacity:.18;right:-70px}.result-grid{grid-template-columns:1fr}}
 @media(max-width:930px){.chord-board,.chord-result,.harmony-grid,.circle-wrap,.exercise-output{grid-template-columns:1fr}.harmony-circle{min-height:380px}.exercise-meta{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.guitar-hero{min-height:70vh}.guitar-hero h1{font-size:clamp(48px,17vw,82px)}.segmented{grid-template-columns:1fr}.guitar-panel{padding:12px}.fretboard,.fret-numbers,.staff-svg,.tab-lines,.exercise-tab{min-width:620px}.result-grid{gap:10px}.exercise-meta{grid-template-columns:1fr}}
+
+.guitar-audio-note{margin:-4px 0 4px;color:#8fa5b3;font-size:11px;line-height:1.55}
