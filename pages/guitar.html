@@ -250,6 +250,52 @@
 </aside>
 </div>
 
+<div class="song-resource-workbench" id="songResourceWorkbench">
+<section class="guitar-panel resource-search-panel">
+<div class="resource-panel-head">
+<div>
+<p class="eyebrow">TAB / ACORDES</p>
+<h3>Busca material para tocar la canción</h3>
+</div>
+<span class="resource-song-label" id="resourceSongLabel">Usa el título buscado o selecciona un vídeo.</span>
+</div>
+<div class="resource-search-grid">
+<label>CANCIÓN / ARTISTA
+<input id="guitarResourceQuery" type="search" placeholder="Ej.: Yngwie Malmsteen Black Star">
+</label>
+<div class="resource-actions">
+<button id="searchSongsterr" type="button">BUSCAR TAB EN SONGSTERR</button>
+<button id="searchChordsWeb" type="button">BUSCAR ACORDES</button>
+<button id="copySongQuery" type="button">COPIAR BÚSQUEDA</button>
+</div>
+</div>
+<p class="tab-legend">StanNet abre proveedores externos para consultar tablaturas/acordes; no copia ni republica material protegido. Cuando tengas tu propio PDF, puedes estudiarlo aquí mismo junto al vídeo.</p>
+</section>
+
+<section class="guitar-panel pdf-practice-panel">
+<div class="resource-panel-head">
+<div>
+<p class="eyebrow">VISOR PDF</p>
+<h3>Vídeo + tablatura, lado a lado</h3>
+</div>
+<div class="pdf-toolbar">
+<label class="pdf-upload-button" for="guitarPdfInput">CARGAR PDF</label>
+<input id="guitarPdfInput" type="file" accept="application/pdf,.pdf" hidden>
+<button id="clearGuitarPdf" type="button" disabled>QUITAR PDF</button>
+<button id="fullscreenGuitarPdf" type="button" disabled>PANTALLA COMPLETA</button>
+</div>
+</div>
+<div class="pdf-drop-zone" id="guitarPdfDropZone" tabindex="0">
+<strong>Arrastra aquí una tablatura PDF</strong>
+<span>o pulsa “Cargar PDF”. El archivo se abre localmente en tu navegador y no se sube a StanNet.</span>
+</div>
+<div class="pdf-viewer-shell" id="guitarPdfViewerShell" hidden>
+<div class="pdf-file-meta"><b id="guitarPdfName">tablatura.pdf</b><span id="guitarPdfStatus">PDF cargado localmente</span></div>
+<iframe id="guitarPdfViewer" title="Visor de tablatura PDF"></iframe>
+</div>
+</section>
+</div>
+
 <div class="song-practice-output" id="songPracticeOutput" hidden>
 <div class="guitar-panel">
 <h3>Progresión generada</h3>
