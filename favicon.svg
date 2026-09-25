@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs>
+  <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".45" stop-color="#cfd7e6"/>
+    <stop offset="1" stop-color="#79849a"/>
+  </linearGradient>
+  <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#35d7e8"/>
+    <stop offset=".5" stop-color="#4d7cff"/>
+    <stop offset="1" stop-color="#d32bff"/>
+  </linearGradient>
+  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="2.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+<path d="M64 5 114 28v35c0 28-18 49-50 60C32 112 14 91 14 63V28Z" fill="#050a12" stroke="url(#metal)" stroke-width="6" stroke-linejoin="round"/>
+<path d="M64 12 106 32v30c0 23-14 42-42 53C36 104 22 85 22 62V32Z" fill="none" stroke="url(#neon)" stroke-width="5" filter="url(#glow)"/>
+<path d="M31 42c8-9 20-13 33-13h10l-8 13H55c-7 0-12 2-15 6l-3 4h25c10 0 17 6 17 15 0 16-16 25-34 25H28l8-13h13c8 0 15-2 19-7l2-3H45c-12 0-20-6-20-15 0-4 2-8 6-12Z" fill="url(#metal)"/>
+<path d="M66 37 82 37 96 67V37h13v52H95L79 58v31H66Z" fill="url(#neon)" filter="url(#glow)"/>
+</svg>
