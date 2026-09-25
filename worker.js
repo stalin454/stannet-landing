@@ -64,6 +64,63 @@ export default {
       return response;
     }
 
+    if (url.pathname === '/api/videos') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      if (!env.YOUTUBE_API_KEY) return json({ error: 'Falta configurar YOUTUBE_API_KEY en Cloudflare.' }, 503);
+
+      const cache = typeof caches !== 'undefined' ? caches.default : null;
+      const cacheKey = new Request(url.origin + '/api/videos?v=3');
+      if (cache) {
+        try {
+          const hit = await cache.match(cacheKey);
+          if (hit) return hit;
+        } catch {}
+      }
+
+      try {
+        const handle = String(env.YOUTUBE_CHANNEL_HANDLE || 'StanNetSpace').replace(/^@/, '');
+        const channelUrl = 'https://www.googleapis.com/youtube/v3/channels?' + new URLSearchParams({
+          part: 'contentDetails',
+          forHandle: handle,
+          key: env.YOUTUBE_API_KEY
+        });
+        const channelResponse = await fetch(channelUrl);
+        const channelData = await channelResponse.json();
+        const uploads = channelData?.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+        if (!channelResponse.ok || !uploads) {
+          return json({ error: 'No se pudo identificar el canal de YouTube.' }, 502);
+        }
+
+        const playlistUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?' + new URLSearchParams({
+          part: 'snippet,contentDetails',
+          playlistId: uploads,
+          maxResults: '24',
+          key: env.YOUTUBE_API_KEY
+        });
+        const playlistResponse = await fetch(playlistUrl);
+        const playlistData = await playlistResponse.json();
+        if (!playlistResponse.ok) return json({ error: 'No se pudieron cargar los vídeos del canal.' }, 502);
+
+        const videos = (playlistData.items || []).map(item => {
+          const id = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId;
+          return id ? {
+            id,
+            title: item.snippet?.title || 'Vídeo de StanNet.Space',
+            published: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt || null,
+            thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+          } : null;
+        }).filter(Boolean);
+
+        const response = json({ videos }, 200, { 'Cache-Control': 'public, max-age=900, s-maxage=3600' });
+        if (cache) {
+          try { await cache.put(cacheKey, response.clone()); } catch {}
+        }
+        return response;
+      } catch {
+        return json({ error: 'No se pudieron cargar los vídeos.' }, 502);
+      }
+    }
+
     if (url.pathname === '/api/youtube-search') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const query = (url.searchParams.get('q') || '').trim().slice(0, 120);
@@ -243,16 +300,63 @@ function bytesToBase64(bytes) {
 }
 
 async function musicDictionaryLookup(word) {
-  try {
-    const response = await fetch('https://stannet-landing.vercel.app/api/music-dictionary?word=' + encodeURIComponent(word), {
-      signal: AbortSignal.timeout(9500), headers: { Accept: 'application/json' }
-    });
-    if (!response.ok) return { word, translation:'', meaning:'' };
-    const data = await response.json();
-    return { word, translation:data.translation || '', meaning:data.meaning || '',
-      example:data.example || '', phonetic:data.phonetic || '', audio:data.audio || '',
-      partOfSpeech:data.partOfSpeech || '', source:'dictionary' };
-  } catch { return { word, translation:'', meaning:'' }; }
+  const proper = /^(?:a |an |the )?(?:surname|given name|place|village|town|city|county|municipality|acronym|abbreviation|initialism)\\b/i;
+  const nearCopy = (a, b) => {
+    if (a === b) return true;
+    if (Math.abs(a.length - b.length) > 1) return false;
+    for (let i = 0, j = 0, misses = 0; i < a.length && j < b.length;) {
+      if (a[i] === b[j]) { i++; j++; continue; }
+      if (++misses > 1) return false;
+      if (a.length > b.length) i++;
+      else if (b.length > a.length) j++;
+      else { i++; j++; }
+    }
+    return true;
+  };
+
+  const read = async target => {
+    const response = await fetch(target, { headers: { Accept: 'application/json', 'User-Agent': 'StanNetMusicDictionary/2.0' } });
+    if (!response.ok) throw new Error('provider');
+    return response.json();
+  };
+
+  const encoded = encodeURIComponent(word);
+  const [dictionary, google, memory] = await Promise.allSettled([
+    read('https://api.dictionaryapi.dev/api/v2/entries/en/' + encoded),
+    read('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=' + encoded),
+    read('https://api.mymemory.translated.net/get?q=' + encoded + '&langpair=en%7Ces')
+  ]);
+
+  const item = dictionary.status === 'fulfilled' && Array.isArray(dictionary.value) ? dictionary.value[0] : null;
+  const senses = (item?.meanings || []).flatMap(group => (group.definitions || []).map(sense => ({
+    part: group.partOfSpeech,
+    definition: sense.definition,
+    example: sense.example
+  })));
+  const sense = senses.find(s => typeof s.definition === 'string' && s.definition.length > 8 && !proper.test(s.definition));
+  const fromGoogle = google.status === 'fulfilled'
+    ? google.value?.[0]?.map(part => part?.[0] || '').join('').trim()
+    : '';
+  const fromMemory = memory.status === 'fulfilled'
+    ? memory.value?.responseData?.translatedText?.trim()
+    : '';
+  const translation = fromGoogle || (!/^(?:NO QUERY SPECIFIED|MYMEMORY WARNING|QUERY LENGTH LIMIT)/i.test(fromMemory || '') ? fromMemory : '');
+
+  if (!sense && (!translation || nearCopy(translation.toLowerCase(), word))) {
+    return { word, translation: '', meaning: '' };
+  }
+
+  return {
+    word,
+    translation: translation || '',
+    meaning: sense?.definition || '',
+    example: sense?.example || '',
+    partOfSpeech: sense?.part || '',
+    phonetic: item?.phonetics?.find(p => p.text)?.text || item?.phonetic || '',
+    audio: item?.phonetics?.find(p => p.audio && /uk|gb/i.test(p.audio))?.audio ||
+      item?.phonetics?.find(p => p.audio)?.audio || '',
+    source: 'dictionary'
+  };
 }
 
 function json(body, status = 200, extraHeaders = {}) {
