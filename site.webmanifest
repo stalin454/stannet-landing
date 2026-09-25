@@ -1,0 +1,15 @@
+{
+  "name": "StanNet.Space",
+  "short_name": "StanNet",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#06131f",
+  "background_color": "#06131f",
+  "display": "standalone"
+}
