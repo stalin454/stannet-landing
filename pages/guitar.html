@@ -33,6 +33,7 @@
 <a class="secondary" href="#chord-lab">Acordes</a>
 <a class="secondary" href="#chord-dictionary">Diccionario</a>
 <a class="secondary" href="#harmony-lab">Circulos</a>
+<a class="secondary" href="#song-lab">Canciones</a>
 <a class="secondary" href="#exercise-lab">Ejercicios</a>
 <a class="secondary" href="#study-library">Estudios TAB</a>
 <a class="secondary" href="#theory-map">Ver arquitectura</a>
@@ -204,10 +205,72 @@
 </div>
 </section>
 
+<section class="section song-lab-section" id="song-lab">
+<div class="section-heading">
+<div>
+<p class="eyebrow">05 / SONG PRACTICE LAB</p>
+<h2>Busca una canción.<br><em>Conviértela en práctica.</em></h2>
+</div>
+<p>Encuentra el vídeo oficial o una interpretación en YouTube y crea una sesión de guitarra alrededor de su tonalidad y progresión. StanNet no afirma transcribir automáticamente la grabación: el alumno controla los acordes y la práctica generada.</p>
+</div>
+<div class="song-search-bar">
+<input id="guitarSongQuery" type="search" placeholder="Ej.: Yngwie Malmsteen Rising Force, Hotel California..." autocomplete="off">
+<button class="listen-scale" id="guitarSongSearch" type="button">BUSCAR CANCIÓN</button>
+</div>
+<p class="song-search-status" id="guitarSongStatus">Escribe título o artista para comenzar.</p>
+<div class="song-results" id="guitarSongResults"></div>
+
+<div class="song-workspace" id="guitarSongWorkspace" hidden>
+<article class="song-video-panel">
+<div class="song-video-frame"><iframe id="guitarSongPlayer" title="Vídeo de práctica" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+<h3 id="guitarSongTitle">Canción seleccionada</h3>
+<p id="guitarSongChannel"></p>
+</article>
+
+<aside class="guitar-console song-generator-controls">
+<p class="eyebrow">GENERADOR INTERACTIVO</p>
+<h2>Configura la práctica.</h2>
+<div class="control-stack">
+<label>TONALIDAD<select id="songPracticeRoot"></select></label>
+<label>MODO<select id="songPracticeMode"><option value="major">Mayor</option><option value="minor">Menor</option></select></label>
+<label>PROGRESIÓN
+<select id="songPracticeProgression">
+<option value="I-V-vi-IV">I – V – vi – IV</option>
+<option value="I-IV-V-I">I – IV – V – I</option>
+<option value="i-VI-III-VII">i – VI – III – VII</option>
+<option value="i-VII-VI-V">i – VII – VI – V</option>
+<option value="ii-V-I-vi">ii – V – I – vi</option>
+</select>
+</label>
+<label>NIVEL<select id="songPracticeLevel"><option value="beginner">Principiante</option><option value="intermediate">Intermedio</option><option value="advanced">Avanzado</option></select></label>
+<label class="range-row">BPM <span id="songPracticeBpmValue">90</span><input id="songPracticeBpm" type="range" min="50" max="180" value="90"></label>
+<button class="listen-scale" id="generateSongPractice" type="button">GENERAR PRÁCTICA</button>
+<button class="listen-scale" id="playSongPractice" type="button">ESCUCHAR PROGRESIÓN</button>
+</div>
+</aside>
+</div>
+
+<div class="song-practice-output" id="songPracticeOutput" hidden>
+<div class="guitar-panel">
+<h3>Progresión generada</h3>
+<div class="progression-strip" id="songPracticeChords"></div>
+<p class="tab-legend">La progresión es una práctica StanNet configurada por el alumno; no se presenta como transcripción exacta del vídeo.</p>
+</div>
+<div class="guitar-panel">
+<h3>TAB de raíces / guía</h3>
+<pre class="exercise-tab" id="songPracticeTab"></pre>
+</div>
+<div class="guitar-panel">
+<h3>Plan de estudio</h3>
+<ol class="song-practice-steps" id="songPracticeSteps"></ol>
+</div>
+</div>
+</section>
+
 <section class="section exercise-section" id="exercise-lab">
 <div class="section-heading">
 <div>
-<p class="eyebrow">05 / GENERADOR DE EJERCICIOS</p>
+<p class="eyebrow">06 / GENERADOR DE EJERCICIOS</p>
 <h2>Practica con<br><em>material original.</em></h2>
 </div>
 <p>Selecciona tecnica, nivel, tonalidad, escala y BPM. La academia crea un ejercicio propio con TAB, digitacion, rutina y audio.</p>
@@ -260,7 +323,7 @@
 <section class="section study-section" id="study-library">
 <div class="section-heading">
 <div>
-<p class="eyebrow">06 / BIBLIOTECA DE ESTUDIOS</p>
+<p class="eyebrow">07 / BIBLIOTECA DE ESTUDIOS</p>
 <h2>Frases y TAB<br><em>para estudiar de verdad.</em></h2>
 </div>
 <p>Estudios cortos organizados por tecnica. Las TAB de referencia mantienen cuerda y traste fijos; los estudios StanNet amplian los conceptos sin copiar solos completos.</p>
@@ -293,7 +356,7 @@
 <section class="section" id="theory-map">
 <div class="section-heading">
 <div>
-<p class="eyebrow">07 / EXPANSION FUTURA</p>
+<p class="eyebrow">08 / EXPANSION FUTURA</p>
 <h2>Una academia,<br><em>no una tabla.</em></h2>
 </div>
 <p>La base ya incluye escalas, modos, acordes, circulos armonicos y generador de ejercicios. El siguiente crecimiento natural sera expandir bibliotecas, guardar progreso y añadir rutinas diarias.</p>
