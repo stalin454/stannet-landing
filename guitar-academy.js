@@ -75,8 +75,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const songPracticeChords = $('#songPracticeChords');
   const songPracticeTab = $('#songPracticeTab');
   const songPracticeSteps = $('#songPracticeSteps');
+  const guitarResourceQuery = $('#guitarResourceQuery');
+  const resourceSongLabel = $('#resourceSongLabel');
+  const guitarPdfInput = $('#guitarPdfInput');
+  const guitarPdfDropZone = $('#guitarPdfDropZone');
+  const guitarPdfViewerShell = $('#guitarPdfViewerShell');
+  const guitarPdfViewer = $('#guitarPdfViewer');
+  const guitarPdfName = $('#guitarPdfName');
+  const guitarPdfStatus = $('#guitarPdfStatus');
+  const clearGuitarPdf = $('#clearGuitarPdf');
+  const fullscreenGuitarPdf = $('#fullscreenGuitarPdf');
   let activeView = 'both';
   let currentExercise = [];
+  let activeSongResult = null;
+  let activePdfUrl = null;
 
   const noteIndex = (note) => data.chromatic.indexOf(note);
   const noteAt = (root, semitones) => data.chromatic[(noteIndex(root) + semitones) % 12];
@@ -688,10 +700,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const selectSongResult = (result) => {
+    activeSongResult = result;
     guitarSongWorkspace.hidden = false;
     guitarSongPlayer.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(result.id)}?rel=0`;
     guitarSongTitle.textContent = result.title;
     guitarSongChannel.textContent = result.channel;
+    if (guitarResourceQuery) guitarResourceQuery.value = `${result.title} ${result.channel}`.trim();
+    if (resourceSongLabel) resourceSongLabel.textContent = `${result.title} · ${result.channel}`;
     guitarSongWorkspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -724,6 +739,55 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       guitarSongSearch.disabled = false;
     }
+  };
+
+  const currentResourceQuery = () => {
+    const explicit = guitarResourceQuery?.value.trim();
+    if (explicit) return explicit;
+    if (activeSongResult) return `${activeSongResult.title} ${activeSongResult.channel}`.trim();
+    return guitarSongQuery?.value.trim() || '';
+  };
+
+  const openExternalResource = (kind) => {
+    const query = currentResourceQuery();
+    if (!query) {
+      guitarSongStatus.textContent = 'Escribe o selecciona primero una canción.';
+      guitarResourceQuery?.focus();
+      return;
+    }
+    const url = kind === 'tabs'
+      ? 'https://www.songsterr.com/?pattern=' + encodeURIComponent(query)
+      : 'https://www.ultimate-guitar.com/search.php?search_type=title&value=' + encodeURIComponent(query);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const loadGuitarPdf = (file) => {
+    if (!file) return;
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) {
+      guitarPdfStatus.textContent = 'Ese archivo no parece ser un PDF.';
+      return;
+    }
+    if (activePdfUrl) URL.revokeObjectURL(activePdfUrl);
+    activePdfUrl = URL.createObjectURL(file);
+    guitarPdfViewer.src = activePdfUrl + '#view=FitH';
+    guitarPdfName.textContent = file.name;
+    guitarPdfStatus.textContent = 'PDF abierto localmente · no se ha subido a StanNet';
+    guitarPdfViewerShell.hidden = false;
+    guitarPdfDropZone.hidden = true;
+    clearGuitarPdf.disabled = false;
+    fullscreenGuitarPdf.disabled = false;
+  };
+
+  const clearLoadedPdf = () => {
+    if (activePdfUrl) URL.revokeObjectURL(activePdfUrl);
+    activePdfUrl = null;
+    guitarPdfViewer.removeAttribute('src');
+    guitarPdfViewerShell.hidden = true;
+    guitarPdfDropZone.hidden = false;
+    clearGuitarPdf.disabled = true;
+    fullscreenGuitarPdf.disabled = true;
+    if (guitarPdfInput) guitarPdfInput.value = '';
   };
 
   const getActiveStudies = () => data.referenceStudies.filter((study) => !studyCategory.value || study.category === studyCategory.value);
@@ -795,6 +859,50 @@ document.addEventListener('DOMContentLoaded', () => {
     songPracticeBpm?.addEventListener('input', () => { songPracticeBpmValue.textContent = songPracticeBpm.value; });
     $('#generateSongPractice')?.addEventListener('click', buildSongPractice);
     $('#playSongPractice')?.addEventListener('click', playSongPractice);
+    $('#searchSongsterr')?.addEventListener('click', () => openExternalResource('tabs'));
+    $('#searchChordsWeb')?.addEventListener('click', () => openExternalResource('chords'));
+    $('#copySongQuery')?.addEventListener('click', async () => {
+      const query = currentResourceQuery();
+      if (!query) return;
+      try {
+        await navigator.clipboard.writeText(query);
+        guitarSongStatus.textContent = 'Búsqueda copiada.';
+      } catch {
+        guitarSongStatus.textContent = query;
+      }
+    });
+    guitarResourceQuery?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') openExternalResource('tabs');
+    });
+    guitarPdfInput?.addEventListener('change', () => loadGuitarPdf(guitarPdfInput.files?.[0]));
+    guitarPdfDropZone?.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      guitarPdfDropZone.classList.add('dragging');
+    });
+    guitarPdfDropZone?.addEventListener('dragleave', () => guitarPdfDropZone.classList.remove('dragging'));
+    guitarPdfDropZone?.addEventListener('drop', (event) => {
+      event.preventDefault();
+      guitarPdfDropZone.classList.remove('dragging');
+      loadGuitarPdf(event.dataTransfer?.files?.[0]);
+    });
+    guitarPdfDropZone?.addEventListener('click', () => guitarPdfInput?.click());
+    guitarPdfDropZone?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        guitarPdfInput?.click();
+      }
+    });
+    clearGuitarPdf?.addEventListener('click', clearLoadedPdf);
+    fullscreenGuitarPdf?.addEventListener('click', () => {
+      const target = guitarPdfViewerShell;
+      if (!target) return;
+      if (document.fullscreenElement) document.exitFullscreen?.();
+      else target.requestFullscreen?.();
+    });
+    window.addEventListener('beforeunload', () => {
+      if (activePdfUrl) URL.revokeObjectURL(activePdfUrl);
+    });
+
     songPracticeMode?.addEventListener('change', () => {
       const minor = songPracticeMode.value === 'minor';
       songPracticeProgression.innerHTML = minor
