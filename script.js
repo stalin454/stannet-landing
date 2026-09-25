@@ -84,3 +84,33 @@ if(videoGallery&&videoPlayer){
       videoGallery.textContent='No se pudieron cargar los vídeos ahora. Puedes abrir el canal directamente en YouTube.';
     });
 }
+
+
+document.querySelectorAll('.nav-trigger').forEach((trigger)=>{
+  trigger.addEventListener('click',(event)=>{
+    event.stopPropagation();
+    const group=trigger.closest('.nav-group');
+    const wasOpen=group?.classList.contains('open');
+    document.querySelectorAll('.nav-group.open').forEach((item)=>{
+      item.classList.remove('open');
+      item.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+    });
+    if(group&&!wasOpen){
+      group.classList.add('open');
+      trigger.setAttribute('aria-expanded','true');
+    }
+  });
+});
+document.addEventListener('click',()=>{
+  document.querySelectorAll('.nav-group.open').forEach((item)=>{
+    item.classList.remove('open');
+    item.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+  });
+});
+document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
+  link.addEventListener('click',()=>{
+    const group=link.closest('.nav-group');
+    group?.classList.remove('open');
+    group?.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+  });
+});
