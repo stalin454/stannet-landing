@@ -5,16 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "index.html"
-      - "pages/**"
-      - "nutri-ia/**"
-      - "style.css"
-      - "script.js"
-      - "worker.js"
-      - "wrangler.jsonc"
-      - ".github/workflows/deploy-cloudflare.yml"
-      - ".assetsignore"
 
 permissions:
   contents: read
