@@ -312,3 +312,9 @@ body{background:var(--bg);color:var(--ink)}.site-header{background:rgba(6,19,31,
 .editorial-feature:nth-of-type(3) h2 .tech-accent,.editorial-contact h2 .tech-accent{color:#35d7e8!important}
 .editorial-intro h2 .tech-accent{max-width:100%}
 @media(max-width:560px){.editorial-home h2 .tech-accent{font-size:.54em;letter-spacing:-.035em!important}}
+
+.nav-group.open .nav-dropdown{display:grid}
+@media(max-width:850px){
+  .nav-group.open .nav-dropdown{display:grid!important}
+  .nav-trigger{display:flex;align-items:center;justify-content:space-between}
+}
