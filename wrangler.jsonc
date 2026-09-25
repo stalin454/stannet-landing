@@ -12,12 +12,13 @@
   },
   "routes": [
     {
-      "pattern": "stannet.space",
-      "custom_domain": true
+      "pattern": "stannet.space/*",
+      "zone_name": "stannet.space"
     },
     {
-      "pattern": "www.stannet.space",
-      "custom_domain": true
+      "pattern": "www.stannet.space/*",
+      "zone_name": "stannet.space"
     }
-  ]
+  ],
+  "workers_dev": true
 }
