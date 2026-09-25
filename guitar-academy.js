@@ -48,6 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const exerciseTab = $('#exerciseTab');
   const exerciseRoutine = $('#exerciseRoutine');
   const exerciseExplain = $('#exerciseExplain');
+  const studyCategory = $('#studyCategory');
+  const studySelect = $('#studySelect');
+  const studyBpm = $('#studyBpm');
+  const studyBpmValue = $('#studyBpmValue');
+  const studyCategoryLabel = $('#studyCategoryLabel');
+  const studyTitle = $('#studyTitle');
+  const studySource = $('#studySource');
+  const studyTab = $('#studyTab');
+  const studyNote = $('#studyNote');
   let activeView = 'both';
   let currentExercise = [];
 
@@ -236,26 +245,54 @@ document.addEventListener('DOMContentLoaded', () => {
     staff.innerHTML = `<svg class="staff-svg" viewBox="0 0 690 185" role="img" aria-label="Pentagrama de la escala"><style>line{stroke:rgba(255,255,255,.42);stroke-width:1}.staff-svg ellipse{fill:#d8d0bf;stroke:#f5c76b}.staff-svg .root-note{fill:#f5c76b}.staff-svg text{fill:#c9c1b2;font:10px DM Mono,monospace;text-anchor:middle}.staff-svg .accidental{fill:#72f6c7;font-size:20px}</style>${staffLines}<text x="18" y="93" style="font-size:42px;fill:#f5c76b">𝄞</text>${noteHeads}</svg>`;
   };
 
-  const renderTab = (notes) => {
-    const preferred = [
-      { note: rootSelect.value, string: 6, start: 0 },
-      { note: rootSelect.value, string: 5, start: 0 },
-      { note: rootSelect.value, string: 4, start: 0 }
-    ];
-    const findPosition = (note, fromFret = 0) => {
-      const positions = [];
-      data.tuning.forEach((string) => {
-        for (let fret = 0; fret <= 12; fret += 1) {
-          if (noteAt(string.note, fret) === note) positions.push({ string: string.string, fret });
-        }
+  const tabStringLabel = (stringNumber) => ({1:'e',2:'B',3:'G',4:'D',5:'A',6:'E'}[stringNumber]);
+
+  const allPositionsForNote = (note) => {
+    const positions = [];
+    data.tuning.forEach((string) => {
+      for (let fret = 0; fret <= 12; fret += 1) {
+        if (noteAt(string.note, fret) === note) positions.push({ string: string.string, fret });
+      }
+    });
+    return positions;
+  };
+
+  const chooseCompactPositions = (items, preferredFret = 5) => {
+    let previous = null;
+    return items.map((item) => {
+      const candidates = allPositionsForNote(item.note);
+      const ranked = candidates.slice().sort((a, b) => {
+        const score = (position) => {
+          if (!previous) return Math.abs(position.fret - preferredFret) + Math.abs(position.string - 4) * 0.7;
+          const fretMove = Math.abs(position.fret - previous.fret);
+          const stringMove = Math.abs(position.string - previous.string);
+          const extremeJump = fretMove > 5 ? 8 : 0;
+          return fretMove + stringMove * 2.4 + extremeJump;
+        };
+        return score(a) - score(b);
       });
-      return positions.sort((a, b) => Math.abs(a.fret - fromFret) - Math.abs(b.fret - fromFret))[0];
-    };
-    const positions = notes.map((item, index) => findPosition(item.note, preferred[index]?.start || 5));
-    tab.innerHTML = data.tuning.slice().reverse().map((string) => {
-      const chunks = positions.map((position) => position.string === string.string ? String(position.fret).padStart(2, '-') : '--');
-      return `${string.note}|-${chunks.join('-')}-|`;
-    }).join('\n');
+      previous = ranked[0];
+      return { ...item, position: previous };
+    });
+  };
+
+  const formatTabPositions = (positions) => {
+    const rows = [1,2,3,4,5,6].map((stringNumber) => {
+      const cells = positions.map((item) => item.position.string === stringNumber ? String(item.position.fret).padStart(2, '-') : '--');
+      return `${tabStringLabel(stringNumber)}|-${cells.join('-')}-|`;
+    });
+    return rows.join('\n');
+  };
+
+  const frequencyAtPosition = (stringNumber, fret) => {
+    const string = data.tuning.find((item) => item.string === stringNumber);
+    const midi = (string.octave + 1) * 12 + noteIndex(string.note) + fret;
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  };
+
+  const renderTab = (notes) => {
+    const positions = chooseCompactPositions(notes, 5);
+    tab.textContent = formatTabPositions(positions);
   };
 
   const render = () => {
@@ -446,14 +483,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return kind === 'mode' ? data.modes[key] : data.scales[key];
   };
 
-  const findPlayablePosition = (note, targetFret = 5) => {
-    const positions = [];
-    data.tuning.forEach((string) => {
-      for (let fret = 0; fret <= 12; fret += 1) {
-        if (noteAt(string.note, fret) === note) positions.push({ string: string.string, stringNote: string.note, fret });
-      }
-    });
-    return positions.sort((a, b) => Math.abs(a.fret - targetFret) - Math.abs(b.fret - targetFret))[0];
+  const findPlayablePosition = (note, targetFret = 5, previous = null) => {
+    const candidates = allPositionsForNote(note);
+    return candidates.sort((a, b) => {
+      const score = (position) => {
+        if (!previous) return Math.abs(position.fret - targetFret) + Math.abs(position.string - 4) * 0.7;
+        return Math.abs(position.fret - previous.fret) + Math.abs(position.string - previous.string) * 2.4 + (Math.abs(position.fret - previous.fret) > 5 ? 8 : 0);
+      };
+      return score(a) - score(b);
+    })[0];
   };
 
   const makeExerciseSequence = () => {
@@ -479,11 +517,13 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const tabFromExercise = (items) => {
-    const positions = items.map((item, index) => ({ ...item, position: findPlayablePosition(item.note, 3 + (index % 5)) }));
-    return data.tuning.slice().reverse().map((string) => {
-      const chunks = positions.map((item) => item.position.string === string.string ? String(item.position.fret).padStart(2, '-') : '--');
-      return `${string.note}|-${chunks.join('-')}-|`;
-    }).join('\n');
+    let previous = null;
+    const positions = items.map((item) => {
+      const position = findPlayablePosition(item.note, previous?.fret ?? 5, previous);
+      previous = position;
+      return { ...item, position };
+    });
+    return formatTabPositions(positions);
   };
 
   const renderExercise = () => {
@@ -519,6 +559,44 @@ document.addEventListener('DOMContentLoaded', () => {
     })));
   };
 
+  const getActiveStudies = () => data.referenceStudies.filter((study) => !studyCategory.value || study.category === studyCategory.value);
+
+  const renderStudyChoices = () => {
+    const categories = [...new Set(data.referenceStudies.map((study) => study.category))];
+    if (!studyCategory.options.length) {
+      studyCategory.innerHTML = categories.map((category) => `<option value="${category}">${category}</option>`).join('');
+    }
+    const studies = getActiveStudies();
+    studySelect.innerHTML = studies.map((study, index) => `<option value="${index}">${study.title}</option>`).join('');
+    studySelect.value = '0';
+    renderStudy();
+  };
+
+  const renderStudy = () => {
+    const studies = getActiveStudies();
+    const study = studies[Number(studySelect.value || 0)] || studies[0];
+    if (!study) return;
+    const positions = study.events.map(([string, fret]) => ({ position: { string, fret } }));
+    studyCategoryLabel.textContent = study.category.toUpperCase();
+    studyTitle.textContent = study.title;
+    studySource.textContent = study.source;
+    studyTab.textContent = formatTabPositions(positions);
+    studyNote.textContent = study.note;
+  };
+
+  const playStudy = () => {
+    const studies = getActiveStudies();
+    const study = studies[Number(studySelect.value || 0)] || studies[0];
+    if (!study) return;
+    const beat = 60 / Number(studyBpm.value || 80);
+    playGuitarSequence(study.events.map(([string, fret], index) => ({
+      frequency: frequencyAtPosition(string, fret),
+      offset: index * beat * 0.5,
+      duration: Math.max(0.32, beat * 0.72),
+      velocity: 0.21
+    })));
+  };
+
   fillSelectors();
   [rootSelect, scaleSelect, modeSelect].forEach((select) => select.addEventListener('change', render));
   [chordRoot, chordType].forEach((select) => select.addEventListener('change', renderChord));
@@ -542,6 +620,14 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#listenProgression').addEventListener('click', playProgression);
   $('#generateExercise').addEventListener('click', renderExercise);
   $('#listenExercise').addEventListener('click', playExercise);
+  if (studyCategory && studySelect && studyBpm) {
+    studyCategory.addEventListener('change', renderStudyChoices);
+    studySelect.addEventListener('change', renderStudy);
+    studyBpm.addEventListener('input', () => { studyBpmValue.textContent = studyBpm.value; });
+    $('#listenStudy')?.addEventListener('click', playStudy);
+    renderStudyChoices();
+  }
+
   $('#compareChordScale').addEventListener('click', () => {
     rootSelect.value = chordRoot.value;
     modeSelect.value = 'none';

@@ -15,3 +15,11 @@
 @media(max-width:560px){.guitar-hero{min-height:70vh}.guitar-hero h1{font-size:clamp(48px,17vw,82px)}.segmented{grid-template-columns:1fr}.guitar-panel{padding:12px}.fretboard,.fret-numbers,.staff-svg,.tab-lines,.exercise-tab{min-width:620px}.result-grid{gap:10px}.exercise-meta{grid-template-columns:1fr}}
 
 .guitar-audio-note{margin:-4px 0 4px;color:#8fa5b3;font-size:11px;line-height:1.55}
+
+.study-section{background:linear-gradient(145deg,rgba(53,215,232,.05),rgba(211,43,255,.04),rgba(245,199,107,.05))}
+.study-grid{display:grid;grid-template-columns:minmax(240px,.34fr) minmax(0,1fr);gap:18px}
+.study-source{margin:-8px 0 18px;color:#8fa5b3;font:10px var(--font-main);line-height:1.6}
+.study-tab{margin:0}
+.tab-legend{margin:12px 0 0;color:#8fa5b3;font-size:12px;line-height:1.65}
+.tab-legend strong{color:var(--guitar-gold)}
+@media(max-width:930px){.study-grid{grid-template-columns:1fr}}

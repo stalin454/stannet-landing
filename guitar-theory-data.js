@@ -210,6 +210,70 @@ window.StanNetGuitarData = {
     intermediate: { name: 'Intermedio', bpm: 95, span: 7, explanation: 'Mantén el tempo, cambia de cuerda con control y acentua cada grupo.' },
     advanced: { name: 'Avanzado', bpm: 125, span: 9, explanation: 'Busca fluidez, dinamica y desplazamientos sin perder la referencia tonal.' }
   },
+  referenceStudies: [
+    {
+      id: 'linear-g-major',
+      category: 'Frases lineales',
+      title: 'Frase lineal en Sol mayor',
+      source: 'Referencia del PDF · p. 3 · ejercicio 1',
+      note: 'Trabajo de una sola cuerda para controlar pua alternada y desplazamientos.',
+      events: [
+        [1,17],[1,20],[1,19],[1,17],[1,15],[1,19],[1,17],[1,15],[1,14],[1,15],[1,17],[1,14],[1,15]
+      ]
+    },
+    {
+      id: 'linear-e-minor',
+      category: 'Frases lineales',
+      title: 'Frase lineal en Mi menor',
+      source: 'Referencia del PDF · p. 3 · ejercicio 2',
+      note: 'Mantiene la frase sobre la primera cuerda para aislar articulacion y afinacion.',
+      events: [
+        [1,20],[1,19],[1,17],[1,15],[1,19],[1,17],[1,15],[1,14],[1,17]
+      ]
+    },
+    {
+      id: 'scalar-e-harmonic-minor',
+      category: 'Frases escalares',
+      title: 'Patron escalar en Mi menor armonica',
+      source: 'Referencia del PDF · p. 16 · ejercicio 1',
+      note: 'Cruza cuerdas dentro de una posicion; practica lento y conserva cada nota limpia.',
+      events: [
+        [1,7],[1,8],[1,7],[1,5],[2,8],[2,7],[2,5],[3,8],[3,7],[3,5],[3,4],[4,7],[4,5],[4,4],[5,7],[5,6]
+      ]
+    },
+    {
+      id: 'a-harmonic-minor-sequence',
+      category: 'Frases escalares',
+      title: 'Secuencia original en La menor armonica',
+      source: 'Estudio StanNet basado en la seccion de frases escalares',
+      note: 'Secuencia ascendente y descendente en una zona compacta del mastil.',
+      events: [
+        [6,5],[6,7],[6,8],[5,5],[5,7],[5,8],[4,6],[4,7],[4,9],[3,5],[3,7],[3,9],
+        [3,7],[3,5],[4,9],[4,7],[4,6],[5,8],[5,7],[5,5],[6,8],[6,7],[6,5]
+      ]
+    },
+    {
+      id: 'e-minor-arpeggio',
+      category: 'Arpegios',
+      title: 'Arpegio de Mi menor · barrido basico',
+      source: 'Estudio StanNet basado en la seccion de arpegios',
+      note: 'Mantiene un dibujo claro y simetrico para aprender el recorrido de cuerdas.',
+      events: [
+        [6,12],[5,14],[4,14],[3,12],[2,12],[1,12],[2,12],[3,12],[4,14],[5,14],[6,12]
+      ]
+    },
+    {
+      id: 'phrygian-dominant-run',
+      category: 'Patron neoclasico',
+      title: 'Frigio dominante · secuencia de tres',
+      source: 'Estudio StanNet inspirado en los patrones del PDF',
+      note: 'Practica grupos de tres manteniendo la digitacion compacta y la tonica como referencia.',
+      events: [
+        [6,5],[6,6],[6,9],[6,6],[6,9],[5,7],[6,9],[5,7],[5,8],[5,7],[5,8],[5,10],
+        [5,8],[5,10],[4,7],[5,10],[4,7],[4,9]
+      ]
+    }
+  ],
   tuning: [
     { string: 6, note: 'E', octave: 2 },
     { string: 5, note: 'A', octave: 2 },

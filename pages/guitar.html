@@ -33,6 +33,7 @@
 <a class="secondary" href="#chord-lab">Acordes</a>
 <a class="secondary" href="#harmony-lab">Circulos</a>
 <a class="secondary" href="#exercise-lab">Ejercicios</a>
+<a class="secondary" href="#study-library">Estudios TAB</a>
 <a class="secondary" href="#theory-map">Ver arquitectura</a>
 </div>
 <div class="guitar-orbit" aria-hidden="true"><div class="guitar-pick"></div></div>
@@ -89,7 +90,7 @@
 </section>
 <section class="guitar-panel">
 <h3>Tablatura sugerida</h3>
-<pre class="tab-lines" id="tab"></pre>
+<pre class="tab-lines" id="tab"></pre><p class="tab-legend">TAB estandar: <strong>e</strong> es la 1ª cuerda aguda y <strong>E</strong> la 6ª cuerda grave. Los numeros son trastes.</p>
 </section>
 </div>
 <div class="explain" id="scaleCharacter"></div>
@@ -212,7 +213,7 @@
 </div>
 <div class="guitar-panel" style="margin-top:18px">
 <h3>Tablatura</h3>
-<pre class="exercise-tab" id="exerciseTab"></pre>
+<pre class="exercise-tab" id="exerciseTab"></pre><p class="tab-legend">La linea superior es la 1ª cuerda (e aguda); la inferior es la 6ª (E grave). Lee cada columna de izquierda a derecha.</p>
 </div>
 </div>
 <aside class="practice-card">
@@ -226,10 +227,43 @@
 </div>
 </section>
 
+<section class="section study-section" id="study-library">
+<div class="section-heading">
+<div>
+<p class="eyebrow">05 / BIBLIOTECA DE ESTUDIOS</p>
+<h2>Frases y TAB<br><em>para estudiar de verdad.</em></h2>
+</div>
+<p>Estudios cortos organizados por tecnica. Las TAB de referencia mantienen cuerda y traste fijos; los estudios StanNet amplian los conceptos sin copiar solos completos.</p>
+</div>
+<div class="study-grid">
+<aside class="guitar-console">
+<p class="eyebrow">ESTUDIOS</p>
+<h2>Selecciona uno.</h2>
+<div class="control-stack">
+<label>CATEGORIA<select id="studyCategory"></select></label>
+<label>EJERCICIO<select id="studySelect"></select></label>
+<label class="range-row">BPM <span id="studyBpmValue">80</span><input id="studyBpm" type="range" min="40" max="160" value="80"></label>
+<button class="listen-scale" id="listenStudy" type="button">ESCUCHAR ESTUDIO</button>
+</div>
+</aside>
+<article class="guitar-stage">
+<p class="eyebrow" id="studyCategoryLabel">FRASES LINEALES</p>
+<h2 class="chord-name" id="studyTitle"></h2>
+<p class="study-source" id="studySource"></p>
+<div class="guitar-panel">
+<h3>Tablatura verificada</h3>
+<pre class="exercise-tab study-tab" id="studyTab"></pre>
+<p class="tab-legend">TAB estandar: <strong>e</strong> = 1ª cuerda aguda · <strong>E</strong> = 6ª cuerda grave. Cada numero indica el traste exacto de esa cuerda.</p>
+</div>
+<div class="explain" id="studyNote"></div>
+</article>
+</div>
+</section>
+
 <section class="section" id="theory-map">
 <div class="section-heading">
 <div>
-<p class="eyebrow">05 / EXPANSION FUTURA</p>
+<p class="eyebrow">06 / EXPANSION FUTURA</p>
 <h2>Una academia,<br><em>no una tabla.</em></h2>
 </div>
 <p>La base ya incluye escalas, modos, acordes, circulos armonicos y generador de ejercicios. El siguiente crecimiento natural sera expandir bibliotecas, guardar progreso y añadir rutinas diarias.</p>
