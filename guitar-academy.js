@@ -340,17 +340,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const type = chordType.value;
     const string6Fret = rootFretOnString('E', chordRoot.value);
     const string5Fret = rootFretOnString('A', chordRoot.value);
-    const family = string6Fret <= 7 && data.chordShapes.string6[type] ? 'string6' : 'string5';
-    const shape = data.chordShapes[family][type] || data.chordShapes.string5.major;
+    const preferred = string6Fret <= 7 ? 'string6' : 'string5';
+    const alternate = preferred === 'string6' ? 'string5' : 'string6';
+
+    let family = data.chordShapes[preferred]?.[type] ? preferred : alternate;
+    let shape = data.chordShapes[family]?.[type];
+
+    if (!shape) return null;
+
     const offset = family === 'string6' ? string6Fret : string5Fret;
     const frets = shape.base.map((fret) => fret === null ? null : fret + offset);
-    const minFret = Math.min(...frets.filter((fret) => fret && fret > 0));
-    const displayStart = minFret > 4 ? minFret : 1;
+    const soundingFrets = frets.filter((fret) => Number.isInteger(fret) && fret > 0);
+    const displayStart = soundingFrets.length && Math.min(...soundingFrets) > 4 ? Math.min(...soundingFrets) : 1;
     return { family, shape, frets, displayStart };
   };
 
   const renderChordDiagram = (notes) => {
-    const { shape, frets, displayStart } = getChordShape();
+    const resolved = getChordShape();
+    if (!resolved) {
+      chordDiagram.innerHTML = '<div class="diagram-warning"><strong>Digitación no publicada.</strong><span>La fórmula del acorde es correcta, pero StanNet no mostrará un dibujo hasta tener una posición verificada.</span></div>';
+      return;
+    }
+    const { family, shape, frets, displayStart } = resolved;
     const noteSet = new Set(notes.map((item) => item.note));
     const degreeByNote = new Map(notes.map((item) => [item.note, item.degree]));
     const headers = data.tuning.map((string, index) => {
@@ -371,7 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
     const fingers = shape.fingers.map((finger) => `<span class="chord-string-label">${finger}</span>`).join('');
-    chordDiagram.innerHTML = `<div class="chord-grid"><span></span>${headers}${cells.join('')}<span></span>${fingers}</div>`;
+    const rootString = family === 'string6' ? '6ª cuerda' : '5ª cuerda';
+    chordDiagram.innerHTML = `<div class="chord-root-family">Forma movible · fundamental en ${rootString}</div><div class="chord-grid"><span></span>${headers}${cells.join('')}<span></span>${fingers}</div><div class="diagram-legend"><span><b>x</b> no tocar</span><span><b>o</b> al aire</span><span><b>●</b> nota pulsada</span><span><b>1–4</b> dedos mano izquierda</span></div>`;
   };
 
   const renderChord = () => {
