@@ -14,6 +14,7 @@ on:
       - "worker.js"
       - "wrangler.jsonc"
       - ".github/workflows/deploy-cloudflare.yml"
+      - ".assetsignore"
 
 permissions:
   contents: read
