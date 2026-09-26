@@ -1,1 +1,105 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>StanNet Shield</title><link rel="stylesheet" href="style.css"></head><body><main><header><div><span class="brand">STAN<span>Net</span> Shield</span><h1>Centro de seguridad</h1><p>Scanner defensivo local · YARA-X · SHA-256</p></div><div class="state">PROTECCIÓN MANUAL</div></header><section class="grid"><article><h2>Analizar</h2><p>Selecciona un archivo o carpeta. Shield nunca ejecuta el contenido analizado.</p><input id="target" placeholder="C:\ruta\archivo-o-carpeta"><button data-action="scan">Analizar ahora</button></article><article><h2>Cuarentena</h2><p>Aísla manualmente un archivo y conserva SHA-256 y ruta original para restaurarlo.</p><input id="quarantine" placeholder="C:\\ruta\\archivo"><button data-action="quarantine">Enviar a cuarentena</button><hr><p>Para restaurar, indica el <code>record.json</code> de la cuarentena.</p><input id="restoreRecord" placeholder="C:\\...\\record.json"><button data-action="restore">Restaurar archivo</button></article><article><h2>PC Cleaner</h2><p>Primero analiza. Shield solo propone archivos temporales antiguos dentro de la carpeta temporal del usuario.</p><button data-action="cleaner">Analizar temporales</button><div id="cleanerList"></div><button data-action="clean-selected" disabled>Limpiar seleccionados</button></article><article><h2>Estado</h2><ul><li>SHA-256: activo</li><li>YARA-X: activo</li><li>Auto-delete: desactivado</li><li>Microsoft Defender: no se modifica</li></ul></article></section><section class="console"><h2>Resultados</h2><pre id="output">StanNet Shield listo.</pre></section><footer>Preview defensiva. Un resultado sin coincidencias no garantiza que un archivo sea seguro.</footer></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>StanNet Shield</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <span class="brand">STAN<span>Net</span> Shield</span>
+      <h1>Centro de seguridad</h1>
+      <p>YARA-X + SHA-256 + Microsoft Defender + mantenimiento seguro</p>
+    </div>
+    <div class="state" id="overallState">COMPROBANDO</div>
+  </header>
+
+  <section class="hero-status">
+    <div><small>SHIELD ENGINE</small><strong>YARA-X activo</strong></div>
+    <div><small>PROTECCIÓN EN TIEMPO REAL</small><strong id="rtState">Consultar Defender</strong></div>
+    <div><small>AUTO-DELETE</small><strong>Desactivado</strong></div>
+    <div><small>DATOS</small><strong>Locales</strong></div>
+  </section>
+
+  <section class="grid">
+    <article class="featured">
+      <div class="eyebrow">WINDOWS SECURITY</div>
+      <h2>Microsoft Defender</h2>
+      <p>Shield complementa la protección de Windows. Consulta su estado, actualiza firmas y lanza un Quick Scan sin desactivar Defender.</p>
+      <div id="defenderStatus" class="status-box">Pulsa «Comprobar estado».</div>
+      <div class="row">
+        <button data-action="defender-status">Comprobar estado</button>
+        <button class="secondary" data-action="defender-update">Actualizar firmas</button>
+        <button class="secondary" data-action="defender-quick">Quick Scan</button>
+      </div>
+    </article>
+
+    <article>
+      <div class="eyebrow">STANNET ENGINE</div>
+      <h2>Scanner local</h2>
+      <p>Analiza un archivo o carpeta con SHA-256 y reglas YARA-X. Shield nunca ejecuta el contenido.</p>
+      <input id="target" placeholder="C:\ruta\archivo-o-carpeta">
+      <button data-action="scan">Analizar ahora</button>
+      <p class="micro">Máximo 10.000 archivos por operación · archivos individuales hasta 1 GiB · YARA-X hasta 64 MiB por archivo.</p>
+    </article>
+
+    <article>
+      <div class="eyebrow">AISLAMIENTO REVERSIBLE</div>
+      <h2>Cuarentena</h2>
+      <p>Aísla manualmente un archivo, conserva su SHA-256 y permite restaurarlo a su ubicación original.</p>
+      <input id="quarantine" placeholder="C:\ruta\archivo">
+      <button data-action="quarantine">Enviar a cuarentena</button>
+      <div class="section-line"></div>
+      <div class="row between"><b>Elementos aislados</b><button class="ghost" data-action="quarantine-refresh">Actualizar</button></div>
+      <div id="quarantineList" class="list"><span class="muted">Sin cargar.</span></div>
+    </article>
+
+    <article>
+      <div class="eyebrow">MANTENIMIENTO SEGURO</div>
+      <h2>PC Cleaner</h2>
+      <p>Solo propone temporales del usuario con más de 7 días. Nada se elimina sin selección y confirmación explícita.</p>
+      <div class="row">
+        <button data-action="cleaner">Analizar temporales</button>
+        <button class="danger" data-action="clean-selected" disabled>Limpiar seleccionados</button>
+      </div>
+      <div id="cleanerSummary" class="summary"></div>
+      <div id="cleanerList" class="list scroll"></div>
+    </article>
+
+    <article>
+      <div class="eyebrow">TRAZABILIDAD</div>
+      <h2>Historial local</h2>
+      <p>Registra análisis y acciones de Shield sin subir tus archivos a Internet.</p>
+      <div class="row">
+        <button data-action="history-refresh">Actualizar</button>
+        <button class="ghost" data-action="history-clear">Borrar historial</button>
+      </div>
+      <div id="historyList" class="list scroll"></div>
+    </article>
+
+    <article>
+      <div class="eyebrow">LÍMITES CLAROS</div>
+      <h2>Modelo de protección</h2>
+      <ul class="checks">
+        <li>Microsoft Defender: protección residente y firmas de malware.</li>
+        <li>StanNet Shield: scanner adicional, YARA-X, cuarentena y cleaner.</li>
+        <li>No desactiva Defender ni modifica sus exclusiones.</li>
+        <li>No borra automáticamente archivos detectados.</li>
+        <li>Un resultado YARA sin coincidencias no garantiza que un archivo sea seguro.</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="console">
+    <div class="row between"><h2>Resultados</h2><button class="ghost" data-action="clear-console">Limpiar consola</button></div>
+    <pre id="output">StanNet Shield listo.</pre>
+  </section>
+
+  <footer>StanNet Shield 0.4 Preview · defensa local complementaria para Windows · Security by design</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
