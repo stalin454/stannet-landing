@@ -3,7 +3,7 @@ use std::process::Command;
 
 fn powershell(script: &str) -> Result<String, String> {
     let output = Command::new("powershell.exe")
-        .args(["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script])
+        .args(["-NoProfile", "-NonInteractive", "-Command", script])
         .output()
         .map_err(|e| format!("No se pudo iniciar PowerShell: {e}"))?;
     if !output.status.success() {
