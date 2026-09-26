@@ -49,7 +49,37 @@
   const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
   launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open'))); close.addEventListener('click',()=>setOpen(false));
   root.querySelectorAll('.snai-modes button').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.snai-modes button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode||'auto'}));
-  const add=(text,kind='bot')=>{const el=document.createElement('div');el.className='snai-msg '+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el};
+  const add=(text,kind='bot')=>{
+    const el=document.createElement('div');
+    el.className='snai-msg '+kind;
+    if(kind==='bot'){
+      const safe=String(text||'');
+      const pattern=/(https?:\/\/(?:www\.)?stannet\.space[^\s<]*)|(\/(?:pages|nutri-ia|sentinel)\/[A-Za-z0-9._~!  const add=(text,kind='bot')=>{const el=document.createElement('div');el.className='snai-msg '+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el};'()*+,;=:@%\/-]*|\/sentinel\/)/gi;
+      let last=0,match;
+      while((match=pattern.exec(safe))){
+        if(match.index>last) el.appendChild(document.createTextNode(safe.slice(last,match.index)));
+        const raw=match[0].replace(/[),.;!?]+$/,'');
+        const trailing=match[0].slice(raw.length);
+        const a=document.createElement('a');
+        a.href=raw;
+        a.textContent=raw;
+        a.target='_self';
+        a.rel='noopener';
+        a.style.color='#59e8ff';
+        a.style.textDecoration='underline';
+        a.style.textUnderlineOffset='3px';
+        el.appendChild(a);
+        if(trailing) el.appendChild(document.createTextNode(trailing));
+        last=match.index+match[0].length;
+      }
+      if(last<safe.length) el.appendChild(document.createTextNode(safe.slice(last)));
+    }else{
+      el.textContent=text;
+    }
+    messages.appendChild(el);
+    messages.scrollTop=messages.scrollHeight;
+    return el
+  };
   form.addEventListener('submit',async(e)=>{
     e.preventDefault(); const text=input.value.trim(); if(!text)return; add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot');
     try{
