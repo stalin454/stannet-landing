@@ -389,8 +389,9 @@ async function handleStanNetAi(request, env) {
   const apiUrl = env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
   const model = env.AI_MODEL || 'openai/gpt-oss-20b';
 
-  if (!env.AI_API_KEY) {
-    return json({ error: 'StanNet AI no está configurado.' }, 503, headers);
+  const apiKey = env.AI_API_KEY || env.GROQ_API_KEY || env.GROQ_KEY;
+  if (!apiKey) {
+    return json({ error: 'StanNet AI no está configurado: falta la clave de Groq en Cloudflare.' }, 503, headers);
   }
 
   let body;
@@ -409,7 +410,7 @@ async function handleStanNetAi(request, env) {
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + env.AI_API_KEY,
+        Authorization: 'Bearer ' + apiKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -430,7 +431,11 @@ async function handleStanNetAi(request, env) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return json({ error: 'StanNet AI no pudo responder ahora.', providerStatus: response.status }, 502, headers);
+      const providerMessage = data?.error?.message || data?.error || '';
+      return json({
+        error: 'Groq rechazó la solicitud' + (response.status ? ' (' + response.status + ')' : '') + (providerMessage ? ': ' + String(providerMessage).slice(0, 240) : '.'),
+        providerStatus: response.status
+      }, 502, headers);
     }
 
     const answer = data?.choices?.[0]?.message?.content;
