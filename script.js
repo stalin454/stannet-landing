@@ -114,3 +114,13 @@ document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
     group?.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
   });
 });
+
+// StanNet AI: load the shared floating assistant on every page that uses script.js.
+(()=>{
+  if(document.querySelector('script[data-stannet-ai-loader]'))return;
+  const ai=document.createElement('script');
+  ai.src='/stannet-ai.js';
+  ai.defer=true;
+  ai.dataset.stannetAiLoader='true';
+  document.body.appendChild(ai);
+})();
