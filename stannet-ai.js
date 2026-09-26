@@ -6,6 +6,10 @@
   #stannet-ai-root{position:fixed;right:22px;bottom:18px;z-index:99999;font-family:Orbitron,Inter,system-ui,sans-serif;color:#f5fbff}
   .snai-launcher{width:88px;height:112px;border:0;background:transparent;cursor:pointer;padding:0;filter:drop-shadow(0 12px 28px rgba(0,230,255,.35));animation:snai-float 2.4s ease-in-out infinite;position:relative}
   .snai-launcher:hover{transform:translateY(-4px) scale(1.04)}
+  .snai-launcher.is-hidden{display:none}
+  .snai-reopen{display:none;align-items:center;justify-content:center;min-width:48px;height:34px;padding:0 12px;border:1px solid rgba(89,232,255,.34);border-radius:12px 0 0 12px;background:rgba(5,9,17,.92);color:#7ef3ff;font:700 11px Orbitron,Inter,sans-serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 18px rgba(89,232,255,.12);backdrop-filter:blur(12px)}
+  .snai-reopen.visible{display:flex}
+  .snai-reopen:hover{border-color:#59e8ff;color:#fff}
   .snai-bot{position:relative;width:76px;height:104px;margin:auto}
   .snai-head{position:absolute;left:15px;top:2px;width:46px;height:34px;border:2px solid #73f1ff;border-radius:13px;background:linear-gradient(145deg,#f7fbff 0 52%,#121827 53%);box-shadow:0 0 16px rgba(89,232,255,.55)}
   .snai-head:before,.snai-head:after{content:"";position:absolute;top:13px;width:7px;height:5px;border-radius:50%;background:#59e8ff;box-shadow:0 0 8px #59e8ff}
@@ -41,13 +45,27 @@
     </section>
     <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-expanded="false">
       <div class="snai-bot"><div class="snai-head"></div><div class="snai-neck"></div><div class="snai-body"><img src="/assets/brand/stannet-shield.png" alt=""></div><i class="snai-arm a"></i><i class="snai-arm b"></i><i class="snai-leg a"></i><i class="snai-leg b"></i><span class="snai-status"></span></div>
-    </button>`;
+    </button>
+    <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">AI</button>`;
   document.body.appendChild(root);
 
-  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send');
+  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send');
+  const UI_KEY='stannet-ai-hidden-v1';
+  const HISTORY_KEY='stannet-ai-history-v1';
   let mode='auto';
+  let history=[];
+  try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(history))history=[]}catch{history=[]}
+  const saveHistory=()=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)))}catch{}};
   const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
-  launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open'))); close.addEventListener('click',()=>setOpen(false));
+  const setHidden=(hidden)=>{
+    launcher.classList.toggle('is-hidden',hidden);
+    reopen.classList.toggle('visible',hidden);
+    if(hidden)setOpen(false);
+    try{localStorage.setItem(UI_KEY,hidden?'1':'0')}catch{}
+  };
+  launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
+  close.addEventListener('click',()=>setHidden(true));
+  reopen.addEventListener('click',()=>{setHidden(false);setOpen(true)});
   root.querySelectorAll('.snai-modes button').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.snai-modes button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode||'auto'}));
   const routeLabels={
     '/pages/programming.html':'Entrar a Programming Academy →',
@@ -76,7 +94,7 @@
     }catch{}
     return raw;
   };
-  const add=(text,kind='bot')=>{
+  const add=(text,kind='bot',persist=true)=>{
     const el=document.createElement('div');
     el.className='snai-msg '+kind;
     if(kind==='bot'){
@@ -113,10 +131,26 @@
     }
     messages.appendChild(el);
     messages.scrollTop=messages.scrollHeight;
+    if(persist){
+      history.push({text:String(text||''),kind});
+      history=history.slice(-40);
+      saveHistory();
+    }
     return el
   };
+
+  if(history.length){
+    messages.innerHTML='';
+    const restored=[...history];
+    history=[];
+    restored.forEach(item=>add(item.text,item.kind||'bot',true));
+  }
+  let initiallyHidden=false;
+  try{initiallyHidden=localStorage.getItem(UI_KEY)==='1'}catch{}
+  if(initiallyHidden)setHidden(true);
+
   form.addEventListener('submit',async(e)=>{
-    e.preventDefault(); const text=input.value.trim(); if(!text)return; add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot');
+    e.preventDefault(); const text=input.value.trim(); if(!text)return; add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot',false);
     try{
       const pref=mode==='auto'?'':`Modo ${mode}. `;
       const r=await fetch('/api/stannet-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:pref+text})});
