@@ -94,6 +94,14 @@ document.querySelector('[data-action="scan"]').onclick=async()=>{
   }
 };
 
+document.querySelector('[data-action="defender-path"]').onclick=async()=>{
+  const path=document.querySelector('#target').value.trim();
+  if(!path)return show('Indica un archivo o carpeta para analizar con Microsoft Defender.');
+  if(!confirm('¿Analizar esta ruta con Microsoft Defender?'))return;
+  const result=await invoke('defender_scan_path',{path});
+  if(result){loadDefender();loadHistory()}
+};
+
 document.querySelector('[data-action="quarantine"]').onclick=async()=>{
   const path=document.querySelector('#quarantine').value.trim();
   if(!path)return show('Indica el archivo que quieres aislar.');
