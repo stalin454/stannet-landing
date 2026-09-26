@@ -211,6 +211,13 @@ fn defender_quick_scan() -> Result<String, String> {
 }
 
 #[tauri::command]
+fn defender_scan_path(path: String) -> Result<String, String> {
+    let result = defender::scan_path(&path)?;
+    let _ = history::record("defender-custom-scan", &path);
+    Ok(result)
+}
+
+#[tauri::command]
 fn defender_update_signatures() -> Result<String, String> {
     let result = defender::update_signatures()?;
     let _ = history::record("defender-update", &result);
@@ -238,6 +245,7 @@ fn main() {
             cleaner_delete_selected,
             defender_status,
             defender_quick_scan,
+            defender_scan_path,
             defender_update_signatures,
             history_list,
             history_clear
