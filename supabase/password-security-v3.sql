@@ -73,3 +73,57 @@ create policy "devices delete own"
 on public.password_devices for delete
 to authenticated
 using ((select auth.uid()) = user_id);
+
+
+-- Atomic optimistic-concurrency sync. expected_version=0 creates the first vault.
+create or replace function public.sync_password_vault(
+  p_expected_version bigint,
+  p_encrypted_record jsonb
+)
+returns table(version bigint, updated_at timestamptz)
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_user uuid := (select auth.uid());
+begin
+  if v_user is null then
+    raise exception 'authentication_required';
+  end if;
+
+  if p_expected_version = 0 then
+    insert into public.password_vaults(user_id, version, encrypted_record, updated_at)
+    values (v_user, 1, p_encrypted_record, now())
+    on conflict (user_id) do nothing;
+
+    if found then
+      return query
+      select pv.version, pv.updated_at
+      from public.password_vaults pv
+      where pv.user_id = v_user;
+      return;
+    end if;
+    raise exception 'vault_version_conflict';
+  end if;
+
+  update public.password_vaults
+  set version = version + 1,
+      encrypted_record = p_encrypted_record,
+      updated_at = now()
+  where user_id = v_user
+    and version = p_expected_version;
+
+  if not found then
+    raise exception 'vault_version_conflict';
+  end if;
+
+  return query
+  select pv.version, pv.updated_at
+  from public.password_vaults pv
+  where pv.user_id = v_user;
+end;
+$$;
+
+revoke all on function public.sync_password_vault(bigint, jsonb) from public, anon;
+grant execute on function public.sync_password_vault(bigint, jsonb) to authenticated;
