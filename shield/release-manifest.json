@@ -1,16 +1,21 @@
 {
   "product": "StanNet Shield",
   "channel": "preview",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "windows": {
-    "status": "not-released",
-    "download": null,
-    "sha256": null,
+    "status": "building",
+    "release_tag": "shield-preview",
+    "download": "https://github.com/stalin454/stannet-landing/releases/download/shield-preview/StanNet-Shield-Setup.exe",
+    "sha256_file": "https://github.com/stalin454/stannet-landing/releases/download/shield-preview/StanNet-Shield-Setup.exe.sha256",
     "signed": false
   },
   "rules": {
     "engine": "YARA-X",
     "source": "StanNet Sentinel"
   },
-  "notice": "No Windows installer is published until the desktop security contract and release tests pass."
+  "defender": {
+    "integration": true,
+    "changes_preferences": false
+  },
+  "notice": "Preview defensiva que complementa Microsoft Defender. El botón web solo se habilita cuando GitHub publica el instalador probado."
 }
