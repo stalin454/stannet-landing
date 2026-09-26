@@ -1,6 +1,6 @@
 import { Compiler } from './vendor/yara_x_js.js';
 import { DEFAULT_RULES, FIXTURES, fixtureBytes } from './rules.mjs';
-export const VERSION='0.2.0';
+export const VERSION='0.3.0';
 export const ENGINE_VERSION='1.20.0';
 export const MAX_BYTES=10*1024*1024;
 export const MAX_SOURCE_BYTES=64*1024;
@@ -99,8 +99,55 @@ export function fileMetadata(bytes) {
         sections.push({name:ascii.decode(bytes.subarray(off,off+8)).replace(/\0.*$/,''),size,offset:pointer,within_file:valid,entropy:valid&&size?entropy(bytes.subarray(pointer,pointer+size)):null});
         if(!valid)warnings.push('Sección PE fuera del archivo: '+n);
       }
+      const directoryBase=optional+(magic===0x20b?112:96);
+      const directoryCountOffset=optional+(magic===0x20b?108:92);
+      const directoryCount=optionalSize>=(magic===0x20b?116:100)?Math.min(u32(directoryCountOffset),16):0;
+      const rvaToOffset=rva=>{
+        for(const section of sections){
+          const off=table+sections.indexOf(section)*40;
+          const virtualSize=u32(off+8),virtualAddress=u32(off+12),rawSize=u32(off+16),rawPointer=u32(off+20);
+          const span=Math.max(virtualSize,rawSize);
+          if(rva>=virtualAddress&&rva<virtualAddress+span){
+            const mapped=rawPointer+(rva-virtualAddress);
+            return mapped<bytes.length?mapped:null;
+          }
+        }
+        return rva<bytes.length?rva:null;
+      };
+      const readCString=(offset,max=260)=>{
+        if(offset==null||offset<0||offset>=bytes.length)return '';
+        let end=offset;const limit=Math.min(bytes.length,offset+max);
+        while(end<limit&&bytes[end]!==0)end++;
+        return ascii.decode(bytes.subarray(offset,end)).replace(/[^\x20-\x7e]/g,'').trim();
+      };
+      const imports=[];
+      let importsTruncated=false;
+      if(directoryCount>1&&directoryBase+16<=optional+optionalSize){
+        const importRva=u32(directoryBase+8),importSize=u32(directoryBase+12);
+        const importOffset=importRva?rvaToOffset(importRva):null;
+        if(importOffset!=null&&importSize){
+          for(let n=0;n<64;n++){
+            const off=importOffset+n*20;
+            if(off+20>bytes.length){warnings.push('Tabla de imports PE truncada.');break;}
+            const originalFirstThunk=u32(off),time=u32(off+4),forward=u32(off+8),nameRva=u32(off+12),firstThunk=u32(off+16);
+            if(!(originalFirstThunk||time||forward||nameRva||firstThunk))break;
+            const name=readCString(rvaToOffset(nameRva),260);
+            if(name)imports.push(name);
+            if(n===63)importsTruncated=true;
+          }
+        }
+      }
+      let authenticode={present:false,size:0,offset:null,verified:false,note:'No hay tabla de certificados PE declarada.'};
+      if(directoryCount>4&&directoryBase+40<=optional+optionalSize){
+        const certOffset=u32(directoryBase+32),certSize=u32(directoryBase+36);
+        if(certOffset&&certSize){
+          const within=certOffset<bytes.length&&certOffset+certSize<=bytes.length;
+          authenticode={present:true,size:certSize,offset:certOffset,within_file:within,verified:false,note:within?'Existe una tabla Authenticode; Sentinel no valida la cadena de confianza ni la firma criptográfica.':'La tabla Authenticode declarada queda fuera del archivo.'};
+          if(!within)warnings.push('Tabla Authenticode fuera del archivo.');
+        }
+      }
       type=magic===0x20b?'PE64':'PE32';validation=warnings.length?'header-with-warnings':'headers-checked';
-      metadata={machine:'0x'+u16(pe+4).toString(16),entry_point:'0x'+u32(optional+16).toString(16),sections,scope:'Cabeceras y secciones; imports y firma digital no analizados en esta versión web.'};
+      metadata={machine:'0x'+u16(pe+4).toString(16),entry_point:'0x'+u32(optional+16).toString(16),sections,imports:Array.from(new Set(imports)).slice(0,64),imports_truncated:importsTruncated,authenticode,scope:'Cabeceras, secciones, DLLs importadas y presencia de tabla Authenticode. La confianza/firma criptográfica no se valida.'};
     }else if(starts([127,69,76,70])){
       type='ELF candidato';validation='invalid-header';need(0,16);
       const bits=bytes[4]===1?32:bytes[4]===2?64:0,le=bytes[5]===1;
