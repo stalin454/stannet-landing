@@ -24,6 +24,17 @@ const groups={
  symbols:'!@#$%^&*()-_=+[]{}:,.?'
 };
 const ambiguous=new Set('il1LoO0');
+const WORDS=[
+'aguila','alarma','bosque','brisa','cable','cactus','campo','cielo','clave','cobre','coral','delta','duna','eco','estrella','faro',
+'flor','fuego','gacela','galaxia','hoja','isla','jaguar','lago','lince','llave','luna','mapa','mar','montana','nube','oceano',
+'orbita','panda','piedra','pino','pixel','planeta','pluma','prisma','puente','radio','rio','roble','roca','ruta','sable','selva',
+'sol','torre','trueno','valle','viento','zorro','ancla','arena','barco','cafe','camino','cascada','cedro','circulo','cometa','cristal',
+'farol','fresa','glaciar','granito','horizonte','jazmin','limon','marea','menta','motor','naranja','norte','olivo','quartz','robot',
+'sierra','tigre','vapor','verde','violeta','acero','bambu','canyon','delfin','esfera','foton','girasol','helio','jade','kiwi',
+'latido','mango','nido','puma','quasar','rayo','sombra','tango','ultra','vector','wifi','xenon','yate','zenit','abeto','bisonte','cromo',
+'dragon','energia','gema','halcon','iman','junco','karma','laser','meteor','nexo','onda','pulso','radar','satelite','templo'
+];
+
 function generate(){
   const len=Number($('length').value);
   let selected=[];
@@ -43,24 +54,92 @@ function generate(){
   $('metricLength').textContent=String(len);
   $('metricAlphabet').textContent=String(pool.length);
   $('metricEntropy').textContent=entropy.toFixed(0)+' bits';
-  const pct=Math.min(100,Math.max(10,entropy/1.28));
-  $('strengthBar').style.width=pct+'%';
+  $('strengthBar').style.width=Math.min(100,Math.max(10,entropy/1.28))+'%';
   $('strengthText').textContent=entropy>=100?'Muy fuerte para una contraseña generada aleatoriamente.':entropy>=80?'Fuerte.':entropy>=60?'Aceptable, pero puedes aumentar la longitud.':'Débil para usos importantes: aumenta la longitud.';
+  $('generatedBreachStatus').textContent='';
 }
+function randomWord(){return WORDS[randomIndex(WORDS.length)]}
+function generatedPassphrase(){
+  const count=Number($('wordCount').value),sep=$('separator').value;
+  let words=Array.from({length:count},randomWord);
+  if($('capitalizeWords').checked)words=words.map(w=>w[0].toUpperCase()+w.slice(1));
+  if($('addPassphraseNumber').checked)words.push(String(randomIndex(90)+10));
+  const phrase=words.join(sep);
+  $('passphraseOutput').textContent=phrase;
+  $('phraseWords').textContent=String(count);
+  $('phraseLength').textContent=String(phrase.length);
+  const theoretical=count*Math.log2(WORDS.length)+($('addPassphraseNumber').checked?Math.log2(90):0);
+  $('phraseEntropy').textContent=theoretical.toFixed(0)+' bits';
+  $('passphraseBreachStatus').textContent='';
+  return phrase;
+}
+async function sha1Hex(text){
+  const digest=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+async function pwnedCount(password){
+  if(!password)throw Error('No hay contraseña que comprobar.');
+  const hash=await sha1Hex(password),prefix=hash.slice(0,5),suffix=hash.slice(5);
+  const response=await fetch('https://api.pwnedpasswords.com/range/'+prefix,{headers:{'Add-Padding':'true'}});
+  if(!response.ok)throw Error('No se pudo consultar Pwned Passwords.');
+  const text=await response.text();
+  for(const line of text.split(/\r?\n/)){
+    const parts=line.split(':');
+    if(parts[0]===suffix)return Number(parts[1])||0;
+  }
+  return 0;
+}
+async function checkOne(password,statusEl){
+  statusEl.textContent='Consultando por k-anonymity…';
+  try{
+    const count=await pwnedCount(password);
+    statusEl.textContent=count>0?'Encontrada en filtraciones conocidas: '+count.toLocaleString('es-ES')+' apariciones. Cámbiala si está en uso.':'No aparece en el corpus consultado. Esto no garantiza que sea segura.';
+    return count;
+  }catch(e){statusEl.textContent=e.message;return null}
+}
+function estimatePasswordScore(password){
+  let score=0;
+  if(password.length>=20)score+=45;else if(password.length>=15)score+=35;else if(password.length>=12)score+=20;else score+=5;
+  const classes=[/[a-z]/,/[A-Z]/,/\d/,/[^A-Za-z0-9]/].filter(r=>r.test(password)).length;
+  score+=classes*7;
+  if(password.length>=24)score+=8;
+  return Math.min(100,score);
+}
+function credentialScore(item,reused){
+  let score=estimatePasswordScore(item.password);
+  if(reused)score-=35;
+  if(item.mfaType==='sms')score+=6;
+  if(item.mfaType==='totp')score+=12;
+  if(item.mfaType==='passkey'||item.mfaType==='security-key')score+=20;
+  if(item.recoverySaved)score+=5;
+  if(item.breachCount>0)score-=50;
+  return Math.max(0,Math.min(100,score));
+}
+
 $('length').addEventListener('input',()=>{$('lengthValue').textContent=$('length').value;generate()});
 for(const id of ['lower','upper','numbers','symbols','excludeAmbiguous'])$(id).addEventListener('change',generate);
 $('generate').addEventListener('click',generate);
+$('checkGeneratedBreach').addEventListener('click',()=>checkOne($('passwordOutput').textContent,$('generatedBreachStatus')));
 $('copyPassword').addEventListener('click',async()=>{
-  const text=$('passwordOutput').textContent;
-  if(!text)return;
+  const text=$('passwordOutput').textContent;if(!text)return;
   try{await navigator.clipboard.writeText(text);$('copyPassword').textContent='Copiada';setTimeout(()=>$('copyPassword').textContent='Copiar',1200)}
   catch{$('strengthText').textContent='No se pudo copiar automáticamente. Selecciona la contraseña manualmente.'}
 });
+$('wordCount').addEventListener('input',()=>{$('wordCountValue').textContent=$('wordCount').value;generatedPassphrase()});
+for(const id of ['separator','capitalizeWords','addPassphraseNumber'])$(id).addEventListener('change',generatedPassphrase);
+$('generatePassphrase').addEventListener('click',generatedPassphrase);
+$('copyPassphrase').addEventListener('click',async()=>{
+  const text=$('passphraseOutput').textContent;if(!text)return;
+  try{await navigator.clipboard.writeText(text);$('copyPassphrase').textContent='Copiada';setTimeout(()=>$('copyPassphrase').textContent='Copiar',1200)}
+  catch{$('passphraseBreachStatus').textContent='No se pudo copiar automáticamente.'}
+});
+$('checkPassphraseBreach').addEventListener('click',()=>checkOne($('passphraseOutput').textContent,$('passphraseBreachStatus')));
 
 document.querySelectorAll('.password-tabs button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.password-tabs button').forEach(x=>x.classList.toggle('active',x===b));
   document.querySelectorAll('.password-view').forEach(v=>v.hidden=v.id!=='view-'+b.dataset.view);
   if(b.dataset.view==='vault')refreshVaultMode();
+  if(b.dataset.view==='audit')auditVault();
 }));
 
 function openDb(){return new Promise((resolve,reject)=>{
@@ -86,21 +165,22 @@ async function unlock(record,password){
   const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(record.iv)},key,unb64(record.ciphertext));
   const data=JSON.parse(new TextDecoder().decode(plain));
   if(!data||!Array.isArray(data.items))throw Error('Formato de bóveda no válido.');
-  currentKey=key;currentSalt=salt;vaultData=data;showWorkspace();armAutoLock();
+  currentKey=key;currentSalt=salt;vaultData=data;
+  for(const item of vaultData.items){if(!item.mfaType)item.mfaType='none';if(typeof item.recoverySaved!=='boolean')item.recoverySaved=false;if(item.breachCount===undefined)item.breachCount=null}
+  showWorkspace();armAutoLock();auditVault();
 }
 async function createVault(password){
   if(password.length<14)throw Error('Usa una contraseña maestra de al menos 14 caracteres; mejor aún, una frase larga.');
   currentSalt=randomBytes(16);currentKey=await deriveKey(password,currentSalt);vaultData={items:[],createdAt:new Date().toISOString()};
-  await encryptVault();showWorkspace();armAutoLock();
+  await encryptVault();showWorkspace();armAutoLock();auditVault();
 }
 function lockVault(msg='Bóveda bloqueada.'){
   currentKey=null;currentSalt=null;vaultData=null;
-  clearTimeout(lockTimer);$('vaultWorkspace').hidden=true;$('masterPassword').value='';$('vaultStatus').textContent=msg;refreshVaultMode();
+  clearTimeout(lockTimer);$('vaultWorkspace').hidden=true;$('masterPassword').value='';$('vaultStatus').textContent=msg;auditVault();refreshVaultMode();
 }
 function armAutoLock(){clearTimeout(lockTimer);lockTimer=setTimeout(()=>lockVault('Bóveda bloqueada automáticamente por inactividad.'),5*60*1000)}
 for(const ev of ['pointerdown','keydown'])document.addEventListener(ev,()=>{if(currentKey)armAutoLock()},{passive:true});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&currentKey)armAutoLock()});
-window.addEventListener('pagehide',()=>lockVault(''));
+window.addEventListener('pagehide',()=>{currentKey=null;currentSalt=null;vaultData=null});
 
 async function refreshVaultMode(){
   const record=await dbGet();
@@ -110,28 +190,26 @@ async function refreshVaultMode(){
   else{$('vaultTitle').textContent='Crear bóveda';$('vaultIntro').textContent='Define una contraseña maestra larga y única. StanNet no la guarda.';$('vaultAction').textContent='Crear bóveda cifrada'}
 }
 $('vaultAction').addEventListener('click',async()=>{
-  const password=$('masterPassword').value;
-  if(!password)return $('vaultStatus').textContent='Introduce la contraseña maestra.';
+  const password=$('masterPassword').value;if(!password)return $('vaultStatus').textContent='Introduce la contraseña maestra.';
   $('vaultStatus').textContent='Procesando derivación de clave…';
   try{const record=await dbGet();if(record)await unlock(record,password);else await createVault(password);$('masterPassword').value='';$('vaultStatus').textContent='Bóveda desbloqueada.'}
-  catch(e){currentKey=null;vaultData=null;$('vaultStatus').textContent='No se pudo abrir la bóveda. Comprueba la contraseña maestra y la integridad de los datos.'}
+  catch{$('vaultStatus').textContent='No se pudo abrir la bóveda. Comprueba la contraseña maestra y la integridad de los datos.'}
 });
 $('lockVault').addEventListener('click',()=>lockVault());
 
 $('exportVault').addEventListener('click',async()=>{
-  const record=await dbGet();
-  if(!record){$('vaultStatus').textContent='Todavía no existe una bóveda para exportar.';return}
+  const record=await dbGet();if(!record){$('vaultStatus').textContent='Todavía no existe una bóveda para exportar.';return}
   const payload={format:'stannet-password-vault',exportedAt:new Date().toISOString(),record};
   const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download='stannet-password-vault-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   $('vaultStatus').textContent='Backup cifrado exportado. Guárdalo en un lugar seguro.';
 });
 $('importVault').addEventListener('change',async()=>{
-  const file=$('importVault').files?.[0];if(!file)return;
+  const file=$('importVault').files&&$('importVault').files[0];if(!file)return;
   try{
-    const payload=JSON.parse(await file.text()),r=payload?.record;
-    if(payload?.format!=='stannet-password-vault'||!r||r.version!==1||r.kdf!=='PBKDF2-SHA256'||!r.salt||!r.iv||!r.ciphertext)throw Error('Formato no válido');
-    if(await dbGet()){if(!confirm('Ya existe una bóveda local. ¿Reemplazarla por este backup cifrado?')){ $('importVault').value=''; return; }}
+    const payload=JSON.parse(await file.text()),r=payload&&payload.record;
+    if(!payload||payload.format!=='stannet-password-vault'||!r||r.version!==1||r.kdf!=='PBKDF2-SHA256'||!r.salt||!r.iv||!r.ciphertext)throw Error('Formato no válido');
+    if(await dbGet()){if(!confirm('Ya existe una bóveda local. ¿Reemplazarla por este backup cifrado?'))return}
     lockVault('');await dbPut(r);$('vaultStatus').textContent='Backup importado. Introduce su contraseña maestra para desbloquearlo.';await refreshVaultMode();
   }catch{$('vaultStatus').textContent='No se pudo importar: el archivo no parece un backup válido de StanNet Password Security.'}
   finally{$('importVault').value=''}
@@ -139,33 +217,79 @@ $('importVault').addEventListener('change',async()=>{
 function showWorkspace(){$('vaultWorkspace').hidden=false;renderCredentials()}
 
 function newId(){return Array.from(randomBytes(16),b=>b.toString(16).padStart(2,'0')).join('')}
-function clearForm(){$('credentialId').value='';$('service').value='';$('username').value='';$('secret').value='';$('notes').value=''}
+function clearForm(){$('credentialId').value='';$('service').value='';$('username').value='';$('secret').value='';$('mfaType').value='none';$('recoverySaved').checked=false;$('notes').value=''}
 $('resetCredential').addEventListener('click',clearForm);
 $('useGenerated').addEventListener('click',()=>{if(!$('passwordOutput').textContent)generate();$('secret').value=$('passwordOutput').textContent});
 
 $('credentialForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!vaultData)return;
-  const item={id:$('credentialId').value||newId(),service:$('service').value.trim(),username:$('username').value.trim(),password:$('secret').value,notes:$('notes').value.trim(),updatedAt:new Date().toISOString()};
+  const existing=vaultData.items.find(x=>x.id===$('credentialId').value);
+  const item={
+    id:$('credentialId').value||newId(),service:$('service').value.trim(),username:$('username').value.trim(),
+    password:$('secret').value,mfaType:$('mfaType').value,recoverySaved:$('recoverySaved').checked,notes:$('notes').value.trim(),
+    breachCount:existing?existing.breachCount:null,lastBreachCheck:existing?existing.lastBreachCheck:null,updatedAt:new Date().toISOString()
+  };
   if(!item.service||!item.password)return;
   const i=vaultData.items.findIndex(x=>x.id===item.id);if(i>=0)vaultData.items[i]=item;else vaultData.items.push(item);
-  await encryptVault();clearForm();renderCredentials();$('vaultStatus').textContent='Credencial guardada y bóveda cifrada de nuevo.';armAutoLock();
+  await encryptVault();clearForm();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial guardada y bóveda cifrada de nuevo.';armAutoLock();
 });
 function renderCredentials(){
   const host=$('credentialList');host.replaceChildren();
-  if(!vaultData?.items.length){const p=document.createElement('p');p.textContent='La bóveda está vacía.';host.append(p);return}
+  if(!vaultData||!vaultData.items.length){const p=document.createElement('p');p.textContent='La bóveda está vacía.';host.append(p);return}
   for(const item of [...vaultData.items].sort((a,b)=>a.service.localeCompare(b.service,'es'))){
     const box=document.createElement('div');box.className='credential-item';
     const head=document.createElement('div');head.className='credential-head';
     const title=document.createElement('b');title.textContent=item.service;
     const user=document.createElement('span');user.className='credential-meta';user.textContent=item.username||'Sin usuario';
     head.append(title,user);
-    const meta=document.createElement('div');meta.className='credential-meta';meta.textContent='Contraseña: ••••••••••••'+(item.notes?' · Notas guardadas':'');
+    const meta=document.createElement('div');meta.className='credential-meta';
+    meta.textContent='Contraseña: •••••••••••• · MFA: '+(item.mfaType||'none')+(item.breachCount>0?' · ⚠ filtrada':'');
     const actions=document.createElement('div');actions.className='credential-actions';
-    const copy=document.createElement('button');copy.type='button';copy.className='secondary-action';copy.textContent='Copiar contraseña';copy.onclick=async()=>{try{await navigator.clipboard.writeText(item.password);copy.textContent='Copiada';setTimeout(()=>copy.textContent='Copiar contraseña',1000)}catch{$('vaultStatus').textContent='No se pudo copiar automáticamente.'}};
-    const edit=document.createElement('button');edit.type='button';edit.className='secondary-action';edit.textContent='Editar';edit.onclick=()=>{$('credentialId').value=item.id;$('service').value=item.service;$('username').value=item.username;$('secret').value=item.password;$('notes').value=item.notes};
-    const del=document.createElement('button');del.type='button';del.className='secondary-action';del.textContent='Eliminar';del.onclick=async()=>{if(!confirm('¿Eliminar esta credencial de la bóveda?'))return;vaultData.items=vaultData.items.filter(x=>x.id!==item.id);await encryptVault();renderCredentials();$('vaultStatus').textContent='Credencial eliminada y bóveda cifrada de nuevo.'};
-    actions.append(copy,edit,del);box.append(head,meta,actions);host.append(box);
+    const copy=document.createElement('button');copy.type='button';copy.className='secondary-action';copy.textContent='Copiar contraseña';
+    copy.onclick=async()=>{try{await navigator.clipboard.writeText(item.password);copy.textContent='Copiada';setTimeout(()=>copy.textContent='Copiar contraseña',1000)}catch{$('vaultStatus').textContent='No se pudo copiar automáticamente.'}};
+    const check=document.createElement('button');check.type='button';check.className='secondary-action';check.textContent='Filtraciones';
+    check.onclick=async()=>{check.textContent='Comprobando…';const count=await pwnedCount(item.password).catch(()=>null);if(count!==null){item.breachCount=count;item.lastBreachCheck=new Date().toISOString();await encryptVault();$('vaultStatus').textContent=count>0?'⚠ '+item.service+': encontrada '+count.toLocaleString('es-ES')+' veces.':'✓ '+item.service+': no encontrada en el corpus.';auditVault()}check.textContent='Filtraciones'};
+    const edit=document.createElement('button');edit.type='button';edit.className='secondary-action';edit.textContent='Editar';
+    edit.onclick=()=>{$('credentialId').value=item.id;$('service').value=item.service;$('username').value=item.username;$('secret').value=item.password;$('mfaType').value=item.mfaType||'none';$('recoverySaved').checked=Boolean(item.recoverySaved);$('notes').value=item.notes||''};
+    const del=document.createElement('button');del.type='button';del.className='secondary-action';del.textContent='Eliminar';
+    del.onclick=async()=>{if(!confirm('¿Eliminar esta credencial de la bóveda?'))return;vaultData.items=vaultData.items.filter(x=>x.id!==item.id);await encryptVault();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial eliminada y bóveda cifrada de nuevo.'};
+    actions.append(copy,check,edit,del);box.append(head,meta,actions);host.append(box);
   }
 }
-generate();refreshVaultMode().catch(()=>{$('vaultStatus').textContent='IndexedDB no está disponible en este navegador.'});
+function auditVault(){
+  const host=$('auditList');host.replaceChildren();
+  if(!vaultData){$('globalScore').textContent='—';$('globalScoreText').textContent='Desbloquea la bóveda para analizar tus cuentas.';$('reuseCount').textContent='—';$('mfaCount').textContent='—';$('breachCount').textContent='—';return}
+  if(!vaultData.items.length){$('globalScore').textContent='100';$('globalScoreText').textContent='La bóveda está vacía.';$('reuseCount').textContent='0';$('mfaCount').textContent='0';$('breachCount').textContent='0';return}
+  const counts=new Map();for(const item of vaultData.items)counts.set(item.password,(counts.get(item.password)||0)+1);
+  const reusedPasswords=new Set([...counts.entries()].filter(([,n])=>n>1).map(([p])=>p));
+  let total=0,mfa=0,breaches=0;
+  for(const item of vaultData.items){
+    const reused=reusedPasswords.has(item.password),score=credentialScore(item,reused);total+=score;
+    if(item.mfaType&&item.mfaType!=='none')mfa++;if(item.breachCount>0)breaches++;
+    const row=document.createElement('div');row.className='audit-row';
+    const left=document.createElement('div'),title=document.createElement('b'),meta=document.createElement('span');
+    title.textContent=item.service;
+    const notes=[reused?'Contraseña reutilizada':'Contraseña única',item.mfaType&&item.mfaType!=='none'?'MFA: '+item.mfaType:'Sin MFA',item.breachCount>0?'Filtrada: '+item.breachCount.toLocaleString('es-ES')+' veces':item.breachCount===0?'No encontrada en última comprobación':'Filtración no comprobada'];
+    meta.textContent=notes.join(' · ');left.append(title,meta);
+    const badge=document.createElement('strong');badge.className='score-badge';badge.textContent=score+'/100';row.append(left,badge);host.append(row);
+  }
+  const global=Math.round(total/vaultData.items.length);
+  $('globalScore').textContent=String(global);
+  $('globalScoreText').textContent=global>=85?'Buen nivel defensivo.':global>=65?'Hay varias mejoras pendientes.':'Revisa primero reutilización, filtraciones y MFA.';
+  $('reuseCount').textContent=String([...reusedPasswords].length);$('mfaCount').textContent=String(mfa)+'/'+vaultData.items.length;$('breachCount').textContent=String(breaches);
+}
+$('runAudit').addEventListener('click',auditVault);
+$('checkAllBreaches').addEventListener('click',async()=>{
+  if(!vaultData){$('breachAuditStatus').textContent='Desbloquea primero la bóveda.';return}
+  $('breachAuditStatus').textContent='Comprobando credenciales por k-anonymity…';
+  let done=0,exposed=0;
+  for(const item of vaultData.items){
+    const count=await pwnedCount(item.password).catch(()=>null);
+    if(count!==null){item.breachCount=count;item.lastBreachCheck=new Date().toISOString();done++;if(count>0)exposed++}
+  }
+  await encryptVault();auditVault();renderCredentials();
+  $('breachAuditStatus').textContent='Comprobadas '+done+' credenciales. '+exposed+' aparecen en filtraciones conocidas.';
+});
+
+generatedPassphrase();generate();refreshVaultMode().catch(()=>{$('vaultStatus').textContent='IndexedDB no está disponible en este navegador.'});
 })();
