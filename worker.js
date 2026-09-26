@@ -232,6 +232,10 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/stannet-ai') {
+      return handleStanNetAi(request, env);
+    }
+
     return env.ASSETS.fetch(request);
   }
 };
@@ -369,6 +373,85 @@ function json(body, status = 200, extraHeaders = {}) {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8', ...extraHeaders }
   });
+}
+
+async function handleStanNetAi(request, env) {
+  const headers = stannetAiCorsHeaders(request, env);
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers });
+  }
+
+  if (request.method !== 'POST') {
+    return json({ error: 'Método no permitido.' }, 405, headers);
+  }
+
+  if (!env.AI_API_URL || !env.AI_MODEL || !env.AI_API_KEY) {
+    return json({ error: 'StanNet AI no está configurado.' }, 503, headers);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'Solicitud no válida.' }, 400, headers);
+  }
+
+  const message = typeof body?.message === 'string' ? body.message.trim() : '';
+  if (!message || message.length > 4000) {
+    return json({ error: 'Mensaje no válido.' }, 400, headers);
+  }
+
+  try {
+    const response = await fetch(env.AI_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + env.AI_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: env.AI_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: 'Eres StanNet AI, asistente de StanNet.space. Responde de forma clara, útil y segura.'
+          },
+          {
+            role: 'user',
+            content: message
+          }
+        ],
+        temperature: 0.6
+      })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return json({ error: 'StanNet AI no pudo responder ahora.' }, 502, headers);
+    }
+
+    const answer = data?.choices?.[0]?.message?.content;
+    if (typeof answer !== 'string' || !answer.trim()) {
+      return json({ error: 'StanNet AI devolvió una respuesta vacía.' }, 502, headers);
+    }
+
+    return json({ answer: answer.trim() }, 200, headers);
+  } catch {
+    return json({ error: 'No se pudo conectar con StanNet AI.' }, 502, headers);
+  }
+}
+
+function stannetAiCorsHeaders(request, env) {
+  const origin = request.headers.get('origin') || '';
+  const allowed = String(env.ALLOWED_ORIGIN || '').trim();
+  const allowOrigin = allowed && origin === allowed ? allowed : allowed || 'https://www.stannet.space';
+
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Vary': 'Origin'
+  };
 }
 
 
