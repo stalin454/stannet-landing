@@ -20,6 +20,96 @@
 <p><strong>Usos prácticos:</strong> hacer una primera revisión de un archivo descargado o recibido, aprender cómo funciona el análisis defensivo y practicar la creación y validación de reglas YARA-X.</p>
 <p><strong>Importante:</strong> Sentinel no sustituye a un antivirus ni garantiza que un archivo sea seguro. No ejecuta el archivo y sus resultados deben interpretarse como señales para investigar, no como un veredicto definitivo.</p>
 </section>
+
+<section class="learning" id="conceptos" aria-labelledby="conceptos-title">
+  <div class="learning-head">
+    <div>
+      <p class="eyebrow">APRENDER MIENTRAS ANALIZAS</p>
+      <h2 id="conceptos-title">Conceptos que debes dominar</h2>
+      <p>Sentinel no pretende darte solo un resultado: la idea es que entiendas qué significa cada señal y cómo encaja en un análisis defensivo real.</p>
+    </div>
+    <a class="study-link" href="../pages/cybersecurity.html">Ir a Cybersecurity Academy →</a>
+  </div>
+
+  <div class="concept-grid">
+    <article class="concept-card" id="concept-hash">
+      <span class="concept-tag">01 · IDENTIDAD</span>
+      <h3>Hash</h3>
+      <p>Un hash es una huella digital calculada a partir del contenido de un archivo. Si cambia un solo byte, normalmente cambia también el hash.</p>
+      <div class="concept-example"><b>Ejemplo</b><code>archivo.exe → 9f86d081...</code></div>
+      <p><strong>¿Para qué sirve?</strong> Para identificar archivos, comparar muestras, comprobar integridad y buscar una muestra conocida en otras herramientas.</p>
+      <p><strong>Ojo:</strong> dos archivos con nombres distintos pueden ser idénticos si comparten el mismo hash.</p>
+    </article>
+
+    <article class="concept-card" id="concept-sha256">
+      <span class="concept-tag">02 · HASHING</span>
+      <h3>SHA-256</h3>
+      <p>SHA-256 es una función hash criptográfica que genera una huella de 256 bits, normalmente representada como 64 caracteres hexadecimales.</p>
+      <div class="concept-example"><b>En Sentinel</b><code>SHA-256 = identificador técnico del archivo analizado</code></div>
+      <p>Es muy usada en ciberseguridad para IOC, listas de reputación, análisis forense y verificación de descargas.</p>
+      <p><strong>No detecta malware por sí sola:</strong> solo identifica el contenido.</p>
+    </article>
+
+    <article class="concept-card" id="concept-yara">
+      <span class="concept-tag">03 · DETECCIÓN</span>
+      <h3>YARA y YARA-X</h3>
+      <p>YARA permite escribir reglas que buscan patrones dentro de archivos: textos, bytes, estructuras o combinaciones de señales.</p>
+      <div class="concept-example"><b>Idea básica</b><code>si aparecen A + B + C → marcar para revisión</code></div>
+      <p>YARA-X es una implementación moderna del motor YARA. Sentinel la ejecuta localmente para comprobar si un archivo coincide con reglas defensivas.</p>
+      <p><strong>Una coincidencia no significa automáticamente malware:</strong> una regla puede producir falsos positivos y siempre necesita contexto.</p>
+    </article>
+
+    <article class="concept-card" id="concept-entropia">
+      <span class="concept-tag">04 · ESTRUCTURA</span>
+      <h3>Entropía</h3>
+      <p>La entropía mide cuán predecibles o aleatorios parecen los bytes de un archivo. En análisis de malware ayuda a detectar contenido comprimido, cifrado u ofuscado.</p>
+      <div class="entropy-scale"><span>0</span><div><i></i></div><span>8</span></div>
+      <p>Valores altos pueden aparecer en malware empaquetado, pero también en ZIP, imágenes, vídeo o archivos cifrados legítimos.</p>
+      <p><strong>Conclusión:</strong> entropía alta es una señal para investigar, no una condena.</p>
+    </article>
+
+    <article class="concept-card" id="concept-strings">
+      <span class="concept-tag">05 · EVIDENCIAS</span>
+      <h3>Strings</h3>
+      <p>Las strings son cadenas de texto legibles extraídas de los bytes de un archivo sin ejecutarlo.</p>
+      <div class="concept-example"><b>Puedes encontrar</b><code>URLs · comandos · rutas · nombres de DLL · mensajes</code></div>
+      <p>Ayudan a entender qué podría hacer un programa y sirven para crear reglas YARA, pero una string aislada rara vez demuestra comportamiento malicioso.</p>
+    </article>
+
+    <article class="concept-card" id="concept-ioc">
+      <span class="concept-tag">06 · IOC</span>
+      <h3>Indicadores de compromiso</h3>
+      <p>Un IOC es un dato observable relacionado con una posible actividad maliciosa: hash, dominio, IP, URL, nombre de archivo o ruta, entre otros.</p>
+      <p>Sentinel extrae algunos indicadores del contenido, pero <strong>no consulta reputación externa</strong>. Que aparezca una IP o URL solo significa que existe esa cadena en el archivo.</p>
+    </article>
+
+    <article class="concept-card" id="concept-estatico">
+      <span class="concept-tag">07 · METODOLOGÍA</span>
+      <h3>Análisis estático</h3>
+      <p>Consiste en estudiar un archivo sin ejecutarlo. Puedes observar hashes, cabeceras, strings, reglas YARA, metadatos y estructura.</p>
+      <p>Es una primera capa segura y muy útil, pero no muestra todo. Para estudiar comportamiento real se utilizan entornos controlados o sandboxes.</p>
+    </article>
+
+    <article class="concept-card" id="concept-fp">
+      <span class="concept-tag">08 · CRITERIO</span>
+      <h3>Falso positivo</h3>
+      <p>Es una detección que parece sospechosa pero corresponde a software legítimo. Sucede cuando una regla o heurística coincide con una señal que también aparece en programas normales.</p>
+      <p>Por eso un analista combina varias evidencias antes de llegar a una conclusión.</p>
+    </article>
+  </div>
+
+  <div class="analyst-flow">
+    <h3>Cómo razona un analista con Sentinel</h3>
+    <ol>
+      <li><b>Identifica</b><span>Comprueba tipo, tamaño y SHA-256.</span></li>
+      <li><b>Observa</b><span>Revisa entropía, strings e indicadores.</span></li>
+      <li><b>Correlaciona</b><span>Comprueba coincidencias YARA-X y sus evidencias.</span></li>
+      <li><b>Cuestiona</b><span>Busca posibles falsos positivos y contexto legítimo.</span></li>
+      <li><b>Escala</b><span>Si hace falta, continúa con Defender, reputación o sandbox en un entorno seguro.</span></li>
+    </ol>
+  </div>
+</section>
+
 <nav class="tabs" aria-label="Herramientas de Sentinel"><button class="active" type="button" data-view="analyze" aria-current="page">Analizar archivo</button><button type="button" data-view="rules">Reglas y pruebas</button><button type="button" data-view="history">Historial local</button></nav>
 <div class="status-row"><p id="status" role="status" aria-live="polite"></p><button id="cancel" type="button" class="danger" hidden>Cancelar</button></div>
 <section id="view-analyze" class="view">
