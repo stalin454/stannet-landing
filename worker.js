@@ -232,6 +232,49 @@ export default {
       }
     }
 
+    if (url.pathname === '/api/sentinel-reputation') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const sha256 = (url.searchParams.get('sha256') || '').trim().toLowerCase();
+      if (!/^[a-f0-9]{64}$/.test(sha256)) return json({ error: 'SHA-256 no válido.' }, 400);
+      if (!env.VIRUSTOTAL_API_KEY) return json({ error: 'La reputación externa no está configurada.' }, 503);
+
+      try {
+        const response = await fetch('https://www.virustotal.com/api/v3/files/' + sha256, {
+          headers: {
+            accept: 'application/json',
+            'x-apikey': env.VIRUSTOTAL_API_KEY
+          }
+        });
+        if (response.status === 404) {
+          return json({ found: false, source: 'VirusTotal', sha256 }, 200, { 'Cache-Control': 'public, max-age=900' });
+        }
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) return json({ error: 'VirusTotal no pudo completar la consulta.', providerStatus: response.status }, 502);
+
+        const a = data?.data?.attributes || {};
+        const stats = a.last_analysis_stats || {};
+        return json({
+          found: true,
+          source: 'VirusTotal',
+          sha256,
+          stats: {
+            malicious: Number(stats.malicious || 0),
+            suspicious: Number(stats.suspicious || 0),
+            harmless: Number(stats.harmless || 0),
+            undetected: Number(stats.undetected || 0),
+            timeout: Number(stats.timeout || 0)
+          },
+          reputation: typeof a.reputation === 'number' ? a.reputation : null,
+          lastAnalysisDate: a.last_analysis_date ? new Date(a.last_analysis_date * 1000).toISOString() : null,
+          typeDescription: a.type_description || '',
+          meaningfulName: a.meaningful_name || '',
+          note: 'Consulta por hash únicamente; el archivo no se sube a VirusTotal.'
+        }, 200, { 'Cache-Control': 'public, max-age=900, s-maxage=1800' });
+      } catch {
+        return json({ error: 'No se pudo consultar la reputación externa.' }, 502);
+      }
+    }
+
     if (url.pathname === '/api/stannet-ai') {
       return handleStanNetAi(request, env);
     }
