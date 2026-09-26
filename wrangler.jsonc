@@ -5,7 +5,7 @@
   "compatibility_date": "2026-09-24",
   "vars": {
     "AI_API_URL": "https://api.groq.com/openai/v1/chat/completions",
-    "AI_MODEL": "llama-3.3-70b-versatile",
+    "AI_MODEL": "openai/gpt-oss-20b",
     "ALLOWED_ORIGIN": "https://www.stannet.space"
   },
   "assets": {
