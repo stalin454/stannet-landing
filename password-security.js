@@ -5,6 +5,126 @@ const ITERATIONS=600000;
 const DB_NAME='stannetPasswordSecurity';
 const STORE='vault';
 let currentKey=null,currentSalt=null,vaultData=null,lockTimer=null;
+let syncUser=null,remoteVersion=0,syncReady=false,syncBusy=false;
+const DEVICE_ID_KEY='stannetPasswordDeviceId';
+
+
+function deviceId(){
+  let id='';
+  try{id=localStorage.getItem(DEVICE_ID_KEY)||''}catch{}
+  if(!/^[0-9a-f-]{36}$/i.test(id)){
+    id=crypto.randomUUID?crypto.randomUUID():([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,ch=>(ch^crypto.getRandomValues(new Uint8Array(1))[0]&15>>ch/4).toString(16));
+    try{localStorage.setItem(DEVICE_ID_KEY,id)}catch{}
+  }
+  return id;
+}
+function deviceLabel(){
+  const ua=navigator.userAgent||'',platform=navigator.platform||'';
+  if(/iPhone/i.test(ua))return 'iPhone';
+  if(/iPad/i.test(ua))return 'iPad';
+  if(/Android/i.test(ua))return 'Android';
+  if(/Windows/i.test(ua)||/Win/i.test(platform))return 'Windows PC';
+  if(/Mac/i.test(platform))return 'Mac';
+  return 'Navegador personal';
+}
+function devicePlatform(){return (navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'unknown'}
+async function syncFetch(path,options={}){
+  const headers=new Headers(options.headers||{});
+  if(!path.startsWith('/api/password-auth/'))headers.set('X-StanNet-Device',deviceId());
+  if(options.body&&!headers.has('content-type'))headers.set('content-type','application/json');
+  const response=await fetch(path,{...options,headers,credentials:'same-origin'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){const err=new Error(data.error||'Error de sincronización.');err.status=response.status;throw err}
+  return data;
+}
+async function registerCurrentDevice(){
+  return syncFetch('/api/password-devices',{method:'POST',body:JSON.stringify({id:deviceId(),label:deviceLabel(),platform:devicePlatform()})});
+}
+async function refreshSyncState(){
+  try{
+    const session=await syncFetch('/api/password-auth/session');
+    syncUser=session.user;
+    await registerCurrentDevice();
+    $('authBox').hidden=true;$('syncWorkspace').hidden=false;
+    $('syncBadge').textContent='CIFRADO + SYNC';
+    $('syncUser').textContent=syncUser.email||syncUser.id;
+    $('syncDeviceLabel').textContent=deviceLabel();
+    syncReady=true;
+    await Promise.all([loadRemoteMeta(),loadDevices()]);
+  }catch{
+    syncUser=null;syncReady=false;remoteVersion=0;
+    $('authBox').hidden=false;$('syncWorkspace').hidden=true;$('syncBadge').textContent='SIN SESIÓN';
+  }
+}
+async function loadRemoteMeta(){
+  if(!syncReady)return null;
+  try{
+    const data=await syncFetch('/api/password-vault');
+    const vault=data.vault||null;remoteVersion=Number(vault&&vault.version||0);
+    $('remoteVersion').textContent=remoteVersion?String(remoteVersion):'Sin copia';
+    if(vault&&vault.updated_at)$('syncStatus').textContent='Última copia remota: '+new Date(vault.updated_at).toLocaleString('es');
+    return vault;
+  }catch(e){$('syncStatus').textContent=e.message;return null}
+}
+async function pushEncryptedVault(silent=false){
+  if(!syncReady||syncBusy)return false;
+  const record=await dbGet();if(!record){if(!silent)$('syncStatus').textContent='No existe una bóveda local que sincronizar.';return false}
+  syncBusy=true;if(!silent)$('syncStatus').textContent='Subiendo únicamente el blob cifrado…';
+  try{
+    const data=await syncFetch('/api/password-vault',{method:'PUT',body:JSON.stringify({expectedVersion:remoteVersion,encryptedRecord:record})});
+    remoteVersion=Number(data.version||remoteVersion+1);$('remoteVersion').textContent=String(remoteVersion);
+    $('syncStatus').textContent='Bóveda cifrada sincronizada · versión '+remoteVersion+'.';
+    await loadDevices();return true;
+  }catch(e){
+    $('syncStatus').textContent=e.status===409?'Conflicto: otro dispositivo tiene una versión más reciente. Descárgala antes de volver a subir.':e.message;
+    return false;
+  }finally{syncBusy=false}
+}
+async function pullEncryptedVault(){
+  if(!syncReady)return;
+  $('syncStatus').textContent='Descargando blob cifrado…';
+  try{
+    const data=await syncFetch('/api/password-vault'),remote=data.vault;
+    if(!remote){$('syncStatus').textContent='Todavía no existe una bóveda remota.';remoteVersion=0;$('remoteVersion').textContent='Sin copia';return}
+    const local=await dbGet();
+    if(local&&!confirm('La copia remota reemplazará la bóveda cifrada local. ¿Continuar?'))return;
+    if(currentKey)lockVault('Bóveda bloqueada para aplicar la copia remota.');
+    await dbPut(remote.encrypted_record);remoteVersion=Number(remote.version||0);$('remoteVersion').textContent=String(remoteVersion);
+    $('syncStatus').textContent='Copia remota descargada. Introduce la contraseña maestra para abrirla.';
+    await refreshVaultMode();
+  }catch(e){$('syncStatus').textContent=e.message}
+}
+async function autoSyncAfterLocalChange(){if(syncReady&&!syncBusy)await pushEncryptedVault(true)}
+async function loadDevices(){
+  if(!syncReady)return;
+  const host=$('deviceList');host.replaceChildren();
+  try{
+    const data=await syncFetch('/api/password-devices');
+    for(const d of data.devices||[]){
+      const row=document.createElement('div');row.className='device-row';
+      const info=document.createElement('div'),name=document.createElement('b'),meta=document.createElement('span');
+      name.textContent=d.label+(d.id===deviceId()?' · ESTE DISPOSITIVO':'');
+      meta.textContent=(d.platform||'')+' · '+(d.revoked_at?'Revocado':'Activo')+' · visto '+new Date(d.last_seen_at||d.created_at).toLocaleString('es');
+      info.append(name,meta);row.append(info);
+      if(!d.revoked_at){
+        const revoke=document.createElement('button');revoke.type='button';revoke.className='secondary-action';revoke.textContent='Revocar';
+        revoke.onclick=async()=>{if(!confirm('¿Revocar este dispositivo para la sincronización?'))return;try{await syncFetch('/api/password-devices',{method:'PATCH',body:JSON.stringify({id:d.id})});await loadDevices();if(d.id===deviceId()){$('syncStatus').textContent='Este dispositivo fue revocado. Cierra sesión.'}}catch(e){$('syncStatus').textContent=e.message}};
+        row.append(revoke);
+      }
+      host.append(row);
+    }
+  }catch(e){const p=document.createElement('p');p.textContent=e.message;host.append(p)}
+}
+async function signInOrUp(action){
+  const email=$('syncEmail').value.trim(),password=$('syncPassword').value;
+  $('syncStatus').textContent='';
+  try{
+    const data=await syncFetch('/api/password-auth/'+action,{method:'POST',body:JSON.stringify({email,password})});
+    $('syncPassword').value='';
+    if(data.requiresConfirmation){$('authBox').hidden=false;alert('Cuenta creada. Revisa tu email y confirma la cuenta antes de iniciar sesión.');return}
+    await refreshSyncState();
+  }catch(e){alert(e.message)}
+}
 
 function b64(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
 function unb64(text){const s=atob(text);return Uint8Array.from(s,c=>c.charCodeAt(0))}
@@ -301,7 +421,7 @@ $('credentialForm').addEventListener('submit',async e=>{
   };
   if(!item.service||!item.password)return;
   const i=vaultData.items.findIndex(x=>x.id===item.id);if(i>=0)vaultData.items[i]=item;else vaultData.items.push(item);
-  await encryptVault();clearForm();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial guardada y bóveda cifrada de nuevo.';armAutoLock();
+  await encryptVault();clearForm();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial guardada y bóveda cifrada de nuevo.';armAutoLock();await autoSyncAfterLocalChange();
 });
 function renderCredentials(){
   const host=$('credentialList');host.replaceChildren();
@@ -322,7 +442,7 @@ function renderCredentials(){
     const edit=document.createElement('button');edit.type='button';edit.className='secondary-action';edit.textContent='Editar';
     edit.onclick=()=>{$('credentialId').value=item.id;$('service').value=item.service;$('username').value=item.username;$('secret').value=item.password;$('mfaType').value=item.mfaType||'none';$('recoverySaved').checked=Boolean(item.recoverySaved);$('notes').value=item.notes||''};
     const del=document.createElement('button');del.type='button';del.className='secondary-action';del.textContent='Eliminar';
-    del.onclick=async()=>{if(!confirm('¿Eliminar esta credencial de la bóveda?'))return;vaultData.items=vaultData.items.filter(x=>x.id!==item.id);await encryptVault();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial eliminada y bóveda cifrada de nuevo.'};
+    del.onclick=async()=>{if(!confirm('¿Eliminar esta credencial de la bóveda?'))return;vaultData.items=vaultData.items.filter(x=>x.id!==item.id);await encryptVault();renderCredentials();auditVault();$('vaultStatus').textContent='Credencial eliminada y bóveda cifrada de nuevo.';await autoSyncAfterLocalChange()};
     actions.append(copy,check,edit,del);box.append(head,meta,actions);host.append(box);
   }
 }
@@ -357,9 +477,24 @@ $('checkAllBreaches').addEventListener('click',async()=>{
     const count=await pwnedCount(item.password).catch(()=>null);
     if(count!==null){item.breachCount=count;item.lastBreachCheck=new Date().toISOString();done++;if(count>0)exposed++}
   }
-  await encryptVault();auditVault();renderCredentials();
+  await encryptVault();auditVault();renderCredentials();await autoSyncAfterLocalChange();
   $('breachAuditStatus').textContent='Comprobadas '+done+' credenciales. '+exposed+' aparecen en filtraciones conocidas.';
 });
 
-generatedPassphrase();generate();refreshVaultMode().catch(()=>{$('vaultStatus').textContent='IndexedDB no está disponible en este navegador.'});
+$('signInSync').addEventListener('click',()=>signInOrUp('signin'));
+$('signUpSync').addEventListener('click',()=>signInOrUp('signup'));
+$('pushVault').addEventListener('click',()=>pushEncryptedVault(false));
+$('pullVault').addEventListener('click',pullEncryptedVault);
+$('refreshSync').addEventListener('click',()=>Promise.all([loadRemoteMeta(),loadDevices()]));
+$('signOutSync').addEventListener('click',async()=>{try{await syncFetch('/api/password-auth/signout',{method:'POST'})}catch{}syncUser=null;syncReady=false;remoteVersion=0;lockVault('Bóveda bloqueada al cerrar sesión.');await refreshSyncState()});
+$('signOutAllSync').addEventListener('click',async()=>{
+  if(!confirm('¿Cerrar todas las sesiones de sincronización?'))return;
+  try{
+    const data=await syncFetch('/api/password-devices');
+    for(const d of data.devices||[]){if(!d.revoked_at)await syncFetch('/api/password-devices',{method:'PATCH',body:JSON.stringify({id:d.id})}).catch(()=>{})}
+    await syncFetch('/api/password-auth/signout-all',{method:'POST'});
+  }catch{}
+  syncUser=null;syncReady=false;remoteVersion=0;lockVault('Todas las sesiones fueron cerradas.');await refreshSyncState();
+});
+generatedPassphrase();generate();refreshVaultMode().catch(()=>{$('vaultStatus').textContent='IndexedDB no está disponible en este navegador.'});refreshSyncState();
 })();
