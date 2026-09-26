@@ -49,25 +49,60 @@
   const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
   launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open'))); close.addEventListener('click',()=>setOpen(false));
   root.querySelectorAll('.snai-modes button').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.snai-modes button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode||'auto'}));
+  const routeLabels={
+    '/pages/programming.html':'Entrar a Programming Academy →',
+    '/pages/programming-fullstack.html':'Abrir Full-Stack Engineer Path →',
+    '/pages/programming-cs-lab.html':'Abrir CS Foundations →',
+    '/pages/programming-lab.html':'Abrir Python Code Lab →',
+    '/pages/programming-web-lab.html':'Abrir Web & Languages Lab →',
+    '/pages/cybersecurity.html':'Entrar a Cyber Defense Academy →',
+    '/pages/cyber-lab.html':'Abrir Cyber Defense Lab →',
+    '/pages/callan.html':'Entrar a Callan English Coach →',
+    '/pages/language-music.html':'Abrir Language Music Lab →',
+    '/pages/guitar.html':'Entrar a Guitar Academy →',
+    '/pages/typing.html':'Abrir Typing Lab →',
+    '/pages/shortcuts.html':'Aprender atajos de teclado →',
+    '/nutri-ia/':'Abrir Nutri IA →',
+    '/sentinel/':'Abrir StanNet Sentinel →',
+    '/pages/education.html':'Ver formación y certificados →',
+    '/pages/cv.html':'Ver perfil y CV →'
+  };
+  const normalizeRoute=(raw)=>{
+    try{
+      if(raw.startsWith('http')){
+        const u=new URL(raw);
+        return u.pathname||'/';
+      }
+    }catch{}
+    return raw;
+  };
   const add=(text,kind='bot')=>{
     const el=document.createElement('div');
     el.className='snai-msg '+kind;
     if(kind==='bot'){
       const safe=String(text||'');
-      const pattern=/(https?:\/\/(?:www\.)?stannet\.space[^\s<]*)|(\/(?:pages|nutri-ia|sentinel)\/[A-Za-z0-9._~!  const add=(text,kind='bot')=>{const el=document.createElement('div');el.className='snai-msg '+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;return el};'()*+,;=:@%\/-]*|\/sentinel\/)/gi;
+      const pattern=/(https?:\/\/(?:www\.)?stannet\.space[^\s<]*)|(\/(?:pages|nutri-ia|sentinel)\/[A-Za-z0-9._~!$&'()*+,;=:@%\/-]*|\/sentinel\/)/gi;
       let last=0,match;
       while((match=pattern.exec(safe))){
         if(match.index>last) el.appendChild(document.createTextNode(safe.slice(last,match.index)));
         const raw=match[0].replace(/[),.;!?]+$/,'');
         const trailing=match[0].slice(raw.length);
+        const route=normalizeRoute(raw);
         const a=document.createElement('a');
         a.href=raw;
-        a.textContent=raw;
+        a.textContent=routeLabels[route]||('Abrir '+route.replace(/^\/|\/$/g,'')+' →');
         a.target='_self';
         a.rel='noopener';
-        a.style.color='#59e8ff';
-        a.style.textDecoration='underline';
-        a.style.textUnderlineOffset='3px';
+        a.style.display='inline-block';
+        a.style.margin='8px 4px 2px 0';
+        a.style.padding='8px 11px';
+        a.style.border='1px solid rgba(89,232,255,.28)';
+        a.style.borderRadius='10px';
+        a.style.background='linear-gradient(135deg,rgba(89,232,255,.12),rgba(157,123,255,.12))';
+        a.style.color='#7ef3ff';
+        a.style.fontWeight='700';
+        a.style.textDecoration='none';
+        a.style.fontSize='12px';
         el.appendChild(a);
         if(trailing) el.appendChild(document.createTextNode(trailing));
         last=match.index+match[0].length;
