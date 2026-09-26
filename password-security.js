@@ -8,6 +8,8 @@ let currentKey=null,currentSalt=null,vaultData=null,lockTimer=null;
 
 function b64(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s)}
 function unb64(text){const s=atob(text);return Uint8Array.from(s,c=>c.charCodeAt(0))}
+function b64url(bytes){return b64(bytes).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64url(text){return unb64(text.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((text.length+3)%4))}
 function randomBytes(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return a}
 function randomIndex(max){
   if(max<=0||max>256)throw Error('Rango aleatorio no válido.');
@@ -122,7 +124,7 @@ $('generate').addEventListener('click',generate);
 $('checkGeneratedBreach').addEventListener('click',()=>checkOne($('passwordOutput').textContent,$('generatedBreachStatus')));
 $('copyPassword').addEventListener('click',async()=>{
   const text=$('passwordOutput').textContent;if(!text)return;
-  try{await navigator.clipboard.writeText(text);$('copyPassword').textContent='Copiada';setTimeout(()=>$('copyPassword').textContent='Copiar',1200)}
+  try{await secureCopy(text,$('strengthText'));$('copyPassword').textContent='Copiada';setTimeout(()=>$('copyPassword').textContent='Copiar',1200)}
   catch{$('strengthText').textContent='No se pudo copiar automáticamente. Selecciona la contraseña manualmente.'}
 });
 $('wordCount').addEventListener('input',()=>{$('wordCountValue').textContent=$('wordCount').value;generatedPassphrase()});
@@ -130,7 +132,7 @@ for(const id of ['separator','capitalizeWords','addPassphraseNumber'])$(id).addE
 $('generatePassphrase').addEventListener('click',generatedPassphrase);
 $('copyPassphrase').addEventListener('click',async()=>{
   const text=$('passphraseOutput').textContent;if(!text)return;
-  try{await navigator.clipboard.writeText(text);$('copyPassphrase').textContent='Copiada';setTimeout(()=>$('copyPassphrase').textContent='Copiar',1200)}
+  try{await secureCopy(text,$('passphraseBreachStatus'));$('copyPassphrase').textContent='Copiada';setTimeout(()=>$('copyPassphrase').textContent='Copiar',1200)}
   catch{$('passphraseBreachStatus').textContent='No se pudo copiar automáticamente.'}
 });
 $('checkPassphraseBreach').addEventListener('click',()=>checkOne($('passphraseOutput').textContent,$('passphraseBreachStatus')));
@@ -147,8 +149,71 @@ function openDb(){return new Promise((resolve,reject)=>{
   req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE)};
   req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
 })}
-async function dbGet(){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get('primary');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)})}
-async function dbPut(value){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(value,'primary');tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function dbGetNamed(key){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(key);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)})}
+async function dbPutNamed(key,value){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(value,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function dbDeleteNamed(key){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function dbGet(){return dbGetNamed('primary')}
+async function dbPut(value){return dbPutNamed('primary',value)}
+
+
+async function deviceGateSupported(){
+  if(!window.PublicKeyCredential||!navigator.credentials||!window.isSecureContext)return false;
+  if(typeof PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable!=='function')return true;
+  try{return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()}catch{return false}
+}
+async function deviceGateRecord(){return dbGetNamed('deviceGate')}
+async function registerDeviceGate(){
+  if(!currentKey)throw Error('Desbloquea primero la bóveda.');
+  if(!await deviceGateSupported())throw Error('Windows Hello / Passkey no está disponible en este navegador o dispositivo.');
+  const challenge=randomBytes(32),userId=randomBytes(16);
+  const credential=await navigator.credentials.create({publicKey:{
+    challenge,
+    rp:{name:'StanNet Password Security'},
+    user:{id:userId,name:'local-vault',displayName:'StanNet Local Vault'},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{authenticatorAttachment:'platform',residentKey:'preferred',userVerification:'required'},
+    timeout:60000,
+    attestation:'none'
+  }});
+  if(!credential)throw Error('No se creó la credencial del dispositivo.');
+  await dbPutNamed('deviceGate',{version:1,id:b64url(new Uint8Array(credential.rawId)),createdAt:new Date().toISOString()});
+  await refreshDeviceGateStatus();
+}
+async function verifyDeviceGate(){
+  const gate=await deviceGateRecord();
+  if(!gate)return true;
+  if(!await deviceGateSupported())throw Error('Esta bóveda requiere Windows Hello / Passkey en este dispositivo.');
+  const assertion=await navigator.credentials.get({publicKey:{
+    challenge:randomBytes(32),
+    allowCredentials:[{type:'public-key',id:unb64url(gate.id)}],
+    userVerification:'required',
+    timeout:60000
+  }});
+  if(!assertion)throw Error('No se completó la verificación del dispositivo.');
+  return true;
+}
+async function refreshDeviceGateStatus(){
+  const supported=await deviceGateSupported(),gate=await deviceGateRecord();
+  const status=$('deviceGateStatus'),enable=$('enableDeviceGate'),disable=$('disableDeviceGate');
+  if(!supported){
+    status.textContent='Windows Hello / Passkey no está disponible aquí. La contraseña maestra sigue protegiendo la bóveda.';
+    enable.disabled=true;disable.hidden=true;return;
+  }
+  enable.disabled=!currentKey||Boolean(gate);
+  disable.hidden=!gate;
+  status.textContent=gate?'Segundo factor local activo en este dispositivo. Se pedirá junto con la contraseña maestra.':'Disponible: puedes añadir Windows Hello / Passkey como segunda barrera local.';
+}
+async function secureCopy(text,statusEl){
+  if(!navigator.clipboard)throw Error('El portapapeles seguro no está disponible.');
+  await navigator.clipboard.writeText(text);
+  statusEl.textContent='Copiado. Intentaré limpiar el portapapeles en 20 segundos.';
+  setTimeout(async()=>{
+    try{
+      const current=await navigator.clipboard.readText();
+      if(current===text)await navigator.clipboard.writeText('');
+    }catch{}
+  },20000);
+}
 
 async function deriveKey(password,salt){
   const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
@@ -162,6 +227,7 @@ async function encryptVault(){
 }
 async function unlock(record,password){
   const salt=unb64(record.salt),key=await deriveKey(password,salt);
+  await verifyDeviceGate();
   const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(record.iv)},key,unb64(record.ciphertext));
   const data=JSON.parse(new TextDecoder().decode(plain));
   if(!data||!Array.isArray(data.items))throw Error('Formato de bóveda no válido.');
@@ -178,16 +244,18 @@ function lockVault(msg='Bóveda bloqueada.'){
   currentKey=null;currentSalt=null;vaultData=null;
   clearTimeout(lockTimer);$('vaultWorkspace').hidden=true;$('masterPassword').value='';$('vaultStatus').textContent=msg;auditVault();refreshVaultMode();
 }
-function armAutoLock(){clearTimeout(lockTimer);lockTimer=setTimeout(()=>lockVault('Bóveda bloqueada automáticamente por inactividad.'),5*60*1000)}
+function armAutoLock(){clearTimeout(lockTimer);lockTimer=setTimeout(()=>lockVault('Bóveda bloqueada automáticamente por inactividad.'),2*60*1000)}
 for(const ev of ['pointerdown','keydown'])document.addEventListener(ev,()=>{if(currentKey)armAutoLock()},{passive:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&currentKey)lockVault('Bóveda bloqueada al cambiar u ocultar la pestaña.')});
 window.addEventListener('pagehide',()=>{currentKey=null;currentSalt=null;vaultData=null});
 
 async function refreshVaultMode(){
   const record=await dbGet();
-  if(currentKey){$('vaultTitle').textContent='Bóveda desbloqueada';$('vaultIntro').textContent='Los datos permanecen descifrados solo en memoria durante esta sesión.';$('vaultAction').hidden=true;return}
+  if(currentKey){$('vaultTitle').textContent='Bóveda desbloqueada';$('vaultIntro').textContent='Los datos permanecen descifrados solo en memoria durante esta sesión.';$('vaultAction').hidden=true;await refreshDeviceGateStatus();return}
   $('vaultAction').hidden=false;
   if(record){$('vaultTitle').textContent='Desbloquear bóveda';$('vaultIntro').textContent='Introduce tu contraseña maestra. No se almacena ni se envía.';$('vaultAction').textContent='Desbloquear'}
   else{$('vaultTitle').textContent='Crear bóveda';$('vaultIntro').textContent='Define una contraseña maestra larga y única. StanNet no la guarda.';$('vaultAction').textContent='Crear bóveda cifrada'}
+  await refreshDeviceGateStatus();
 }
 $('vaultAction').addEventListener('click',async()=>{
   const password=$('masterPassword').value;if(!password)return $('vaultStatus').textContent='Introduce la contraseña maestra.';
@@ -196,6 +264,8 @@ $('vaultAction').addEventListener('click',async()=>{
   catch{$('vaultStatus').textContent='No se pudo abrir la bóveda. Comprueba la contraseña maestra y la integridad de los datos.'}
 });
 $('lockVault').addEventListener('click',()=>lockVault());
+$('enableDeviceGate').addEventListener('click',async()=>{try{$('deviceGateStatus').textContent='Abriendo Windows Hello / Passkey…';await registerDeviceGate()}catch(e){$('deviceGateStatus').textContent=e.message}});
+$('disableDeviceGate').addEventListener('click',async()=>{try{await verifyDeviceGate();await dbDeleteNamed('deviceGate');$('deviceGateStatus').textContent='Segundo factor local desactivado.';await refreshDeviceGateStatus()}catch(e){$('deviceGateStatus').textContent=e.message}});
 
 $('exportVault').addEventListener('click',async()=>{
   const record=await dbGet();if(!record){$('vaultStatus').textContent='Todavía no existe una bóveda para exportar.';return}
@@ -210,7 +280,7 @@ $('importVault').addEventListener('change',async()=>{
     const payload=JSON.parse(await file.text()),r=payload&&payload.record;
     if(!payload||payload.format!=='stannet-password-vault'||!r||r.version!==1||r.kdf!=='PBKDF2-SHA256'||!r.salt||!r.iv||!r.ciphertext)throw Error('Formato no válido');
     if(await dbGet()){if(!confirm('Ya existe una bóveda local. ¿Reemplazarla por este backup cifrado?'))return}
-    lockVault('');await dbPut(r);$('vaultStatus').textContent='Backup importado. Introduce su contraseña maestra para desbloquearlo.';await refreshVaultMode();
+    lockVault('');await dbPut(r);await dbDeleteNamed('deviceGate');$('vaultStatus').textContent='Backup importado. El segundo factor local se ha desvinculado; introduce la contraseña maestra para desbloquearlo.';await refreshVaultMode();
   }catch{$('vaultStatus').textContent='No se pudo importar: el archivo no parece un backup válido de StanNet Password Security.'}
   finally{$('importVault').value=''}
 });
@@ -246,7 +316,7 @@ function renderCredentials(){
     meta.textContent='Contraseña: •••••••••••• · MFA: '+(item.mfaType||'none')+(item.breachCount>0?' · ⚠ filtrada':'');
     const actions=document.createElement('div');actions.className='credential-actions';
     const copy=document.createElement('button');copy.type='button';copy.className='secondary-action';copy.textContent='Copiar contraseña';
-    copy.onclick=async()=>{try{await navigator.clipboard.writeText(item.password);copy.textContent='Copiada';setTimeout(()=>copy.textContent='Copiar contraseña',1000)}catch{$('vaultStatus').textContent='No se pudo copiar automáticamente.'}};
+    copy.onclick=async()=>{try{await secureCopy(item.password,$('vaultStatus'));copy.textContent='Copiada';setTimeout(()=>copy.textContent='Copiar contraseña',1000)}catch{$('vaultStatus').textContent='No se pudo copiar automáticamente.'}};
     const check=document.createElement('button');check.type='button';check.className='secondary-action';check.textContent='Filtraciones';
     check.onclick=async()=>{check.textContent='Comprobando…';const count=await pwnedCount(item.password).catch(()=>null);if(count!==null){item.breachCount=count;item.lastBreachCheck=new Date().toISOString();await encryptVault();$('vaultStatus').textContent=count>0?'⚠ '+item.service+': encontrada '+count.toLocaleString('es-ES')+' veces.':'✓ '+item.service+': no encontrada en el corpus.';auditVault()}check.textContent='Filtraciones'};
     const edit=document.createElement('button');edit.type='button';edit.className='secondary-action';edit.textContent='Editar';
