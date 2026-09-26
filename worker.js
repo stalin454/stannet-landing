@@ -275,6 +275,18 @@ export default {
       }
     }
 
+    if (url.pathname.startsWith('/api/password-auth/')) {
+      return handlePasswordAuth(request, env, url);
+    }
+
+    if (url.pathname === '/api/password-vault') {
+      return handlePasswordVault(request, env);
+    }
+
+    if (url.pathname === '/api/password-devices') {
+      return handlePasswordDevices(request, env, url);
+    }
+
     if (url.pathname === '/api/stannet-ai') {
       return handleStanNetAi(request, env);
     }
@@ -416,6 +428,207 @@ function json(body, status = 200, extraHeaders = {}) {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8', ...extraHeaders }
   });
+}
+
+function passwordCookie(name, value, maxAge) {
+  return name + '=' + encodeURIComponent(value || '') + '; Path=/api/; HttpOnly; Secure; SameSite=Strict; Max-Age=' + maxAge;
+}
+function passwordClearCookie(name) {
+  return name + '=; Path=/api/; HttpOnly; Secure; SameSite=Strict; Max-Age=0';
+}
+function passwordCookies(request) {
+  const out = {};
+  for (const part of (request.headers.get('cookie') || '').split(';')) {
+    const i = part.indexOf('=');
+    if (i < 0) continue;
+    out[part.slice(0, i).trim()] = decodeURIComponent(part.slice(i + 1).trim());
+  }
+  return out;
+}
+function passwordJson(body, status = 200, setCookies = []) {
+  const headers = new Headers({ 'content-type':'application/json; charset=utf-8', 'cache-control':'no-store' });
+  for (const cookie of setCookies) headers.append('set-cookie', cookie);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+function passwordSessionCookies(data) {
+  const expires = Number(data?.expires_in || 3600);
+  const cookies = [];
+  if (data?.access_token) cookies.push(passwordCookie('stannet_ps_access', data.access_token, Math.max(60, expires)));
+  if (data?.refresh_token) cookies.push(passwordCookie('stannet_ps_refresh', data.refresh_token, 60 * 60 * 24 * 30));
+  return cookies;
+}
+async function supabaseAuth(path, init = {}) {
+  const headers = new Headers(init.headers || {});
+  headers.set('apikey', SUPABASE_KEY);
+  if (!headers.has('content-type') && init.body) headers.set('content-type','application/json');
+  return fetch(SUPABASE_URL + path, { ...init, headers });
+}
+async function ensurePasswordAuth(request) {
+  const cookies = passwordCookies(request);
+  let access = cookies.stannet_ps_access || '';
+  const refresh = cookies.stannet_ps_refresh || '';
+  const readUser = async token => {
+    if (!token) return null;
+    const response = await supabaseAuth('/auth/v1/user', { headers:{ Authorization:'Bearer ' + token } });
+    if (!response.ok) return null;
+    return response.json();
+  };
+  let user = await readUser(access);
+  let setCookies = [];
+  if (!user && refresh) {
+    const response = await supabaseAuth('/auth/v1/token?grant_type=refresh_token', {
+      method:'POST',
+      body:JSON.stringify({ refresh_token:refresh })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      access = data.access_token || '';
+      user = data.user || await readUser(access);
+      setCookies = passwordSessionCookies(data);
+    }
+  }
+  return user && access ? { ok:true, user, access, setCookies } : { ok:false, setCookies:[
+    passwordClearCookie('stannet_ps_access'), passwordClearCookie('stannet_ps_refresh')
+  ] };
+}
+async function handlePasswordAuth(request, env, url) {
+  const action = url.pathname.split('/').pop();
+  if (action === 'session' && request.method === 'GET') {
+    const auth = await ensurePasswordAuth(request);
+    return auth.ok
+      ? passwordJson({ ok:true, user:{ id:auth.user.id, email:auth.user.email || '' } }, 200, auth.setCookies)
+      : passwordJson({ ok:false }, 401, auth.setCookies);
+  }
+  if ((action === 'signin' || action === 'signup') && request.method === 'POST') {
+    let body = {};
+    try { body = await request.json(); } catch { return passwordJson({ error:'Solicitud no válida.' }, 400); }
+    const email = String(body.email || '').trim().toLowerCase();
+    const password = String(body.password || '');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 10 || password.length > 256) {
+      return passwordJson({ error:'Email o contraseña no válidos.' }, 400);
+    }
+    const target = action === 'signup' ? '/auth/v1/signup' : '/auth/v1/token?grant_type=password';
+    const response = await supabaseAuth(target, { method:'POST', body:JSON.stringify({ email, password }) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) return passwordJson({ error:data?.msg || data?.error_description || data?.message || 'No se pudo completar la autenticación.' }, response.status);
+    const session = data.access_token ? data : data.session;
+    return passwordJson({
+      ok:true,
+      user:{ id:data.user?.id || session?.user?.id || '', email:data.user?.email || session?.user?.email || email },
+      requiresConfirmation:!session?.access_token
+    }, 200, session?.access_token ? passwordSessionCookies(session) : []);
+  }
+  if ((action === 'signout' || action === 'signout-all') && request.method === 'POST') {
+    const auth = await ensurePasswordAuth(request);
+    if (auth.ok) {
+      const scope = action === 'signout-all' ? 'global' : 'local';
+      await supabaseAuth('/auth/v1/logout?scope=' + scope, { method:'POST', headers:{ Authorization:'Bearer ' + auth.access } }).catch(() => {});
+    }
+    return passwordJson({ ok:true }, 200, [passwordClearCookie('stannet_ps_access'), passwordClearCookie('stannet_ps_refresh')]);
+  }
+  return passwordJson({ error:'Método no permitido.' }, 405);
+}
+async function supabaseRest(path, access, init = {}) {
+  const headers = new Headers(init.headers || {});
+  headers.set('apikey', SUPABASE_KEY);
+  headers.set('authorization', 'Bearer ' + access);
+  if (!headers.has('content-type') && init.body) headers.set('content-type','application/json');
+  return fetch(SUPABASE_URL + '/rest/v1/' + path, { ...init, headers });
+}
+async function requirePasswordDevice(request, auth) {
+  const id = (request.headers.get('x-stannet-device') || '').trim();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { ok:false, status:428, error:'Registra este dispositivo antes de sincronizar.' };
+  const response = await supabaseRest('password_devices?id=eq.' + encodeURIComponent(id) + '&select=id,revoked_at&limit=1', auth.access);
+  if (!response.ok) return { ok:false, status:503, error:'No se pudo comprobar el dispositivo.' };
+  const rows = await response.json().catch(() => []);
+  if (!rows[0] || rows[0].revoked_at) return { ok:false, status:403, error:'Este dispositivo no está autorizado para sincronizar.' };
+  return { ok:true, id };
+}
+async function handlePasswordVault(request, env) {
+  const auth = await ensurePasswordAuth(request);
+  if (!auth.ok) return passwordJson({ error:'Sesión requerida.' }, 401, auth.setCookies);
+  const device = await requirePasswordDevice(request, auth);
+  if (!device.ok) return passwordJson({ error:device.error }, device.status, auth.setCookies);
+
+  if (request.method === 'GET') {
+    const response = await supabaseRest('password_vaults?select=version,encrypted_record,updated_at&limit=1', auth.access);
+    if (!response.ok) return passwordJson({ error:'La tabla de sincronización todavía no está disponible.' }, 503, auth.setCookies);
+    const rows = await response.json().catch(() => []);
+    return passwordJson({ ok:true, vault:rows[0] || null }, 200, auth.setCookies);
+  }
+
+  if (request.method === 'PUT') {
+    let body = {};
+    try { body = await request.json(); } catch { return passwordJson({ error:'Solicitud no válida.' }, 400, auth.setCookies); }
+    const expectedVersion = Number(body.expectedVersion);
+    const record = body.encryptedRecord;
+    if (!Number.isInteger(expectedVersion) || expectedVersion < 0 || !record || typeof record !== 'object') {
+      return passwordJson({ error:'Datos de sincronización no válidos.' }, 400, auth.setCookies);
+    }
+    const raw = JSON.stringify(record);
+    if (raw.length > 2_000_000) return passwordJson({ error:'Bóveda demasiado grande para esta versión.' }, 413, auth.setCookies);
+    const response = await supabaseRest('rpc/sync_password_vault', auth.access, {
+      method:'POST',
+      body:JSON.stringify({ p_expected_version:expectedVersion, p_encrypted_record:record })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const text = JSON.stringify(data);
+      if (/vault_version_conflict/i.test(text)) return passwordJson({ error:'version_conflict' }, 409, auth.setCookies);
+      return passwordJson({ error:'No se pudo sincronizar la bóveda.' }, 503, auth.setCookies);
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    await supabaseRest('password_devices?id=eq.' + encodeURIComponent(device.id), auth.access, {
+      method:'PATCH', body:JSON.stringify({ last_seen_at:new Date().toISOString() }), headers:{ Prefer:'return=minimal' }
+    }).catch(() => {});
+    return passwordJson({ ok:true, version:Number(row?.version || expectedVersion + 1), updatedAt:row?.updated_at || new Date().toISOString() }, 200, auth.setCookies);
+  }
+  return passwordJson({ error:'Método no permitido.' }, 405, auth.setCookies);
+}
+async function handlePasswordDevices(request, env, url) {
+  const auth = await ensurePasswordAuth(request);
+  if (!auth.ok) return passwordJson({ error:'Sesión requerida.' }, 401, auth.setCookies);
+
+  if (request.method === 'GET') {
+    const response = await supabaseRest('password_devices?select=id,label,platform,last_seen_at,created_at,revoked_at&order=created_at.desc', auth.access);
+    if (!response.ok) return passwordJson({ error:'La tabla de dispositivos todavía no está disponible.' }, 503, auth.setCookies);
+    return passwordJson({ ok:true, devices:await response.json() }, 200, auth.setCookies);
+  }
+
+  if (request.method === 'POST') {
+    let body = {};
+    try { body = await request.json(); } catch { return passwordJson({ error:'Solicitud no válida.' }, 400, auth.setCookies); }
+    const id = String(body.id || '').trim();
+    const label = String(body.label || '').trim().slice(0,80);
+    const platform = String(body.platform || 'unknown').trim().slice(0,80);
+    if (!/^[0-9a-f-]{36}$/i.test(id) || !label) return passwordJson({ error:'Dispositivo no válido.' }, 400, auth.setCookies);
+    const existingRes = await supabaseRest('password_devices?id=eq.' + encodeURIComponent(id) + '&select=id,revoked_at&limit=1', auth.access);
+    const existing = existingRes.ok ? (await existingRes.json().catch(() => []))[0] : null;
+    if (existing?.revoked_at) return passwordJson({ error:'Este dispositivo fue revocado.' }, 403, auth.setCookies);
+    const response = await supabaseRest('password_devices?on_conflict=id', auth.access, {
+      method:'POST',
+      body:JSON.stringify({ id, user_id:auth.user.id, label, platform, last_seen_at:new Date().toISOString() }),
+      headers:{ Prefer:'resolution=merge-duplicates,return=representation' }
+    });
+    if (!response.ok) return passwordJson({ error:'No se pudo registrar el dispositivo.' }, 503, auth.setCookies);
+    return passwordJson({ ok:true, device:(await response.json().catch(() => []))[0] || { id,label,platform } }, 200, auth.setCookies);
+  }
+
+  if (request.method === 'PATCH') {
+    let body = {};
+    try { body = await request.json(); } catch { return passwordJson({ error:'Solicitud no válida.' }, 400, auth.setCookies); }
+    const id = String(body.id || '').trim();
+    if (!/^[0-9a-f-]{36}$/i.test(id)) return passwordJson({ error:'Dispositivo no válido.' }, 400, auth.setCookies);
+    const response = await supabaseRest('password_devices?id=eq.' + encodeURIComponent(id), auth.access, {
+      method:'PATCH',
+      body:JSON.stringify({ revoked_at:new Date().toISOString() }),
+      headers:{ Prefer:'return=representation' }
+    });
+    if (!response.ok) return passwordJson({ error:'No se pudo revocar el dispositivo.' }, 503, auth.setCookies);
+    return passwordJson({ ok:true }, 200, auth.setCookies);
+  }
+
+  return passwordJson({ error:'Método no permitido.' }, 405, auth.setCookies);
 }
 
 async function handleStanNetAi(request, env) {
