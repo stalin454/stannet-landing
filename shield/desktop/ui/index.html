@@ -42,7 +42,10 @@
       <h2>Scanner local</h2>
       <p>Analiza un archivo o carpeta con SHA-256 y reglas YARA-X. Shield nunca ejecuta el contenido.</p>
       <input id="target" placeholder="C:\ruta\archivo-o-carpeta">
-      <button data-action="scan">Analizar ahora</button>
+      <div class="row">
+        <button data-action="scan">Analizar con Shield</button>
+        <button class="secondary" data-action="defender-path">Analizar con Defender</button>
+      </div>
       <p class="micro">Máximo 10.000 archivos por operación · archivos individuales hasta 1 GiB · YARA-X hasta 64 MiB por archivo.</p>
     </article>
 
