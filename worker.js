@@ -468,7 +468,10 @@ Panel de organización personal para nutrición, entrenamiento, sueño, suplemen
 9. StanNet Sentinel — /sentinel/
 Proyecto de ciberseguridad defensiva dentro del ecosistema StanNet.
 
-10. Formación y perfil
+10. Proyecto cliente — Alfa y Omega — /sanacion/
+Sitio web de bienestar integral desarrollado para un cliente externo. Tiene identidad visual y navegación propias y se presenta en StanNet únicamente como trabajo de portfolio, no como producto o academia de StanNet.
+
+11. Formación y perfil
 • Formación y certificados — /pages/education.html
 • Perfil / CV — /pages/cv.html
 
