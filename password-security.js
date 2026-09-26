@@ -18,11 +18,12 @@ function randomIndex(max){
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=randomIndex(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 
 const groups={
- lower:'abcdefghijkmnopqrstuvwxyz',
- upper:'ABCDEFGHJKLMNPQRSTUVWXYZ',
- numbers:'23456789',
+ lower:'abcdefghijklmnopqrstuvwxyz',
+ upper:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+ numbers:'0123456789',
  symbols:'!@#$%^&*()-_=+[]{}:,.?'
 };
+const ambiguous=new Set('il1LoO0');
 function generate(){
   const len=Number($('length').value);
   let selected=[];
@@ -31,6 +32,7 @@ function generate(){
   if($('numbers').checked)selected.push(groups.numbers);
   if($('symbols').checked)selected.push(groups.symbols);
   if(!selected.length){$('strengthText').textContent='Selecciona al menos un grupo de caracteres.';return}
+  if($('excludeAmbiguous').checked)selected=selected.map(g=>[...g].filter(ch=>!ambiguous.has(ch)).join('')).filter(Boolean);
   const pool=selected.join('');
   const chars=selected.map(g=>g[randomIndex(g.length)]);
   while(chars.length<len)chars.push(pool[randomIndex(pool.length)]);
