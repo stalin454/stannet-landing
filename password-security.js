@@ -117,6 +117,25 @@ $('vaultAction').addEventListener('click',async()=>{
   catch(e){currentKey=null;vaultData=null;$('vaultStatus').textContent='No se pudo abrir la bóveda. Comprueba la contraseña maestra y la integridad de los datos.'}
 });
 $('lockVault').addEventListener('click',()=>lockVault());
+
+$('exportVault').addEventListener('click',async()=>{
+  const record=await dbGet();
+  if(!record){$('vaultStatus').textContent='Todavía no existe una bóveda para exportar.';return}
+  const payload={format:'stannet-password-vault',exportedAt:new Date().toISOString(),record};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
+  const a=document.createElement('a');a.href=url;a.download='stannet-password-vault-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  $('vaultStatus').textContent='Backup cifrado exportado. Guárdalo en un lugar seguro.';
+});
+$('importVault').addEventListener('change',async()=>{
+  const file=$('importVault').files?.[0];if(!file)return;
+  try{
+    const payload=JSON.parse(await file.text()),r=payload?.record;
+    if(payload?.format!=='stannet-password-vault'||!r||r.version!==1||r.kdf!=='PBKDF2-SHA256'||!r.salt||!r.iv||!r.ciphertext)throw Error('Formato no válido');
+    if(await dbGet()){if(!confirm('Ya existe una bóveda local. ¿Reemplazarla por este backup cifrado?')){ $('importVault').value=''; return; }}
+    lockVault('');await dbPut(r);$('vaultStatus').textContent='Backup importado. Introduce su contraseña maestra para desbloquearlo.';await refreshVaultMode();
+  }catch{$('vaultStatus').textContent='No se pudo importar: el archivo no parece un backup válido de StanNet Password Security.'}
+  finally{$('importVault').value=''}
+});
 function showWorkspace(){$('vaultWorkspace').hidden=false;renderCredentials()}
 
 function newId(){return Array.from(randomBytes(16),b=>b.toString(16).padStart(2,'0')).join('')}
