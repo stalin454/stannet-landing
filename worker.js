@@ -387,7 +387,7 @@ async function handleStanNetAi(request, env) {
   }
 
   const apiUrl = env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
-  const model = env.AI_MODEL || 'llama-3.3-70b-versatile';
+  const model = env.AI_MODEL || 'openai/gpt-oss-20b';
 
   if (!env.AI_API_KEY) {
     return json({ error: 'StanNet AI no está configurado.' }, 503, headers);
