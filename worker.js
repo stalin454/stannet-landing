@@ -386,7 +386,10 @@ async function handleStanNetAi(request, env) {
     return json({ error: 'Método no permitido.' }, 405, headers);
   }
 
-  if (!env.AI_API_URL || !env.AI_MODEL || !env.AI_API_KEY) {
+  const apiUrl = env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+  const model = env.AI_MODEL || 'llama-3.3-70b-versatile';
+
+  if (!env.AI_API_KEY) {
     return json({ error: 'StanNet AI no está configurado.' }, 503, headers);
   }
 
@@ -403,14 +406,14 @@ async function handleStanNetAi(request, env) {
   }
 
   try {
-    const response = await fetch(env.AI_API_URL, {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + env.AI_API_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: env.AI_MODEL,
+        model,
         messages: [
           {
             role: 'system',
