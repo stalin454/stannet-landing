@@ -430,7 +430,7 @@ async function handleStanNetAi(request, env) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      return json({ error: 'StanNet AI no pudo responder ahora.' }, 502, headers);
+      return json({ error: 'StanNet AI no pudo responder ahora.', providerStatus: response.status }, 502, headers);
     }
 
     const answer = data?.choices?.[0]?.message?.content;
