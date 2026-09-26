@@ -318,3 +318,9 @@ body{background:var(--bg);color:var(--ink)}.site-header{background:rgba(6,19,31,
   .nav-group.open .nav-dropdown{display:grid!important}
   .nav-trigger{display:flex;align-items:center;justify-content:space-between}
 }
+
+/* Global StanNet header logo sizing */
+.site-header .brand-lockup{display:inline-flex;align-items:center;gap:10px;white-space:nowrap}
+.site-header .brand-lockup .brand-mark{display:block;width:34px!important;height:34px!important;max-width:34px!important;max-height:34px!important;min-width:34px!important;object-fit:contain!important;flex:0 0 34px}
+.site-header .brand-lockup>span{display:inline-flex;align-items:baseline}
+@media(max-width:520px){.site-header .brand-lockup .brand-mark{width:30px!important;height:30px!important;max-width:30px!important;max-height:30px!important;min-width:30px!important;flex-basis:30px}}
