@@ -9,7 +9,7 @@ function entry(parent,text,className='entry'){
   const el=document.createElement('div');el.className=className;el.textContent=text;parent.append(el);return el;
 }
 function button(parent,text,action){const b=document.createElement('button');b.type='button';b.className='secondary';b.textContent=text;b.addEventListener('click',()=>Promise.resolve().then(action).catch(e=>message(e.message)));parent.append(b);return b;}
-function clearReport(){report=null;$('result').hidden=true;$('download').disabled=true;$('save-report').disabled=true;$('reputation').disabled=true;$('reputation-panel').hidden=true;$('reputation-result').replaceChildren();}
+function clearReport(){report=null;$('result').hidden=true;$('download').disabled=true;$('save-report').disabled=true;}
 function busy(value){for(const id of jobButtons)$(id).disabled=value;$('file').disabled=value;$('source').disabled=value;$('cancel').hidden=!value;$('scan').setAttribute('aria-busy',String(value));if(!value)$('draft').disabled=!report?.strings?.some(s=>s.text.length>=5&&s.text.length<=128&&!s.truncated);}
 function run(action,payload){
   if(running)return Promise.reject(Error('Hay una operación en curso. Puedes cancelarla.'));
@@ -73,10 +73,7 @@ function render(data){
   if(data.strings_truncated)entry($('strings'),'Extracción truncada; consulta los límites en el JSON.');
   $('draft').disabled=!offered;
   $('technical').textContent=JSON.stringify({schema_version:data.schema_version,app_version:data.app_version,analyzed_at:data.analyzed_at,metadata:data.file.metadata,format_validation:data.file.format_validation,detection:{version:data.detection.version,rules_sha256:data.detection.rules_sha256,rules_origin:data.detection.rules_origin},execution:data.execution,truncation:data.truncation,warnings:data.warnings},null,2);
-  $('result').hidden=false;$('download').disabled=false;$('save-report').disabled=false;$('reputation').disabled=false;
-  const peMeta=data.file.metadata||{};
-  if(Array.isArray(peMeta.imports)&&peMeta.imports.length){entry($('detections'),'DLLs importadas: '+peMeta.imports.join(', '),'entry evidence');if(peMeta.imports_truncated)entry($('detections'),'Lista de imports truncada al límite del analizador.');}
-  if(peMeta.authenticode){entry($('detections'),'Authenticode: '+(peMeta.authenticode.present?(peMeta.authenticode.within_file===false?'declarado fuera del archivo':'tabla presente; firma no verificada'):'sin tabla declarada'),'entry evidence');}
+  $('result').hidden=false;$('download').disabled=false;$('save-report').disabled=false;
   message('Análisis completado. '+data.warnings.join(' '));
 }
 async function scan(file){
@@ -101,29 +98,6 @@ $('signals').addEventListener('click',()=>demo('combo'));
 function download(data,type,name){
   const url=URL.createObjectURL(new Blob([data],{type})),link=document.createElement('a');link.href=url;link.download=name;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-$('reputation').addEventListener('click',async()=>{
-  if(!report)return;
-  $('reputation').disabled=true;
-  $('reputation-panel').hidden=false;
-  $('reputation-result').replaceChildren();
-  entry($('reputation-result'),'Consultando reputación por SHA-256…');
-  try{
-    const response=await fetch('/api/sentinel-reputation?sha256='+encodeURIComponent(report.file.sha256),{headers:{accept:'application/json'}});
-    const data=await response.json().catch(()=>({}));
-    $('reputation-result').replaceChildren();
-    if(!response.ok)throw Error(data.error||'No se pudo consultar la reputación.');
-    if(!data.found){entry($('reputation-result'),'Hash no encontrado en VirusTotal. Esto no demuestra que el archivo sea seguro.');return;}
-    const s=data.stats||{};
-    entry($('reputation-result'),'VirusTotal · malicioso '+(s.malicious||0)+' · sospechoso '+(s.suspicious||0)+' · no detectado '+(s.undetected||0),'entry match-title');
-    if(data.typeDescription)entry($('reputation-result'),'Tipo reportado: '+data.typeDescription);
-    if(data.meaningfulName)entry($('reputation-result'),'Nombre conocido: '+data.meaningfulName);
-    if(data.lastAnalysisDate)entry($('reputation-result'),'Último análisis: '+new Date(data.lastAnalysisDate).toLocaleString('es'));
-    entry($('reputation-result'),'Consulta externa basada solo en el hash. Interpreta el resultado junto con el análisis local.');
-  }catch(e){
-    $('reputation-result').replaceChildren();
-    entry($('reputation-result'),e.message||'No se pudo consultar la reputación.');
-  }finally{$('reputation').disabled=false;}
-});
 $('download').addEventListener('click',()=>{if(report)download(JSON.stringify(report,null,2),'application/json','sentinel-'+report.file.sha256.slice(0,12)+'.json');});
 $('save-report').addEventListener('click',async()=>{if(!report)return;try{await storage.saveReport(report);message('Informe guardado en este navegador, sin archivo ni strings.');}catch(e){message(e.message);}});
 $('source').value=DEFAULT_RULES;
