@@ -1,3 +1,4 @@
+import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -22,27 +23,37 @@ export default {
       return handleRadioFeed(url);
     }
 
+    if (url.pathname === '/api/radio/program') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const program = resolveRadioProgram(new Date(), 'Europe/Madrid');
+      const streamUrl = typeof env.RADIO_STREAM_URL === 'string' && /^https:\/\//i.test(env.RADIO_STREAM_URL.trim()) ? env.RADIO_STREAM_URL.trim() : '';
+      const bulletinCategory = ['CYBER','AI','TECH','DEV'].includes(program.current.type) ? program.current.type : 'ALL';
+      return json({
+        station:'StanNet Radio',
+        generatedAt:new Date().toISOString(),
+        ...program,
+        schedule:radioProgramClock,
+        playout:{
+          mode:program.current.mode,
+          bulletinUrl:program.current.mode==='bulletin' ? '/api/radio/bulletin?category='+encodeURIComponent(bulletinCategory) : null,
+          voiceEndpoint:program.current.mode==='bulletin' ? '/api/radio/voice' : null,
+          musicSource:program.current.mode==='music' ? 'StanNet authorized catalogue' : null,
+          streamConfigured:Boolean(streamUrl),
+          streamUrl
+        },
+        automation:{
+          editorialFeed:true,
+          aiEditor:true,
+          neuralVoice:Boolean(env.AZURE_SPEECH_REGION && env.AZURE_SPEECH_KEY),
+          scheduler:true,
+          continuousStream:Boolean(streamUrl)
+        }
+      },200,{ 'Cache-Control':'public, max-age=20, s-maxage=20' });
+    }
+
     if (url.pathname === '/api/radio/status') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
-      const configuredStream = typeof env.RADIO_STREAM_URL === 'string' ? env.RADIO_STREAM_URL.trim() : '';
-      const streamUrl = /^https:\/\//i.test(configuredStream) ? configuredStream : '';
-      return json({
-        station: 'StanNet Radio',
-        tagline: 'Music · Tech · Cyber · AI',
-        stage: 1,
-        live: Boolean(streamUrl),
-        streamUrl,
-        now: {
-          title: streamUrl ? 'StanNet Radio Live' : 'StanNet Radio',
-          meta: streamUrl ? 'Live stream' : 'Stage 1 · Cloudflare-ready'
-        },
-        schedule: [
-          { time: '08:00', type: 'CYBER', title: 'Cybersecurity Daily', description: 'Boletín de seguridad, vulnerabilidades y contexto defensivo.' },
-          { time: '10:00', type: 'AI', title: 'AI Update', description: 'Novedades relevantes de inteligencia artificial y herramientas.' },
-          { time: '13:00', type: 'DEV', title: 'Programming Sessions', description: 'Conceptos breves de programación, Linux y desarrollo web.' },
-          { time: '18:00', type: 'MUSIC', title: 'StanNet Electronic', description: 'Música propia, sesiones y catálogo autorizado.' }
-        ]
-      }, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=60' });
+      return json(radioStatus(env, new Date()), 200, { 'Cache-Control': 'public, max-age=20, s-maxage=20' });
     }
 
     if (url.pathname === '/api/speech') {
