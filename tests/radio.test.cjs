@@ -10,4 +10,11 @@ assert(api.includes("RADIO_STREAM_URL"),"Cloudflare stream env missing");
 assert(worker.includes("/api/radio/status"),"worker route missing");
 assert(!html.toLowerCase().includes("vercel"),"radio page must not reference Vercel");
 assert(!js.toLowerCase().includes("vercel"),"radio JS must not reference Vercel");
-console.log("StanNet Radio stage 1 OK");
+
+assert(worker.includes("/api/radio/feed"),"Stage 2 feed endpoint missing");
+assert(worker.includes("RADIO_FEEDS"),"Stage 2 source registry missing");
+assert(worker.includes("dedupeRadioItems"),"Stage 2 deduplication missing");
+assert(html.includes('id="radioFeed"'),"Stage 2 feed UI missing");
+assert(js.includes("/api/radio/feed"),"Stage 2 client feed integration missing");
+assert(worker.includes("CISA")&&worker.includes("Cloudflare")&&worker.includes("GitHub"),"trusted source set missing");
+console.log("StanNet Radio stages 1-2 OK");
