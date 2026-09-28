@@ -9,5 +9,41 @@
     ],
     "notes": "No añadas una pista sin documentar rights.type y rights.source."
   },
-  "tracks": []
+  "tracks": [],
+  "schema": {
+    "track": {
+      "required": [
+        "id",
+        "title",
+        "path",
+        "rights"
+      ],
+      "optional": [
+        "artist",
+        "durationSeconds",
+        "blocks",
+        "enabled"
+      ],
+      "blocks": [
+        "MUSIC",
+        "ELECTRONIC",
+        "GUITAR",
+        "NIGHT",
+        "MORNING",
+        "AFTERNOON"
+      ]
+    },
+    "rights": {
+      "required": [
+        "type",
+        "source"
+      ],
+      "allowedTypes": [
+        "owned",
+        "licensed",
+        "public-domain",
+        "creative-commons-compatible"
+      ]
+    }
+  }
 }
