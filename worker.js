@@ -8,6 +8,11 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/catalog') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioCatalog(request, env);
+    }
+
     if (url.pathname === '/api/radio/playout') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       return handleRadioPlayout(url, env);
@@ -905,6 +910,45 @@ async function handleRadioJingle(url,env) {
   const text=messages[variant];
   if(!text) return json({ error:'Jingle no válido.' },400);
   return synthesizeRadioSpeech(text,env,'6',{ 'X-StanNet-Jingle':variant });
+}
+
+async function handleRadioCatalog(request,env) {
+  try{
+    const target=new URL('/radio-catalog.json',request.url);
+    const response=await env.ASSETS.fetch(new Request(target,{headers:{accept:'application/json'}}));
+    if(!response.ok) return json({ error:'Catálogo musical no disponible.' },503);
+    const catalog=await response.json();
+    const excluded=Array.isArray(catalog?.policy?.excludedPaths)?catalog.policy.excludedPaths:[];
+    const tracks=Array.isArray(catalog?.tracks)?catalog.tracks:[];
+    const safe=tracks.filter(track=>{
+      const path=String(track?.path||'');
+      const rights=track?.rights||{};
+      return track?.enabled!==false &&
+        path &&
+        !excluded.some(prefix=>path.startsWith(prefix)) &&
+        typeof rights.type==='string' &&
+        typeof rights.source==='string' &&
+        rights.type.trim() &&
+        rights.source.trim();
+    });
+    return json({
+      station:catalog?.station||'StanNet Radio',
+      version:Number(catalog?.version||1),
+      requireRights:catalog?.policy?.requireRights===true,
+      total:tracks.length,
+      authorized:safe.length,
+      tracks:safe.map(track=>({
+        id:String(track.id||''),
+        title:String(track.title||''),
+        artist:String(track.artist||'StanNet'),
+        durationSeconds:Number(track.durationSeconds||0)||null,
+        blocks:Array.isArray(track.blocks)?track.blocks:[],
+        path:String(track.path||'')
+      }))
+    },200,{ 'Cache-Control':'public, max-age=60, s-maxage=300' });
+  }catch{
+    return json({ error:'No se pudo leer el catálogo musical.' },503);
+  }
 }
 
 async function handleRadioPlayout(url,env) {
