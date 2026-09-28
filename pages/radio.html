@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="StanNet Radio · Music, Tech, Cyber & AI. Radio digital y podcasts del ecosistema StanNet.">
+<title>StanNet Radio | Music · Tech · Cyber · AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../radio.css">
+</head>
+<body id="top" class="radio-page">
+<header class="site-header">
+<a class="brand brand-lockup" href="../index.html" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="../assets/brand/stannet-shield.png" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav home-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Proyectos <span>⌄</span></button><div class="nav-dropdown"><a href="../index.html#proyectos">Todos los proyectos</a><a href="../sentinel/">StanNet Sentinel</a><a href="../nutri-ia/">Nutri IA</a><a href="music.html">Music Lab</a><a class="active" aria-current="page" href="radio.html">StanNet Radio</a><a href="marketplace.html">Marketplace</a></div></div>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button><div class="nav-dropdown"><a href="cybersecurity.html">Cybersecurity Academy</a><a href="programming.html">Programming Academy</a><a href="callan.html">Callan English Coach</a><a href="guitar.html">Guitar Academy</a></div></div>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button><div class="nav-dropdown"><a href="cyber-lab.html">Cyber Defense Lab</a><a href="../sentinel/">Sentinel</a><a href="programming-fullstack.html">Full-Stack Lab</a></div></div>
+<a href="education.html">Formación</a><a href="cv.html">Sobre mí</a>
+</nav>
+</header>
+
+<main>
+<section class="radio-hero">
+<div class="radio-hero-copy">
+<p class="eyebrow">STANNET / AUTONOMOUS DIGITAL RADIO</p>
+<h1>Music <span>•</span> Tech <span>•</span><br>Cyber <span>•</span> AI</h1>
+<p class="radio-lead">Una radio digital preparada para música, podcasts y boletines automatizados de tecnología, ciberseguridad e inteligencia artificial.</p>
+<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 1 · PLAYER READY</span></div>
+</div>
+<div class="radio-console" aria-label="Reproductor StanNet Radio">
+<div class="radio-console-top"><span>STANNET RADIO</span><span id="liveBadge">STANDBY</span></div>
+<div class="radio-art"><img src="../assets/brand/stannet-shield.png" alt="StanNet Radio"><div class="radio-rings" aria-hidden="true"></div></div>
+<div class="radio-now">
+<small>NOW PLAYING</small>
+<h2 id="nowTitle">StanNet Radio</h2>
+<p id="nowMeta">Music · Tech · Cyber · AI</p>
+</div>
+<audio id="radioAudio" preload="none"></audio>
+<div class="radio-controls">
+<button id="radioPlay" class="radio-play" type="button" aria-label="Reproducir radio">▶</button>
+<div class="radio-volume"><label for="radioVolume">VOL</label><input id="radioVolume" type="range" min="0" max="1" step=".05" value=".8"></div>
+</div>
+<p id="radioMessage" class="radio-message" role="status">El stream se conectará desde la configuración de Cloudflare cuando activemos la emisión.</p>
+</div>
+</section>
+
+<section class="section radio-section">
+<div class="section-heading"><div><p class="eyebrow">01 / PROGRAMACIÓN</p><h2>Una frecuencia.<br><em>Varias señales.</em></h2></div><p>La parrilla ya está modelada para que en las siguientes etapas pueda generarse y actualizarse automáticamente.</p></div>
+<div id="radioSchedule" class="radio-grid" aria-live="polite"></div>
+</section>
+
+<section class="section radio-section">
+<div class="section-heading"><div><p class="eyebrow">02 / CANALES</p><h2>Contenido con<br><em>identidad StanNet.</em></h2></div><p>Noticias, aprendizaje y música conectados con el resto del ecosistema.</p></div>
+<div class="radio-grid">
+<article class="radio-card"><span>CYBER / 01</span><h3>Cybersecurity News</h3><p>Vulnerabilidades, CVE, incidentes, defensa y contexto para estudiantes.</p></article>
+<article class="radio-card"><span>AI / 02</span><h3>AI News</h3><p>Nuevos modelos, herramientas, agentes y aplicaciones de inteligencia artificial.</p></article>
+<article class="radio-card"><span>DEV / 03</span><h3>Programming Sessions</h3><p>Microprogramas sobre JavaScript, Python, web, Linux y fundamentos técnicos.</p></article>
+<article class="radio-card"><span>MUSIC / 04</span><h3>StanNet Electronic</h3><p>Música propia, sesiones, jingles y material con derechos adecuados para emisión.</p></article>
+</div>
+</section>
+
+<section class="section radio-automation">
+<p class="eyebrow">03 / PIPELINE</p>
+<h2>Preparada para<br><em>funcionar sola.</em></h2>
+<div class="radio-pipeline">
+<span>FUENTES</span><b>→</b><span>IA EDITORIAL</span><b>→</b><span>GUION</span><b>→</b><span>VOZ</span><b>→</b><span>AUDIO</span><b>→</b><span>EMISIÓN</span>
+</div>
+<p>La Etapa 1 no publica noticias generadas ni inventa una emisión. Deja una base verificable para conectar después fuentes fiables, TTS, almacenamiento y streaming.</p>
+</section>
+</main>
+<footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
+<script src="../script.js"></script>
+<script src="../radio.js"></script>
+</body>
+</html>
