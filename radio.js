@@ -16,12 +16,52 @@ feedButtons.forEach(button=>button.addEventListener("click",()=>{feedButtons.for
 if(feedEl)loadFeed();
 
 
-const bulletinButton=document.querySelector("#generateBulletin"),listenBulletin=document.querySelector("#listenBulletin"),bulletinAudio=document.querySelector("#bulletinAudio"),bulletinEl=document.querySelector("#radioBulletin"),bulletinSources=document.querySelector("#bulletinSources"),bulletinMode=document.querySelector("#bulletinMode");\nlet currentBulletinText="",currentVoiceUrl="";
+const bulletinButton=document.querySelector("#generateBulletin"),listenBulletin=document.querySelector("#listenBulletin"),bulletinAudio=document.querySelector("#bulletinAudio"),bulletinEl=document.querySelector("#radioBulletin"),bulletinSources=document.querySelector("#bulletinSources"),bulletinMode=document.querySelector("#bulletinMode");
+let currentBulletinText="",currentVoiceUrl="";
 const renderBulletin=(data)=>{if(!bulletinEl)return;currentBulletinText=[data.intro,data.script,data.outro].filter(Boolean).join("\\n\\n");if(listenBulletin)listenBulletin.disabled=!currentBulletinText;if(currentVoiceUrl){URL.revokeObjectURL(currentVoiceUrl);currentVoiceUrl="";}if(bulletinAudio){bulletinAudio.pause();bulletinAudio.removeAttribute("src");}if(listenBulletin)listenBulletin.textContent="▶ ESCUCHAR LOCUTOR";bulletinEl.innerHTML="";const title=document.createElement("h3");title.textContent=data.title||"StanNet Radio Brief";const intro=document.createElement("p");intro.className="radio-bulletin-intro";intro.textContent=data.intro||"";const script=document.createElement("div");script.className="radio-bulletin-script";String(data.script||"").split(/\n{2,}/).filter(Boolean).forEach(text=>{const p=document.createElement("p");p.textContent=text;script.append(p)});const outro=document.createElement("p");outro.className="radio-bulletin-outro";outro.textContent=data.outro||"";title.after();bulletinEl.append(title,intro,script,outro);if(bulletinMode)bulletinMode.textContent=(data.mode||"editorial").toUpperCase()+" · "+(data.durationHint||"");if(bulletinSources){bulletinSources.innerHTML="";(data.references||[]).forEach(ref=>{const a=document.createElement("a");a.href=ref.url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="["+ref.ref+"] "+ref.source+" · "+ref.title;bulletinSources.append(a)})}};
 bulletinButton?.addEventListener("click",async()=>{bulletinButton.disabled=true;bulletinButton.textContent="EDITANDO…";if(bulletinMode)bulletinMode.textContent="SELECCIONANDO FUENTES";try{const active=document.querySelector("[data-radio-category].active")?.dataset.radioCategory||"ALL";const response=await fetch("/api/radio/bulletin?category="+encodeURIComponent(active),{headers:{accept:"application/json"}});const data=await response.json();if(!response.ok)throw new Error(data.error||"bulletin");renderBulletin(data)}catch{if(bulletinEl)bulletinEl.textContent="No se pudo preparar el boletín ahora."}finally{bulletinButton.disabled=false;bulletinButton.textContent="GENERAR BOLETÍN"}});
 
 
 listenBulletin?.addEventListener("click",async()=>{if(!currentBulletinText||!bulletinAudio)return;if(currentVoiceUrl){if(bulletinAudio.paused){await bulletinAudio.play();listenBulletin.textContent="❚❚ PAUSAR LOCUTOR"}else{bulletinAudio.pause();listenBulletin.textContent="▶ ESCUCHAR LOCUTOR"}return;}listenBulletin.disabled=true;listenBulletin.textContent="GENERANDO VOZ…";try{const response=await fetch("/api/radio/voice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:currentBulletinText})});if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||"voice");}const blob=await response.blob();currentVoiceUrl=URL.createObjectURL(blob);bulletinAudio.src=currentVoiceUrl;await bulletinAudio.play();listenBulletin.textContent="❚❚ PAUSAR LOCUTOR"}catch{listenBulletin.textContent="VOZ NO DISPONIBLE";if(bulletinMode)bulletinMode.textContent="ERROR DE LOCUCIÓN"}finally{listenBulletin.disabled=false}});
 bulletinAudio?.addEventListener("ended",()=>{if(listenBulletin)listenBulletin.textContent="▶ ESCUCHAR LOCUTOR"});
+
+
+const autoNow=document.querySelector("#radioAutomationNow"),autoNowMeta=document.querySelector("#radioAutomationNowMeta"),autoNext=document.querySelector("#radioAutomationNext"),autoNextMeta=document.querySelector("#radioAutomationNextMeta"),autoState=document.querySelector("#radioAutomationState"),autoStateMeta=document.querySelector("#radioAutomationStateMeta"),autoQueue=document.querySelector("#radioAutomationQueue"),schedulerClock=document.querySelector("#radioSchedulerClock");
+const renderProgram=(data)=>{
+  const current=data.current||{},next=data.next||{};
+  if(autoNow)autoNow.textContent=current.title||"StanNet Radio";
+  if(autoNowMeta)autoNowMeta.textContent=(current.time||"")+" · "+(current.type||"")+" · "+(current.mode||"").toUpperCase();
+  if(autoNext)autoNext.textContent=next.title||"—";
+  if(autoNextMeta)autoNextMeta.textContent=(next.time||"")+" · en "+String(data.minutesUntilNext??"—")+" min";
+  if(schedulerClock)schedulerClock.textContent=(data.localTime||"—")+" · "+(data.timeZone||"Europe/Madrid");
+  if(autoState){
+    const a=data.automation||{};
+    autoState.textContent=a.scheduler?"Scheduler activo":"Scheduler en espera";
+    const bits=["Feed",a.aiEditor?"IA editorial":null,a.neuralVoice?"Voz neural":"Voz pendiente",a.continuousStream?"Stream conectado":"Stream pendiente"].filter(Boolean);
+    if(autoStateMeta)autoStateMeta.textContent=bits.join(" · ");
+  }
+  if(autoQueue){
+    autoQueue.replaceChildren();
+    (data.queue||[]).forEach((slot,index)=>{
+      const row=document.createElement("div");row.className="radio-queue-item"+(index===0?" active":"");
+      const time=document.createElement("span");time.textContent=slot.time||"";
+      const body=document.createElement("div");const title=document.createElement("b");title.textContent=slot.title||"";
+      const meta=document.createElement("small");meta.textContent=(slot.type||"")+" · "+(slot.mode||"").toUpperCase();
+      body.append(title,meta);row.append(time,body);autoQueue.append(row);
+    });
+  }
+  if(current.title){nowTitle.textContent=current.title;nowMeta.textContent=(current.type||"")+" · "+(current.mode||"").toUpperCase();}
+};
+const loadProgram=async()=>{
+  try{
+    const response=await fetch("/api/radio/program",{headers:{accept:"application/json"}});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"program");
+    renderProgram(data);
+  }catch{
+    if(autoState)autoState.textContent="Scheduler no disponible";
+    if(autoStateMeta)autoStateMeta.textContent="Reintentando automáticamente.";
+  }
+};
+if(autoNow){loadProgram();setInterval(loadProgram,60000);}
 
 })();
