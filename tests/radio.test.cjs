@@ -3,6 +3,7 @@ const html=fs.readFileSync("pages/radio.html","utf8");
 const js=fs.readFileSync("radio.js","utf8");
 const api=fs.readFileSync("radio-api.js","utf8");
 const worker=fs.readFileSync("worker.js","utf8");
+
 assert(html.includes("Music <span>•</span> Tech"),"radio identity missing");
 assert(html.includes("../radio.js"),"radio script missing");
 assert(js.includes("/api/radio/status"),"radio status endpoint missing");
@@ -17,6 +18,7 @@ assert(worker.includes("dedupeRadioItems"),"Stage 2 deduplication missing");
 assert(html.includes('id="radioFeed"'),"Stage 2 feed UI missing");
 assert(js.includes("/api/radio/feed"),"Stage 2 client feed integration missing");
 assert(worker.includes("CISA")&&worker.includes("Cloudflare")&&worker.includes("GitHub"),"trusted source set missing");
+
 assert(worker.includes("/api/radio/bulletin"),"Stage 3 bulletin endpoint missing");
 assert(worker.includes("rankRadioItems"),"Stage 3 editorial ranking missing");
 assert(worker.includes("generateRadioBulletinWithAi"),"Stage 3 AI editor missing");
@@ -24,4 +26,22 @@ assert(worker.includes("buildRadioFallbackBulletin"),"Stage 3 safe fallback miss
 assert(worker.includes("No inventes hechos"),"Stage 3 hallucination guardrail missing");
 assert(html.includes("radioBulletin"),"Stage 3 bulletin UI missing");
 assert(js.includes("/api/radio/bulletin"),"Stage 3 client integration missing");
-assert(worker.includes("/api/radio/voice"),"Stage 4 voice endpoint missing");\nassert(worker.includes("RADIO_VOICE_NAME"),"Stage 4 Cloudflare voice config missing");\nassert(worker.includes("es-ES-AlvaroNeural"),"Stage 4 default Spanish neural voice missing");\nassert(worker.includes("buildRadioSsml"),"Stage 4 natural prosody missing");\nassert(worker.includes("260ms"),"Stage 4 radio pauses missing");\nassert(html.includes("listenBulletin"),"Stage 4 voice control missing");\nassert(js.includes("/api/radio/voice"),"Stage 4 client voice integration missing");\nassert(!worker.includes("RADIO_VOICE_API_KEY"),"Stage 4 must reuse Cloudflare speech secret")\nconsole.log("StanNet Radio stages 1-4 OK");
+
+assert(worker.includes("/api/radio/voice"),"Stage 4 voice endpoint missing");
+assert(worker.includes("RADIO_VOICE_NAME"),"Stage 4 Cloudflare voice config missing");
+assert(worker.includes("es-ES-AlvaroNeural"),"Stage 4 default Spanish neural voice missing");
+assert(worker.includes("buildRadioSsml"),"Stage 4 natural prosody missing");
+assert(worker.includes("260ms"),"Stage 4 radio pauses missing");
+assert(html.includes("listenBulletin"),"Stage 4 voice control missing");
+assert(js.includes("/api/radio/voice"),"Stage 4 client voice integration missing");
+assert(!worker.includes("RADIO_VOICE_API_KEY"),"Stage 4 must reuse Cloudflare speech secret");
+
+assert(worker.includes("/api/radio/program"),"Stage 5 program endpoint missing");
+assert(worker.includes("RADIO_PROGRAM_CLOCK"),"Stage 5 program clock missing");
+assert(worker.includes("resolveRadioProgram"),"Stage 5 scheduler missing");
+assert(worker.includes("Europe/Madrid"),"Stage 5 timezone missing");
+assert(html.includes('id="radioAutomationNow"'),"Stage 5 automation UI missing");
+assert(js.includes("/api/radio/program"),"Stage 5 client scheduler integration missing");
+assert(api.includes("radioProgramClock"),"Stage 5 shared schedule model missing");
+
+console.log("StanNet Radio stages 1-5 OK");
