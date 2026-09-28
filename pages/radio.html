@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="StanNet Radio · Music, Tech, Cyber & AI. Radio digital y podcasts del ecosistema StanNet.">
+<title>StanNet Radio | Music · Tech · Cyber · AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../radio.css">
+</head>
+<body id="top" class="radio-page">
+<header class="site-header">
+<a class="brand brand-lockup" href="../index.html" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="../assets/brand/stannet-shield.png" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav home-nav" aria-label="Navegación principal">
+<a href="../index.html">Inicio</a>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Proyectos <span>⌄</span></button><div class="nav-dropdown"><a href="../index.html#proyectos">Todos los proyectos</a><a href="../sentinel/">StanNet Sentinel</a><a href="../nutri-ia/">Nutri IA</a><a href="music.html">Music Lab</a><a class="active" aria-current="page" href="radio.html">StanNet Radio</a><a href="marketplace.html">Marketplace</a></div></div>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button><div class="nav-dropdown"><a href="cybersecurity.html">Cybersecurity Academy</a><a href="programming.html">Programming Academy</a><a href="callan.html">Callan English Coach</a><a href="guitar.html">Guitar Academy</a></div></div>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button><div class="nav-dropdown"><a href="cyber-lab.html">Cyber Defense Lab</a><a href="../sentinel/">Sentinel</a><a href="programming-fullstack.html">Full-Stack Lab</a></div></div>
+<a href="education.html">Formación</a><a href="cv.html">Sobre mí</a>
+</nav>
+</header>
+
+<main>
+<section class="radio-hero">
+<div class="radio-hero-copy">
+<p class="eyebrow">STANNET / AUTONOMOUS DIGITAL RADIO</p>
+<h1>Music <span>•</span> Tech <span>•</span><br>Cyber <span>•</span> AI</h1>
+<p class="radio-lead">Una radio digital preparada para música, podcasts y boletines automatizados de tecnología, ciberseguridad e inteligencia artificial.</p>
+<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 7 · MUSIC LIBRARY + STREAM SERVER</span></div>
+</div>
+<div class="radio-console" aria-label="Reproductor StanNet Radio">
+<div class="radio-console-top"><span>STANNET RADIO</span><span id="liveBadge">STANDBY</span></div>
+<div class="radio-art"><img src="../assets/brand/stannet-shield.png" alt="StanNet Radio"><div class="radio-rings" aria-hidden="true"></div></div>
+<div class="radio-now">
+<small>NOW PLAYING</small>
+<h2 id="nowTitle">StanNet Radio</h2>
+<p id="nowMeta">Music · Tech · Cyber · AI</p>
+</div>
+<audio id="radioAudio" preload="none"></audio>
+<div class="radio-controls">
+<button id="radioPlay" class="radio-play" type="button" aria-label="Reproducir radio">▶</button>
+<div class="radio-volume"><label for="radioVolume">VOL</label><input id="radioVolume" type="range" min="0" max="1" step=".05" value=".8"></div>
+</div>
+<p id="radioMessage" class="radio-message" role="status">El stream se conectará desde la configuración de Cloudflare cuando activemos la emisión.</p>
+</div>
+</section>
+
+<section class="section radio-section">
+<div class="section-heading"><div><p class="eyebrow">01 / PROGRAMACIÓN</p><h2>Una frecuencia.<br><em>Varias señales.</em></h2></div><p>La parrilla funciona con reloj Europe/Madrid y el backend resuelve automáticamente el bloque actual, el siguiente y la cola de emisión.</p></div>
+<div id="radioSchedule" class="radio-grid" aria-live="polite"></div>
+</section>
+
+<section class="section radio-section">
+<div class="section-heading"><div><p class="eyebrow">02 / CANALES</p><h2>Contenido con<br><em>identidad StanNet.</em></h2></div><p>Noticias, aprendizaje y música conectados con el resto del ecosistema.</p></div>
+<div class="radio-grid">
+<article class="radio-card"><span>CYBER / 01</span><h3>Cybersecurity News</h3><p>Vulnerabilidades, CVE, incidentes, defensa y contexto para estudiantes.</p></article>
+<article class="radio-card"><span>AI / 02</span><h3>AI News</h3><p>Nuevos modelos, herramientas, agentes y aplicaciones de inteligencia artificial.</p></article>
+<article class="radio-card"><span>DEV / 03</span><h3>Programming Sessions</h3><p>Microprogramas sobre JavaScript, Python, web, Linux y fundamentos técnicos.</p></article>
+<article class="radio-card"><span>MUSIC / 04</span><h3>StanNet Electronic</h3><p>Música propia, sesiones, jingles y material con derechos adecuados para emisión.</p></article>
+</div>
+</section>
+
+<section class="section radio-section">
+<div class="section-heading"><div><p class="eyebrow">03 / EDITORIAL FEED</p><h2>Radar de<br><em>actualidad.</em></h2></div><p>Entradas recuperadas desde fuentes oficiales. Las fuentes alimentan el editor automático para construir boletines trazables y convertirlos en voz cuando el bloque de programación lo requiere.</p></div>
+<div class="radio-feed-toolbar" role="group" aria-label="Filtrar noticias"><button type="button" data-radio-category="ALL" class="active">TODO</button><button type="button" data-radio-category="CYBER">CYBER</button><button type="button" data-radio-category="AI">AI</button><button type="button" data-radio-category="TECH">TECH</button><button type="button" data-radio-category="DEV">DEV</button></div>
+<p id="radioFeedStatus" class="radio-feed-status" aria-live="polite">Cargando fuentes editoriales…</p>
+<div id="radioFeed" class="radio-news-grid"></div>
+</section>
+
+<section class="section radio-section radio-bulletin-section">
+<div class="section-heading"><div><p class="eyebrow">04 / AI EDITOR</p><h2>Boletín<br><em>StanNet.</em></h2></div><p>La IA editorial trabaja solo con las fuentes recuperadas por el radar. Cada bloque conserva referencias verificables antes de pasar a voz.</p></div>
+<div class="radio-bulletin-actions"><button id="generateBulletin" type="button">GENERAR BOLETÍN</button><button id="listenBulletin" class="radio-voice-button" type="button" disabled>▶ ESCUCHAR LOCUTOR</button><span id="bulletinMode">LISTO PARA EDITAR</span></div><audio id="bulletinAudio" preload="none"></audio>
+<article id="radioBulletin" class="radio-bulletin" aria-live="polite"><p>Genera un boletín para ver la selección editorial y su trazabilidad.</p></article>
+<div id="bulletinSources" class="radio-bulletin-sources"></div>
+</section>
+
+<section class="section radio-section radio-scheduler-section">
+<div class="section-heading"><div><p class="eyebrow">05 / AUTO SCHEDULER</p><h2>La radio sabe<br><em>qué toca ahora.</em></h2></div><p>El motor de programación trabaja con horario Europe/Madrid y prepara la cola de playout para noticias, programación y música.</p></div>
+<div class="radio-auto-grid">
+  <article class="radio-auto-card radio-auto-now"><span>AHORA</span><h3 id="radioAutomationNow">Calculando bloque…</h3><p id="radioAutomationNowMeta">Conectando con el scheduler.</p></article>
+  <article class="radio-auto-card"><span>SIGUIENTE</span><h3 id="radioAutomationNext">—</h3><p id="radioAutomationNextMeta">—</p></article>
+  <article class="radio-auto-card"><span>PLAYOUT</span><h3 id="radioAutomationState">Motor de emisión activo</h3><p id="radioAutomationStateMeta">Feed · editor · voz · playout</p></article>
+</div>
+<div class="radio-playout-status">
+  <div><span>SECUENCIA ACTUAL</span><strong id="radioPlayoutSequence">Calculando…</strong></div>
+  <div><span>BIBLIOTECA MUSICAL</span><strong id="radioLibraryState">Comprobando catálogo…</strong></div>
+  <div><span>STREAM 24/7</span><strong id="radioStreamState">Pendiente de servidor</strong></div>
+</div>
+<div class="radio-queue-wrap"><div class="radio-queue-head"><span>COLA DE EMISIÓN</span><span id="radioSchedulerClock">Europe/Madrid</span></div><div id="radioAutomationQueue" class="radio-queue"></div></div>
+</section>
+
+<section class="section radio-automation">
+<p class="eyebrow">06 / PIPELINE</p>
+<h2>Preparada para<br><em>funcionar sola.</em></h2>
+<div class="radio-pipeline">
+<span>FUENTES</span><b>→</b><span>IA EDITORIAL</span><b>→</b><span>GUION</span><b>→</b><span>VOZ</span><b>→</b><span>AUDIO</span><b>→</b><span>EMISIÓN</span>
+</div>
+<p>Las etapas 1–7 ya conectan reproductor, fuentes, editor, voz, programación automática, playout y una biblioteca musical con control explícito de derechos. La emisión 24/7 real se activa al conectar el playout musical y RADIO_STREAM_URL a un servidor de streaming.</p>
+</section>
+</main>
+<footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
+<script src="../script.js"></script>
+<script src="../radio.js"></script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -5,6 +6,74 @@ export default {
     if (url.pathname === '/favicon.ico') {
       const target = new URL('/favicon.svg', request.url);
       return env.ASSETS.fetch(new Request(target, request));
+    }
+
+    if (url.pathname === '/api/radio/catalog') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioCatalog(request, env);
+    }
+
+    if (url.pathname === '/api/radio/playout') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioPlayout(url, env);
+    }
+
+    if (url.pathname === '/api/radio/program-audio') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioProgramAudio(url, env);
+    }
+
+    if (url.pathname === '/api/radio/jingle') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioJingle(url, env);
+    }
+
+    if (url.pathname === '/api/radio/voice') {
+      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioVoice(request, env);
+    }
+
+    if (url.pathname === '/api/radio/bulletin') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioBulletin(url, env);
+    }
+
+    if (url.pathname === '/api/radio/feed') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioFeed(url);
+    }
+
+    if (url.pathname === '/api/radio/program') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const program = resolveRadioProgram(new Date(), 'Europe/Madrid');
+      const streamUrl = typeof env.RADIO_STREAM_URL === 'string' && /^https:\/\//i.test(env.RADIO_STREAM_URL.trim()) ? env.RADIO_STREAM_URL.trim() : '';
+      const bulletinCategory = ['CYBER','AI','TECH','DEV'].includes(program.current.type) ? program.current.type : 'ALL';
+      return json({
+        station:'StanNet Radio',
+        generatedAt:new Date().toISOString(),
+        ...program,
+        schedule:radioProgramClock,
+        playout:{
+          mode:program.current.mode,
+          bulletinUrl:program.current.mode==='bulletin' ? '/api/radio/bulletin?category='+encodeURIComponent(bulletinCategory) : null,
+          voiceEndpoint:program.current.mode==='bulletin' ? '/api/radio/voice' : null,
+          musicSource:program.current.mode==='music' ? 'StanNet authorized catalogue' : null,
+          streamConfigured:Boolean(streamUrl),
+          streamUrl
+        },
+        automation:{
+          editorialFeed:true,
+          aiEditor:true,
+          neuralVoice:Boolean(env.AZURE_SPEECH_REGION && env.AZURE_SPEECH_KEY),
+          scheduler:true,
+          continuousStream:Boolean(streamUrl)
+        }
+      },200,{ 'Cache-Control':'public, max-age=20, s-maxage=20' });
+    }
+
+    if (url.pathname === '/api/radio/status') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return json(radioStatus(env, new Date()), 200, { 'Cache-Control': 'public, max-age=20, s-maxage=20' });
     }
 
     if (url.pathname === '/api/speech') {
@@ -629,6 +698,444 @@ async function handlePasswordDevices(request, env, url) {
   }
 
   return passwordJson({ error:'Método no permitido.' }, 405, auth.setCookies);
+}
+
+
+const RADIO_FEEDS = Object.freeze([
+  { id:'cisa', source:'CISA', category:'CYBER', url:'https://www.cisa.gov/cybersecurity-advisories/all.xml' },
+  { id:'cloudflare', source:'Cloudflare', category:'TECH', url:'https://blog.cloudflare.com/rss/' },
+  { id:'google-ai', source:'Google', category:'AI', url:'https://blog.google/technology/ai/rss/' },
+  { id:'github', source:'GitHub', category:'DEV', url:'https://github.blog/feed/' }
+]);
+
+async function handleRadioFeed(url) {
+  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+  const allowed=new Set(['ALL','CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requestedCategory)) return json({ error:'Categoría de radio no válida.' },400);
+
+  const settled=await Promise.allSettled(RADIO_FEEDS.map(fetchRadioSource));
+  const sources=[];
+  const combined=[];
+  settled.forEach((result,index)=>{
+    const config=RADIO_FEEDS[index];
+    if(result.status==='fulfilled'){
+      sources.push({ id:config.id, source:config.source, category:config.category, ok:true, count:result.value.length });
+      combined.push(...result.value);
+    }else{
+      sources.push({ id:config.id, source:config.source, category:config.category, ok:false, count:0 });
+    }
+  });
+
+  const deduped=dedupeRadioItems(combined)
+    .filter(item=>requestedCategory==='ALL'||item.category===requestedCategory)
+    .sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0))
+    .slice(0,40);
+
+  return json({
+    generatedAt:new Date().toISOString(),
+    category:requestedCategory,
+    count:deduped.length,
+    sources,
+    items:deduped
+  },200,{ 'Cache-Control':'public, max-age=300, s-maxage=900' });
+}
+
+async function fetchRadioSource(config) {
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),6500);
+  try{
+    const response=await fetch(config.url,{
+      headers:{ Accept:'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9', 'User-Agent':'StanNet-Radio/2.0 (+https://www.stannet.space/pages/radio.html)' },
+      signal:controller.signal
+    });
+    if(!response.ok) throw new Error('feed '+response.status);
+    const xml=await response.text();
+    if(xml.length>1500000) throw new Error('feed too large');
+    return parseRadioFeed(xml,config);
+  }finally{ clearTimeout(timeout); }
+}
+
+function parseRadioFeed(xml,config) {
+  const blocks=[...(xml.match(/<item\b[\s\S]*?<\/item>/gi)||[]),...(xml.match(/<entry\b[\s\S]*?<\/entry>/gi)||[])].slice(0,18);
+  return blocks.map(block=>{
+    const title=cleanRadioText(readRadioTag(block,['title']));
+    const link=readRadioLink(block);
+    const published=cleanRadioText(readRadioTag(block,['pubDate','published','updated','dc:date']));
+    const description=cleanRadioText(readRadioTag(block,['description','summary','content:encoded','content'])).slice(0,360);
+    if(!title||!isSafeRadioUrl(link)) return null;
+    const date=Date.parse(published);
+    return {
+      id:radioHash(config.id+'|'+link+'|'+title),
+      source:config.source,
+      category:config.category,
+      title:title.slice(0,220),
+      url:link,
+      publishedAt:Number.isFinite(date)?new Date(date).toISOString():null,
+      summary:description,
+      editorialStatus:'source'
+    };
+  }).filter(Boolean);
+}
+
+function readRadioTag(block,names) {
+  for(const name of names){
+    const escaped=name.replace(':','\\:');
+    const match=block.match(new RegExp('<'+escaped+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+escaped+'>','i'));
+    if(match) return match[1];
+  }
+  return '';
+}
+
+function readRadioLink(block) {
+  const atom=block.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*\/?\s*>/i);
+  if(atom) return decodeRadioEntities(atom[1].trim());
+  return cleanRadioText(readRadioTag(block,['link']));
+}
+
+function cleanRadioText(value) {
+  return decodeRadioEntities(String(value||'')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1')
+    .replace(/<script\b[\s\S]*?<\/script>/gi,' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/\s+/g,' ')
+    .trim());
+}
+
+function decodeRadioEntities(value) {
+  const named={ amp:'&', lt:'<', gt:'>', quot:'"', apos:"'", '#39':"'" };
+  return String(value||'').replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos|#39);/gi,(full,key)=>{
+    if(named[key]) return named[key];
+    if(key[0]==='#'){
+      const hex=key[1]?.toLowerCase()==='x';
+      const code=parseInt(key.slice(hex?2:1),hex?16:10);
+      return Number.isFinite(code)?String.fromCodePoint(code):full;
+    }
+    return full;
+  });
+}
+
+function isSafeRadioUrl(value) {
+  try{ const parsed=new URL(value); return parsed.protocol==='https:'; }catch{ return false; }
+}
+
+function dedupeRadioItems(items) {
+  const seen=new Set();
+  return items.filter(item=>{
+    const key=(item.url||'').replace(/[?#].*$/,'').replace(/\/$/,'').toLowerCase()+'|'+item.title.toLowerCase().replace(/[^a-z0-9áéíóúüñ]+/gi,' ').trim();
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
+function radioHash(value) {
+  let hash=2166136261;
+  for(let i=0;i<value.length;i++){ hash^=value.charCodeAt(i); hash=Math.imul(hash,16777619); }
+  return 'radio-'+(hash>>>0).toString(36);
+}
+
+
+async function buildRadioBulletinData(requestedCategory,env) {
+  const allowed=new Set(['ALL','CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requestedCategory)) throw new Error('invalid_category');
+
+  const candidates=await collectRadioItems(requestedCategory);
+  const selected=rankRadioItems(candidates).slice(0,6);
+  if(!selected.length) throw new Error('no_sources');
+
+  const references=selected.map((item,index)=>({
+    ref:index+1,id:item.id,source:item.source,category:item.category,title:item.title,url:item.url,publishedAt:item.publishedAt
+  }));
+  const fallback=buildRadioFallbackBulletin(selected);
+  const apiKey=env.AI_API_KEY||env.GROQ_API_KEY||env.GROQ_KEY;
+  if(!apiKey){
+    return { ...fallback, generatedAt:new Date().toISOString(), mode:'extractive', references };
+  }
+  try{
+    const ai=await generateRadioBulletinWithAi(selected,env,apiKey);
+    return {
+      generatedAt:new Date().toISOString(),
+      mode:'ai-editorial',
+      title:ai.title,
+      intro:ai.intro,
+      script:ai.script,
+      outro:ai.outro,
+      durationHint:ai.durationHint||'2–4 min',
+      references
+    };
+  }catch{
+    return { ...fallback, generatedAt:new Date().toISOString(), mode:'extractive-fallback', references };
+  }
+}
+
+async function handleRadioBulletin(url,env) {
+  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+  try{
+    const bulletin=await buildRadioBulletinData(requestedCategory,env);
+    return json(bulletin,200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+  }catch(error){
+    if(error?.message==='invalid_category') return json({ error:'Categoría de boletín no válida.' },400);
+    if(error?.message==='no_sources') return json({ error:'No hay fuentes disponibles para preparar el boletín.' },503);
+    return json({ error:'No se pudo preparar el boletín.' },502);
+  }
+}
+
+async function handleRadioProgramAudio(url,env) {
+  const program=resolveRadioProgram(new Date(),'Europe/Madrid');
+  const requested=(url.searchParams.get('category')||program.current.type||'ALL').trim().toUpperCase();
+  const allowed=new Set(['CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requested)) return json({ error:'El bloque actual no es un boletín reproducible.' },409);
+  try{
+    const bulletin=await buildRadioBulletinData(requested,env);
+    const text=[bulletin.intro,bulletin.script,bulletin.outro].filter(Boolean).join('\n\n');
+    return synthesizeRadioSpeech(text,env,'6',{
+      'X-StanNet-Program':requested,
+      'X-StanNet-Bulletin-Mode':bulletin.mode||'editorial'
+    });
+  }catch(error){
+    if(error?.message==='no_sources') return json({ error:'No hay fuentes disponibles para generar audio.' },503);
+    return json({ error:'No se pudo generar el audio del programa.' },502);
+  }
+}
+
+async function handleRadioJingle(url,env) {
+  const variant=(url.searchParams.get('variant')||'station').trim().toLowerCase();
+  const messages={
+    station:'StanNet Radio. Music, Tech, Cyber and AI.',
+    cyber:'Estás escuchando StanNet Radio. Cybersecurity News.',
+    ai:'StanNet Radio. Inteligencia artificial y tecnología.',
+    dev:'StanNet Radio. Programming Sessions.',
+    transition:'StanNet Radio. Seguimos conectados.'
+  };
+  const text=messages[variant];
+  if(!text) return json({ error:'Jingle no válido.' },400);
+  return synthesizeRadioSpeech(text,env,'6',{ 'X-StanNet-Jingle':variant });
+}
+
+async function handleRadioCatalog(request,env) {
+  try{
+    const target=new URL('/radio-catalog.json',request.url);
+    const response=await env.ASSETS.fetch(new Request(target,{headers:{accept:'application/json'}}));
+    if(!response.ok) return json({ error:'Catálogo musical no disponible.' },503);
+    const catalog=await response.json();
+    const excluded=Array.isArray(catalog?.policy?.excludedPaths)?catalog.policy.excludedPaths:[];
+    const tracks=Array.isArray(catalog?.tracks)?catalog.tracks:[];
+    const safe=tracks.filter(track=>{
+      const path=String(track?.path||'');
+      const rights=track?.rights||{};
+      return track?.enabled!==false &&
+        path &&
+        !excluded.some(prefix=>path.startsWith(prefix)) &&
+        typeof rights.type==='string' &&
+        typeof rights.source==='string' &&
+        rights.type.trim() &&
+        rights.source.trim();
+    });
+    return json({
+      station:catalog?.station||'StanNet Radio',
+      version:Number(catalog?.version||1),
+      requireRights:catalog?.policy?.requireRights===true,
+      total:tracks.length,
+      authorized:safe.length,
+      tracks:safe.map(track=>({
+        id:String(track.id||''),
+        title:String(track.title||''),
+        artist:String(track.artist||'StanNet'),
+        durationSeconds:Number(track.durationSeconds||0)||null,
+        blocks:Array.isArray(track.blocks)?track.blocks:[],
+        path:String(track.path||'')
+      }))
+    },200,{ 'Cache-Control':'public, max-age=60, s-maxage=300' });
+  }catch{
+    return json({ error:'No se pudo leer el catálogo musical.' },503);
+  }
+}
+
+async function handleRadioPlayout(url,env) {
+  const program=resolveRadioProgram(new Date(),'Europe/Madrid');
+  const origin=url.origin;
+  const category=['CYBER','AI','TECH','DEV'].includes(program.current.type)?program.current.type:null;
+  const items=[];
+  items.push({
+    kind:'jingle',
+    title:'StanNet Station ID',
+    audioUrl:origin+'/api/radio/jingle?variant=station',
+    required:true
+  });
+  if(program.current.mode==='bulletin'&&category){
+    items.push({
+      kind:'bulletin',
+      title:program.current.title,
+      category,
+      audioUrl:origin+'/api/radio/program-audio?category='+encodeURIComponent(category),
+      required:true
+    });
+    items.push({
+      kind:'jingle',
+      title:'StanNet Transition',
+      audioUrl:origin+'/api/radio/jingle?variant=transition',
+      required:true
+    });
+  }else{
+    items.push({
+      kind:'music',
+      title:program.current.title,
+      catalogue:'StanNet authorized catalogue',
+      catalogueUrl:origin+'/radio-catalog.json',
+      required:false,
+      note:'Se reproducen únicamente pistas con derechos de emisión definidos en el catálogo.'
+    });
+  }
+  return json({
+    station:'StanNet Radio',
+    stage:6,
+    generatedAt:new Date().toISOString(),
+    timeZone:program.timeZone,
+    current:program.current,
+    next:program.next,
+    items,
+    stream:{
+      configured:Boolean(typeof env.RADIO_STREAM_URL==='string'&&/^https:\/\//i.test(env.RADIO_STREAM_URL.trim())),
+      url:typeof env.RADIO_STREAM_URL==='string'&&/^https:\/\//i.test(env.RADIO_STREAM_URL.trim())?env.RADIO_STREAM_URL.trim():''
+    }
+  },200,{ 'Cache-Control':'public, max-age=20, s-maxage=20' });
+}
+
+async function collectRadioItems(category='ALL') {
+  const settled=await Promise.allSettled(RADIO_FEEDS.map(fetchRadioSource));
+  const items=[];
+  settled.forEach(result=>{ if(result.status==='fulfilled') items.push(...result.value); });
+  return dedupeRadioItems(items).filter(item=>category==='ALL'||item.category===category);
+}
+
+function rankRadioItems(items) {
+  const now=Date.now();
+  return [...items].map(item=>{
+    const published=Date.parse(item.publishedAt)||0;
+    const ageHours=published?Math.max(0,(now-published)/36e5):9999;
+    const freshness=ageHours<=24?50:ageHours<=72?35:ageHours<=168?20:5;
+    const authority=item.source==='CISA'?30:item.source==='Cloudflare'||item.source==='Google'||item.source==='GitHub'?22:10;
+    const signal=/critical|vulnerab|security|cyber|attack|breach|malware|ransomware|artificial intelligence|\bai\b|model|developer|release|cloud/i.test(item.title+' '+item.summary)?12:0;
+    return { ...item, editorialScore:freshness+authority+signal };
+  }).sort((a,b)=>b.editorialScore-a.editorialScore||(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0));
+}
+
+function buildRadioFallbackBulletin(items) {
+  const lines=items.map((item,index)=>{
+    const summary=item.summary?item.summary.replace(/\s+/g,' ').trim().slice(0,220):'Consulta la fuente original para ampliar la información.';
+    return (index+1)+'. '+item.title+'. '+summary+' Fuente: '+item.source+'.';
+  });
+  return {
+    title:'StanNet Radio · Tech & Cyber Brief',
+    intro:'Estas son las novedades seleccionadas por StanNet Radio a partir de fuentes identificadas.',
+    script:lines.join('\n\n'),
+    outro:'Consulta las fuentes enlazadas antes de tomar decisiones técnicas o de seguridad.',
+    durationHint:'2–4 min'
+  };
+}
+
+async function generateRadioBulletinWithAi(items,env,apiKey) {
+  const apiUrl=env.AI_API_URL||'https://api.groq.com/openai/v1/chat/completions';
+  const model=env.RADIO_AI_MODEL||env.AI_MODEL||'openai/gpt-oss-20b';
+  const sourcePack=items.map((item,index)=>({
+    ref:index+1,source:item.source,category:item.category,title:item.title,publishedAt:item.publishedAt,summary:item.summary,url:item.url
+  }));
+  const response=await fetch(apiUrl,{
+    method:'POST',
+    headers:{ Authorization:'Bearer '+apiKey,'Content-Type':'application/json' },
+    body:JSON.stringify({
+      model,
+      temperature:0.2,
+      response_format:{ type:'json_object' },
+      messages:[
+        { role:'system',content:'Eres el editor de StanNet Radio. Redacta un boletín radiofónico breve en español usando EXCLUSIVAMENTE los datos del paquete de fuentes. No inventes hechos, cifras, fechas, impactos, CVE ni declaraciones. Distingue claramente hechos de contexto. Si una fuente no permite sostener un detalle, omítelo. No copies frases largas: parafrasea. No incluyas URLs dentro del guion. Devuelve JSON válido con title, intro, script, outro y durationHint. En script, añade [1], [2], etc. al final de cada bloque para indicar la referencia utilizada. Tono claro, técnico y comprensible para estudiantes de ciberseguridad, IA y programación. No des instrucciones ofensivas de explotación.' },
+        { role:'user',content:JSON.stringify({ station:'StanNet Radio',sources:sourcePack }) }
+      ]
+    })
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error('ai provider');
+  const raw=data?.choices?.[0]?.message?.content;
+  if(typeof raw!=='string'||!raw.trim()) throw new Error('empty ai');
+  const parsed=JSON.parse(raw);
+  const script=String(parsed.script||'').trim();
+  if(!script||script.length>9000) throw new Error('invalid script');
+  const refs=[...script.matchAll(/\[(\d+)\]/g)].map(match=>Number(match[1]));
+  if(refs.some(ref=>ref<1||ref>items.length)) throw new Error('invalid refs');
+  return {
+    title:String(parsed.title||'StanNet Radio Brief').slice(0,140),
+    intro:String(parsed.intro||'').slice(0,700),
+    script,
+    outro:String(parsed.outro||'').slice(0,700),
+    durationHint:String(parsed.durationHint||'2–4 min').slice(0,40)
+  };
+}
+
+
+async function handleRadioVoice(request,env) {
+  let body;
+  try{ body=await request.json(); }catch{ return json({ error:'Solicitud no válida.' },400); }
+  const raw=typeof body?.text==='string'?body.text.trim():'';
+  if(!raw||raw.length>8500) return json({ error:'El guion de radio no es válido.' },400);
+  return synthesizeRadioSpeech(raw,env,'4');
+}
+
+async function synthesizeRadioSpeech(raw,env,stage='6',extraHeaders={}) {
+  if(!raw||String(raw).length>8500) return json({ error:'El guion de radio no es válido.' },400);
+  if(!env.AZURE_SPEECH_REGION||!env.AZURE_SPEECH_KEY) return json({ error:'La voz de radio no está configurada en Cloudflare.' },503);
+
+  const clean=prepareRadioSpeech(raw);
+  const voice=String(env.RADIO_VOICE_NAME||'es-ES-AlvaroNeural').trim();
+  if(!/^[a-z]{2}-[A-Z]{2}-[A-Za-z0-9]+Neural$/.test(voice)) return json({ error:'RADIO_VOICE_NAME no es válido.' },503);
+  const ssml=buildRadioSsml(clean,voice);
+  try{
+    const response=await fetch('https://'+env.AZURE_SPEECH_REGION+'.tts.speech.microsoft.com/cognitiveservices/v1',{
+      method:'POST',
+      headers:{
+        'Ocp-Apim-Subscription-Key':env.AZURE_SPEECH_KEY,
+        'Content-Type':'application/ssml+xml',
+        'X-Microsoft-OutputFormat':'audio-24khz-160kbitrate-mono-mp3',
+        'User-Agent':'StanNet-Radio/'+stage+'.0'
+      },
+      body:ssml
+    });
+    if(!response.ok) return json({ error:'El proveedor de voz no pudo generar la locución.',providerStatus:response.status },502);
+    const headers=new Headers({
+      'Content-Type':'audio/mpeg',
+      'Cache-Control':'public, max-age=300, s-maxage=600',
+      'X-StanNet-Voice':voice,
+      'X-StanNet-Audio-Stage':String(stage),
+      ...extraHeaders
+    });
+    return new Response(response.body,{status:200,headers});
+  }catch{
+    return json({ error:'No se pudo conectar con el servicio de voz.' },502);
+  }
+}
+
+function prepareRadioSpeech(value) {
+  return String(value||'')
+    .replace(/\[(\d+)\]/g,'')
+    .replace(/https?:\/\/\S+/gi,'')
+    .replace(/\bCVE-(\d{4})-(\d+)\b/gi,'C V E $1 $2')
+    .replace(/\bAI\b/g,'inteligencia artificial')
+    .replace(/\bIA\b/g,'inteligencia artificial')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function buildRadioSsml(text,voice) {
+  const escaped=escapeRadioSsml(text);
+  const sentences=escaped
+    .split(/(?<=[.!?])\s+/)
+    .filter(Boolean)
+    .map(sentence=>sentence+'<break time="260ms"/>')
+    .join(' ');
+  return '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES"><voice name="'+voice+'"><prosody rate="-3%" pitch="-1st" volume="+0%">'+sentences+'</prosody></voice></speak>';
+}
+
+function escapeRadioSsml(value) {
+  return String(value||'').replace(/[&<>"']/g,char=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;' }[char]));
 }
 
 async function handleStanNetAi(request, env) {

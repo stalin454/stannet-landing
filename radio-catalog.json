@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "station": "StanNet Radio",
+  "policy": {
+    "description": "Solo pistas propias, con licencia explícita para emisión, dominio público o licencia compatible con streaming.",
+    "requireRights": true,
+    "excludedPaths": [
+      "sanacion/"
+    ],
+    "notes": "No añadas una pista sin documentar rights.type y rights.source."
+  },
+  "tracks": [],
+  "schema": {
+    "track": {
+      "required": [
+        "id",
+        "title",
+        "path",
+        "rights"
+      ],
+      "optional": [
+        "artist",
+        "durationSeconds",
+        "blocks",
+        "enabled"
+      ],
+      "blocks": [
+        "MUSIC",
+        "ELECTRONIC",
+        "GUITAR",
+        "NIGHT",
+        "MORNING",
+        "AFTERNOON"
+      ]
+    },
+    "rights": {
+      "required": [
+        "type",
+        "source"
+      ],
+      "allowedTypes": [
+        "owned",
+        "licensed",
+        "public-domain",
+        "creative-commons-compatible"
+      ]
+    }
+  }
+}

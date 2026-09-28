@@ -1,0 +1,34 @@
+services:
+  icecast:
+    build:
+      context: ./icecast
+    restart: unless-stopped
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
+      ICECAST_ADMIN_USER: ${ICECAST_ADMIN_USER:-admin}
+      ICECAST_HOSTNAME: ${ICECAST_HOSTNAME:-radio.stannet.space}
+    ports:
+      - "8000:8000"
+    networks:
+      - radio
+
+  liquidsoap:
+    image: savonet/liquidsoap:v2.4.5
+    restart: unless-stopped
+    depends_on:
+      - icecast
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      STANNET_RADIO_API: ${STANNET_RADIO_API:-https://www.stannet.space}
+    volumes:
+      - ./liquidsoap/stannet-radio.liq:/etc/liquidsoap/stannet-radio.liq:ro\n      - ./liquidsoap/playlist.m3u:/etc/liquidsoap/playlist.m3u:ro
+      - ./music:/music:ro
+    command: ["/etc/liquidsoap/stannet-radio.liq"]
+    networks:
+      - radio
+
+networks:
+  radio:
+    driver: bridge
