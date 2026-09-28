@@ -7,6 +7,11 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/voice') {
+      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioVoice(request, env);
+    }
+
     if (url.pathname === '/api/radio/bulletin') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       return handleRadioBulletin(url, env);
@@ -902,6 +907,67 @@ async function generateRadioBulletinWithAi(items,env,apiKey) {
     outro:String(parsed.outro||'').slice(0,700),
     durationHint:String(parsed.durationHint||'2–4 min').slice(0,40)
   };
+}
+
+
+async function handleRadioVoice(request,env) {
+  let body;
+  try{ body=await request.json(); }catch{ return json({ error:'Solicitud no válida.' },400); }
+  const raw=typeof body?.text==='string'?body.text.trim():'';
+  if(!raw||raw.length>8500) return json({ error:'El guion de radio no es válido.' },400);
+  if(!env.AZURE_SPEECH_REGION||!env.AZURE_SPEECH_KEY) return json({ error:'La voz de radio no está configurada en Cloudflare.' },503);
+
+  const clean=prepareRadioSpeech(raw);
+  const voice=String(env.RADIO_VOICE_NAME||'es-ES-AlvaroNeural').trim();
+  if(!/^[a-z]{2}-[A-Z]{2}-[A-Za-z0-9]+Neural$/.test(voice)) return json({ error:'RADIO_VOICE_NAME no es válido.' },503);
+  const ssml=buildRadioSsml(clean,voice);
+  try{
+    const response=await fetch('https://'+env.AZURE_SPEECH_REGION+'.tts.speech.microsoft.com/cognitiveservices/v1',{
+      method:'POST',
+      headers:{
+        'Ocp-Apim-Subscription-Key':env.AZURE_SPEECH_KEY,
+        'Content-Type':'application/ssml+xml',
+        'X-Microsoft-OutputFormat':'audio-24khz-160kbitrate-mono-mp3',
+        'User-Agent':'StanNet-Radio/4.0'
+      },
+      body:ssml
+    });
+    if(!response.ok) return json({ error:'El proveedor de voz no pudo generar la locución.',providerStatus:response.status },502);
+    const headers=new Headers({
+      'Content-Type':'audio/mpeg',
+      'Cache-Control':'private, max-age=3600',
+      'X-StanNet-Voice':voice,
+      'X-StanNet-Audio-Stage':'4'
+    });
+    return new Response(response.body,{status:200,headers});
+  }catch{
+    return json({ error:'No se pudo conectar con el servicio de voz.' },502);
+  }
+}
+
+function prepareRadioSpeech(value) {
+  return String(value||'')
+    .replace(/\[(\d+)\]/g,'')
+    .replace(/https?:\/\/\S+/gi,'')
+    .replace(/\bCVE-(\d{4})-(\d+)\b/gi,'C V E $1 $2')
+    .replace(/\bAI\b/g,'inteligencia artificial')
+    .replace(/\bIA\b/g,'inteligencia artificial')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function buildRadioSsml(text,voice) {
+  const escaped=escapeRadioSsml(text);
+  const sentences=escaped
+    .split(/(?<=[.!?])\s+/)
+    .filter(Boolean)
+    .map(sentence=>sentence+'<break time="260ms"/>')
+    .join(' ');
+  return '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES"><voice name="'+voice+'"><prosody rate="-3%" pitch="-1st" volume="+0%">'+sentences+'</prosody></voice></speak>';
+}
+
+function escapeRadioSsml(value) {
+  return String(value||'').replace(/[&<>"']/g,char=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;' }[char]));
 }
 
 async function handleStanNetAi(request, env) {
