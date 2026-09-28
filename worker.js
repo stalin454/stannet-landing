@@ -7,6 +7,11 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/feed') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioFeed(url);
+    }
+
     if (url.pathname === '/api/radio/status') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const configuredStream = typeof env.RADIO_STREAM_URL === 'string' ? env.RADIO_STREAM_URL.trim() : '';
@@ -652,6 +657,140 @@ async function handlePasswordDevices(request, env, url) {
   }
 
   return passwordJson({ error:'Método no permitido.' }, 405, auth.setCookies);
+}
+
+
+const RADIO_FEEDS = Object.freeze([
+  { id:'cisa', source:'CISA', category:'CYBER', url:'https://www.cisa.gov/cybersecurity-advisories/all.xml' },
+  { id:'cloudflare', source:'Cloudflare', category:'TECH', url:'https://blog.cloudflare.com/rss/' },
+  { id:'google-ai', source:'Google', category:'AI', url:'https://blog.google/technology/ai/rss/' },
+  { id:'github', source:'GitHub', category:'DEV', url:'https://github.blog/feed/' }
+]);
+
+async function handleRadioFeed(url) {
+  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+  const allowed=new Set(['ALL','CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requestedCategory)) return json({ error:'Categoría de radio no válida.' },400);
+
+  const settled=await Promise.allSettled(RADIO_FEEDS.map(fetchRadioSource));
+  const sources=[];
+  const combined=[];
+  settled.forEach((result,index)=>{
+    const config=RADIO_FEEDS[index];
+    if(result.status==='fulfilled'){
+      sources.push({ id:config.id, source:config.source, category:config.category, ok:true, count:result.value.length });
+      combined.push(...result.value);
+    }else{
+      sources.push({ id:config.id, source:config.source, category:config.category, ok:false, count:0 });
+    }
+  });
+
+  const deduped=dedupeRadioItems(combined)
+    .filter(item=>requestedCategory==='ALL'||item.category===requestedCategory)
+    .sort((a,b)=>(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0))
+    .slice(0,40);
+
+  return json({
+    generatedAt:new Date().toISOString(),
+    category:requestedCategory,
+    count:deduped.length,
+    sources,
+    items:deduped
+  },200,{ 'Cache-Control':'public, max-age=300, s-maxage=900' });
+}
+
+async function fetchRadioSource(config) {
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),6500);
+  try{
+    const response=await fetch(config.url,{
+      headers:{ Accept:'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9', 'User-Agent':'StanNet-Radio/2.0 (+https://www.stannet.space/pages/radio.html)' },
+      signal:controller.signal
+    });
+    if(!response.ok) throw new Error('feed '+response.status);
+    const xml=await response.text();
+    if(xml.length>1500000) throw new Error('feed too large');
+    return parseRadioFeed(xml,config);
+  }finally{ clearTimeout(timeout); }
+}
+
+function parseRadioFeed(xml,config) {
+  const blocks=[...(xml.match(/<item\b[\s\S]*?<\/item>/gi)||[]),...(xml.match(/<entry\b[\s\S]*?<\/entry>/gi)||[])].slice(0,18);
+  return blocks.map(block=>{
+    const title=cleanRadioText(readRadioTag(block,['title']));
+    const link=readRadioLink(block);
+    const published=cleanRadioText(readRadioTag(block,['pubDate','published','updated','dc:date']));
+    const description=cleanRadioText(readRadioTag(block,['description','summary','content:encoded','content'])).slice(0,360);
+    if(!title||!isSafeRadioUrl(link)) return null;
+    const date=Date.parse(published);
+    return {
+      id:radioHash(config.id+'|'+link+'|'+title),
+      source:config.source,
+      category:config.category,
+      title:title.slice(0,220),
+      url:link,
+      publishedAt:Number.isFinite(date)?new Date(date).toISOString():null,
+      summary:description,
+      editorialStatus:'source'
+    };
+  }).filter(Boolean);
+}
+
+function readRadioTag(block,names) {
+  for(const name of names){
+    const escaped=name.replace(':','\\:');
+    const match=block.match(new RegExp('<'+escaped+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+escaped+'>','i'));
+    if(match) return match[1];
+  }
+  return '';
+}
+
+function readRadioLink(block) {
+  const atom=block.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*\/?\s*>/i);
+  if(atom) return decodeRadioEntities(atom[1].trim());
+  return cleanRadioText(readRadioTag(block,['link']));
+}
+
+function cleanRadioText(value) {
+  return decodeRadioEntities(String(value||'')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1')
+    .replace(/<script\b[\s\S]*?<\/script>/gi,' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ')
+    .replace(/\s+/g,' ')
+    .trim());
+}
+
+function decodeRadioEntities(value) {
+  const named={ amp:'&', lt:'<', gt:'>', quot:'"', apos:"'", '#39':"'" };
+  return String(value||'').replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos|#39);/gi,(full,key)=>{
+    if(named[key]) return named[key];
+    if(key[0]==='#'){
+      const hex=key[1]?.toLowerCase()==='x';
+      const code=parseInt(key.slice(hex?2:1),hex?16:10);
+      return Number.isFinite(code)?String.fromCodePoint(code):full;
+    }
+    return full;
+  });
+}
+
+function isSafeRadioUrl(value) {
+  try{ const parsed=new URL(value); return parsed.protocol==='https:'; }catch{ return false; }
+}
+
+function dedupeRadioItems(items) {
+  const seen=new Set();
+  return items.filter(item=>{
+    const key=(item.url||'').replace(/[?#].*$/,'').replace(/\/$/,'').toLowerCase()+'|'+item.title.toLowerCase().replace(/[^a-z0-9áéíóúüñ]+/gi,' ').trim();
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
+function radioHash(value) {
+  let hash=2166136261;
+  for(let i=0;i<value.length;i++){ hash^=value.charCodeAt(i); hash=Math.imul(hash,16777619); }
+  return 'radio-'+(hash>>>0).toString(36);
 }
 
 async function handleStanNetAi(request, env) {
