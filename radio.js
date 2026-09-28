@@ -62,7 +62,7 @@ const loadProgram=async()=>{
     if(autoStateMeta)autoStateMeta.textContent="Reintentando automáticamente.";
   }
 };
-const playoutSequence=document.querySelector("#radioPlayoutSequence"),streamState=document.querySelector("#radioStreamState");
+const playoutSequence=document.querySelector("#radioPlayoutSequence"),streamState=document.querySelector("#radioStreamState"),libraryState=document.querySelector("#radioLibraryState");
 const loadPlayout=async()=>{
   try{
     const response=await fetch("/api/radio/playout",{headers:{accept:"application/json"}});
@@ -74,6 +74,19 @@ const loadPlayout=async()=>{
     if(streamState)streamState.textContent="Pendiente";
   }
 };
-if(autoNow){loadProgram();loadPlayout();setInterval(()=>{loadProgram();loadPlayout()},60000);}
+const loadLibrary=async()=>{
+  try{
+    const response=await fetch("/api/radio/catalog",{headers:{accept:"application/json"}});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"catalog");
+    if(libraryState){
+      libraryState.textContent=data.authorized>0
+        ? data.authorized+" pista(s) autorizada(s) · "+data.total+" total"
+        : "SIN PISTAS AUTORIZADAS · añade tu música";
+    }
+  }catch{
+    if(libraryState)libraryState.textContent="Catálogo no disponible";
+  }
+};
+if(autoNow){loadProgram();loadPlayout();loadLibrary();setInterval(()=>{loadProgram();loadPlayout();loadLibrary()},60000);}
 
 })();
