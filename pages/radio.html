@@ -30,7 +30,7 @@
 <p class="eyebrow">STANNET / AUTONOMOUS DIGITAL RADIO</p>
 <h1>Music <span>•</span> Tech <span>•</span><br>Cyber <span>•</span> AI</h1>
 <p class="radio-lead">Una radio digital preparada para música, podcasts y boletines automatizados de tecnología, ciberseguridad e inteligencia artificial.</p>
-<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 1 · PLAYER READY</span></div>
+<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 5 · AUTO SCHEDULER</span></div>
 </div>
 <div class="radio-console" aria-label="Reproductor StanNet Radio">
 <div class="radio-console-top"><span>STANNET RADIO</span><span id="liveBadge">STANDBY</span></div>
@@ -50,7 +50,7 @@
 </section>
 
 <section class="section radio-section">
-<div class="section-heading"><div><p class="eyebrow">01 / PROGRAMACIÓN</p><h2>Una frecuencia.<br><em>Varias señales.</em></h2></div><p>La parrilla ya está modelada para que en las siguientes etapas pueda generarse y actualizarse automáticamente.</p></div>
+<div class="section-heading"><div><p class="eyebrow">01 / PROGRAMACIÓN</p><h2>Una frecuencia.<br><em>Varias señales.</em></h2></div><p>La parrilla funciona con reloj Europe/Madrid y el backend resuelve automáticamente el bloque actual, el siguiente y la cola de emisión.</p></div>
 <div id="radioSchedule" class="radio-grid" aria-live="polite"></div>
 </section>
 
@@ -65,7 +65,7 @@
 </section>
 
 <section class="section radio-section">
-<div class="section-heading"><div><p class="eyebrow">03 / EDITORIAL FEED</p><h2>Radar de<br><em>actualidad.</em></h2></div><p>Entradas recuperadas desde fuentes oficiales. En esta etapa se muestran como material fuente; todavía no se convierten automáticamente en guiones ni voz.</p></div>
+<div class="section-heading"><div><p class="eyebrow">03 / EDITORIAL FEED</p><h2>Radar de<br><em>actualidad.</em></h2></div><p>Entradas recuperadas desde fuentes oficiales. Las fuentes alimentan el editor automático para construir boletines trazables y convertirlos en voz cuando el bloque de programación lo requiere.</p></div>
 <div class="radio-feed-toolbar" role="group" aria-label="Filtrar noticias"><button type="button" data-radio-category="ALL" class="active">TODO</button><button type="button" data-radio-category="CYBER">CYBER</button><button type="button" data-radio-category="AI">AI</button><button type="button" data-radio-category="TECH">TECH</button><button type="button" data-radio-category="DEV">DEV</button></div>
 <p id="radioFeedStatus" class="radio-feed-status" aria-live="polite">Cargando fuentes editoriales…</p>
 <div id="radioFeed" class="radio-news-grid"></div>
@@ -78,13 +78,23 @@
 <div id="bulletinSources" class="radio-bulletin-sources"></div>
 </section>
 
+<section class="section radio-section radio-scheduler-section">
+<div class="section-heading"><div><p class="eyebrow">05 / AUTO SCHEDULER</p><h2>La radio sabe<br><em>qué toca ahora.</em></h2></div><p>El motor de programación trabaja con horario Europe/Madrid y prepara la cola de playout para noticias, programación y música.</p></div>
+<div class="radio-auto-grid">
+  <article class="radio-auto-card radio-auto-now"><span>AHORA</span><h3 id="radioAutomationNow">Calculando bloque…</h3><p id="radioAutomationNowMeta">Conectando con el scheduler.</p></article>
+  <article class="radio-auto-card"><span>SIGUIENTE</span><h3 id="radioAutomationNext">—</h3><p id="radioAutomationNextMeta">—</p></article>
+  <article class="radio-auto-card"><span>AUTOMATIZACIÓN</span><h3 id="radioAutomationState">Scheduler activo</h3><p id="radioAutomationStateMeta">Feed · editor · voz · playout</p></article>
+</div>
+<div class="radio-queue-wrap"><div class="radio-queue-head"><span>COLA DE EMISIÓN</span><span id="radioSchedulerClock">Europe/Madrid</span></div><div id="radioAutomationQueue" class="radio-queue"></div></div>
+</section>
+
 <section class="section radio-automation">
-<p class="eyebrow">05 / PIPELINE</p>
+<p class="eyebrow">06 / PIPELINE</p>
 <h2>Preparada para<br><em>funcionar sola.</em></h2>
 <div class="radio-pipeline">
 <span>FUENTES</span><b>→</b><span>IA EDITORIAL</span><b>→</b><span>GUION</span><b>→</b><span>VOZ</span><b>→</b><span>AUDIO</span><b>→</b><span>EMISIÓN</span>
 </div>
-<p>La Etapa 1 no publica noticias generadas ni inventa una emisión. Deja una base verificable para conectar después fuentes fiables, TTS, almacenamiento y streaming.</p>
+<p>Las etapas 1–5 ya conectan reproductor, fuentes, editor, voz y programación automática. La emisión 24/7 real se activa al conectar el playout musical y RADIO_STREAM_URL a un servidor de streaming.</p>
 </section>
 </main>
 <footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
