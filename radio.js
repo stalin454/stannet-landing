@@ -8,4 +8,11 @@ play.addEventListener("click",async()=>{if(!audio.src)return;try{if(audio.paused
 volume?.addEventListener("input",()=>{audio.volume=Number(volume.value)});
 audio.volume=Number(volume?.value||.8);
 audio.addEventListener("error",()=>setMessage("La fuente de audio no está disponible en este momento."));
+
+const feedEl=document.querySelector("#radioFeed"),feedStatus=document.querySelector("#radioFeedStatus"),feedButtons=[...document.querySelectorAll("[data-radio-category]")];
+const renderFeed=(items=[])=>{if(!feedEl)return;feedEl.innerHTML="";items.forEach(item=>{const article=document.createElement("article");article.className="radio-news-card";const meta=document.createElement("div");meta.className="radio-news-meta";const tag=document.createElement("span");tag.textContent=item.category;const source=document.createElement("span");source.textContent=item.source;meta.append(tag,source);const title=document.createElement("h3");title.textContent=item.title;const summary=document.createElement("p");summary.textContent=item.summary||"Fuente editorial verificada.";const link=document.createElement("a");link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="ABRIR FUENTE ↗";article.append(meta,title,summary,link);feedEl.append(article)});if(!items.length)feedEl.textContent="No hay entradas disponibles para este filtro."};
+const loadFeed=async(category="ALL")=>{if(feedStatus)feedStatus.textContent="Actualizando fuentes…";try{const response=await fetch("/api/radio/feed?category="+encodeURIComponent(category),{headers:{accept:"application/json"}});const data=await response.json();if(!response.ok)throw new Error(data.error||"feed");renderFeed(data.items||[]);const ok=(data.sources||[]).filter(source=>source.ok).length;if(feedStatus)feedStatus.textContent=(data.count||0)+" entradas · "+ok+"/"+(data.sources||[]).length+" fuentes disponibles · sin generación IA en esta etapa."}catch{renderFeed([]);if(feedStatus)feedStatus.textContent="No se pudo actualizar el radar editorial."}};
+feedButtons.forEach(button=>button.addEventListener("click",()=>{feedButtons.forEach(item=>item.classList.toggle("active",item===button));loadFeed(button.dataset.radioCategory||"ALL")}));
+if(feedEl)loadFeed();
+
 })();
