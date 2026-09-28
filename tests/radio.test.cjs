@@ -54,4 +54,21 @@ assert(catalog?.policy?.requireRights===true,"Stage 6 rights policy missing");
 assert(Array.isArray(catalog.tracks),"Stage 6 music catalogue invalid");
 assert(catalog.policy.excludedPaths.includes("sanacion/"),"Client audio exclusion missing");
 
-console.log("StanNet Radio stages 1-6 OK");
+const compose=fs.readFileSync("radio-server/docker-compose.yml","utf8");
+const liquidsoap=fs.readFileSync("radio-server/liquidsoap/stannet-radio.liq","utf8");
+const icecastTemplate=fs.readFileSync("radio-server/icecast/icecast.xml.template","utf8");
+const envExample=fs.readFileSync("radio-server/.env.example","utf8");
+assert(worker.includes("/api/radio/catalog"),"Stage 7 catalog endpoint missing");
+assert(html.includes("radioLibraryState"),"Stage 7 library UI missing");
+assert(js.includes("/api/radio/catalog"),"Stage 7 catalog client integration missing");
+assert(compose.includes("savonet/liquidsoap:v2.4.5"),"Stage 7 Liquidsoap version must be pinned");
+assert(compose.includes("playlist.m3u"),"Stage 7 approved playlist mount missing");
+assert(liquidsoap.includes('output.icecast('),"Stage 7 Icecast output missing");
+assert(liquidsoap.includes('/stannet.mp3'),"Stage 7 stream mount missing");
+assert(liquidsoap.includes('/etc/liquidsoap/playlist.m3u'),"Stage 7 must use generated playlist");
+assert(icecastTemplate.includes('${ICECAST_SOURCE_PASSWORD}'),"Stage 7 Icecast secret template missing");
+assert(envExample.includes("CHANGE_ME_LONG_RANDOM_SOURCE_PASSWORD"),"Stage 7 env template missing");
+assert(!compose.includes("sanacion/"),"Stage 7 server must not reference client audio");
+assert(fs.existsSync("radio-server/build-playlist.mjs"),"Stage 7 playlist builder missing");
+
+console.log("StanNet Radio stages 1-7 OK");
