@@ -30,7 +30,7 @@
 <p class="eyebrow">STANNET / AUTONOMOUS DIGITAL RADIO</p>
 <h1>Music <span>•</span> Tech <span>•</span><br>Cyber <span>•</span> AI</h1>
 <p class="radio-lead">Una radio digital preparada para música, podcasts y boletines automatizados de tecnología, ciberseguridad e inteligencia artificial.</p>
-<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 5 · AUTO SCHEDULER</span></div>
+<div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 6 · PLAYOUT ENGINE</span></div>
 </div>
 <div class="radio-console" aria-label="Reproductor StanNet Radio">
 <div class="radio-console-top"><span>STANNET RADIO</span><span id="liveBadge">STANDBY</span></div>
@@ -83,7 +83,11 @@
 <div class="radio-auto-grid">
   <article class="radio-auto-card radio-auto-now"><span>AHORA</span><h3 id="radioAutomationNow">Calculando bloque…</h3><p id="radioAutomationNowMeta">Conectando con el scheduler.</p></article>
   <article class="radio-auto-card"><span>SIGUIENTE</span><h3 id="radioAutomationNext">—</h3><p id="radioAutomationNextMeta">—</p></article>
-  <article class="radio-auto-card"><span>AUTOMATIZACIÓN</span><h3 id="radioAutomationState">Scheduler activo</h3><p id="radioAutomationStateMeta">Feed · editor · voz · playout</p></article>
+  <article class="radio-auto-card"><span>PLAYOUT</span><h3 id="radioAutomationState">Motor de emisión activo</h3><p id="radioAutomationStateMeta">Feed · editor · voz · playout</p></article>
+</div>
+<div class="radio-playout-status">
+  <div><span>SECUENCIA ACTUAL</span><strong id="radioPlayoutSequence">Calculando…</strong></div>
+  <div><span>STREAM 24/7</span><strong id="radioStreamState">Pendiente de servidor</strong></div>
 </div>
 <div class="radio-queue-wrap"><div class="radio-queue-head"><span>COLA DE EMISIÓN</span><span id="radioSchedulerClock">Europe/Madrid</span></div><div id="radioAutomationQueue" class="radio-queue"></div></div>
 </section>
@@ -94,7 +98,7 @@
 <div class="radio-pipeline">
 <span>FUENTES</span><b>→</b><span>IA EDITORIAL</span><b>→</b><span>GUION</span><b>→</b><span>VOZ</span><b>→</b><span>AUDIO</span><b>→</b><span>EMISIÓN</span>
 </div>
-<p>Las etapas 1–5 ya conectan reproductor, fuentes, editor, voz y programación automática. La emisión 24/7 real se activa al conectar el playout musical y RADIO_STREAM_URL a un servidor de streaming.</p>
+<p>Las etapas 1–6 ya conectan reproductor, fuentes, editor, voz, programación automática y manifiesto de playout. La emisión 24/7 real se activa al conectar el playout musical y RADIO_STREAM_URL a un servidor de streaming.</p>
 </section>
 </main>
 <footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
