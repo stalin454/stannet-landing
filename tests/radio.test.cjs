@@ -1,0 +1,13 @@
+const fs=require("fs"),assert=require("assert");
+const html=fs.readFileSync("pages/radio.html","utf8");
+const js=fs.readFileSync("radio.js","utf8");
+const api=fs.readFileSync("radio-api.js","utf8");
+const worker=fs.readFileSync("worker.js","utf8");
+assert(html.includes("Music <span>•</span> Tech"),"radio identity missing");
+assert(html.includes("../radio.js"),"radio script missing");
+assert(js.includes("/api/radio/status"),"radio status endpoint missing");
+assert(api.includes("RADIO_STREAM_URL"),"Cloudflare stream env missing");
+assert(worker.includes("/api/radio/status"),"worker route missing");
+assert(!html.toLowerCase().includes("vercel"),"radio page must not reference Vercel");
+assert(!js.toLowerCase().includes("vercel"),"radio JS must not reference Vercel");
+console.log("StanNet Radio stage 1 OK");
