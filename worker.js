@@ -7,6 +7,11 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/bulletin') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioBulletin(url, env);
+    }
+
     if (url.pathname === '/api/radio/feed') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       return handleRadioFeed(url);
@@ -791,6 +796,112 @@ function radioHash(value) {
   let hash=2166136261;
   for(let i=0;i<value.length;i++){ hash^=value.charCodeAt(i); hash=Math.imul(hash,16777619); }
   return 'radio-'+(hash>>>0).toString(36);
+}
+
+
+async function handleRadioBulletin(url,env) {
+  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+  const allowed=new Set(['ALL','CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requestedCategory)) return json({ error:'Categoría de boletín no válida.' },400);
+
+  const candidates=await collectRadioItems(requestedCategory);
+  const selected=rankRadioItems(candidates).slice(0,6);
+  if(!selected.length) return json({ error:'No hay fuentes disponibles para preparar el boletín.' },503);
+
+  const references=selected.map((item,index)=>({
+    ref:index+1,id:item.id,source:item.source,category:item.category,title:item.title,url:item.url,publishedAt:item.publishedAt
+  }));
+  const fallback=buildRadioFallbackBulletin(selected);
+  const apiKey=env.AI_API_KEY||env.GROQ_API_KEY||env.GROQ_KEY;
+  if(!apiKey){
+    return json({ ...fallback, generatedAt:new Date().toISOString(), mode:'extractive', references },200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+  }
+
+  try{
+    const ai=await generateRadioBulletinWithAi(selected,env,apiKey);
+    return json({
+      generatedAt:new Date().toISOString(),
+      mode:'ai-editorial',
+      title:ai.title,
+      intro:ai.intro,
+      script:ai.script,
+      outro:ai.outro,
+      durationHint:ai.durationHint||'2–4 min',
+      references
+    },200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+  }catch{
+    return json({ ...fallback, generatedAt:new Date().toISOString(), mode:'extractive-fallback', references },200,{ 'Cache-Control':'public, max-age=180, s-maxage=300' });
+  }
+}
+
+async function collectRadioItems(category='ALL') {
+  const settled=await Promise.allSettled(RADIO_FEEDS.map(fetchRadioSource));
+  const items=[];
+  settled.forEach(result=>{ if(result.status==='fulfilled') items.push(...result.value); });
+  return dedupeRadioItems(items).filter(item=>category==='ALL'||item.category===category);
+}
+
+function rankRadioItems(items) {
+  const now=Date.now();
+  return [...items].map(item=>{
+    const published=Date.parse(item.publishedAt)||0;
+    const ageHours=published?Math.max(0,(now-published)/36e5):9999;
+    const freshness=ageHours<=24?50:ageHours<=72?35:ageHours<=168?20:5;
+    const authority=item.source==='CISA'?30:item.source==='Cloudflare'||item.source==='Google'||item.source==='GitHub'?22:10;
+    const signal=/critical|vulnerab|security|cyber|attack|breach|malware|ransomware|artificial intelligence|\bai\b|model|developer|release|cloud/i.test(item.title+' '+item.summary)?12:0;
+    return { ...item, editorialScore:freshness+authority+signal };
+  }).sort((a,b)=>b.editorialScore-a.editorialScore||(Date.parse(b.publishedAt)||0)-(Date.parse(a.publishedAt)||0));
+}
+
+function buildRadioFallbackBulletin(items) {
+  const lines=items.map((item,index)=>{
+    const summary=item.summary?item.summary.replace(/\s+/g,' ').trim().slice(0,220):'Consulta la fuente original para ampliar la información.';
+    return (index+1)+'. '+item.title+'. '+summary+' Fuente: '+item.source+'.';
+  });
+  return {
+    title:'StanNet Radio · Tech & Cyber Brief',
+    intro:'Estas son las novedades seleccionadas por StanNet Radio a partir de fuentes identificadas.',
+    script:lines.join('\n\n'),
+    outro:'Consulta las fuentes enlazadas antes de tomar decisiones técnicas o de seguridad.',
+    durationHint:'2–4 min'
+  };
+}
+
+async function generateRadioBulletinWithAi(items,env,apiKey) {
+  const apiUrl=env.AI_API_URL||'https://api.groq.com/openai/v1/chat/completions';
+  const model=env.RADIO_AI_MODEL||env.AI_MODEL||'openai/gpt-oss-20b';
+  const sourcePack=items.map((item,index)=>({
+    ref:index+1,source:item.source,category:item.category,title:item.title,publishedAt:item.publishedAt,summary:item.summary,url:item.url
+  }));
+  const response=await fetch(apiUrl,{
+    method:'POST',
+    headers:{ Authorization:'Bearer '+apiKey,'Content-Type':'application/json' },
+    body:JSON.stringify({
+      model,
+      temperature:0.2,
+      response_format:{ type:'json_object' },
+      messages:[
+        { role:'system',content:'Eres el editor de StanNet Radio. Redacta un boletín radiofónico breve en español usando EXCLUSIVAMENTE los datos del paquete de fuentes. No inventes hechos, cifras, fechas, impactos, CVE ni declaraciones. Distingue claramente hechos de contexto. Si una fuente no permite sostener un detalle, omítelo. No copies frases largas: parafrasea. No incluyas URLs dentro del guion. Devuelve JSON válido con title, intro, script, outro y durationHint. En script, añade [1], [2], etc. al final de cada bloque para indicar la referencia utilizada. Tono claro, técnico y comprensible para estudiantes de ciberseguridad, IA y programación. No des instrucciones ofensivas de explotación.' },
+        { role:'user',content:JSON.stringify({ station:'StanNet Radio',sources:sourcePack }) }
+      ]
+    })
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok) throw new Error('ai provider');
+  const raw=data?.choices?.[0]?.message?.content;
+  if(typeof raw!=='string'||!raw.trim()) throw new Error('empty ai');
+  const parsed=JSON.parse(raw);
+  const script=String(parsed.script||'').trim();
+  if(!script||script.length>9000) throw new Error('invalid script');
+  const refs=[...script.matchAll(/\[(\d+)\]/g)].map(match=>Number(match[1]));
+  if(refs.some(ref=>ref<1||ref>items.length)) throw new Error('invalid refs');
+  return {
+    title:String(parsed.title||'StanNet Radio Brief').slice(0,140),
+    intro:String(parsed.intro||'').slice(0,700),
+    script,
+    outro:String(parsed.outro||'').slice(0,700),
+    durationHint:String(parsed.durationHint||'2–4 min').slice(0,40)
+  };
 }
 
 async function handleStanNetAi(request, env) {
