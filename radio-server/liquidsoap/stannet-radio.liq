@@ -3,7 +3,7 @@
 
 settings.log.level := 3
 
-music = playlist(mode="randomize", reload_mode="watch", "/music")
+music = playlist(mode="randomize", reload_mode="watch", "/etc/liquidsoap/playlist.m3u")
 radio = mksafe(music)
 
 output.icecast(
