@@ -8,6 +8,21 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/playout') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioPlayout(url, env);
+    }
+
+    if (url.pathname === '/api/radio/program-audio') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioProgramAudio(url, env);
+    }
+
+    if (url.pathname === '/api/radio/jingle') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      return handleRadioJingle(url, env);
+    }
+
     if (url.pathname === '/api/radio/voice') {
       if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
       return handleRadioVoice(request, env);
@@ -815,14 +830,13 @@ function radioHash(value) {
 }
 
 
-async function handleRadioBulletin(url,env) {
-  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+async function buildRadioBulletinData(requestedCategory,env) {
   const allowed=new Set(['ALL','CYBER','AI','TECH','DEV']);
-  if(!allowed.has(requestedCategory)) return json({ error:'Categoría de boletín no válida.' },400);
+  if(!allowed.has(requestedCategory)) throw new Error('invalid_category');
 
   const candidates=await collectRadioItems(requestedCategory);
   const selected=rankRadioItems(candidates).slice(0,6);
-  if(!selected.length) return json({ error:'No hay fuentes disponibles para preparar el boletín.' },503);
+  if(!selected.length) throw new Error('no_sources');
 
   const references=selected.map((item,index)=>({
     ref:index+1,id:item.id,source:item.source,category:item.category,title:item.title,url:item.url,publishedAt:item.publishedAt
@@ -830,12 +844,11 @@ async function handleRadioBulletin(url,env) {
   const fallback=buildRadioFallbackBulletin(selected);
   const apiKey=env.AI_API_KEY||env.GROQ_API_KEY||env.GROQ_KEY;
   if(!apiKey){
-    return json({ ...fallback, generatedAt:new Date().toISOString(), mode:'extractive', references },200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+    return { ...fallback, generatedAt:new Date().toISOString(), mode:'extractive', references };
   }
-
   try{
     const ai=await generateRadioBulletinWithAi(selected,env,apiKey);
-    return json({
+    return {
       generatedAt:new Date().toISOString(),
       mode:'ai-editorial',
       title:ai.title,
@@ -844,10 +857,104 @@ async function handleRadioBulletin(url,env) {
       outro:ai.outro,
       durationHint:ai.durationHint||'2–4 min',
       references
-    },200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+    };
   }catch{
-    return json({ ...fallback, generatedAt:new Date().toISOString(), mode:'extractive-fallback', references },200,{ 'Cache-Control':'public, max-age=180, s-maxage=300' });
+    return { ...fallback, generatedAt:new Date().toISOString(), mode:'extractive-fallback', references };
   }
+}
+
+async function handleRadioBulletin(url,env) {
+  const requestedCategory=(url.searchParams.get('category')||'ALL').trim().toUpperCase();
+  try{
+    const bulletin=await buildRadioBulletinData(requestedCategory,env);
+    return json(bulletin,200,{ 'Cache-Control':'public, max-age=300, s-maxage=600' });
+  }catch(error){
+    if(error?.message==='invalid_category') return json({ error:'Categoría de boletín no válida.' },400);
+    if(error?.message==='no_sources') return json({ error:'No hay fuentes disponibles para preparar el boletín.' },503);
+    return json({ error:'No se pudo preparar el boletín.' },502);
+  }
+}
+
+async function handleRadioProgramAudio(url,env) {
+  const program=resolveRadioProgram(new Date(),'Europe/Madrid');
+  const requested=(url.searchParams.get('category')||program.current.type||'ALL').trim().toUpperCase();
+  const allowed=new Set(['CYBER','AI','TECH','DEV']);
+  if(!allowed.has(requested)) return json({ error:'El bloque actual no es un boletín reproducible.' },409);
+  try{
+    const bulletin=await buildRadioBulletinData(requested,env);
+    const text=[bulletin.intro,bulletin.script,bulletin.outro].filter(Boolean).join('\n\n');
+    return synthesizeRadioSpeech(text,env,'6',{
+      'X-StanNet-Program':requested,
+      'X-StanNet-Bulletin-Mode':bulletin.mode||'editorial'
+    });
+  }catch(error){
+    if(error?.message==='no_sources') return json({ error:'No hay fuentes disponibles para generar audio.' },503);
+    return json({ error:'No se pudo generar el audio del programa.' },502);
+  }
+}
+
+async function handleRadioJingle(url,env) {
+  const variant=(url.searchParams.get('variant')||'station').trim().toLowerCase();
+  const messages={
+    station:'StanNet Radio. Music, Tech, Cyber and AI.',
+    cyber:'Estás escuchando StanNet Radio. Cybersecurity News.',
+    ai:'StanNet Radio. Inteligencia artificial y tecnología.',
+    dev:'StanNet Radio. Programming Sessions.',
+    transition:'StanNet Radio. Seguimos conectados.'
+  };
+  const text=messages[variant];
+  if(!text) return json({ error:'Jingle no válido.' },400);
+  return synthesizeRadioSpeech(text,env,'6',{ 'X-StanNet-Jingle':variant });
+}
+
+async function handleRadioPlayout(url,env) {
+  const program=resolveRadioProgram(new Date(),'Europe/Madrid');
+  const origin=url.origin;
+  const category=['CYBER','AI','TECH','DEV'].includes(program.current.type)?program.current.type:null;
+  const items=[];
+  items.push({
+    kind:'jingle',
+    title:'StanNet Station ID',
+    audioUrl:origin+'/api/radio/jingle?variant=station',
+    required:true
+  });
+  if(program.current.mode==='bulletin'&&category){
+    items.push({
+      kind:'bulletin',
+      title:program.current.title,
+      category,
+      audioUrl:origin+'/api/radio/program-audio?category='+encodeURIComponent(category),
+      required:true
+    });
+    items.push({
+      kind:'jingle',
+      title:'StanNet Transition',
+      audioUrl:origin+'/api/radio/jingle?variant=transition',
+      required:true
+    });
+  }else{
+    items.push({
+      kind:'music',
+      title:program.current.title,
+      catalogue:'StanNet authorized catalogue',
+      catalogueUrl:origin+'/radio-catalog.json',
+      required:false,
+      note:'Se reproducen únicamente pistas con derechos de emisión definidos en el catálogo.'
+    });
+  }
+  return json({
+    station:'StanNet Radio',
+    stage:6,
+    generatedAt:new Date().toISOString(),
+    timeZone:program.timeZone,
+    current:program.current,
+    next:program.next,
+    items,
+    stream:{
+      configured:Boolean(typeof env.RADIO_STREAM_URL==='string'&&/^https:\/\//i.test(env.RADIO_STREAM_URL.trim())),
+      url:typeof env.RADIO_STREAM_URL==='string'&&/^https:\/\//i.test(env.RADIO_STREAM_URL.trim())?env.RADIO_STREAM_URL.trim():''
+    }
+  },200,{ 'Cache-Control':'public, max-age=20, s-maxage=20' });
 }
 
 async function collectRadioItems(category='ALL') {
@@ -926,6 +1033,11 @@ async function handleRadioVoice(request,env) {
   try{ body=await request.json(); }catch{ return json({ error:'Solicitud no válida.' },400); }
   const raw=typeof body?.text==='string'?body.text.trim():'';
   if(!raw||raw.length>8500) return json({ error:'El guion de radio no es válido.' },400);
+  return synthesizeRadioSpeech(raw,env,'4');
+}
+
+async function synthesizeRadioSpeech(raw,env,stage='6',extraHeaders={}) {
+  if(!raw||String(raw).length>8500) return json({ error:'El guion de radio no es válido.' },400);
   if(!env.AZURE_SPEECH_REGION||!env.AZURE_SPEECH_KEY) return json({ error:'La voz de radio no está configurada en Cloudflare.' },503);
 
   const clean=prepareRadioSpeech(raw);
@@ -939,16 +1051,17 @@ async function handleRadioVoice(request,env) {
         'Ocp-Apim-Subscription-Key':env.AZURE_SPEECH_KEY,
         'Content-Type':'application/ssml+xml',
         'X-Microsoft-OutputFormat':'audio-24khz-160kbitrate-mono-mp3',
-        'User-Agent':'StanNet-Radio/4.0'
+        'User-Agent':'StanNet-Radio/'+stage+'.0'
       },
       body:ssml
     });
     if(!response.ok) return json({ error:'El proveedor de voz no pudo generar la locución.',providerStatus:response.status },502);
     const headers=new Headers({
       'Content-Type':'audio/mpeg',
-      'Cache-Control':'private, max-age=3600',
+      'Cache-Control':'public, max-age=300, s-maxage=600',
       'X-StanNet-Voice':voice,
-      'X-StanNet-Audio-Stage':'4'
+      'X-StanNet-Audio-Stage':String(stage),
+      ...extraHeaders
     });
     return new Response(response.body,{status:200,headers});
   }catch{
