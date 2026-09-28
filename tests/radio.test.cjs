@@ -24,4 +24,4 @@ assert(worker.includes("buildRadioFallbackBulletin"),"Stage 3 safe fallback miss
 assert(worker.includes("No inventes hechos"),"Stage 3 hallucination guardrail missing");
 assert(html.includes("radioBulletin"),"Stage 3 bulletin UI missing");
 assert(js.includes("/api/radio/bulletin"),"Stage 3 client integration missing");
-console.log("StanNet Radio stages 1-3 OK");
+assert(worker.includes("/api/radio/voice"),"Stage 4 voice endpoint missing");\nassert(worker.includes("RADIO_VOICE_NAME"),"Stage 4 Cloudflare voice config missing");\nassert(worker.includes("es-ES-AlvaroNeural"),"Stage 4 default Spanish neural voice missing");\nassert(worker.includes("buildRadioSsml"),"Stage 4 natural prosody missing");\nassert(worker.includes("260ms"),"Stage 4 radio pauses missing");\nassert(html.includes("listenBulletin"),"Stage 4 voice control missing");\nassert(js.includes("/api/radio/voice"),"Stage 4 client voice integration missing");\nassert(!worker.includes("RADIO_VOICE_API_KEY"),"Stage 4 must reuse Cloudflare speech secret")\nconsole.log("StanNet Radio stages 1-4 OK");
