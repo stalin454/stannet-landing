@@ -37,7 +37,7 @@ assert(js.includes("/api/radio/voice"),"Stage 4 client voice integration missing
 assert(!worker.includes("RADIO_VOICE_API_KEY"),"Stage 4 must reuse Cloudflare speech secret");
 
 assert(worker.includes("/api/radio/program"),"Stage 5 program endpoint missing");
-assert(worker.includes("RADIO_PROGRAM_CLOCK"),"Stage 5 program clock missing");
+assert(api.includes("radioProgramClock"),"Stage 5 program clock missing");
 assert(worker.includes("resolveRadioProgram"),"Stage 5 scheduler missing");
 assert(worker.includes("Europe/Madrid"),"Stage 5 timezone missing");
 assert(html.includes('id="radioAutomationNow"'),"Stage 5 automation UI missing");
