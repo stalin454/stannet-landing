@@ -62,6 +62,18 @@ const loadProgram=async()=>{
     if(autoStateMeta)autoStateMeta.textContent="Reintentando automáticamente.";
   }
 };
-if(autoNow){loadProgram();setInterval(loadProgram,60000);}
+const playoutSequence=document.querySelector("#radioPlayoutSequence"),streamState=document.querySelector("#radioStreamState");
+const loadPlayout=async()=>{
+  try{
+    const response=await fetch("/api/radio/playout",{headers:{accept:"application/json"}});
+    const data=await response.json();if(!response.ok)throw new Error(data.error||"playout");
+    if(playoutSequence)playoutSequence.textContent=(data.items||[]).map(item=>item.kind.toUpperCase()+": "+item.title).join(" → ")||"Sin secuencia";
+    if(streamState)streamState.textContent=data.stream?.configured?"STREAM CONFIGURADO":"PENDIENTE DE RADIO_STREAM_URL";
+  }catch{
+    if(playoutSequence)playoutSequence.textContent="Playout no disponible";
+    if(streamState)streamState.textContent="Pendiente";
+  }
+};
+if(autoNow){loadProgram();loadPlayout();setInterval(()=>{loadProgram();loadPlayout()},60000);}
 
 })();
