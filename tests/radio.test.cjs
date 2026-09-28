@@ -44,4 +44,14 @@ assert(html.includes('id="radioAutomationNow"'),"Stage 5 automation UI missing")
 assert(js.includes("/api/radio/program"),"Stage 5 client scheduler integration missing");
 assert(api.includes("radioProgramClock"),"Stage 5 shared schedule model missing");
 
-console.log("StanNet Radio stages 1-5 OK");
+const catalog=JSON.parse(fs.readFileSync("radio-catalog.json","utf8"));
+assert(worker.includes("/api/radio/playout"),"Stage 6 playout endpoint missing");
+assert(worker.includes("/api/radio/program-audio"),"Stage 6 streamable bulletin audio missing");
+assert(worker.includes("/api/radio/jingle"),"Stage 6 jingle endpoint missing");
+assert(worker.includes("handleRadioPlayout"),"Stage 6 playout handler missing");
+assert(worker.includes("synthesizeRadioSpeech"),"Stage 6 shared TTS engine missing");
+assert(catalog?.policy?.requireRights===true,"Stage 6 rights policy missing");
+assert(Array.isArray(catalog.tracks),"Stage 6 music catalogue invalid");
+assert(catalog.policy.excludedPaths.includes("sanacion/"),"Client audio exclusion missing");
+
+console.log("StanNet Radio stages 1-6 OK");
