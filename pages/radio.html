@@ -73,7 +73,7 @@
 
 <section class="section radio-section radio-bulletin-section">
 <div class="section-heading"><div><p class="eyebrow">04 / AI EDITOR</p><h2>Boletín<br><em>StanNet.</em></h2></div><p>La IA editorial trabaja solo con las fuentes recuperadas por el radar. Cada bloque conserva referencias verificables antes de pasar a voz.</p></div>
-<div class="radio-bulletin-actions"><button id="generateBulletin" type="button">GENERAR BOLETÍN</button><span id="bulletinMode">LISTO PARA EDITAR</span></div>
+<div class="radio-bulletin-actions"><button id="generateBulletin" type="button">GENERAR BOLETÍN</button><button id="listenBulletin" class="radio-voice-button" type="button" disabled>▶ ESCUCHAR LOCUTOR</button><span id="bulletinMode">LISTO PARA EDITAR</span></div><audio id="bulletinAudio" preload="none"></audio>
 <article id="radioBulletin" class="radio-bulletin" aria-live="polite"><p>Genera un boletín para ver la selección editorial y su trazabilidad.</p></article>
 <div id="bulletinSources" class="radio-bulletin-sources"></div>
 </section>
