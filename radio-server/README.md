@@ -1,8 +1,9 @@
-# StanNet Radio · Stage 7 server
+# StanNet Radio · Stage 8 autonomous server
 
-This bundle runs the listener stream as two isolated services:
+This bundle runs the listener stream as three isolated services:
 
-- **Liquidsoap 2.4.5**: continuous playout/encoding.
+- **Director (Node 22)**: decides what plays next from the StanNet schedule and R2 catalog.
+- **Liquidsoap 2.4.5**: resolves each Director URI, decodes it, encodes the station feed and sends it to Icecast.
 - **Icecast 2**: listener-facing streaming server.
 
 ## Safety / rights rule
@@ -24,9 +25,11 @@ Do not copy files from client projects such as `sanacion/`.
 
 The website player already consumes `RADIO_STREAM_URL`.
 
-## Current Stage 7 behavior
+## Stage 8 autonomous behavior
 
-The server is intentionally **music-continuous first**. The Cloudflare app already produces the Stage 6 playout manifest, spoken bulletins and jingles. Stage 8 will make Liquidsoap consume those scheduled inserts automatically without relying on a visitor's browser.
+The Director asks the public StanNet APIs for the current schedule and cloud-ready R2 catalog. For bulletin slots it emits, once per slot: station jingle → generated bulletin audio → transition. It then returns to music. For music slots it rotates R2 tracks while remembering recent IDs in a persistent Docker volume. If no track is available it falls back to a station jingle instead of crashing.
+
+Liquidsoap consumes the Director through `request.dynamic`, so no browser or desktop computer is involved in playout. The server keeps running while the owner's PC is off.
 
 ## Production notes
 
@@ -72,3 +75,8 @@ El importador:
 - genera `radio-server/liquidsoap/playlist.m3u`.
 
 Los binarios de audio y la playlist generada están excluidos de Git. El catálogo y los metadatos sí pueden versionarse.
+
+
+## What still requires infrastructure
+
+The code is autonomous, but it must run on a machine that stays online. Deploy this folder to a Linux VPS with Docker. Cloudflare Workers/R2 host the APIs and audio objects; they do not replace the continuously running Icecast/Liquidsoap process.

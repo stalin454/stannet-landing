@@ -14,17 +14,38 @@ services:
     networks:
       - radio
 
+  director:
+    build:
+      context: ./director
+    restart: unless-stopped
+    environment:
+      STANNET_RADIO_API: ${STANNET_RADIO_API:-https://www.stannet.space}
+      RADIO_RECENT_TRACKS: ${RADIO_RECENT_TRACKS:-5}
+      RADIO_DIRECTOR_STATE: /state/director.json
+    volumes:
+      - director-state:/state
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:8788/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - radio
+
   liquidsoap:
     image: savonet/liquidsoap:v2.4.5
     restart: unless-stopped
     depends_on:
-      - icecast
+      icecast:
+        condition: service_started
+      director:
+        condition: service_healthy
     environment:
       ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
-      STANNET_RADIO_API: ${STANNET_RADIO_API:-https://www.stannet.space}
+      RADIO_DIRECTOR_URL: http://director:8788/next
     volumes:
-      - ./liquidsoap/stannet-radio.liq:/etc/liquidsoap/stannet-radio.liq:ro\n      - ./liquidsoap/playlist.m3u:/etc/liquidsoap/playlist.m3u:ro
-      - ./music:/music:ro
+      - ./liquidsoap/stannet-radio.liq:/etc/liquidsoap/stannet-radio.liq:ro
     command: ["/etc/liquidsoap/stannet-radio.liq"]
     networks:
       - radio
@@ -32,3 +53,6 @@ services:
 networks:
   radio:
     driver: bridge
+
+volumes:
+  director-state:
