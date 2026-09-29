@@ -931,19 +931,22 @@ async function handleRadioCatalog(request,env) {
         rights.type.trim() &&
         rights.source.trim();
     });
+    const cloudReady=safe.filter(track=>/^https:\/\/media\.stannet\.space\//i.test(String(track?.audioUrl||'')));
     return json({
       station:catalog?.station||'StanNet Radio',
       version:Number(catalog?.version||1),
       requireRights:catalog?.policy?.requireRights===true,
       total:tracks.length,
       authorized:safe.length,
+      cloudReady:cloudReady.length,
       tracks:safe.map(track=>({
         id:String(track.id||''),
         title:String(track.title||''),
         artist:String(track.artist||'StanNet'),
         durationSeconds:Number(track.durationSeconds||0)||null,
         blocks:Array.isArray(track.blocks)?track.blocks:[],
-        path:String(track.path||'')
+        path:String(track.path||''),
+        audioUrl:/^https:\/\/media\.stannet\.space\//i.test(String(track?.audioUrl||''))?String(track.audioUrl):''
       }))
     },200,{ 'Cache-Control':'public, max-age=60, s-maxage=300' });
   }catch{
