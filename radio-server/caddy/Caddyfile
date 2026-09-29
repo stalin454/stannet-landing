@@ -1,0 +1,10 @@
+{$RADIO_DOMAIN:radio.stannet.space} {
+  encode zstd gzip
+
+  header {
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "no-referrer"
+  }
+
+  reverse_proxy icecast:8000
+}
