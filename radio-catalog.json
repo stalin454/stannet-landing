@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "station": "StanNet Radio",
   "policy": {
     "description": "Solo pistas propias, con licencia explícita para emisión, dominio público o licencia compatible con streaming.",
@@ -9,7 +9,238 @@
     ],
     "notes": "No añadas una pista sin documentar rights.type y rights.source."
   },
-  "tracks": [],
+  "tracks": [
+    {
+      "id": "suno-6cc280d49c65e8b8",
+      "title": "Blues para un mar que muere (1)",
+      "artist": "StanNet",
+      "path": "radio-server/music/blues-para-un-mar-que-muere-1-6cc280d49c65.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "Blues para un mar que muere  (1).mp3",
+        "importedAt": "2026-09-29T06:33:30.813Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "6cc280d49c65e8b846c107025361744ef95769d4d215fdea8d835865ba17a98e",
+        "bytes": 7600926
+      }
+    },
+    {
+      "id": "suno-57a6d59cf24ab5e7",
+      "title": "DETONACIÓN (1)",
+      "artist": "StanNet",
+      "path": "radio-server/music/detonacion-1-57a6d59cf24a.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "DETONACIÓN  (1).mp3",
+        "importedAt": "2026-09-29T06:33:30.876Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "57a6d59cf24ab5e79661b918c94656535ff586e8d014128d180bcb2d72cc8e64",
+        "bytes": 6567678
+      }
+    },
+    {
+      "id": "suno-86f7e74fdbd55b17",
+      "title": "Disciplina",
+      "artist": "StanNet",
+      "path": "radio-server/music/disciplina-86f7e74fdbd5.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "Disciplina .mp3",
+        "importedAt": "2026-09-29T06:33:30.916Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "86f7e74fdbd55b177dff520aabbe85733b09de0006140523fd6f19dcf9d92f90",
+        "bytes": 5419924
+      }
+    },
+    {
+      "id": "suno-e61f80055c9de87a",
+      "title": "El que se fue",
+      "artist": "StanNet",
+      "path": "radio-server/music/el-que-se-fue-e61f80055c9d.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "El que se fue .mp3",
+        "importedAt": "2026-09-29T06:33:31.112Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "e61f80055c9de87a356713f4e7dd68db6219e415a7c787c4cb28bcbda17f50e9",
+        "bytes": 6712014
+      }
+    },
+    {
+      "id": "suno-c2bcda172660d5e0",
+      "title": "La bichota y Carlitos Santana",
+      "artist": "StanNet",
+      "path": "radio-server/music/la-bichota-y-carlitos-santana-c2bcda172660.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "La bichota y Carlitos Santana .mp3",
+        "importedAt": "2026-09-29T06:33:31.184Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "c2bcda172660d5e09a043ed8a592f96ecc7eb272be5b26b5fc9c7cc41b6b2d7a",
+        "bytes": 5113865
+      }
+    },
+    {
+      "id": "suno-172b2770785900af",
+      "title": "Levantate y pelea",
+      "artist": "StanNet",
+      "path": "radio-server/music/levantate-y-pelea-172b27707859.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "Levantate y pelea.mp3",
+        "importedAt": "2026-09-29T06:33:31.231Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "172b2770785900af763ca572e7fb807b6b8021a0b37b4e4b183a5d0883f7583f",
+        "bytes": 7910502
+      }
+    },
+    {
+      "id": "suno-5ae14f5f7839b40e",
+      "title": "Lipa",
+      "artist": "StanNet",
+      "path": "radio-server/music/lipa-5ae14f5f7839.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "Lipa.mp3",
+        "importedAt": "2026-09-29T06:33:31.257Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "5ae14f5f7839b40e9ecd66dcc099c2092287ca0f32bbdaf7d6d3beb894cfbe02",
+        "bytes": 2573838
+      }
+    },
+    {
+      "id": "suno-da22324e9cbfe304",
+      "title": "NO HAY TECHO",
+      "artist": "StanNet",
+      "path": "radio-server/music/no-hay-techo-da22324e9cbf.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "NO HAY TECHO .mp3",
+        "importedAt": "2026-09-29T06:33:31.297Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "da22324e9cbfe30439c948b8533fec1c691d94be58d5884d22649f7944277e61",
+        "bytes": 6146694
+      }
+    },
+    {
+      "id": "suno-014d61b1b07e4f65",
+      "title": "Salta",
+      "artist": "StanNet",
+      "path": "radio-server/music/salta-014d61b1b07e.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "Salta .mp3",
+        "importedAt": "2026-09-29T06:33:31.361Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "014d61b1b07e4f65d8888b0172cfdb958cbd5bc838a2c96ce619472afb0f4076",
+        "bytes": 10777364
+      }
+    },
+    {
+      "id": "suno-787c3d7f06be2592",
+      "title": "SANGRE DE GUERRERO",
+      "artist": "StanNet",
+      "path": "radio-server/music/sangre-de-guerrero-787c3d7f06be.mp3",
+      "blocks": [
+        "MUSIC"
+      ],
+      "enabled": true,
+      "source": {
+        "platform": "Suno",
+        "originalFilename": "SANGRE DE GUERRERO .mp3",
+        "importedAt": "2026-09-29T06:33:31.413Z"
+      },
+      "rights": {
+        "type": "owned",
+        "source": "Suno · derechos declarados por el propietario de la biblioteca"
+      },
+      "fingerprint": {
+        "sha256": "787c3d7f06be2592c82d2aee9e089178808efcbd36113ae81a4b2133e35c1c8b",
+        "bytes": 5910822
+      }
+    }
+  ],
   "schema": {
     "track": {
       "required": [
@@ -45,5 +276,6 @@
         "creative-commons-compatible"
       ]
     }
-  }
+  },
+  "updatedAt": "2026-09-29T06:33:31.424Z"
 }
