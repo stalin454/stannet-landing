@@ -80,7 +80,7 @@ const loadLibrary=async()=>{
     const data=await response.json();if(!response.ok)throw new Error(data.error||"catalog");
     if(libraryState){
       libraryState.textContent=data.authorized>0
-        ? data.authorized+" pista(s) autorizada(s) · "+data.total+" total"
+        ? data.authorized+" autorizada(s) · "+(data.cloudReady||0)+" en R2 · "+data.total+" total"
         : "SIN PISTAS AUTORIZADAS · añade tu música";
     }
   }catch{
