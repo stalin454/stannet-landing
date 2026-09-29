@@ -62,10 +62,10 @@ assert(worker.includes("/api/radio/catalog"),"Stage 7 catalog endpoint missing")
 assert(html.includes("radioLibraryState"),"Stage 7 library UI missing");
 assert(js.includes("/api/radio/catalog"),"Stage 7 catalog client integration missing");
 assert(compose.includes("savonet/liquidsoap:v2.4.5"),"Stage 7 Liquidsoap version must be pinned");
-assert(compose.includes("playlist.m3u"),"Stage 7 approved playlist mount missing");
+assert(compose.includes("director:"),"Stage 8 director service missing");
 assert(liquidsoap.includes('output.icecast('),"Stage 7 Icecast output missing");
 assert(liquidsoap.includes('/stannet.mp3'),"Stage 7 stream mount missing");
-assert(liquidsoap.includes('/etc/liquidsoap/playlist.m3u'),"Stage 7 must use generated playlist");
+assert(liquidsoap.includes("request.dynamic"),"Stage 8 Liquidsoap dynamic request source missing");
 assert(icecastTemplate.includes('${ICECAST_SOURCE_PASSWORD}'),"Stage 7 Icecast secret template missing");
 assert(envExample.includes("CHANGE_ME_LONG_RANDOM_SOURCE_PASSWORD"),"Stage 7 env template missing");
 assert(!compose.includes("sanacion/"),"Stage 7 server must not reference client audio");
@@ -76,4 +76,12 @@ assert(worker.includes("cloudReady"),"R2-ready catalog count missing");
 assert(worker.includes("media\\.stannet\\.space"),"R2 host allowlist missing");
 assert(js.includes("data.cloudReady"),"R2-ready UI state missing");
 
-console.log("StanNet Radio stages 1-7 + R2 library OK");
+assert(compose.includes("RADIO_DIRECTOR_URL"),"Stage 8 director URL wiring missing");
+assert(compose.includes("director-state"),"Stage 8 director persistent state missing");
+assert(liquidsoap.includes("http.get"),"Stage 8 Liquidsoap must query director");
+assert(liquidsoap.includes("request.create"),"Stage 8 Liquidsoap must convert director URI to request");
+assert(!compose.includes("\\n      -"),"docker-compose contains escaped newline corruption");
+assert(fs.existsSync("radio-server/director/director.mjs"),"Stage 8 director implementation missing");
+assert(fs.existsSync("tests/radio-director.test.mjs"),"Stage 8 director test missing");
+
+console.log("StanNet Radio stages 1-8 + R2 library OK");
