@@ -70,5 +70,10 @@ assert(icecastTemplate.includes('${ICECAST_SOURCE_PASSWORD}'),"Stage 7 Icecast s
 assert(envExample.includes("CHANGE_ME_LONG_RANDOM_SOURCE_PASSWORD"),"Stage 7 env template missing");
 assert(!compose.includes("sanacion/"),"Stage 7 server must not reference client audio");
 assert(fs.existsSync("radio-server/build-playlist.mjs"),"Stage 7 playlist builder missing");
+assert(catalog.tracks.length===10,"R2 library should contain 10 imported tracks");
+assert(catalog.tracks.every(track=>/^https:\/\/media\.stannet\.space\//.test(track.audioUrl||"")),"All imported tracks must have R2 audioUrl");
+assert(worker.includes("cloudReady"),"R2-ready catalog count missing");
+assert(worker.includes("media\\.stannet\\.space"),"R2 host allowlist missing");
+assert(js.includes("data.cloudReady"),"R2-ready UI state missing");
 
-console.log("StanNet Radio stages 1-7 OK");
+console.log("StanNet Radio stages 1-7 + R2 library OK");
