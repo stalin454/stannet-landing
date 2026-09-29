@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "station": "StanNet Radio",
   "policy": {
     "description": "Solo pistas propias, con licencia explícita para emisión, dominio público o licencia compatible con streaming.",
@@ -31,6 +31,12 @@
       "fingerprint": {
         "sha256": "6cc280d49c65e8b846c107025361744ef95769d4d215fdea8d835865ba17a98e",
         "bytes": 7600926
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/Blues%20para%20un%20mar%20que%20muere%20%20(1).mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/Blues para un mar que muere  (1).mp3"
       }
     },
     {
@@ -54,6 +60,12 @@
       "fingerprint": {
         "sha256": "57a6d59cf24ab5e79661b918c94656535ff586e8d014128d180bcb2d72cc8e64",
         "bytes": 6567678
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/DETONACI%C3%93N%20%20(1).mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/DETONACIÓN  (1).mp3"
       }
     },
     {
@@ -77,6 +89,12 @@
       "fingerprint": {
         "sha256": "86f7e74fdbd55b177dff520aabbe85733b09de0006140523fd6f19dcf9d92f90",
         "bytes": 5419924
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/Disciplina%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/Disciplina .mp3"
       }
     },
     {
@@ -100,6 +118,12 @@
       "fingerprint": {
         "sha256": "e61f80055c9de87a356713f4e7dd68db6219e415a7c787c4cb28bcbda17f50e9",
         "bytes": 6712014
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/El%20que%20se%20fue%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/El que se fue .mp3"
       }
     },
     {
@@ -123,6 +147,12 @@
       "fingerprint": {
         "sha256": "c2bcda172660d5e09a043ed8a592f96ecc7eb272be5b26b5fc9c7cc41b6b2d7a",
         "bytes": 5113865
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/La%20bichota%20y%20Carlitos%20Santana%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/La bichota y Carlitos Santana .mp3"
       }
     },
     {
@@ -146,6 +176,12 @@
       "fingerprint": {
         "sha256": "172b2770785900af763ca572e7fb807b6b8021a0b37b4e4b183a5d0883f7583f",
         "bytes": 7910502
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/Levantate%20y%20pelea.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/Levantate y pelea.mp3"
       }
     },
     {
@@ -169,6 +205,12 @@
       "fingerprint": {
         "sha256": "5ae14f5f7839b40e9ecd66dcc099c2092287ca0f32bbdaf7d6d3beb894cfbe02",
         "bytes": 2573838
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/Lipa.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/Lipa.mp3"
       }
     },
     {
@@ -192,6 +234,12 @@
       "fingerprint": {
         "sha256": "da22324e9cbfe30439c948b8533fec1c691d94be58d5884d22649f7944277e61",
         "bytes": 6146694
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/NO%20HAY%20TECHO%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/NO HAY TECHO .mp3"
       }
     },
     {
@@ -215,6 +263,12 @@
       "fingerprint": {
         "sha256": "014d61b1b07e4f65d8888b0172cfdb958cbd5bc838a2c96ce619472afb0f4076",
         "bytes": 10777364
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/Salta%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/Salta .mp3"
       }
     },
     {
@@ -238,6 +292,12 @@
       "fingerprint": {
         "sha256": "787c3d7f06be2592c82d2aee9e089178808efcbd36113ae81a4b2133e35c1c8b",
         "bytes": 5910822
+      },
+      "audioUrl": "https://media.stannet.space/tracks/CStanNetRadioMusic/SANGRE%20DE%20GUERRERO%20.mp3",
+      "storage": {
+        "provider": "Cloudflare R2",
+        "bucket": "stannet-radio-music",
+        "objectKey": "tracks/CStanNetRadioMusic/SANGRE DE GUERRERO .mp3"
       }
     }
   ],
@@ -277,5 +337,5 @@
       ]
     }
   },
-  "updatedAt": "2026-09-29T06:33:31.424Z"
+  "updatedAt": "2026-09-29T07:47:37.205Z"
 }
