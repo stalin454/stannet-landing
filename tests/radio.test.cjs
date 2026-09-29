@@ -83,5 +83,11 @@ assert(liquidsoap.includes("request.create"),"Stage 8 Liquidsoap must convert di
 assert(!compose.includes("\\n      -"),"docker-compose contains escaped newline corruption");
 assert(fs.existsSync("radio-server/director/director.mjs"),"Stage 8 director implementation missing");
 assert(fs.existsSync("tests/radio-director.test.mjs"),"Stage 8 director test missing");
+const caddy=fs.readFileSync("radio-server/caddy/Caddyfile","utf8");
+assert(compose.includes("caddy:2.11.4-alpine"),"Pinned Caddy TLS proxy missing");
+assert(compose.includes('"80:80"')&&compose.includes('"443:443"'),"HTTPS ports missing");
+assert(!compose.includes('"8000:8000"'),"Icecast port must not be publicly exposed");
+assert(caddy.includes("reverse_proxy icecast:8000"),"Caddy must proxy Icecast internally");
+assert(envExample.includes("RADIO_DOMAIN=radio.stannet.space"),"Radio domain env missing");
 
 console.log("StanNet Radio stages 1-8 + R2 library OK");
