@@ -80,3 +80,8 @@ Los binarios de audio y la playlist generada están excluidos de Git. El catálo
 ## What still requires infrastructure
 
 The code is autonomous, but it must run on a machine that stays online. Deploy this folder to a Linux VPS with Docker. Cloudflare Workers/R2 host the APIs and audio objects; they do not replace the continuously running Icecast/Liquidsoap process.
+
+
+## HTTPS y dominio público
+
+El stack incluye Caddy delante de Icecast. En producción, crea un registro DNS para `radio.stannet.space` apuntando a la IP pública del VPS. Caddy obtiene y renueva TLS automáticamente y publica el mount como `https://radio.stannet.space/stannet.mp3`. El puerto 8000 de Icecast queda accesible solo dentro de la red Docker.
