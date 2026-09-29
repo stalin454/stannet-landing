@@ -23,8 +23,12 @@ const lines=["#EXTM3U"];
 for(const track of safe){
   const title=[track.artist,track.title].filter(Boolean).join(" - ");
   if(track.durationSeconds) lines.push(`#EXTINF:${Math.round(track.durationSeconds)},${title}`);
-  const rel=String(track.path).replace(/^radio-server\/music\//,"");
-  lines.push("/music/"+rel);
+  const remote=String(track.audioUrl||"").trim();
+  if(/^https:\/\//i.test(remote)) lines.push(remote);
+  else {
+    const rel=String(track.path).replace(/^radio-server\/music\//,"");
+    lines.push("/music/"+rel);
+  }
 }
 fs.writeFileSync(outputPath,lines.join("\n")+"\n");
 console.log(`StanNet Radio playlist: ${safe.length} authorized track(s).`);
