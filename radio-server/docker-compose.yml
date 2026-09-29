@@ -1,4 +1,21 @@
 services:
+  caddy:
+    image: caddy:2.11.4-alpine
+    restart: unless-stopped
+    depends_on:
+      - icecast
+    environment:
+      RADIO_DOMAIN: ${RADIO_DOMAIN:-radio.stannet.space}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - radio
+
   icecast:
     build:
       context: ./icecast
@@ -9,8 +26,8 @@ services:
       ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
       ICECAST_ADMIN_USER: ${ICECAST_ADMIN_USER:-admin}
       ICECAST_HOSTNAME: ${ICECAST_HOSTNAME:-radio.stannet.space}
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     networks:
       - radio
 
@@ -56,3 +73,5 @@ networks:
 
 volumes:
   director-state:
+  caddy-data:
+  caddy-config:
