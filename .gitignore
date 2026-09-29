@@ -27,3 +27,8 @@ Thumbs.db
 coverage/
 dist/
 .cache/
+
+# StanNet Radio local media library (large binaries stay out of Git)
+radio-server/music/*
+!radio-server/music/.gitkeep
+radio-server/liquidsoap/playlist.m3u

@@ -34,3 +34,41 @@ The server is intentionally **music-continuous first**. The Cloudflare app alrea
 - Keep port 8000 private if a TLS reverse proxy is used.
 - Back up the rights metadata together with the audio catalogue.
 - Test new Liquidsoap releases in staging before changing the pinned version.
+
+
+## Importar tu biblioteca Suno local
+
+El importador está pensado para una biblioteca local como:
+
+`C:\\CStanNetRadioMusic`
+
+Desde la raíz del proyecto ejecuta:
+
+```powershell
+npm run radio:import
+```
+
+También puedes indicar otra carpeta:
+
+```powershell
+npm run radio:import -- "D:\\MiMusica"
+```
+
+Antes de modificar nada puedes probar:
+
+```powershell
+npm run radio:import:dry
+```
+
+El importador:
+
+- busca MP3, WAV, M4A, FLAC, OGG y AAC de forma recursiva;
+- calcula SHA-256 para evitar duplicados;
+- deriva el título a partir del nombre del archivo;
+- asigna `artist: StanNet`;
+- marca los derechos como `owned` con origen Suno según la declaración del propietario;
+- copia los archivos a `radio-server/music/` localmente;
+- actualiza `radio-catalog.json`;
+- genera `radio-server/liquidsoap/playlist.m3u`.
+
+Los binarios de audio y la playlist generada están excluidos de Git. El catálogo y los metadatos sí pueden versionarse.
