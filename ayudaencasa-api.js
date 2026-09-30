@@ -242,6 +242,15 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE id=?').bind(target).first();if(!exists)return response({error:'Usuario no encontrado.',code:'AEC_NOT_FOUND'},404);
   await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();return response({ok:true});
  }
+ if(path==='/conversations'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare(`SELECT c.id,c.job_id,j.status job_status,r.title,
+   (SELECT COUNT(*) FROM aec_messages m WHERE m.conversation_id=c.id AND m.sender_id<>? AND m.created_at>COALESCE((SELECT mr.last_read_at FROM aec_message_reads mr WHERE mr.conversation_id=c.id AND mr.user_id=?),'1970-01-01')) unread_count,
+   (SELECT body FROM aec_messages lm WHERE lm.conversation_id=c.id ORDER BY lm.created_at DESC LIMIT 1) last_message
+   FROM aec_conversations c JOIN aec_jobs j ON j.id=c.job_id JOIN aec_requests r ON r.id=j.request_id
+   WHERE j.customer_id=? OR j.professional_id=? ORDER BY c.created_at DESC LIMIT 50`).bind(session.id,session.id,session.id,session.id).all();
+  return response({conversations:rows.results||[]});
+ }
  if(path==='/notifications'&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const rows=await env.AYUDA_DB.prepare("SELECT id,kind,payload_json,status,created_at,sent_at FROM aec_notification_outbox WHERE user_id=? ORDER BY created_at DESC LIMIT 50").bind(session.id).all();
@@ -293,6 +302,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   if(blocked)return response({error:'La conversación no está disponible.',code:'AEC_CHAT_BLOCKED'},403);
   const conv=await ensureConversation(env,job);
   const rows=await env.AYUDA_DB.prepare('SELECT id,sender_id,body,created_at FROM aec_messages WHERE conversation_id=? ORDER BY created_at ASC LIMIT 200').bind(conv).all();
+  await env.AYUDA_DB.prepare("INSERT INTO aec_message_reads(conversation_id,user_id,last_read_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(conversation_id,user_id) DO UPDATE SET last_read_at=CURRENT_TIMESTAMP").bind(conv,session.id).run();
   return response({conversationId:conv,messages:rows.results||[]});
  }
  if(messagesMatch&&request.method==='POST'){
@@ -306,6 +316,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const body=clean((await readJson(request))?.body,3000);if(!body)return response({error:'Mensaje vacío.',code:'AEC_MESSAGE_INVALID'},400);
   const conv=await ensureConversation(env,job),id=crypto.randomUUID();
   await env.AYUDA_DB.prepare('INSERT INTO aec_messages(id,conversation_id,sender_id,body) VALUES(?,?,?,?)').bind(id,conv,session.id,body).run();
+  await enqueueNotification(env,other,'USER','NEW_MESSAGE',{jobId:job.id});
   return response({ok:true,message:{id,body}},201);
  }
  const reviewMatch=path.match(/^\/jobs\/([^/]+)\/review$/);
