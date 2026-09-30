@@ -28,7 +28,7 @@ El servidor valida propiedad, rol y estado antes de cada transición. Al aceptar
 - cookies de sesión no accesibles a JavaScript;
 - hashes de tokens de sesión y recuperación;
 - PBKDF2 con salt individual;
-- rate limiting inicial en registro/login/recuperación;
+- rate limiting en identidad y flujos de escritura sensibles;
 - comprobación de Origin en mutaciones;
 - Content-Type JSON y límite inicial de payload;
 - mensajes de login genéricos;
@@ -44,10 +44,13 @@ El servidor valida propiedad, rol y estado antes de cada transición. Al aceptar
 La recuperación genera tokens de un solo uso con caducidad de 30 minutos. El envío solo se intenta cuando existen `AEC_EMAIL_ENDPOINT` y `AEC_EMAIL_TOKEN`. Verificación de email obligatoria queda como requisito previo a producción; no se debe activar una falsa verificación.
 
 ## Migraciones
-Aplicar en orden `migrations/ayudaencasa/0001_core.sql` a `0006_moderation_privacy.sql`.
+Aplicar en orden `migrations/ayudaencasa/0001_core.sql` a `0008_message_reads.sql`.
 
 ## Antes de producción
-Crear D1 y binding `AYUDA_DB`; configurar proveedor transaccional; implementar verificación de email; ejecutar migraciones en staging; pruebas end-to-end con cliente y profesional; revisar RGPD/LSSI y textos legales; definir backups/retención; observabilidad y alertas; benchmark de PBKDF2 y rate limiting; revisión de concurrencia al aceptar propuestas; pruebas de abuso y autorización.
+Crear D1 y binding `AYUDA_DB`; configurar proveedor transaccional; ejecutar migraciones en staging; pruebas end-to-end con cliente y profesional; revisar RGPD/LSSI y textos legales; definir backups/retención; observabilidad y alertas; benchmark de PBKDF2 y rate limiting; pruebas de abuso y autorización.
 
 ## Principio de lanzamiento
 No afirmar “perfil verificado”, “pago seguro”, “identidad comprobada” o equivalentes hasta que esos controles existan y hayan sido probados.
+
+## Decisiones académicas
+La versión de graduación permanece noindex y fuera del lanzamiento comercial. Los pagos se sustituyen por una capa de entitlements preparada pero sin proveedor financiero. La mensajería usa persistencia y estado leído/no leído; realtime es una mejora posterior y no un requisito del flujo principal.
