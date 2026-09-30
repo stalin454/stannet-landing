@@ -66,3 +66,9 @@ assert.match(html, /id="testimonios"/);
 assert.match(html, /EXPERIENCIAS DE CLIENTES/);
 assert.match(html, /Pendiente de autorización del cliente/);
 assert.match(html, /metodoyuenjosepalomo\.com/);
+
+assert.match(html, /id="fortalecimientos"/);
+assert.match(html, /FORTALECIMIENTOS Y RECURSOS/);
+assert.match(html, /id="testimonialTrack"/);
+assert.match(html, /testimonialPrev/);
+assert.match(html, /testimonialNext/);
