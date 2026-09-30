@@ -277,6 +277,32 @@ export async function handleAyudaEnCasaApi(request,env,url){
   try{await env.AYUDA_DB.prepare('INSERT INTO aec_reviews(id,job_id,author_id,subject_id,rating,body) VALUES(?,?,?,?,?,?)').bind(crypto.randomUUID(),job.id,session.id,subject,rating,body).run();}catch{return response({error:'Ya has valorado este trabajo.',code:'AEC_REVIEW_EXISTS'},409);}
   return response({ok:true},201);
  }
+ if(path==='/professionals'&&request.method==='GET'){
+  if(!env.AYUDA_DB)return response({professionals:[]});
+  const category=clean(url.searchParams.get('category'),64),postal=clean(url.searchParams.get('postal'),12);
+  let sql=`SELECT pp.user_id,pp.display_name,pp.bio,pp.location_label,pp.postal_prefix,pp.hourly_rate_minor,pp.currency,
+   COALESCE((SELECT AVG(r.rating) FROM aec_reviews r WHERE r.subject_id=pp.user_id),0) rating,
+   (SELECT COUNT(*) FROM aec_reviews r WHERE r.subject_id=pp.user_id) review_count
+   FROM aec_professional_profiles pp JOIN aec_users u ON u.id=pp.user_id WHERE pp.published=1 AND u.status='ACTIVE'`;
+  const binds=[];if(postal){sql+=' AND pp.postal_prefix=?';binds.push(postal);}if(category){sql+=' AND EXISTS(SELECT 1 FROM aec_professional_services ps WHERE ps.professional_id=pp.user_id AND ps.category_id=?)';binds.push(category);}sql+=' ORDER BY rating DESC,review_count DESC LIMIT 50';
+  const stmt=env.AYUDA_DB.prepare(sql),rows=await (binds.length?stmt.bind(...binds):stmt).all();return response({professionals:rows.results||[]});
+ }
+ if(path==='/professional/services'&&request.method==='PUT'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const ids=Array.isArray((await readJson(request))?.categoryIds)?[...new Set((await readJson(request))?.categoryIds)]:[];
+  if(ids.length>20||ids.some(x=>typeof x!=='string'||x.length>64))return response({error:'Servicios no válidos.',code:'AEC_SERVICES_INVALID'},400);
+  const valid=ids.length?await env.AYUDA_DB.prepare(`SELECT id FROM aec_categories WHERE status='ACTIVE' AND id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all():{results:[]};
+  if((valid.results||[]).length!==ids.length)return response({error:'Alguna categoría no es válida.',code:'AEC_SERVICES_INVALID'},400);
+  const ops=[env.AYUDA_DB.prepare('DELETE FROM aec_professional_services WHERE professional_id=?').bind(session.id),...ids.map(id=>env.AYUDA_DB.prepare('INSERT INTO aec_professional_services(professional_id,category_id) VALUES(?,?)').bind(session.id,id))];await env.AYUDA_DB.batch(ops);return response({ok:true});
+ }
+ if(path==='/professional/profile/publish'&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const profile=await env.AYUDA_DB.prepare('SELECT display_name,location_label,bio FROM aec_professional_profiles WHERE user_id=?').bind(session.id).first();
+  if(!profile||profile.display_name.length<2||profile.location_label.length<2||profile.bio.length<20)return response({error:'Completa el perfil antes de publicarlo.',code:'AEC_PROFILE_INCOMPLETE'},409);
+  const svc=await env.AYUDA_DB.prepare('SELECT COUNT(*) n FROM aec_professional_services WHERE professional_id=?').bind(session.id).first();if(Number(svc?.n||0)<1)return response({error:'Selecciona al menos un servicio.',code:'AEC_PROFILE_INCOMPLETE'},409);
+  if(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){const u=await env.AYUDA_DB.prepare('SELECT email_verified_at FROM aec_users WHERE id=?').bind(session.id).first();if(!u?.email_verified_at)return response({error:'Verifica tu correo antes de publicar.',code:'AEC_EMAIL_UNVERIFIED'},409);}
+  await env.AYUDA_DB.prepare('UPDATE aec_professional_profiles SET published=1,updated_at=CURRENT_TIMESTAMP WHERE user_id=?').bind(session.id).run();await audit(env,session.id,'PROFILE_PUBLISHED','user',session.id);return response({ok:true,published:true});
+ }
  if(path==='/professional/profile'&&request.method==='GET'){
   const session=await readSession(request,env);
   if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
