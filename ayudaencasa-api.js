@@ -260,6 +260,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/reports'&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'report:'+session.id,10,3600);if(!limited.ok)return response({error:'Has enviado demasiados reportes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const data=await readJson(request),reason=clean(data?.reason,80),details=clean(data?.details,2000),subject=clean(data?.subjectUserId,80),jobId=clean(data?.jobId,80);
   if(reason.length<3)return response({error:'Indica el motivo del reporte.',code:'AEC_REPORT_INVALID'},400);
   if(subject===session.id)return response({error:'Reporte no válido.',code:'AEC_REPORT_INVALID'},400);
@@ -269,6 +270,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/blocks'&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'block:'+session.id,30,3600);if(!limited.ok)return response({error:'Demasiadas operaciones de bloqueo. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const target=clean((await readJson(request))?.userId,80);if(!target||target===session.id)return response({error:'Bloqueo no válido.',code:'AEC_BLOCK_INVALID'},400);
   const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE id=?').bind(target).first();if(!exists)return response({error:'Usuario no encontrado.',code:'AEC_NOT_FOUND'},404);
   await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();return response({ok:true});
@@ -354,6 +356,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(messagesMatch&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'message:'+session.id,60,3600);if(!limited.ok)return response({error:'Has enviado demasiados mensajes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
   if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
   const other=session.id===job.customer_id?job.professional_id:job.customer_id;
