@@ -248,6 +248,12 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_privacy_requests(id,user_id,kind,status) VALUES(?,?,?,'REQUESTED')").bind(id,session.id,kind).run();
   await audit(env,session.id,'PRIVACY_'+kind+'_REQUESTED','privacy_request',id);return response({ok:true,request:{id,status:'REQUESTED'}},201);
  }
+ if(path==='/proposals'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare(`SELECT p.id,p.request_id,p.message,p.amount_minor,p.currency,p.status,p.created_at,r.title,r.location_label,r.status request_status
+   FROM aec_proposals p JOIN aec_requests r ON r.id=p.request_id WHERE p.professional_id=? ORDER BY p.created_at DESC LIMIT 50`).bind(session.id).all();
+  return response({proposals:rows.results||[]});
+ }
  if(path==='/jobs'&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const rows=await env.AYUDA_DB.prepare(`SELECT j.id,j.status,j.customer_id,j.professional_id,j.created_at,r.title,r.location_label,p.amount_minor,p.currency
