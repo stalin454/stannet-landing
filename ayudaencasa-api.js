@@ -287,6 +287,10 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const binds=[];if(postal){sql+=' AND pp.postal_prefix=?';binds.push(postal);}if(category){sql+=' AND EXISTS(SELECT 1 FROM aec_professional_services ps WHERE ps.professional_id=pp.user_id AND ps.category_id=?)';binds.push(category);}sql+=' ORDER BY rating DESC,review_count DESC LIMIT 50';
   const stmt=env.AYUDA_DB.prepare(sql),rows=await (binds.length?stmt.bind(...binds):stmt).all();return response({professionals:rows.results||[]});
  }
+ if(path==='/professional/services'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare('SELECT category_id FROM aec_professional_services WHERE professional_id=?').bind(session.id).all();return response({categoryIds:(rows.results||[]).map(x=>x.category_id)});
+ }
  if(path==='/professional/services'&&request.method==='PUT'){
   const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
   const serviceBody=await readJson(request),ids=Array.isArray(serviceBody?.categoryIds)?[...new Set(serviceBody.categoryIds)]:[];
