@@ -44,7 +44,7 @@ El servidor valida propiedad, rol y estado antes de cada transición. Al aceptar
 La recuperación genera tokens de un solo uso con caducidad de 30 minutos. El envío solo se intenta cuando existen `AEC_EMAIL_ENDPOINT` y `AEC_EMAIL_TOKEN`. Verificación de email obligatoria queda como requisito previo a producción; no se debe activar una falsa verificación.
 
 ## Migraciones
-Aplicar en orden `migrations/ayudaencasa/0001_core.sql` a `0008_message_reads.sql`.
+Aplicar en orden `migrations/ayudaencasa/0001_core.sql` a `0009_service_area.sql`.
 
 ## Antes de producción
 Crear D1 y binding `AYUDA_DB`; configurar proveedor transaccional; ejecutar migraciones en staging; pruebas end-to-end con cliente y profesional; revisar RGPD/LSSI y textos legales; definir backups/retención; observabilidad y alertas; benchmark de PBKDF2 y rate limiting; pruebas de abuso y autorización.
@@ -54,3 +54,6 @@ No afirmar “perfil verificado”, “pago seguro”, “identidad comprobada�
 
 ## Decisiones académicas
 La versión de graduación permanece noindex y fuera del lanzamiento comercial. Los pagos se sustituyen por una capa de entitlements preparada pero sin proveedor financiero. La mensajería usa persistencia y estado leído/no leído; realtime es una mejora posterior y no un requisito del flujo principal.
+
+## Matching geográfico
+La interfaz ofrece autocompletado de municipios/códigos postales del área inicial y los perfiles profesionales guardan un radio de servicio de 1–100 km. La capa está preparada para sustituir el catálogo inicial por una fuente geográfica nacional sin cambiar el contrato principal del marketplace.
