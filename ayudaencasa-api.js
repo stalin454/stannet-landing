@@ -441,6 +441,11 @@ export async function handleAyudaEnCasaApi(request,env,url){
   }
   return response({categories:fallbackCategories},200,{'Cache-Control':'public, max-age=300'});
  }
+ if(path.startsWith('/admin/')){
+  const session=await readSession(request,env);
+  if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  if(!['MODERATOR','ADMIN'].includes(session.role))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+ }
  if(request.method!=='GET'&&request.method!=='HEAD'){
   return response({error:'Función todavía no activada.',code:'AEC_NOT_READY'},503);
  }
