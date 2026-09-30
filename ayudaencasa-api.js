@@ -113,6 +113,11 @@ export async function handleAyudaEnCasaApi(request,env,url){
   await audit(env,session.id,'REQUEST_CREATED','request',id);
   return response({ok:true,request:{id,status:'DRAFT'}},201);
  }
+ if(path==='/requests'&&request.method==='GET'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare('SELECT id,category_id,title,description,location_label,postal_prefix,status,created_at FROM aec_requests WHERE customer_id=? ORDER BY created_at DESC LIMIT 50').bind(session.id).all();
+  return response({requests:rows.results||[]});
+ }
  const requestMatch=path.match(/^\/requests\/([^/]+)$/);
  if(requestMatch&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
