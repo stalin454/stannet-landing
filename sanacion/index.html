@@ -275,12 +275,14 @@
 <div class="footer-bottom"><p id="privacidad">Privacidad: los datos enviados voluntariamente por los canales de contacto se utilizan para responder consultas y gestionar citas. La información definitiva del responsable del tratamiento y los plazos de conservación se incorporará con los datos legales facilitados por el titular del negocio.</p><p id="aviso">Aviso legal: antes del lanzamiento comercial se incorporarán los datos identificativos del titular, las condiciones de contratación y la información correspondiente a reservas, cambios y cancelaciones.</p><p id="accesibilidad">Accesibilidad: la web está diseñada para navegación por teclado, dispositivos táctiles y preferencias de movimiento reducido.</p></div>
 </footer>
 <script>
-const menu=document.querySelector('.menu');
+const menu=document.querySelector('.nav .menu');
 const nav=document.querySelector('.nav nav');
-const closeMenu=()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'};
-menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'×':'☰'});
-document.querySelectorAll('.nav nav a').forEach((link)=>link.addEventListener('click',closeMenu));
-document.addEventListener('click',(event)=>{if(nav.classList.contains('open')&&!event.target.closest('.nav'))closeMenu()});
+const closeMenu=()=>{if(!nav||!menu)return;nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'};
+if(menu&&nav){
+  menu.addEventListener('click',(event)=>{event.preventDefault();event.stopPropagation();const open=!nav.classList.contains('open');nav.classList.toggle('open',open);menu.setAttribute('aria-expanded',open?'true':'false');menu.textContent=open?'×':'☰'});
+  nav.querySelectorAll('a').forEach((link)=>link.addEventListener('click',closeMenu));
+  document.addEventListener('click',(event)=>{if(nav.classList.contains('open')&&!event.target.closest('.nav'))closeMenu()});
+}
 
 const phone='34617717292';
 document.querySelectorAll('.service-contact').forEach((link)=>{
@@ -332,8 +334,13 @@ document.addEventListener('keydown',(event)=>{
   if(event.key==='Tab'&&lightbox.classList.contains('open')){event.preventDefault();closeButton.focus()}
 });
 
-const revealObserver=new IntersectionObserver((entries)=>entries.forEach((entry)=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.12});
-document.querySelectorAll('.reveal').forEach((element)=>revealObserver.observe(element));
+const revealElements=document.querySelectorAll('.reveal');
+if('IntersectionObserver' in window){
+  const revealObserver=new IntersectionObserver((entries)=>entries.forEach((entry)=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.08,rootMargin:'0px 0px 80px 0px'});
+  revealElements.forEach((element)=>revealObserver.observe(element));
+}else{
+  revealElements.forEach((element)=>element.classList.add('visible'));
+}
 
 const testimonialTrack=document.querySelector('#testimonialTrack');
 const testimonialPrev=document.querySelector('#testimonialPrev');
@@ -342,6 +349,5 @@ const slideTestimonials=(direction)=>{if(!testimonialTrack)return;const card=tes
 if(testimonialPrev) testimonialPrev.addEventListener('click',()=>slideTestimonials(-1));
 if(testimonialNext) testimonialNext.addEventListener('click',()=>slideTestimonials(1));
 </script>
-<script src="/stannet-global-nav.js?v=20261001-7"></script>
 </body>
 </html>
