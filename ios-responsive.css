@@ -473,7 +473,16 @@ footer{
 
 /* iPad landscape: collapse navigation before it starts overflowing. */
 @media (min-width:851px) and (max-width:1180px){
+  .site-header{
+    position:sticky;
+    top:0;
+    z-index:100000;
+    overflow:visible;
+  }
+
   .menu-toggle{
+    position:relative;
+    z-index:100002;
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -498,6 +507,7 @@ footer{
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
+    z-index:100001;
   }
 
   .site-nav.open,
