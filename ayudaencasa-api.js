@@ -171,6 +171,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   try{await env.AYUDA_DB.prepare("INSERT INTO aec_proposals(id,request_id,professional_id,message,amount_minor,status) VALUES(?,?,?,?,?,'PENDING')").bind(id,req.id,session.id,message,amount).run();}
   catch{return response({error:'Ya existe una propuesta para esta solicitud.',code:'AEC_PROPOSAL_EXISTS'},409);}
   await env.AYUDA_DB.prepare("UPDATE aec_requests SET status='PROPOSALS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(req.id).run();
+  await enqueueNotification(env,req.id,'CUSTOMER','PROPOSAL_RECEIVED',{requestId:req.id,proposalId:id});
   await audit(env,session.id,'PROPOSAL_CREATED','proposal',id);return response({ok:true,proposal:{id,status:'PENDING'}},201);
  }
  const listProposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
@@ -212,6 +213,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
    env.AYUDA_DB.prepare("UPDATE aec_requests SET status='ASSIGNED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(p.request_id),
    env.AYUDA_DB.prepare("INSERT INTO aec_jobs(id,request_id,accepted_proposal_id,customer_id,professional_id,status) VALUES(?,?,?,?,?,'AGREED')").bind(jobId,p.request_id,p.id,session.id,p.professional_id)
   ]);}catch{return response({error:'La propuesta ya fue procesada.',code:'AEC_ACCEPT_CONFLICT'},409);}
+  await enqueueNotification(env,p.professional_id,'USER','PROPOSAL_ACCEPTED',{requestId:p.request_id,jobId});
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
  if(path==='/admin/reports'&&request.method==='GET'){
@@ -239,6 +241,11 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const target=clean((await readJson(request))?.userId,80);if(!target||target===session.id)return response({error:'Bloqueo no válido.',code:'AEC_BLOCK_INVALID'},400);
   const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE id=?').bind(target).first();if(!exists)return response({error:'Usuario no encontrado.',code:'AEC_NOT_FOUND'},404);
   await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();return response({ok:true});
+ }
+ if(path==='/notifications'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT id,kind,payload_json,status,created_at,sent_at FROM aec_notification_outbox WHERE user_id=? ORDER BY created_at DESC LIMIT 50").bind(session.id).all();
+  return response({notifications:(rows.results||[]).map(n=>({...n,payload:safeJson(n.payload_json)}))});
  }
  if(path==='/privacy/requests'&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
@@ -374,6 +381,15 @@ export async function handleAyudaEnCasaApi(request,env,url){
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
 }
 
+function safeJson(value){try{return JSON.parse(value||'{}')}catch{return {}}}
+async function enqueueNotification(env,target,targetType,kind,payload){
+ try{
+  let userId=target;
+  if(targetType==='CUSTOMER'){const r=await env.AYUDA_DB.prepare('SELECT customer_id FROM aec_requests WHERE id=?').bind(target).first();userId=r?.customer_id;}
+  if(!userId)return;
+  await env.AYUDA_DB.prepare("INSERT INTO aec_notification_outbox(id,user_id,kind,payload_json,status) VALUES(?,?,?,?,'PENDING')").bind(crypto.randomUUID(),userId,kind,JSON.stringify(payload||{})).run();
+ }catch{}
+}
 async function sendAuthEmail(env,payload){
  if(!env.AEC_EMAIL_ENDPOINT||!env.AEC_EMAIL_TOKEN)return false;
  try{const r=await fetch(env.AEC_EMAIL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.AEC_EMAIL_TOKEN},body:JSON.stringify(payload)});return r.ok;}catch{return false;}
