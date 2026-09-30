@@ -177,6 +177,58 @@ export async function handleAyudaEnCasaApi(request,env,url){
   ]);
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
+ if(path==='/jobs'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare(`SELECT j.id,j.status,j.customer_id,j.professional_id,j.created_at,r.title,r.location_label,p.amount_minor,p.currency
+   FROM aec_jobs j JOIN aec_requests r ON r.id=j.request_id JOIN aec_proposals p ON p.id=j.accepted_proposal_id
+   WHERE j.customer_id=? OR j.professional_id=? ORDER BY j.created_at DESC LIMIT 50`).bind(session.id,session.id).all();
+  return response({jobs:rows.results||[]});
+ }
+ const jobStateMatch=path.match(/^\/jobs\/([^/]+)\/(start|complete)$/);
+ if(jobStateMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare('SELECT id,request_id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(jobStateMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const action=jobStateMatch[2];
+  if(action==='start'){
+   if(session.id!==job.professional_id||!['AGREED','SCHEDULED'].includes(job.status))return response({error:'El trabajo no puede iniciarse.',code:'AEC_BAD_STATE'},409);
+   await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_jobs SET status='IN_PROGRESS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.id),env.AYUDA_DB.prepare("UPDATE aec_requests SET status='IN_PROGRESS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.request_id)]);
+   await audit(env,session.id,'JOB_STARTED','job',job.id);return response({ok:true,status:'IN_PROGRESS'});
+  }
+  if(session.id!==job.customer_id||job.status!=='IN_PROGRESS')return response({error:'El trabajo no puede completarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_jobs SET status='COMPLETED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.id),env.AYUDA_DB.prepare("UPDATE aec_requests SET status='COMPLETED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.request_id)]);
+  await audit(env,session.id,'JOB_COMPLETED','job',job.id);return response({ok:true,status:'COMPLETED'});
+ }
+ const messagesMatch=path.match(/^\/jobs\/([^/]+)\/messages$/);
+ if(messagesMatch&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const conv=await ensureConversation(env,job);
+  const rows=await env.AYUDA_DB.prepare('SELECT id,sender_id,body,created_at FROM aec_messages WHERE conversation_id=? ORDER BY created_at ASC LIMIT 200').bind(conv).all();
+  return response({conversationId:conv,messages:rows.results||[]});
+ }
+ if(messagesMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(['COMPLETED','CANCELLED'].includes(job.status))return response({error:'La conversación está cerrada.',code:'AEC_CHAT_CLOSED'},409);
+  const body=clean((await readJson(request))?.body,3000);if(!body)return response({error:'Mensaje vacío.',code:'AEC_MESSAGE_INVALID'},400);
+  const conv=await ensureConversation(env,job),id=crypto.randomUUID();
+  await env.AYUDA_DB.prepare('INSERT INTO aec_messages(id,conversation_id,sender_id,body) VALUES(?,?,?,?)').bind(id,conv,session.id,body).run();
+  return response({ok:true,message:{id,body}},201);
+ }
+ const reviewMatch=path.match(/^\/jobs\/([^/]+)\/review$/);
+ if(reviewMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare("SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?").bind(reviewMatch[1]).first();
+  if(!job||job.status!=='COMPLETED'||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No se puede valorar este trabajo.',code:'AEC_REVIEW_FORBIDDEN'},403);
+  const data=await readJson(request),rating=Number(data?.rating),body=clean(data?.body,2000);
+  if(!Number.isInteger(rating)||rating<1||rating>5)return response({error:'Valoración no válida.',code:'AEC_REVIEW_INVALID'},400);
+  const subject=session.id===job.customer_id?job.professional_id:job.customer_id;
+  try{await env.AYUDA_DB.prepare('INSERT INTO aec_reviews(id,job_id,author_id,subject_id,rating,body) VALUES(?,?,?,?,?,?)').bind(crypto.randomUUID(),job.id,session.id,subject,rating,body).run();}catch{return response({error:'Ya has valorado este trabajo.',code:'AEC_REVIEW_EXISTS'},409);}
+  return response({ok:true},201);
+ }
  if(path==='/professional/profile'&&request.method==='GET'){
   const session=await readSession(request,env);
   if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
@@ -209,6 +261,13 @@ export async function handleAyudaEnCasaApi(request,env,url){
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
 }
 
+async function ensureConversation(env,job){
+ let row=await env.AYUDA_DB.prepare('SELECT id FROM aec_conversations WHERE job_id=?').bind(job.id).first();
+ if(row)return row.id;
+ const id=crypto.randomUUID();
+ try{await env.AYUDA_DB.batch([env.AYUDA_DB.prepare('INSERT INTO aec_conversations(id,job_id) VALUES(?,?)').bind(id,job.id),env.AYUDA_DB.prepare('INSERT INTO aec_conversation_participants(conversation_id,user_id) VALUES(?,?)').bind(id,job.customer_id),env.AYUDA_DB.prepare('INSERT INTO aec_conversation_participants(conversation_id,user_id) VALUES(?,?)').bind(id,job.professional_id)]);return id;}
+ catch{row=await env.AYUDA_DB.prepare('SELECT id FROM aec_conversations WHERE job_id=?').bind(job.id).first();if(row)return row.id;throw new Error('conversation_creation_failed');}
+}
 function clean(value,max){return String(value??'').trim().slice(0,max);}
 async function requireRole(request,env,role){
  const session=await readSession(request,env);
