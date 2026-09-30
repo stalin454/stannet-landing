@@ -58,6 +58,37 @@ export async function handleAyudaEnCasaApi(request,env,url){
  if(path==='/health'&&request.method==='GET'){
   return response({ok:true,service:'AyudaEnCasa',version:'v1',databaseConfigured:Boolean(env.AYUDA_DB)});
  }
+ if(path==='/auth/password/forgot'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({ok:true});
+  const limited=await rateLimit(request,env,'forgot',5,900);
+  if(!limited.ok) return response({ok:true});
+  const body=await readJson(request),email=String(body?.email||'').trim().toLowerCase();
+  const user=validEmail(email)?await env.AYUDA_DB.prepare("SELECT id FROM aec_users WHERE email=? AND status='ACTIVE' LIMIT 1").bind(email).first():null;
+  if(user){
+   const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'RESET_PASSWORD',?,datetime('now','+30 minutes'))").bind(id,user.id,hash).run();
+   // Delivery is intentionally delegated to a configured email provider.
+   if(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){
+    await fetch(env.AEC_EMAIL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.AEC_EMAIL_TOKEN},body:JSON.stringify({type:'password_reset',email,token:raw})}).catch(()=>{});
+   }
+  }
+  return response({ok:true,message:'Si la cuenta existe, recibirás instrucciones para recuperar el acceso.'});
+ }
+ if(path==='/auth/password/reset'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Servicio no disponible.',code:'AEC_DB_REQUIRED'},503);
+  const body=await readJson(request),token=String(body?.token||''),password=String(body?.password||'');
+  if(!token||!validPassword(password)) return response({error:'Solicitud no válida.',code:'AEC_RESET_INVALID'},400);
+  const tokenHash=await sha256(token);
+  const row=await env.AYUDA_DB.prepare("SELECT id,user_id FROM aec_auth_tokens WHERE purpose='RESET_PASSWORD' AND token_hash=? AND consumed_at IS NULL AND expires_at>CURRENT_TIMESTAMP LIMIT 1").bind(tokenHash).first();
+  if(!row) return response({error:'El enlace no es válido o ha caducado.',code:'AEC_RESET_EXPIRED'},400);
+  const salt=randomToken(16),iterations=310000,passwordHash=await derivePassword(password,salt,iterations);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_password_credentials SET password_hash=?,iterations=?,salt=?,changed_at=CURRENT_TIMESTAMP WHERE user_id=?").bind(passwordHash,iterations,salt,row.user_id),
+   env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE id=?").bind(row.id),
+   env.AYUDA_DB.prepare("UPDATE aec_sessions SET revoked_at=CURRENT_TIMESTAMP WHERE user_id=? AND revoked_at IS NULL").bind(row.user_id)
+  ]);
+  return response({ok:true});
+ }
  if(path==='/me'&&request.method==='GET'){
   const session=await readSession(request,env);
   if(!session) return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
