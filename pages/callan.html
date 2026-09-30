@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Aula privada de ingles con IA basada en el metodo Callan, desde nivel inicial hasta avanzado.">
 <title>Callan English Coach | StanNet.Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,6 +29,7 @@
 <script>
 document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do you live in Spain?','Yes, I live in Spain.'],['Do you live in a city?','Yes, I live in a city.'],['Is your city big?','Yes, my city is big.']];let callanMemoryIndex=0;const prompt=document.querySelector('#callanMemoryPrompt');const answer=document.querySelector('#callanMemoryAnswer');const result=document.querySelector('#callanMemoryResult');const normalize=(value)=>value.toLowerCase().replace(/[.,!?]/g,'').replace(/\s+/g,' ').trim();const render=()=>{prompt.textContent=callanMemoryItems[callanMemoryIndex][0];answer.value='';result.textContent='Primero escucha el audio original. Después intenta escribir la respuesta sin mirar.'};document.querySelector('#callanMemoryCheck').addEventListener('click',()=>{const expected=callanMemoryItems[callanMemoryIndex][1];if(normalize(answer.value)===normalize(expected)){result.innerHTML='<strong>Good answer.</strong> La estructura es correcta. Escúchala una vez más y repítela en voz alta.'}else result.innerHTML='<strong>Let us try again.</strong> Escribe una frase completa. Puedes mostrar el modelo si necesitas ayuda.'});document.querySelector('#callanMemoryReveal').addEventListener('click',()=>{result.textContent='Modelo: '+callanMemoryItems[callanMemoryIndex][1]+' Reescríbelo y después dilo en voz alta.';answer.focus()});document.querySelector('#callanMemoryListen').addEventListener('click',()=>{if(!('speechSynthesis' in window)){result.textContent='La escucha de modelo no está disponible en este navegador.';return}speechSynthesis.cancel();const speech=new SpeechSynthesisUtterance(callanMemoryItems[callanMemoryIndex][1]);speech.lang='en-GB';speech.rate=1.05;speechSynthesis.speak(speech);result.textContent='Escucha el modelo, escríbelo y repítelo.'});document.querySelector('#lessonSelect').addEventListener('change',()=>{callanMemoryIndex=(callanMemoryIndex+1)%callanMemoryItems.length;render()})});
 </script>
+<link rel="stylesheet" href="/ios-responsive.css">
 </head>
 <body id="top">
 <header class="site-header">
