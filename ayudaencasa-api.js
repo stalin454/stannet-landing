@@ -13,6 +13,44 @@ const fallbackCategories=[
 export async function handleAyudaEnCasaApi(request,env,url){
  if(!url.pathname.startsWith(PREFIX)) return null;
  const path=url.pathname.slice(PREFIX.length)||'/';
+ if(path==='/auth/register'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const body=await readJson(request);
+  if(!body) return response({error:'Solicitud no válida.',code:'AEC_BAD_JSON'},400);
+  const email=String(body.email||'').trim().toLowerCase();
+  const password=String(body.password||'');
+  const role=String(body.role||'').toUpperCase();
+  if(!validEmail(email)) return response({error:'Correo no válido.',code:'AEC_INVALID_EMAIL'},400);
+  if(!validPassword(password)) return response({error:'La contraseña debe tener al menos 12 caracteres.',code:'AEC_WEAK_PASSWORD'},400);
+  if(!['CUSTOMER','PROFESSIONAL'].includes(role)) return response({error:'Tipo de cuenta no válido.',code:'AEC_INVALID_ROLE'},400);
+  const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE email=? LIMIT 1').bind(email).first();
+  if(exists) return response({error:'No se pudo crear la cuenta con esos datos.',code:'AEC_REGISTER_FAILED'},409);
+  const userId=crypto.randomUUID();
+  const salt=randomToken(16);
+  const iterations=310000;
+  const passwordHash=await derivePassword(password,salt,iterations);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("INSERT INTO aec_users(id,email,role,status) VALUES(?,?,?,'ACTIVE')").bind(userId,email,role),
+   env.AYUDA_DB.prepare('INSERT INTO aec_password_credentials(user_id,password_hash,algorithm,iterations,salt) VALUES(?,?,?,?,?)').bind(userId,passwordHash,'PBKDF2-SHA256',iterations,salt)
+  ]);
+  const session=await createSession(env,userId);
+  return response({ok:true,user:{id:userId,email,role}},201,{'Set-Cookie':session.cookie});
+ }
+ if(path==='/auth/login'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const body=await readJson(request);
+  const email=String(body?.email||'').trim().toLowerCase();
+  const password=String(body?.password||'');
+  if(!validEmail(email)||!password) return response({error:'Credenciales no válidas.',code:'AEC_INVALID_CREDENTIALS'},401);
+  const row=await env.AYUDA_DB.prepare(`SELECT u.id,u.email,u.role,u.status,c.password_hash,c.iterations,c.salt
+   FROM aec_users u JOIN aec_password_credentials c ON c.user_id=u.id WHERE u.email=? LIMIT 1`).bind(email).first();
+  const candidate=row?await derivePassword(password,row.salt,row.iterations):await derivePassword(password,'00000000000000000000000000000000',310000);
+  if(!row||row.status!=='ACTIVE'||!constantTimeEqual(candidate,row.password_hash||candidate)){
+   return response({error:'Credenciales no válidas.',code:'AEC_INVALID_CREDENTIALS'},401);
+  }
+  const session=await createSession(env,row.id);
+  return response({ok:true,user:{id:row.id,email:row.email,role:row.role}},200,{'Set-Cookie':session.cookie});
+ }
  if(path==='/health'&&request.method==='GET'){
   return response({ok:true,service:'AyudaEnCasa',version:'v1',databaseConfigured:Boolean(env.AYUDA_DB)});
  }
@@ -42,6 +80,31 @@ export async function handleAyudaEnCasaApi(request,env,url){
   return response({error:'Función todavía no activada.',code:'AEC_NOT_READY'},503);
  }
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
+}
+
+async function readJson(request){
+ try{return await request.json();}catch{return null;}
+}
+function validEmail(v){return v.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+function validPassword(v){return v.length>=12&&v.length<=128;}
+function randomToken(bytes=32){
+ const data=crypto.getRandomValues(new Uint8Array(bytes));
+ return [...data].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function derivePassword(password,saltHex,iterations){
+ const salt=new Uint8Array((saltHex.match(/.{2}/g)||[]).map(x=>parseInt(x,16)));
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations},key,256);
+ return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function constantTimeEqual(a,b){
+ if(a.length!==b.length)return false;
+ let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;
+}
+async function createSession(env,userId){
+ const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
+ await env.AYUDA_DB.prepare("INSERT INTO aec_sessions(id,user_id,token_hash,expires_at) VALUES(?,?,?,datetime('now','+7 days'))").bind(id,userId,hash).run();
+ return {cookie:`aec_session=${encodeURIComponent(raw)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`};
 }
 
 async function readSession(request,env){
