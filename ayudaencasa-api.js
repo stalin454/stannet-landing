@@ -229,6 +229,21 @@ export async function handleAyudaEnCasaApi(request,env,url){
   await enqueueNotification(env,p.professional_id,'USER','PROPOSAL_ACCEPTED',{requestId:p.request_id,jobId});
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
+ if(path==='/admin/privacy-requests'&&request.method==='GET'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.user_id,u.email,p.request_type,p.status,p.created_at,p.updated_at FROM aec_privacy_requests p JOIN aec_users u ON u.id=p.user_id WHERE p.status IN ('OPEN','IN_PROGRESS') ORDER BY p.created_at ASC LIMIT 100").all();
+  return response({requests:rows.results||[]});
+ }
+ const adminPrivacyMatch=path.match(/^\/admin\/privacy-requests\/([^/]+)$/);
+ if(adminPrivacyMatch&&request.method==='PATCH'){
+  const session=await requireAnyRole(request,env,['ADMIN']);if(session instanceof Response)return session;
+  const body=await readJson(request),status=String(body?.status||'').toUpperCase();
+  if(!['IN_PROGRESS','COMPLETED','REJECTED'].includes(status))return response({error:'Estado no válido.',code:'AEC_PRIVACY_STATE_INVALID'},400);
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_privacy_requests WHERE id=?').bind(adminPrivacyMatch[1]).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  await env.AYUDA_DB.prepare('UPDATE aec_privacy_requests SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,item.id).run();
+  await audit(env,session.id,'PRIVACY_REQUEST_UPDATED','privacy_request',item.id);return response({ok:true,status});
+ }
  if(path==='/admin/reports'&&request.method==='GET'){
   const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
   const rows=await env.AYUDA_DB.prepare("SELECT id,reporter_id,subject_user_id,job_id,reason,details,status,created_at,updated_at FROM aec_reports WHERE status IN ('OPEN','REVIEWING') ORDER BY created_at ASC LIMIT 100").all();return response({reports:rows.results||[]});
