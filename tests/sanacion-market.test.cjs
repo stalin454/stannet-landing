@@ -72,3 +72,8 @@ assert.match(html, /FORTALECIMIENTOS Y RECURSOS/);
 assert.match(html, /id="testimonialTrack"/);
 assert.match(html, /testimonialPrev/);
 assert.match(html, /testimonialNext/);
+
+assert.match(html, /id="profesionales"/);
+assert.match(html, /QUIÉN TE ACOMPAÑA/);
+assert.match(html, /DIRECTORIO DEL EQUIPO/);
+assert.match(html, /CERTIFICACIONES/);
