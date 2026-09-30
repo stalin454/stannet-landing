@@ -33,3 +33,7 @@ La base funcional está implementada en la rama `feature/ayuda-en-casa-foundatio
 
 ## Cierre del código académico
 El alcance académico se congela cuando CI está verde. El único paso externo imprescindible para una demo persistente es provisionar la D1 de staging, enlazarla como `AYUDA_DB` y ejecutar las migraciones 0001–0009. El lanzamiento público, pagos y requisitos comerciales se mantienen fuera de este hito.
+
+
+## Cierre y lanzamiento
+La lista verificable de puertas de seguridad, staging, E2E, RGPD y despliegue está en `release-readiness.md`. El código no debe confundirse con un lanzamiento comercial: infraestructura, correo, datos legales y pruebas reales deben quedar verificados antes de producción.
