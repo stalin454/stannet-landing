@@ -59,3 +59,10 @@ assert.match(html, /FORTALECIMIENTOS/);
 assert.match(html, /NIVELES I · II · III/);
 assert.match(html, /metodoyuenjosepalomo\.com\/cursos-metodo-yuen/);
 assert.match(html, /Experiencias reales de clientes/);
+
+assert.match(html, /id="recursos"/);
+assert.match(html, /APRENDER ANTES DE VIVIRLO/);
+assert.match(html, /id="testimonios"/);
+assert.match(html, /EXPERIENCIAS DE CLIENTES/);
+assert.match(html, /Pendiente de autorización del cliente/);
+assert.match(html, /metodoyuenjosepalomo\.com/);
