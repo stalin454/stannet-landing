@@ -676,3 +676,98 @@ footer{
     font-size:28px;
   }
 }
+
+
+/* iPadOS Safari: force tablet navigation even on 12.9-inch iPad Pro landscape (1366 CSS px). */
+@supports (-webkit-touch-callout: none){
+  @media (min-width:768px) and (max-width:1366px){
+    .site-header{
+      position:sticky !important;
+      top:0;
+      z-index:100000 !important;
+      overflow:visible !important;
+    }
+
+    .menu-toggle{
+      display:inline-flex !important;
+      align-items:center;
+      justify-content:center;
+      min-width:48px;
+      min-height:48px;
+      font-size:28px;
+      position:relative;
+      z-index:100002;
+    }
+
+    .site-nav,
+    .home-nav{
+      display:none !important;
+      position:absolute !important;
+      top:100% !important;
+      left:0 !important;
+      right:0 !important;
+      width:100% !important;
+      flex-direction:column !important;
+      align-items:stretch !important;
+      gap:4px !important;
+      padding:16px max(24px,var(--safe-right)) max(28px,var(--safe-bottom)) max(24px,var(--safe-left)) !important;
+      background:#0b0c1e !important;
+      border-bottom:1px solid var(--line) !important;
+      max-height:calc(100dvh - 76px - var(--safe-top)) !important;
+      overflow-y:auto !important;
+      overflow-x:hidden !important;
+      -webkit-overflow-scrolling:touch;
+      z-index:100001 !important;
+    }
+
+    .site-nav.open,
+    .home-nav.open{
+      display:flex !important;
+    }
+
+    .nav-group,
+    .site-nav > a,
+    .nav-trigger{
+      width:100% !important;
+    }
+
+    .site-nav > a,
+    .nav-trigger{
+      min-height:48px !important;
+      display:flex !important;
+      align-items:center !important;
+      font-size:16px !important;
+      text-align:left !important;
+      padding:12px 0 !important;
+    }
+
+    .nav-dropdown{
+      position:static !important;
+      display:none !important;
+      width:100% !important;
+      min-width:0 !important;
+      margin:4px 0 10px !important;
+      padding:6px 0 6px 14px !important;
+      border:0 !important;
+      border-left:1px solid var(--line) !important;
+      border-radius:0 !important;
+      box-shadow:none !important;
+      background:transparent !important;
+    }
+
+    .nav-group.open > .nav-dropdown{
+      display:grid !important;
+    }
+
+    .nav-dropdown a{
+      font-size:15px !important;
+      line-height:1.45 !important;
+      min-height:46px !important;
+      padding:11px 10px !important;
+    }
+
+    body{
+      font-size:18px !important;
+    }
+  }
+}
