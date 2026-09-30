@@ -1,0 +1,451 @@
+/* ============================================================
+   STANNET — GLOBAL RESPONSIVE / iOS & MOBILE LAYER
+   Applied site-wide. Keep this file loaded after page CSS.
+   ============================================================ */
+
+:root{
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  overflow-x:hidden;
+}
+
+body{
+  width:100%;
+  min-width:0;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding-left:var(--safe-left);
+  padding-right:var(--safe-right);
+}
+
+*,
+*::before,
+*::after{
+  min-width:0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg,
+iframe{
+  max-width:100%;
+}
+
+img,
+video{
+  height:auto;
+}
+
+iframe{
+  width:100%;
+  border:0;
+}
+
+pre,
+code,
+samp{
+  max-width:100%;
+}
+
+pre{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+table{
+  max-width:100%;
+}
+
+input,
+select,
+textarea,
+button{
+  max-width:100%;
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+[role="button"]{
+  touch-action:manipulation;
+}
+
+a,
+button,
+summary,
+input[type="button"],
+input[type="submit"],
+input[type="reset"]{
+  -webkit-tap-highlight-color:rgba(53,215,232,.18);
+}
+
+.site-header{
+  padding-top:var(--safe-top);
+  min-height:76px;
+  height:auto;
+}
+
+footer{
+  padding-bottom:max(28px,var(--safe-bottom));
+}
+
+/* Dynamic viewport units: Safari address/tab bars no longer crop full-screen sections. */
+@supports (height:100dvh){
+  .hero,
+  .editorial-hero,
+  .page-hero,
+  .pa-body,
+  main{
+    --stannet-viewport-height:100dvh;
+  }
+
+  .editorial-hero{
+    min-height:calc(100dvh - 76px);
+  }
+}
+
+/* Prevent common fixed-width content from forcing horizontal scroll. */
+.section,
+.page-hero,
+.pa-container,
+.pa-header,
+.academy-hero,
+.content-grid,
+.project-grid,
+.case-grid,
+.form-grid,
+.editorial-intro,
+.editorial-feature,
+.editorial-contact,
+.editorial-statement{
+  width:100%;
+  max-width:100%;
+}
+
+.hero-copy,
+.section-heading > p,
+.feature-copy,
+.info-card,
+.project-card,
+.case-study{
+  overflow-wrap:anywhere;
+}
+
+@media (max-width:1024px){
+  .site-header{
+    padding-left:max(18px,var(--safe-left));
+    padding-right:max(18px,var(--safe-right));
+  }
+
+  .section,
+  .page-hero,
+  .academy-hero,
+  .editorial-hero-copy,
+  .editorial-intro,
+  .editorial-feature,
+  .editorial-contact,
+  .editorial-statement{
+    padding-left:max(22px,var(--safe-left));
+    padding-right:max(22px,var(--safe-right));
+  }
+
+  .project-grid,
+  .content-grid,
+  .case-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .editorial-hero{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .editorial-hero-art{
+    min-height:380px;
+  }
+
+  .editorial-feature,
+  .editorial-feature.reverse{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .editorial-feature.reverse .feature-copy,
+  .editorial-feature.reverse .feature-visual{
+    order:initial;
+  }
+}
+
+@media (max-width:850px){
+  .site-header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+  }
+
+  .menu-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:44px;
+    min-height:44px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+
+  .site-nav,
+  .home-nav{
+    top:100%;
+    max-height:calc(100dvh - 76px - var(--safe-top));
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:max(24px,var(--safe-bottom));
+  }
+
+  .site-nav a,
+  .nav-trigger{
+    min-height:44px;
+    display:flex;
+    align-items:center;
+  }
+
+  .nav-dropdown{
+    max-width:100%;
+  }
+
+  .hero,
+  .home-hero{
+    min-height:auto;
+    padding-top:clamp(64px,14vw,92px);
+    padding-bottom:clamp(72px,16vw,110px);
+  }
+
+  h1,
+  .page-hero h1,
+  .academy-hero .pa-main-title,
+  .editorial-hero h1,
+  .home-hero-title{
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+
+  .hero-actions,
+  .academy-actions,
+  .feature-links,
+  .case-actions{
+    flex-wrap:wrap;
+  }
+
+  .button,
+  .pa-btn,
+  .feature-links a,
+  .editorial-actions a{
+    min-height:44px;
+  }
+
+  .section-heading,
+  .contact,
+  .editorial-intro{
+    gap:24px;
+  }
+
+  .project-grid,
+  .content-grid,
+  .case-grid,
+  .form-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .project-card,
+  .case-study{
+    min-height:auto;
+  }
+
+  .editorial-hero-art{
+    min-height:300px;
+  }
+
+  table{
+    display:block;
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Avoid iOS automatic zoom when focusing controls. */
+  input,
+  select,
+  textarea{
+    font-size:16px !important;
+  }
+
+  textarea{
+    min-height:120px;
+  }
+}
+
+@media (max-width:520px){
+  .site-header{
+    padding-left:max(14px,var(--safe-left));
+    padding-right:max(14px,var(--safe-right));
+  }
+
+  .brand{
+    max-width:calc(100vw - 86px - var(--safe-left) - var(--safe-right));
+  }
+
+  .brand-lockup img,
+  .brand-mark{
+    max-width:42px;
+    height:auto;
+  }
+
+  .section,
+  .page-hero,
+  .academy-hero,
+  .editorial-hero-copy,
+  .editorial-intro,
+  .editorial-feature,
+  .editorial-contact,
+  .editorial-statement{
+    padding-left:max(16px,var(--safe-left));
+    padding-right:max(16px,var(--safe-right));
+  }
+
+  h1,
+  .page-hero h1,
+  .academy-hero .pa-main-title,
+  .editorial-hero h1,
+  .home-hero-title{
+    font-size:clamp(38px,12vw,58px);
+    line-height:1;
+    letter-spacing:-.045em;
+  }
+
+  h2,
+  .section-heading h2,
+  .contact h2{
+    font-size:clamp(30px,9vw,44px);
+  }
+
+  .hero-copy,
+  .editorial-hero-copy > p:not(.eyebrow){
+    font-size:16px;
+    line-height:1.65;
+  }
+
+  .hero-actions,
+  .academy-actions,
+  .editorial-actions{
+    width:100%;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .hero-actions > *,
+  .academy-actions > *,
+  .editorial-actions > *{
+    width:100%;
+    justify-content:center;
+  }
+
+  .feature-links{
+    align-items:stretch;
+  }
+
+  .feature-links a{
+    width:100%;
+  }
+
+  .pa-body{
+    padding:1rem;
+  }
+
+  .pa-tracks-grid,
+  .pa-languages-grid,
+  .pa-builds-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .pa-card,
+  .pa-lang-card,
+  .pa-build-card,
+  .info-card,
+  .music-form{
+    padding:18px;
+  }
+
+  .manifesto-meta,
+  footer{
+    width:100%;
+  }
+}
+
+@media (max-width:380px){
+  .section,
+  .page-hero,
+  .academy-hero,
+  .editorial-hero-copy,
+  .editorial-intro,
+  .editorial-feature,
+  .editorial-contact,
+  .editorial-statement{
+    padding-left:max(13px,var(--safe-left));
+    padding-right:max(13px,var(--safe-right));
+  }
+
+  h1,
+  .page-hero h1,
+  .academy-hero .pa-main-title,
+  .editorial-hero h1,
+  .home-hero-title{
+    font-size:clamp(34px,11vw,46px);
+  }
+}
+
+/* Landscape iPhone: preserve content while browser chrome reduces vertical space. */
+@media (max-height:520px) and (orientation:landscape){
+  .site-nav,
+  .home-nav{
+    max-height:calc(100dvh - 60px);
+  }
+
+  .hero,
+  .home-hero,
+  .page-hero,
+  .editorial-hero-copy{
+    padding-top:40px;
+    padding-bottom:40px;
+  }
+
+  .editorial-hero-art{
+    min-height:240px;
+  }
+}
+
+/* Respect reduced-motion preference on iOS/macOS. */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,
+  *::before,
+  *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
