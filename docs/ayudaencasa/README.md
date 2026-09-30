@@ -24,7 +24,12 @@ Una función solo se considera cerrada cuando contempla autorización, validaci�
 - `security.md`: amenazas y controles.
 - `deployment.md`: montaje de staging y futura producción.
 - `roadmap.md`: estado académico y evolución comercial.
+- `e2e-defense-checklist.md`: prueba completa para staging.
+- `defense-guide.md`: guion técnico para la exposición.
 - `migrations/ayudaencasa/`: modelo de datos versionado.
 
 ## Estado académico
 La base funcional está implementada en la rama `feature/ayuda-en-casa-foundation`. Para una demostración con persistencia real se requiere crear/configurar el D1 de staging `AYUDA_DB` y aplicar las migraciones. No se almacena un database_id ficticio en el repositorio.
+
+## Cierre del código académico
+El alcance académico se congela cuando CI está verde. El único paso externo imprescindible para una demo persistente es provisionar la D1 de staging, enlazarla como `AYUDA_DB` y ejecutar las migraciones 0001–0008. El lanzamiento público, pagos y requisitos comerciales se mantienen fuera de este hito.
