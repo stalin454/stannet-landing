@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ruta Dinamarca de StanNet: bitácora personal de preparación, idioma, estudios, trabajo y llegada a Dinamarca.">
+<title>Ruta Dinamarca | StanNet.Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+:root{--dk-red:#c8102e;--dk-red-soft:#f7d9dd;--dk-ice:#c8f3f6;--dk-blue:#0d2733;--dk-panel:#0d111c}
+*{box-sizing:border-box}
+body{overflow-x:hidden}
+.route-hero{position:relative;min-height:76vh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);align-items:center;gap:50px;padding:clamp(72px,9vw,130px) clamp(22px,7vw,110px);border-bottom:1px solid var(--line);background:radial-gradient(circle at 78% 22%,rgba(200,16,46,.22),transparent 26%),radial-gradient(circle at 15% 80%,rgba(89,232,255,.12),transparent 28%),#070b11}
+.route-kicker{font:600 11px Orbitron,sans-serif;letter-spacing:.18em;color:var(--cyan)}
+.route-hero h1{margin:18px 0;font:600 clamp(54px,8vw,112px)/.91 Orbitron,sans-serif;letter-spacing:-.075em}
+.route-hero h1 em{display:block;color:#fff;font-style:normal}.route-hero h1 span{color:var(--dk-red)}
+.route-lead{max-width:670px;color:#b9cbd3;font:400 clamp(17px,1.7vw,22px)/1.7 Inter,sans-serif}
+.route-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.route-actions a{display:inline-flex;min-height:48px;align-items:center;padding:0 18px;border:1px solid rgba(255,255,255,.16);border-radius:999px;font:600 11px Orbitron,sans-serif}.route-actions .primary{background:var(--dk-red);border-color:var(--dk-red);color:white}
+.dk-card{position:relative;min-height:440px;padding:34px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(155deg,rgba(255,255,255,.07),rgba(255,255,255,.02));overflow:hidden}
+.dk-flag{width:180px;aspect-ratio:28/21;background:#c8102e;position:absolute;right:28px;top:32px;box-shadow:0 24px 60px rgba(0,0,0,.35)}.dk-flag:before,.dk-flag:after{content:"";position:absolute;background:#fff}.dk-flag:before{left:54px;top:0;bottom:0;width:18px}.dk-flag:after{left:0;right:0;top:78px;height:18px}
+.dk-card small{font:600 10px Orbitron,sans-serif;color:var(--cyan);letter-spacing:.14em}.dk-card strong{display:block;max-width:300px;margin-top:240px;font:600 clamp(27px,3vw,42px)/1.05 Orbitron,sans-serif}.dk-card p{color:#aebfc7;line-height:1.7}
+.route-section{padding:clamp(70px,8vw,110px) clamp(22px,7vw,110px);border-bottom:1px solid var(--line)}
+.route-heading{display:grid;grid-template-columns:180px 1fr;gap:30px;max-width:1150px;margin:0 auto 48px}.route-heading span{font:600 10px Orbitron,sans-serif;letter-spacing:.16em;color:var(--cyan)}.route-heading h2{margin:0;font:600 clamp(36px,5vw,66px)/1 Orbitron,sans-serif;letter-spacing:-.05em}.route-heading p{max-width:760px;color:#aebfc7;line-height:1.75}
+.route-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;max-width:1150px;margin:auto}.route-panel{min-width:0;padding:26px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.025)}.route-panel b{display:block;font:600 10px Orbitron,sans-serif;color:var(--dk-red);letter-spacing:.12em}.route-panel h3{font:600 24px/1.15 Orbitron,sans-serif;margin:16px 0 10px}.route-panel p,.route-panel li{color:#aebfc7;font:400 14px/1.7 Inter,sans-serif}.route-panel ul{padding-left:18px}
+.route-panel a{display:inline-flex;margin-top:14px;color:var(--cyan);font:600 11px Orbitron,sans-serif}
+.timeline{max-width:950px;margin:auto;display:grid;gap:0}.stage-row{display:grid;grid-template-columns:110px 1fr;gap:24px;padding:26px 0;border-top:1px solid rgba(255,255,255,.12)}.stage-row:last-child{border-bottom:1px solid rgba(255,255,255,.12)}.stage-row span{font:600 10px Orbitron,sans-serif;color:var(--dk-red)}.stage-row h3{margin:0 0 8px;font:600 21px Orbitron,sans-serif}.stage-row p{margin:0;color:#aebfc7;line-height:1.7}
+.city-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:1150px;margin:auto}.city{padding:22px;border:1px solid rgba(255,255,255,.1);min-height:150px}.city strong{display:block;font:600 18px Orbitron,sans-serif}.city span{display:block;margin-top:10px;color:#8ea7b2;font-size:13px}
+.academy-callout{max-width:1150px;margin:auto;padding:clamp(28px,5vw,55px);display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px;background:linear-gradient(120deg,rgba(200,16,46,.19),rgba(89,232,255,.07));border:1px solid rgba(200,16,46,.38)}.academy-callout h2{margin:0 0 12px;font:600 clamp(30px,4vw,52px)/1 Orbitron,sans-serif}.academy-callout p{max-width:700px;margin:0;color:#b5c5cc;line-height:1.7}.academy-callout a{display:inline-flex;min-height:50px;align-items:center;padding:0 20px;background:var(--dk-red);color:white;font:600 11px Orbitron,sans-serif;white-space:nowrap}
+.blog-grid{max-width:1150px;margin:auto;display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.post{padding:32px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.025)}.post time{font:600 10px Orbitron,sans-serif;color:var(--cyan)}.post h3{font:600 27px/1.15 Orbitron,sans-serif;margin:15px 0}.post p{color:#aebfc7;line-height:1.75}.post .status{display:inline-flex;margin-top:10px;padding:7px 10px;border:1px solid rgba(200,16,46,.45);color:#ff8094;font:600 9px Orbitron,sans-serif}
+@media(max-width:980px){.route-hero{grid-template-columns:1fr;min-height:auto}.dk-card{min-height:360px}.dk-card strong{margin-top:190px}.route-grid{grid-template-columns:1fr 1fr}.city-grid{grid-template-columns:1fr 1fr}.blog-grid{grid-template-columns:1fr}.route-heading{grid-template-columns:1fr}.academy-callout{grid-template-columns:1fr}}
+@media(max-width:640px){.route-hero,.route-section{padding-left:18px;padding-right:18px}.route-hero h1{font-size:clamp(48px,15vw,72px)}.dk-card{min-height:320px}.dk-flag{width:135px}.dk-flag:before{left:40px;width:14px}.dk-flag:after{top:58px;height:14px}.dk-card strong{margin-top:165px}.route-grid,.city-grid{grid-template-columns:1fr}.stage-row{grid-template-columns:1fr;gap:8px}.academy-callout a{white-space:normal;text-align:center;justify-content:center}}
+</style>
+<link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
+</head>
+<body>
+<main>
+<section class="route-hero">
+<div>
+<p class="route-kicker">STANNET / NUEVA RUTA</p>
+<h1>RUTA <em><span>DINA</span>MARCA</em></h1>
+<p class="route-lead">Una bitácora real para documentar el camino hacia Dinamarca: idioma, estudios, trabajo, ciudades, preparación y decisiones. No será una guía escrita desde fuera; será el registro de una ruta que empieza ahora.</p>
+<div class="route-actions"><a class="primary" href="#bitacora">Empezar la ruta →</a><a href="danish.html">Entrar a Danish Academy ↗</a></div>
+</div>
+<aside class="dk-card" aria-label="Objetivo Ruta Dinamarca">
+<div class="dk-flag" aria-hidden="true"></div>
+<small>DESTINO / DK</small>
+<strong>Preparar. Aprender. Llegar.</strong>
+<p>Una ruta por etapas, con objetivos medibles y recursos que irán creciendo dentro de StanNet.</p>
+</aside>
+</section>
+
+<section class="route-section" id="bitacora">
+<div class="route-heading"><span>01 / BITÁCORA</span><div><h2>El viaje empieza antes del avión.</h2><p>Aquí quedarán documentadas las decisiones, avances, errores, trámites, estudios, aprendizaje del idioma y todo lo que vaya acercando la salida hacia Dinamarca.</p></div></div>
+<div class="blog-grid">
+<article class="post"><time>CAPÍTULO 00 · INICIO</time><h3>He decidido construir mi Ruta Dinamarca.</h3><p>El primer objetivo es convertir una idea grande en un proceso visible: terminar la formación actual, reforzar inglés, comenzar danés, investigar opciones académicas y laborales y preparar una llegada con alternativas reales.</p><span class="status">RUTA EN CONSTRUCCIÓN</span></article>
+<article class="post"><time>PRÓXIMO CAPÍTULO</time><h3>Mapa de preparación.</h3><p>El siguiente paso será transformar los objetivos en una hoja de ruta mensual con hitos de idioma, estudios, documentación, empleo y ahorro.</p><span class="status">PENDIENTE</span></article>
+</div>
+</section>
+
+<section class="route-section" id="plan">
+<div class="route-heading"><span>02 / PLAN</span><div><h2>Una ruta dividida en etapas.</h2><p>Cada etapa tendrá tareas, recursos y decisiones concretas. El blog irá registrando el progreso en lugar de mostrar una lista estática.</p></div></div>
+<div class="timeline">
+<div class="stage-row"><span>ETAPA 01</span><div><h3>Preparación</h3><p>Formación, inglés, primeras bases de danés, documentación y presupuesto.</p></div></div>
+<div class="stage-row"><span>ETAPA 02</span><div><h3>Exploración</h3><p>Comparar ciudades, estudios, vivienda, transporte y oportunidades profesionales.</p></div></div>
+<div class="stage-row"><span>ETAPA 03</span><div><h3>Aplicaciones</h3><p>Preparar CV, candidaturas, admisiones y contactos antes de la salida.</p></div></div>
+<div class="stage-row"><span>ETAPA 04</span><div><h3>Llegada</h3><p>Convertir la investigación previa en una checklist práctica de los primeros días.</p></div></div>
+<div class="stage-row"><span>ETAPA 05</span><div><h3>Construcción</h3><p>Documentar estudios, empleo, adaptación, idioma y evolución profesional desde Dinamarca.</p></div></div>
+</div>
+</section>
+
+<section class="route-section" id="areas">
+<div class="route-heading"><span>03 / ÁREAS</span><div><h2>Todo lo que hay que preparar.</h2></div></div>
+<div class="route-grid">
+<article class="route-panel"><b>IDIOMA</b><h3>Danés + inglés</h3><p>Aprendizaje práctico para vida diaria, estudios y trabajo.</p><a href="danish.html">Abrir Danish Academy →</a></article>
+<article class="route-panel"><b>ESTUDIOS</b><h3>Continuidad académica</h3><p>Registrar programas, requisitos, alternativas y decisiones académicas.</p></article>
+<article class="route-panel"><b>TRABAJO</b><h3>Entrada profesional</h3><p>CV, búsqueda laboral, tecnología, logística y transición hacia IT/ciberseguridad.</p></article>
+<article class="route-panel"><b>VIVIENDA</b><h3>Dónde vivir</h3><p>Comparar ciudades, barrios, transporte y coste de instalación.</p></article>
+<article class="route-panel"><b>DOCUMENTOS</b><h3>Llegar preparado</h3><p>Checklist de documentos y procesos que iremos verificando con fuentes oficiales.</p></article>
+<article class="route-panel"><b>PRESUPUESTO</b><h3>Plan financiero</h3><p>Ahorro previo, llegada, alojamiento y margen de seguridad.</p></article>
+</div>
+</section>
+
+<section class="route-section" id="ciudades">
+<div class="route-heading"><span>04 / CIUDADES</span><div><h2>Ciudades bajo el radar.</h2><p>La lista irá cambiando a medida que comparemos estudios, empleo, vivienda y calidad de vida.</p></div></div>
+<div class="city-grid">
+<div class="city"><strong>Fredericia</strong><span>Base posible · Jutlandia</span></div>
+<div class="city"><strong>Vejle</strong><span>Estudios · conexiones</span></div>
+<div class="city"><strong>Aarhus</strong><span>Universidad · tecnología</span></div>
+<div class="city"><strong>Kolding</strong><span>Alternativa regional</span></div>
+<div class="city"><strong>Horsens</strong><span>Estudios · Jutlandia</span></div>
+<div class="city"><strong>Odense</strong><span>Educación · tecnología</span></div>
+<div class="city"><strong>Copenhague</strong><span>Mercado laboral · capital</span></div>
+</div>
+</section>
+
+<section class="route-section" id="academia">
+<div class="academy-callout">
+<div><p class="route-kicker">RUTA DINAMARCA / ACADEMIA</p><h2>StanNet Danish Academy</h2><p>La academia de danés pasa a formar parte oficial de Ruta Dinamarca. Será el área de estudio para avanzar desde frases esenciales hasta comprensión y comunicación práctica.</p></div>
+<a href="danish.html">Entrar en la academia →</a>
+</div>
+</section>
+</main>
+<script src="/stannet-global-nav.js?v=20261001-8"></script>
+</body>
+</html>
