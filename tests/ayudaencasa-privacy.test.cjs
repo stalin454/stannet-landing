@@ -4,4 +4,5 @@ for(const state of ["'REQUESTED'","'PROCESSING'","'COMPLETED'","'REJECTED'"])ass
 assert.ok(api.includes("const {customer_id,...safe}=item"),'professional request response must omit customer id');
 assert.ok(admin.includes('x.kind')&&admin.includes('PROCESSING'),'admin privacy UI schema mismatch');
 assert.ok(mig.includes("kind TEXT")&&mig.includes("completed_at"),'privacy migration baseline missing');
+assert.ok(api.includes('completed_at=CASE WHEN ? IN (\'COMPLETED\',\'REJECTED\')'),'privacy completion SQL missing');
 console.log('PASS: AyudaEnCasa privacy schema and exposure invariants verified.');
