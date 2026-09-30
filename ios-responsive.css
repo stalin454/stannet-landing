@@ -449,3 +449,93 @@ footer{
     scroll-behavior:auto !important;
   }
 }
+
+
+/* iOS/iPad touch navigation: JS toggles .open; never depend on hover. */
+.nav-group.open > .nav-dropdown{
+  display:grid !important;
+}
+
+@media (max-width:850px){
+  .site-nav.open,
+  .home-nav.open{
+    display:flex !important;
+  }
+
+  .nav-group.open > .nav-dropdown{
+    display:grid !important;
+  }
+
+  .nav-group.open > .nav-trigger{
+    color:var(--ink);
+  }
+}
+
+/* iPad landscape: collapse navigation before it starts overflowing. */
+@media (min-width:851px) and (max-width:1180px) and (pointer:coarse){
+  .menu-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:44px;
+    min-height:44px;
+  }
+
+  .site-nav,
+  .home-nav{
+    display:none;
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    flex-direction:column;
+    align-items:stretch;
+    gap:4px;
+    padding:14px max(18px,var(--safe-right)) max(24px,var(--safe-bottom)) max(18px,var(--safe-left));
+    background:#0b0c1e;
+    border-bottom:1px solid var(--line);
+    max-height:calc(100dvh - 76px - var(--safe-top));
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .site-nav.open,
+  .home-nav.open{
+    display:flex !important;
+  }
+
+  .nav-group{
+    display:block;
+    width:100%;
+  }
+
+  .nav-trigger,
+  .site-nav > a{
+    width:100%;
+    min-height:44px;
+    text-align:left;
+  }
+
+  .nav-dropdown{
+    position:static;
+    min-width:0;
+    width:100%;
+    margin:4px 0 8px;
+    padding:4px 0 4px 12px;
+    border:0;
+    border-left:1px solid var(--line);
+    border-radius:0;
+    box-shadow:none;
+    background:transparent;
+  }
+
+  .nav-group:hover > .nav-dropdown{
+    display:none;
+  }
+
+  .nav-group.open > .nav-dropdown,
+  .nav-group:focus-within > .nav-dropdown{
+    display:grid !important;
+  }
+}
