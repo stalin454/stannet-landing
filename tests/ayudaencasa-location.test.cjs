@@ -4,4 +4,6 @@ for(const x of ['Azuqueca de Henares','Alcalá de Henares','Guadalajara','locati
 assert.ok(mig.includes('service_radius_km'),'service radius migration missing');
 assert.ok(api.includes('service_radius_km'),'service radius API missing');
 assert.ok(html.includes('role="combobox"')&&html.includes('aria-controls="locationSuggestions"'),'autocomplete accessibility missing');
+assert.ok(ui.includes("loadPublicProfessionals({postal,category:categoryId})"),'hero search is not connected to live catalogue');
+assert.ok(ui.includes('categoryIdForName'),'service classification is not mapped to catalogue categories');
 console.log('PASS: AyudaEnCasa geographic search evolution verified.');
