@@ -5,10 +5,10 @@ const html = fs.readFileSync('index.html','utf8');
 const script = fs.readFileSync('script.js','utf8');
 const css = fs.readFileSync('style.css','utf8');
 
-for (const label of ['Proyectos','Academias','Laboratorios']) {
+for (const label of ['Web Development','Apps','Ciberseguridad','Academias','Laboratorios']) {
   assert.ok(html.includes('>'+label+' <span>⌄</span></button>'), label+' dropdown missing');
 }
-assert.ok((html.match(/class="nav-group"/g)||[]).length >= 3);
+assert.ok((html.match(/class="nav-group"/g)||[]).length >= 5);
 assert.ok(html.includes('pages/typing.html'));
 assert.ok(html.includes('pages/shortcuts.html'));
 assert.ok(html.includes('pages/vocal-studio.html'));
