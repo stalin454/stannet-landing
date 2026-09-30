@@ -16,7 +16,7 @@ Credential stuffing, enumeración de cuentas, secuestro de sesión, broken acces
 - revocación de sesiones tras reset de contraseña;
 - validación de Origin y rechazo Sec-Fetch-Site cross-site en mutaciones;
 - Content-Type y límite de payload;
-- rate limits para identidad, solicitudes, propuestas y mensajes;
+- rate limits para identidad, solicitudes, propuestas, mensajes, reportes y bloqueos;
 - mensajes genéricos en autenticación sensible;
 - bloqueo bilateral del chat;
 - perfiles no publicados por defecto;
