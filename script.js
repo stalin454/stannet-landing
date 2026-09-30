@@ -111,7 +111,7 @@ document.querySelectorAll('.nav-trigger').forEach((trigger)=>{
 document.addEventListener('click',()=>{
   document.querySelectorAll('.nav-group.open').forEach((item)=>{
     item.classList.remove('open');
-    item.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+    const trigger=item.querySelector('.nav-trigger'); if(trigger) trigger.setAttribute('aria-expanded','false');
   });
 });
 document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
