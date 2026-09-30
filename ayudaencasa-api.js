@@ -13,6 +13,9 @@ const fallbackCategories=[
 export async function handleAyudaEnCasaApi(request,env,url){
  if(!url.pathname.startsWith(PREFIX)) return null;
  const path=url.pathname.slice(PREFIX.length)||'/';
+ if(!['GET','HEAD','OPTIONS'].includes(request.method)){
+  const originError=validateMutationRequest(request,env,url);if(originError)return originError;
+ }
  if(path==='/auth/register'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
   const limited=await rateLimit(request,env,'register',5,900);
@@ -227,6 +230,9 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
   if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const other=session.id===job.customer_id?job.professional_id:job.customer_id;
+  const blocked=await env.AYUDA_DB.prepare('SELECT 1 AS yes FROM aec_blocks WHERE (blocker_id=? AND blocked_id=?) OR (blocker_id=? AND blocked_id=?) LIMIT 1').bind(session.id,other,other,session.id).first();
+  if(blocked)return response({error:'La conversación no está disponible.',code:'AEC_CHAT_BLOCKED'},403);
   const conv=await ensureConversation(env,job);
   const rows=await env.AYUDA_DB.prepare('SELECT id,sender_id,body,created_at FROM aec_messages WHERE conversation_id=? ORDER BY created_at ASC LIMIT 200').bind(conv).all();
   return response({conversationId:conv,messages:rows.results||[]});
@@ -317,6 +323,15 @@ async function rateLimit(request,env,bucket,limit,windowSeconds){
  return {ok:true,retryAfter:0};
 }
 
+function validateMutationRequest(request,env,url){
+ const type=(request.headers.get('Content-Type')||'').toLowerCase();
+ if(!type.startsWith('application/json'))return response({error:'Content-Type no permitido.',code:'AEC_CONTENT_TYPE'},415);
+ const len=Number(request.headers.get('Content-Length')||0);if(len>16384)return response({error:'Solicitud demasiado grande.',code:'AEC_PAYLOAD_TOO_LARGE'},413);
+ const origin=request.headers.get('Origin');if(!origin)return null;
+ const allowed=new Set([url.origin,env.ALLOWED_ORIGIN,'https://stannet.space','https://www.stannet.space'].filter(Boolean));
+ if(!allowed.has(origin))return response({error:'Origen no permitido.',code:'AEC_ORIGIN_FORBIDDEN'},403);
+ return null;
+}
 async function readJson(request){
  try{return await request.json();}catch{return null;}
 }
@@ -359,7 +374,7 @@ function readCookie(request,name){
  for(const part of header.split(';')){
   const i=part.indexOf('=');
   if(i<0) continue;
-  if(part.slice(0,i).trim()===name) return decodeURIComponent(part.slice(i+1).trim());
+  if(part.slice(0,i).trim()===name){try{return decodeURIComponent(part.slice(i+1).trim());}catch{return '';}}
  }
  return '';
 }
