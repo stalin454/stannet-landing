@@ -177,6 +177,29 @@ export async function handleAyudaEnCasaApi(request,env,url){
   ]);
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
+ if(path==='/reports'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const data=await readJson(request),reason=clean(data?.reason,80),details=clean(data?.details,2000),subject=clean(data?.subjectUserId,80),jobId=clean(data?.jobId,80);
+  if(reason.length<3)return response({error:'Indica el motivo del reporte.',code:'AEC_REPORT_INVALID'},400);
+  if(subject===session.id)return response({error:'Reporte no válido.',code:'AEC_REPORT_INVALID'},400);
+  if(jobId){const job=await env.AYUDA_DB.prepare('SELECT customer_id,professional_id FROM aec_jobs WHERE id=?').bind(jobId).first();if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);}
+  const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_reports(id,reporter_id,subject_user_id,job_id,reason,details,status) VALUES(?,?,?,?,?,?,'OPEN')").bind(id,session.id,subject||null,jobId||null,reason,details).run();
+  await audit(env,session.id,'REPORT_CREATED','report',id);return response({ok:true,report:{id,status:'OPEN'}},201);
+ }
+ if(path==='/blocks'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const target=clean((await readJson(request))?.userId,80);if(!target||target===session.id)return response({error:'Bloqueo no válido.',code:'AEC_BLOCK_INVALID'},400);
+  const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE id=?').bind(target).first();if(!exists)return response({error:'Usuario no encontrado.',code:'AEC_NOT_FOUND'},404);
+  await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();return response({ok:true});
+ }
+ if(path==='/privacy/requests'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const kind=String((await readJson(request))?.kind||'').toUpperCase();if(!['EXPORT','DELETE'].includes(kind))return response({error:'Solicitud no válida.',code:'AEC_PRIVACY_INVALID'},400);
+  const pending=await env.AYUDA_DB.prepare("SELECT id FROM aec_privacy_requests WHERE user_id=? AND kind=? AND status IN ('REQUESTED','PROCESSING')").bind(session.id,kind).first();
+  if(pending)return response({ok:true,request:{id:pending.id,status:'REQUESTED'}});
+  const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_privacy_requests(id,user_id,kind,status) VALUES(?,?,?,'REQUESTED')").bind(id,session.id,kind).run();
+  await audit(env,session.id,'PRIVACY_'+kind+'_REQUESTED','privacy_request',id);return response({ok:true,request:{id,status:'REQUESTED'}},201);
+ }
  if(path==='/jobs'&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const rows=await env.AYUDA_DB.prepare(`SELECT j.id,j.status,j.customer_id,j.professional_id,j.created_at,r.title,r.location_label,p.amount_minor,p.currency
@@ -212,6 +235,9 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
   if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const other=session.id===job.customer_id?job.professional_id:job.customer_id;
+  const blocked=await env.AYUDA_DB.prepare('SELECT 1 AS yes FROM aec_blocks WHERE (blocker_id=? AND blocked_id=?) OR (blocker_id=? AND blocked_id=?) LIMIT 1').bind(session.id,other,other,session.id).first();
+  if(blocked)return response({error:'La conversación no está disponible.',code:'AEC_CHAT_BLOCKED'},403);
   if(['COMPLETED','CANCELLED'].includes(job.status))return response({error:'La conversación está cerrada.',code:'AEC_CHAT_CLOSED'},409);
   const body=clean((await readJson(request))?.body,3000);if(!body)return response({error:'Mensaje vacío.',code:'AEC_MESSAGE_INVALID'},400);
   const conv=await ensureConversation(env,job),id=crypto.randomUUID();
