@@ -65,3 +65,6 @@ function forgotPassword(){openModal('<h2 id="modalTitle">Recuperar contraseña</
 handleAuthLinks();
 
 function professionalServiceChecks(selected=[]){const ids={'Limpieza y organización':'cleaning','Cuidados y acompañamiento':'care','Jardín y exterior':'garden','Hogar y reparaciones':'repairs','Profesionales del hogar':'trades','Ayuda física':'physical','Bienestar y cuidado personal':'wellbeing'};return serviceGroups.filter(g=>ids[g.name]).map(g=>'<label><input type="checkbox" name="service" value="'+ids[g.name]+'" '+(selected.includes(ids[g.name])?'checked':'')+'> '+escapeHtml(g.name)+'</label>').join('')}
+
+async function loadPublicProfessionals(){const box=$('#publicProfessionals');if(!box)return;try{const r=await fetch('/api/ayudaencasa/v1/professionals');if(!r.ok)return;const data=await r.json();if(!data.professionals?.length)return;box.innerHTML=data.professionals.map(p=>'<article class="profile"><div><h3>'+escapeHtml(p.display_name)+'</h3><span class="example">PROFESIONAL</span><p>'+escapeHtml(p.bio)+'</p><p>📍 '+escapeHtml(p.location_label)+'</p><p>★ '+Number(p.rating||0).toFixed(1)+' · '+Number(p.review_count||0)+' valoraciones'+(p.hourly_rate_minor!=null?' · desde '+(p.hourly_rate_minor/100).toFixed(2)+' €/h':'')+'</p></div></article>').join('')}catch{}}
+loadPublicProfessionals();
