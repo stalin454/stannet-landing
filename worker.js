@@ -1,7 +1,12 @@
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
+import { handleAyudaEnCasaApi } from './ayudaencasa-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/ayudaencasa/v1')) {
+      return handleAyudaEnCasaApi(request, env, url);
+    }
 
     if (url.pathname === '/favicon.ico') {
       const target = new URL('/favicon.svg', request.url);
