@@ -20,14 +20,25 @@ const toggle=document.querySelector('.menu-toggle');
 const nav=document.querySelector('.site-nav');
 
 if(toggle&&nav){
-  toggle.addEventListener('click',()=>{
-    const open=nav.classList.toggle('open');
-    toggle.setAttribute('aria-expanded',String(open));
+  const toggleMenu=function(event){
+    if(event){event.preventDefault();event.stopPropagation();}
+    const open=!nav.classList.contains('open');
+    nav.classList.toggle('open',open);
+    toggle.setAttribute('aria-expanded',open?'true':'false');
     toggle.textContent=open?'×':'☰';
-  });
+  };
+  toggle.addEventListener('click',toggleMenu);
+  toggle.addEventListener('touchend',function(event){
+    if(event.cancelable) event.preventDefault();
+    toggleMenu(event);
+  },{passive:false});
 
-  document.querySelectorAll('.site-nav a').forEach((a)=>{
-    a.addEventListener('click',()=>nav.classList.remove('open'));
+  document.querySelectorAll('.site-nav a').forEach(function(a){
+    a.addEventListener('click',function(){
+      nav.classList.remove('open');
+      toggle.setAttribute('aria-expanded','false');
+      toggle.textContent='☰';
+    });
   });
 }
 
@@ -38,9 +49,9 @@ const form=document.querySelector('#songForm');
 if(form){
   form.addEventListener('submit',(e)=>{
     e.preventDefault();
-    const name=document.querySelector('#nombre')?.value.trim()||'artista';
-    const genre=document.querySelector('#genero')?.value||'Pop electrónico';
-    const story=document.querySelector('#tema')?.value.trim()||'una idea abierta';
+    const name=(document.querySelector('#nombre') ? document.querySelector('#nombre').value.trim() : '')||'artista';
+    const genre=(document.querySelector('#genero') ? document.querySelector('#genero').value : '')||'Pop electrónico';
+    const story=(document.querySelector('#tema') ? document.querySelector('#tema').value.trim() : '')||'una idea abierta';
     const result=document.querySelector('#resultado');
 
     result.innerHTML=`<strong>Brief creado para ${name}.</strong><br>Género: ${genre}.<br>Concepto: ${story}.<br>La propuesta ya tiene dirección para convertirse en canción.`;
@@ -59,7 +70,7 @@ if(videoGallery&&videoPlayer){
       return response.json();
     })
     .then(({videos})=>{
-      if(!videos?.length){
+      if(!videos || !videos.length){
         videoGallery.textContent='Todavía no hay vídeos públicos en el canal.';
         return;
       }
@@ -90,10 +101,10 @@ document.querySelectorAll('.nav-trigger').forEach((trigger)=>{
   trigger.addEventListener('click',(event)=>{
     event.stopPropagation();
     const group=trigger.closest('.nav-group');
-    const wasOpen=group?.classList.contains('open');
+    const wasOpen=group ? group.classList.contains('open') : false;
     document.querySelectorAll('.nav-group.open').forEach((item)=>{
       item.classList.remove('open');
-      item.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+      const t=item.querySelector('.nav-trigger'); if(t)t.setAttribute('aria-expanded','false');
     });
     if(group&&!wasOpen){
       group.classList.add('open');
@@ -110,8 +121,7 @@ document.addEventListener('click',()=>{
 document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
   link.addEventListener('click',()=>{
     const group=link.closest('.nav-group');
-    group?.classList.remove('open');
-    group?.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
+    if(group){group.classList.remove('open'); const t=group.querySelector('.nav-trigger'); if(t)t.setAttribute('aria-expanded','false');}
   });
 });
 
