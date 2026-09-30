@@ -325,7 +325,8 @@ async function rateLimit(request,env,bucket,limit,windowSeconds){
 
 function validateMutationRequest(request,env,url){
  const type=(request.headers.get('Content-Type')||'').toLowerCase();
- if(!type.startsWith('application/json'))return response({error:'Content-Type no permitido.',code:'AEC_CONTENT_TYPE'},415);
+ const mayBeEmpty=['/auth/logout'].includes(url.pathname.slice(PREFIX.length))||/\/(publish|start|complete|accept)$/.test(url.pathname);
+ if(!mayBeEmpty&&!type.startsWith('application/json'))return response({error:'Content-Type no permitido.',code:'AEC_CONTENT_TYPE'},415);
  const len=Number(request.headers.get('Content-Length')||0);if(len>16384)return response({error:'Solicitud demasiado grande.',code:'AEC_PAYLOAD_TOO_LARGE'},413);
  const origin=request.headers.get('Origin');if(!origin)return null;
  const allowed=new Set([url.origin,env.ALLOWED_ORIGIN,'https://stannet.space','https://www.stannet.space'].filter(Boolean));
