@@ -441,16 +441,17 @@ async function rateLimit(request,env,bucket,limit,windowSeconds){
 
 function validateMutationRequest(request,env,url){
  const type=(request.headers.get('Content-Type')||'').toLowerCase();
- const mayBeEmpty=['/auth/logout'].includes(url.pathname.slice(PREFIX.length))||/\/(publish|start|complete|accept)$/.test(url.pathname);
+ const mayBeEmpty=['/auth/logout'].includes(url.pathname.slice(PREFIX.length))||/\/(publish|start|complete|accept|cancel|withdraw)$/.test(url.pathname);
  if(!mayBeEmpty&&!type.startsWith('application/json'))return response({error:'Content-Type no permitido.',code:'AEC_CONTENT_TYPE'},415);
  const len=Number(request.headers.get('Content-Length')||0);if(len>16384)return response({error:'Solicitud demasiado grande.',code:'AEC_PAYLOAD_TOO_LARGE'},413);
+ const fetchSite=(request.headers.get('Sec-Fetch-Site')||'').toLowerCase();if(fetchSite==='cross-site')return response({error:'Origen no permitido.',code:'AEC_ORIGIN_FORBIDDEN'},403);
  const origin=request.headers.get('Origin');if(!origin)return null;
  const allowed=new Set([url.origin,env.ALLOWED_ORIGIN,'https://stannet.space','https://www.stannet.space'].filter(Boolean));
  if(!allowed.has(origin))return response({error:'Origen no permitido.',code:'AEC_ORIGIN_FORBIDDEN'},403);
  return null;
 }
 async function readJson(request){
- try{return await request.json();}catch{return null;}
+ try{const text=await request.text();if(text.length>16384)return null;return JSON.parse(text);}catch{return null;}
 }
 function validEmail(v){return v.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
 function validPassword(v){return v.length>=12&&v.length<=128;}
