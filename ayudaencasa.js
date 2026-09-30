@@ -32,7 +32,7 @@ async function api(path,options={}){const r=await fetch('/api/ayudaencasa/v1'+pa
 async function loadDashboard(){
  const panel=$('#accountDashboard'),grid=$('#dashboardGrid');if(!panel||!state.user)return;
  panel.classList.add('show');$('#dashboardTitle').textContent=state.user.role==='PROFESSIONAL'?'Panel profesional':'Panel de cliente';grid.innerHTML='<p class="empty">Cargando…</p>';
- try{if(state.user.role==='PROFESSIONAL')await renderProfessionalDashboard(grid);else await renderCustomerDashboard(grid);await appendJobs(grid)}catch(e){grid.innerHTML='<p class="empty">'+escapeHtml(e.message)+'</p>'}
+ try{if(state.user.role==='PROFESSIONAL')await renderProfessionalDashboard(grid);else await renderCustomerDashboard(grid);await appendJobs(grid);await appendNotifications(grid)}catch(e){grid.innerHTML='<p class="empty">'+escapeHtml(e.message)+'</p>'}
 }
 async function renderCustomerDashboard(grid){
  const data=await api('/requests');grid.innerHTML='<article class="dash-card"><h3>Nueva solicitud</h3><form id="requestForm" class="dash-form"><input name="title" placeholder="¿Qué necesitas?" maxlength="120" required><textarea name="description" placeholder="Describe el trabajo" maxlength="3000" required></textarea><select name="categoryId"><option value="">Categoría</option>'+fallbackCategoryOptions()+'</select><input name="location" placeholder="Zona" value="'+escapeHtml(state.location)+'" required><input name="postalPrefix" placeholder="Código postal (opcional)" maxlength="12"><button class="primary" type="submit">Crear y publicar</button><div id="requestNote"></div></form></article><article class="dash-card"><h3>Mis solicitudes</h3><div class="dash-list">'+(data.requests.length?data.requests.map(requestCard).join(''):'<p class="empty">Todavía no tienes solicitudes.</p>')+'</div></article>';
@@ -70,3 +70,6 @@ async function loadPublicProfessionals(){const box=$('#publicProfessionals');if(
 loadPublicProfessionals();
 
 function proposalCard(p){return '<div class="dash-item"><b>'+escapeHtml(p.title)+'</b><small>'+escapeHtml(p.location_label)+' · <span class="dash-status">'+escapeHtml(p.status)+'</span></small><p>'+escapeHtml(p.message)+'</p>'+(p.amount_minor!=null?'<p>'+(p.amount_minor/100).toFixed(2)+' €</p>':'')+(p.status==='PENDING'?'<button type="button" data-withdraw="'+p.id+'">Retirar propuesta</button>':'')+'</div>'}
+
+async function appendNotifications(grid){const data=await api('/notifications');if(!data.notifications?.length)return;const card=document.createElement('article');card.className='dash-card';card.innerHTML='<h3>Actividad</h3><div class="dash-list">'+data.notifications.slice(0,10).map(n=>'<div class="dash-item"><b>'+escapeHtml(notificationLabel(n.kind))+'</b><small>'+escapeHtml(n.created_at)+'</small></div>').join('')+'</div>';grid.append(card)}
+function notificationLabel(kind){return ({PROPOSAL_RECEIVED:'Has recibido una nueva propuesta',PROPOSAL_ACCEPTED:'Tu propuesta ha sido aceptada'})[kind]||'Nueva actividad en tu cuenta'}
