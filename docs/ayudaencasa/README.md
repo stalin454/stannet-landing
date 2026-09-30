@@ -32,4 +32,4 @@ Una función solo se considera cerrada cuando contempla autorización, validaci�
 La base funcional está implementada en la rama `feature/ayuda-en-casa-foundation`. Para una demostración con persistencia real se requiere crear/configurar el D1 de staging `AYUDA_DB` y aplicar las migraciones. No se almacena un database_id ficticio en el repositorio.
 
 ## Cierre del código académico
-El alcance académico se congela cuando CI está verde. El único paso externo imprescindible para una demo persistente es provisionar la D1 de staging, enlazarla como `AYUDA_DB` y ejecutar las migraciones 0001–0008. El lanzamiento público, pagos y requisitos comerciales se mantienen fuera de este hito.
+El alcance académico se congela cuando CI está verde. El único paso externo imprescindible para una demo persistente es provisionar la D1 de staging, enlazarla como `AYUDA_DB` y ejecutar las migraciones 0001–0009. El lanzamiento público, pagos y requisitos comerciales se mantienen fuera de este hito.
