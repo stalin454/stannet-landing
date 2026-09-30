@@ -1,5 +1,5 @@
 -- AyudaEnCasa schema reference
--- The executable source of truth is migrations/ayudaencasa/0001_core.sql through 0008_message_reads.sql.
+-- The executable source of truth is migrations/ayudaencasa/0001_core.sql through 0009_service_area.sql.
 -- Do not apply this documentation file directly to production.
 --
 -- Domain tables created by the migrations:
