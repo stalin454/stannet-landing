@@ -567,6 +567,10 @@ function response(body,status=200,extra={}){
   'Content-Type':'application/json; charset=utf-8',
   'Cache-Control':'no-store',
   'X-Content-Type-Options':'nosniff',
+  'X-Frame-Options':'DENY',
+  'Referrer-Policy':'no-referrer',
+  'Permissions-Policy':'camera=(), microphone=(), geolocation=()',
+  'Cross-Origin-Resource-Policy':'same-origin',
   ...extra
  }});
 }
