@@ -10,7 +10,7 @@
 ## Secuencia
 1. Crear D1 desde Cloudflare y conservar el ID fuera de esta documentación.
 2. Añadir el binding `AYUDA_DB` al entorno de staging.
-3. Aplicar, en orden, las migraciones 0001 a 0008.
+3. Aplicar, en orden, las migraciones 0001 a 0009.
 4. Ejecutar `npm run test:ci`.
 5. Desplegar primero a staging.
 6. Probar dos cuentas independientes: CUSTOMER y PROFESSIONAL.
