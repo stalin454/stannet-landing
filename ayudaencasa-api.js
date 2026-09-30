@@ -196,6 +196,17 @@ export async function handleAyudaEnCasaApi(request,env,url){
   ]);
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
+ if(path==='/admin/reports'&&request.method==='GET'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT id,reporter_id,subject_user_id,job_id,reason,details,status,created_at,updated_at FROM aec_reports WHERE status IN ('OPEN','REVIEWING') ORDER BY created_at ASC LIMIT 100").all();return response({reports:rows.results||[]});
+ }
+ const adminReportMatch=path.match(/^\/admin\/reports\/([^/]+)$/);
+ if(adminReportMatch&&request.method==='PATCH'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const status=String((await readJson(request))?.status||'').toUpperCase();if(!['REVIEWING','RESOLVED','DISMISSED'].includes(status))return response({error:'Estado no válido.',code:'AEC_REPORT_STATE_INVALID'},400);
+  const existing=await env.AYUDA_DB.prepare('SELECT id FROM aec_reports WHERE id=?').bind(adminReportMatch[1]).first();if(!existing)return response({error:'Reporte no encontrado.',code:'AEC_NOT_FOUND'},404);
+  await env.AYUDA_DB.prepare('UPDATE aec_reports SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,existing.id).run();await audit(env,session.id,'REPORT_'+status,'report',existing.id);return response({ok:true,status});
+ }
  if(path==='/reports'&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const data=await readJson(request),reason=clean(data?.reason,80),details=clean(data?.details,2000),subject=clean(data?.subjectUserId,80),jobId=clean(data?.jobId,80);
@@ -356,6 +367,10 @@ async function requireRole(request,env,role){
  if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
  if(session.role!==role)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
  return session;
+}
+async function requireAnyRole(request,env,roles){
+ const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+ if(!roles.includes(session.role))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);return session;
 }
 async function audit(env,actor,eventType,resourceType,resourceId){
  try{await env.AYUDA_DB.prepare('INSERT INTO aec_audit_events(id,actor_user_id,event_type,resource_type,resource_id) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor,eventType,resourceType,resourceId).run();}catch{}
