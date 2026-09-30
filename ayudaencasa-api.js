@@ -79,6 +79,19 @@ export async function handleAyudaEnCasaApi(request,env,url){
   ]);
   await audit(env,row.user_id,'EMAIL_VERIFIED','user',row.user_id);return response({ok:true});
  }
+ if(path==='/auth/verify-email/resend'&&request.method==='POST'){
+  if(!env.AYUDA_DB)return response({ok:true});
+  const limited=await rateLimit(request,env,'verify-resend',4,900);if(!limited.ok)return response({ok:true});
+  const body=await readJson(request),email=String(body?.email||'').trim().toLowerCase();
+  const user=validEmail(email)?await env.AYUDA_DB.prepare("SELECT id FROM aec_users WHERE email=? AND status='PENDING' LIMIT 1").bind(email).first():null;
+  if(user&&env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){
+   const raw=randomToken(32),hash=await sha256(raw);
+   await env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE user_id=? AND purpose='VERIFY_EMAIL' AND consumed_at IS NULL").bind(user.id).run();
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'VERIFY_EMAIL',?,datetime('now','+24 hours'))").bind(crypto.randomUUID(),user.id,hash).run();
+   await sendAuthEmail(env,{type:'verify_email',email,token:raw,url:new URL('/pages/marketplace.html?verify='+encodeURIComponent(raw),url.origin).toString()});
+  }
+  return response({ok:true,message:'Si la cuenta está pendiente, recibirás un nuevo enlace de verificación.'});
+ }
  if(path==='/auth/password/forgot'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({ok:true});
   const limited=await rateLimit(request,env,'forgot',5,900);
