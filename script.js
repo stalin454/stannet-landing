@@ -28,10 +28,6 @@ if(toggle&&nav){
     toggle.textContent=open?'×':'☰';
   };
   toggle.addEventListener('click',toggleMenu);
-  toggle.addEventListener('touchend',function(event){
-    if(event.cancelable) event.preventDefault();
-    toggleMenu(event);
-  },{passive:false});
 
   document.querySelectorAll('.site-nav a').forEach(function(a){
     a.addEventListener('click',function(){
