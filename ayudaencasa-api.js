@@ -272,8 +272,10 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const limited=await rateLimit(request,env,'block:'+session.id,30,3600);if(!limited.ok)return response({error:'Demasiadas operaciones de bloqueo. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const target=clean((await readJson(request))?.userId,80);if(!target||target===session.id)return response({error:'Bloqueo no válido.',code:'AEC_BLOCK_INVALID'},400);
-  const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE id=?').bind(target).first();if(!exists)return response({error:'Usuario no encontrado.',code:'AEC_NOT_FOUND'},404);
-  await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();return response({ok:true});
+  const related=await env.AYUDA_DB.prepare('SELECT id FROM aec_jobs WHERE (customer_id=? AND professional_id=?) OR (customer_id=? AND professional_id=?) LIMIT 1').bind(session.id,target,target,session.id).first();
+  if(!related)return response({error:'No se puede bloquear a este usuario.',code:'AEC_BLOCK_INVALID'},400);
+  await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();
+  await audit(env,session.id,'USER_BLOCKED','user',target);return response({ok:true});
  }
  if(path==='/conversations'&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
