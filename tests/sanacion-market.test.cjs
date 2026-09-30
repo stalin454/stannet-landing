@@ -20,8 +20,12 @@ assert.doesNotMatch(html, /fonts\.googleapis\.com|fonts\.gstatic\.com/);
 assert.match(html, /role="dialog" aria-modal="true"/);
 assert.match(html, /prefers-reduced-motion/);
 assert.match(html, /Saltar al contenido/);
-assert.match(html, /Información importante/);
-assert.match(html, /no sustituyen diagnóstico|no sustituye diagnóstico/i);
+assert.match(html, /RAÍCES Y EVOLUCIÓN/);
+assert.match(html, /Pehr Henrik Ling/);
+assert.match(html, /Dieter Dorn/);
+assert.match(html, /Kam Yuen/);
+assert.match(html, /Historia de la música como terapia/);
+assert.doesNotMatch(html, /No sustituyen diagnóstico|consulta con personal médico|atención de urgencia/i);
 
 const refs = [...html.matchAll(/(?:src|data-image)="([^"]+)"/g)]
   .map((m) => m[1])
