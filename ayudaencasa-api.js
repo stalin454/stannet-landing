@@ -181,6 +181,24 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.professional_id,p.message,p.amount_minor,p.currency,p.status,p.created_at,pp.display_name FROM aec_proposals p LEFT JOIN aec_professional_profiles pp ON pp.user_id=p.professional_id WHERE p.request_id=? ORDER BY p.created_at").bind(owned.id).all();
   return response({proposals:rows.results||[]});
  }
+ const cancelMatch=path.match(/^\/requests\/([^/]+)\/cancel$/);
+ if(cancelMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_requests WHERE id=? AND customer_id=?').bind(cancelMatch[1],session.id).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(!['DRAFT','PUBLISHED','MATCHING','PROPOSALS'].includes(item.status))return response({error:'La solicitud ya no puede cancelarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_requests SET status='CANCELLED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status IN ('DRAFT','PUBLISHED','MATCHING','PROPOSALS')").bind(item.id),env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='REJECTED',updated_at=CURRENT_TIMESTAMP WHERE request_id=? AND status='PENDING'").bind(item.id)]);
+  await audit(env,session.id,'REQUEST_CANCELLED','request',item.id);return response({ok:true,status:'CANCELLED'});
+ }
+ const withdrawMatch=path.match(/^\/proposals\/([^/]+)\/withdraw$/);
+ if(withdrawMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const p=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_proposals WHERE id=? AND professional_id=?').bind(withdrawMatch[1],session.id).first();
+  if(!p)return response({error:'Propuesta no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(p.status!=='PENDING')return response({error:'La propuesta ya no puede retirarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='WITHDRAWN',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(p.id).run();
+  await audit(env,session.id,'PROPOSAL_WITHDRAWN','proposal',p.id);return response({ok:true,status:'WITHDRAWN'});
+ }
  const acceptMatch=path.match(/^\/proposals\/([^/]+)\/accept$/);
  if(acceptMatch&&request.method==='POST'){
   const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
@@ -188,12 +206,12 @@ export async function handleAyudaEnCasaApi(request,env,url){
   if(!p||p.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
   if(p.status!=='PENDING'||!['PUBLISHED','MATCHING','PROPOSALS'].includes(p.request_status))return response({error:'La propuesta ya no puede aceptarse.',code:'AEC_BAD_STATE'},409);
   const jobId=crypto.randomUUID();
-  await env.AYUDA_DB.batch([
+  try{await env.AYUDA_DB.batch([
    env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='ACCEPTED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(p.id),
    env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='REJECTED',updated_at=CURRENT_TIMESTAMP WHERE request_id=? AND id<>? AND status='PENDING'").bind(p.request_id,p.id),
    env.AYUDA_DB.prepare("UPDATE aec_requests SET status='ASSIGNED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(p.request_id),
    env.AYUDA_DB.prepare("INSERT INTO aec_jobs(id,request_id,accepted_proposal_id,customer_id,professional_id,status) VALUES(?,?,?,?,?,'AGREED')").bind(jobId,p.request_id,p.id,session.id,p.professional_id)
-  ]);
+  ]);}catch{return response({error:'La propuesta ya fue procesada.',code:'AEC_ACCEPT_CONFLICT'},409);}
   await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
  }
  if(path==='/admin/reports'&&request.method==='GET'){
