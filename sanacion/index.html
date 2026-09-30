@@ -323,7 +323,7 @@ const closeLightbox=()=>{
   lightbox.classList.remove('open');
   lightboxImage.src='';
   document.body.style.overflow='';
-  lightboxTrigger?.focus();
+  if(lightboxTrigger) lightboxTrigger.focus();
 };
 closeButton.addEventListener('click',closeLightbox);
 lightbox.addEventListener('click',(event)=>{if(event.target===lightbox)closeLightbox()});
@@ -338,9 +338,9 @@ document.querySelectorAll('.reveal').forEach((element)=>revealObserver.observe(e
 const testimonialTrack=document.querySelector('#testimonialTrack');
 const testimonialPrev=document.querySelector('#testimonialPrev');
 const testimonialNext=document.querySelector('#testimonialNext');
-const slideTestimonials=(direction)=>{if(!testimonialTrack)return;const card=testimonialTrack.querySelector('.testimonial-card');const step=(card?.getBoundingClientRect().width||300)+16;testimonialTrack.scrollBy({left:direction*step,behavior:'smooth'})};
-testimonialPrev?.addEventListener('click',()=>slideTestimonials(-1));
-testimonialNext?.addEventListener('click',()=>slideTestimonials(1));
+const slideTestimonials=(direction)=>{if(!testimonialTrack)return;const card=testimonialTrack.querySelector('.testimonial-card');const step=(card ? card.getBoundingClientRect().width : 300)+16;testimonialTrack.scrollBy({left:direction*step,behavior:'smooth'})};
+if(testimonialPrev) testimonialPrev.addEventListener('click',()=>slideTestimonials(-1));
+if(testimonialNext) testimonialNext.addEventListener('click',()=>slideTestimonials(1));
 </script>
 <script src="/stannet-global-nav.js?v=20261001-7"></script>
 </body>
