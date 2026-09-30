@@ -34,12 +34,19 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const salt=randomToken(16);
   const iterations=310000;
   const passwordHash=await derivePassword(password,salt,iterations);
+  const verificationEnabled=Boolean(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN);
   await env.AYUDA_DB.batch([
-   env.AYUDA_DB.prepare("INSERT INTO aec_users(id,email,role,status) VALUES(?,?,?,'ACTIVE')").bind(userId,email,role),
+   env.AYUDA_DB.prepare("INSERT INTO aec_users(id,email,role,status) VALUES(?,?,?,?)").bind(userId,email,role,verificationEnabled?'PENDING':'ACTIVE'),
    env.AYUDA_DB.prepare('INSERT INTO aec_password_credentials(user_id,password_hash,algorithm,iterations,salt) VALUES(?,?,?,?,?)').bind(userId,passwordHash,'PBKDF2-SHA256',iterations,salt)
   ]);
+  if(verificationEnabled){
+   const raw=randomToken(32),hash=await sha256(raw);
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'VERIFY_EMAIL',?,datetime('now','+24 hours'))").bind(crypto.randomUUID(),userId,hash).run();
+   await sendAuthEmail(env,{type:'verify_email',email,token:raw});
+   return response({ok:true,verificationRequired:true},201);
+  }
   const session=await createSession(env,userId);
-  return response({ok:true,user:{id:userId,email,role}},201,{'Set-Cookie':session.cookie});
+  return response({ok:true,user:{id:userId,email,role},verificationRequired:false},201,{'Set-Cookie':session.cookie});
  }
  if(path==='/auth/login'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
@@ -61,6 +68,17 @@ export async function handleAyudaEnCasaApi(request,env,url){
  if(path==='/health'&&request.method==='GET'){
   return response({ok:true,service:'AyudaEnCasa',version:'v1',databaseConfigured:Boolean(env.AYUDA_DB)});
  }
+ if(path==='/auth/verify-email'&&request.method==='POST'){
+  if(!env.AYUDA_DB)return response({error:'Servicio no disponible.',code:'AEC_DB_REQUIRED'},503);
+  const token=String((await readJson(request))?.token||'');if(!token)return response({error:'Token no válido.',code:'AEC_VERIFY_INVALID'},400);
+  const hash=await sha256(token),row=await env.AYUDA_DB.prepare("SELECT id,user_id FROM aec_auth_tokens WHERE purpose='VERIFY_EMAIL' AND token_hash=? AND consumed_at IS NULL AND expires_at>CURRENT_TIMESTAMP LIMIT 1").bind(hash).first();
+  if(!row)return response({error:'El enlace no es válido o ha caducado.',code:'AEC_VERIFY_EXPIRED'},400);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_users SET status='ACTIVE',email_verified_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(row.user_id),
+   env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE id=?").bind(row.id)
+  ]);
+  await audit(env,row.user_id,'EMAIL_VERIFIED','user',row.user_id);return response({ok:true});
+ }
  if(path==='/auth/password/forgot'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({ok:true});
   const limited=await rateLimit(request,env,'forgot',5,900);
@@ -71,9 +89,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
    const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
    await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'RESET_PASSWORD',?,datetime('now','+30 minutes'))").bind(id,user.id,hash).run();
    // Delivery is intentionally delegated to a configured email provider.
-   if(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){
-    await fetch(env.AEC_EMAIL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.AEC_EMAIL_TOKEN},body:JSON.stringify({type:'password_reset',email,token:raw})}).catch(()=>{});
-   }
+   await sendAuthEmail(env,{type:'password_reset',email,token:raw});
   }
   return response({ok:true,message:'Si la cuenta existe, recibirás instrucciones para recuperar el acceso.'});
  }
@@ -293,6 +309,10 @@ export async function handleAyudaEnCasaApi(request,env,url){
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
 }
 
+async function sendAuthEmail(env,payload){
+ if(!env.AEC_EMAIL_ENDPOINT||!env.AEC_EMAIL_TOKEN)return false;
+ try{const r=await fetch(env.AEC_EMAIL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.AEC_EMAIL_TOKEN},body:JSON.stringify(payload)});return r.ok;}catch{return false;}
+}
 async function ensureConversation(env,job){
  let row=await env.AYUDA_DB.prepare('SELECT id FROM aec_conversations WHERE job_id=?').bind(job.id).first();
  if(row)return row.id;
