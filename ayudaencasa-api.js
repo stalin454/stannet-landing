@@ -387,7 +387,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
    COALESCE((SELECT AVG(r.rating) FROM aec_reviews r WHERE r.subject_id=pp.user_id),0) rating,
    (SELECT COUNT(*) FROM aec_reviews r WHERE r.subject_id=pp.user_id) review_count
    FROM aec_professional_profiles pp JOIN aec_users u ON u.id=pp.user_id WHERE pp.published=1 AND u.status='ACTIVE'`;
-  const binds=[];if(postal){sql+=' AND pp.postal_prefix=?';binds.push(postal);}if(category){sql+=' AND EXISTS(SELECT 1 FROM aec_professional_services ps WHERE ps.professional_id=pp.user_id AND ps.category_id=?)';binds.push(category);}sql+=' ORDER BY rating DESC,review_count DESC LIMIT 50';
+  const binds=[];if(postal){sql+=' AND (pp.postal_prefix=? OR substr(pp.postal_prefix,1,2)=substr(?,1,2))';binds.push(postal,postal);}if(category){sql+=' AND EXISTS(SELECT 1 FROM aec_professional_services ps WHERE ps.professional_id=pp.user_id AND ps.category_id=?)';binds.push(category);}sql+=' ORDER BY CASE WHEN pp.postal_prefix=? THEN 0 ELSE 1 END,rating DESC,review_count DESC LIMIT 50';if(postal)binds.push(postal);else{sql=sql.replace(" ORDER BY CASE WHEN pp.postal_prefix=? THEN 0 ELSE 1 END,rating DESC,review_count DESC LIMIT 50"," ORDER BY rating DESC,review_count DESC LIMIT 50");}
   const stmt=env.AYUDA_DB.prepare(sql),rows=await (binds.length?stmt.bind(...binds):stmt).all();return response({professionals:rows.results||[]});
  }
  if(path==='/professional/services'&&request.method==='GET'){
