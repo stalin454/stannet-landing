@@ -52,3 +52,10 @@ for (const link of blankLinks) {
 }
 
 console.log('Sanacion market-readiness checks passed.');
+
+assert.match(html, /El lenguaje del Método Yuen/);
+assert.match(html, /DEBILIDADES/);
+assert.match(html, /FORTALECIMIENTOS/);
+assert.match(html, /NIVELES I · II · III/);
+assert.match(html, /metodoyuenjosepalomo\.com\/cursos-metodo-yuen/);
+assert.match(html, /Experiencias reales de clientes/);
