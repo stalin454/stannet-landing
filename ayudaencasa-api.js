@@ -283,7 +283,9 @@ export async function handleAyudaEnCasaApi(request,env,url){
    (SELECT COUNT(*) FROM aec_messages m WHERE m.conversation_id=c.id AND m.sender_id<>? AND m.created_at>COALESCE((SELECT mr.last_read_at FROM aec_message_reads mr WHERE mr.conversation_id=c.id AND mr.user_id=?),'1970-01-01')) unread_count,
    (SELECT body FROM aec_messages lm WHERE lm.conversation_id=c.id ORDER BY lm.created_at DESC LIMIT 1) last_message
    FROM aec_conversations c JOIN aec_jobs j ON j.id=c.job_id JOIN aec_requests r ON r.id=j.request_id
-   WHERE j.customer_id=? OR j.professional_id=? ORDER BY c.created_at DESC LIMIT 50`).bind(session.id,session.id,session.id,session.id).all();
+   WHERE (j.customer_id=? OR j.professional_id=?)
+   AND NOT EXISTS(SELECT 1 FROM aec_blocks b WHERE (b.blocker_id=j.customer_id AND b.blocked_id=j.professional_id) OR (b.blocker_id=j.professional_id AND b.blocked_id=j.customer_id))
+   ORDER BY c.created_at DESC LIMIT 50`).bind(session.id,session.id,session.id,session.id).all();
   return response({conversations:rows.results||[]});
  }
  if(path==='/me/entitlements'&&request.method==='GET'){
