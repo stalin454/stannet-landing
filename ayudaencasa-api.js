@@ -102,6 +102,76 @@ export async function handleAyudaEnCasaApi(request,env,url){
   }
   return response({ok:true},200,{'Set-Cookie':expiredCookie()});
  }
+ if(path==='/requests'&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');
+  if(session instanceof Response)return session;
+  const body=await readJson(request),title=clean(body?.title,120),description=clean(body?.description,3000),location=clean(body?.location,120),postal=clean(body?.postalPrefix,12),category=clean(body?.categoryId,64);
+  if(title.length<4||description.length<10||location.length<2)return response({error:'Solicitud incompleta.',code:'AEC_REQUEST_INVALID'},400);
+  if(category){const exists=await env.AYUDA_DB.prepare("SELECT id FROM aec_categories WHERE id=? AND status='ACTIVE'").bind(category).first();if(!exists)return response({error:'Categoría no válida.',code:'AEC_CATEGORY_INVALID'},400);}
+  const id=crypto.randomUUID();
+  await env.AYUDA_DB.prepare("INSERT INTO aec_requests(id,customer_id,category_id,title,description,location_label,postal_prefix,status) VALUES(?,?,?,?,?,?,?,'DRAFT')").bind(id,session.id,category||null,title,description,location,postal||null).run();
+  await audit(env,session.id,'REQUEST_CREATED','request',id);
+  return response({ok:true,request:{id,status:'DRAFT'}},201);
+ }
+ const requestMatch=path.match(/^\/requests\/([^/]+)$/);
+ if(requestMatch&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const item=await env.AYUDA_DB.prepare('SELECT id,customer_id,category_id,title,description,location_label,postal_prefix,status,created_at,updated_at FROM aec_requests WHERE id=?').bind(requestMatch[1]).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(session.role==='CUSTOMER'&&item.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(session.role==='PROFESSIONAL'&&!['PUBLISHED','MATCHING','PROPOSALS','ASSIGNED','IN_PROGRESS','COMPLETED'].includes(item.status))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  return response({request:item});
+ }
+ const publishMatch=path.match(/^\/requests\/([^/]+)\/publish$/);
+ if(publishMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_requests WHERE id=? AND customer_id=?').bind(publishMatch[1],session.id).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(item.status!=='DRAFT')return response({error:'La solicitud no está en borrador.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.prepare("UPDATE aec_requests SET status='PUBLISHED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(item.id).run();
+  await audit(env,session.id,'REQUEST_PUBLISHED','request',item.id);return response({ok:true,status:'PUBLISHED'});
+ }
+ if(path==='/market/requests'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT id,category_id,title,description,location_label,postal_prefix,status,created_at FROM aec_requests WHERE status IN ('PUBLISHED','MATCHING','PROPOSALS') ORDER BY created_at DESC LIMIT 50").all();
+  return response({requests:rows.results||[]});
+ }
+ const proposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
+ if(proposalMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const req=await env.AYUDA_DB.prepare("SELECT id,status FROM aec_requests WHERE id=? AND status IN ('PUBLISHED','MATCHING','PROPOSALS')").bind(proposalMatch[1]).first();
+  if(!req)return response({error:'Solicitud no disponible.',code:'AEC_BAD_STATE'},409);
+  const body=await readJson(request),message=clean(body?.message,2000),amount=body?.amountMinor==null?null:Number(body.amountMinor);
+  if(message.length<5||(amount!==null&&(!Number.isInteger(amount)||amount<0||amount>10000000)))return response({error:'Propuesta no válida.',code:'AEC_PROPOSAL_INVALID'},400);
+  const id=crypto.randomUUID();
+  try{await env.AYUDA_DB.prepare("INSERT INTO aec_proposals(id,request_id,professional_id,message,amount_minor,status) VALUES(?,?,?,?,?,'PENDING')").bind(id,req.id,session.id,message,amount).run();}
+  catch{return response({error:'Ya existe una propuesta para esta solicitud.',code:'AEC_PROPOSAL_EXISTS'},409);}
+  await env.AYUDA_DB.prepare("UPDATE aec_requests SET status='PROPOSALS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(req.id).run();
+  await audit(env,session.id,'PROPOSAL_CREATED','proposal',id);return response({ok:true,proposal:{id,status:'PENDING'}},201);
+ }
+ const listProposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
+ if(listProposalMatch&&request.method==='GET'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const owned=await env.AYUDA_DB.prepare('SELECT id FROM aec_requests WHERE id=? AND customer_id=?').bind(listProposalMatch[1],session.id).first();
+  if(!owned)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.professional_id,p.message,p.amount_minor,p.currency,p.status,p.created_at,pp.display_name FROM aec_proposals p LEFT JOIN aec_professional_profiles pp ON pp.user_id=p.professional_id WHERE p.request_id=? ORDER BY p.created_at").bind(owned.id).all();
+  return response({proposals:rows.results||[]});
+ }
+ const acceptMatch=path.match(/^\/proposals\/([^/]+)\/accept$/);
+ if(acceptMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const p=await env.AYUDA_DB.prepare("SELECT p.id,p.request_id,p.professional_id,p.status,r.customer_id,r.status request_status FROM aec_proposals p JOIN aec_requests r ON r.id=p.request_id WHERE p.id=?").bind(acceptMatch[1]).first();
+  if(!p||p.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(p.status!=='PENDING'||!['PUBLISHED','MATCHING','PROPOSALS'].includes(p.request_status))return response({error:'La propuesta ya no puede aceptarse.',code:'AEC_BAD_STATE'},409);
+  const jobId=crypto.randomUUID();
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='ACCEPTED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(p.id),
+   env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='REJECTED',updated_at=CURRENT_TIMESTAMP WHERE request_id=? AND id<>? AND status='PENDING'").bind(p.request_id,p.id),
+   env.AYUDA_DB.prepare("UPDATE aec_requests SET status='ASSIGNED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(p.request_id),
+   env.AYUDA_DB.prepare("INSERT INTO aec_jobs(id,request_id,accepted_proposal_id,customer_id,professional_id,status) VALUES(?,?,?,?,?,'AGREED')").bind(jobId,p.request_id,p.id,session.id,p.professional_id)
+  ]);
+  await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
+ }
  if(path==='/professional/profile'&&request.method==='GET'){
   const session=await readSession(request,env);
   if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
@@ -132,6 +202,17 @@ export async function handleAyudaEnCasaApi(request,env,url){
   return response({error:'Función todavía no activada.',code:'AEC_NOT_READY'},503);
  }
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
+}
+
+function clean(value,max){return String(value??'').trim().slice(0,max);}
+async function requireRole(request,env,role){
+ const session=await readSession(request,env);
+ if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+ if(session.role!==role)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+ return session;
+}
+async function audit(env,actor,eventType,resourceType,resourceId){
+ try{await env.AYUDA_DB.prepare('INSERT INTO aec_audit_events(id,actor_user_id,event_type,resource_type,resource_id) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor,eventType,resourceType,resourceId).run();}catch{}
 }
 
 async function rateLimit(request,env,bucket,limit,windowSeconds){
