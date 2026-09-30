@@ -549,3 +549,130 @@ footer{
     display:grid !important;
   }
 }
+
+
+/* ============================================================
+   TABLET / iPAD TYPOGRAPHY & LAYOUT
+   Give iPad its own scale instead of a compressed desktop UI.
+   ============================================================ */
+@media (min-width:768px) and (max-width:1180px){
+  html{font-size:18px}
+
+  body{
+    font-size:18px;
+    line-height:1.6;
+  }
+
+  .site-header{
+    min-height:72px;
+  }
+
+  .brand{
+    font-size:24px;
+  }
+
+  .site-nav a,
+  .nav-trigger{
+    font-size:14px !important;
+    line-height:1.35;
+    letter-spacing:.01em;
+  }
+
+  .site-nav > a,
+  .nav-trigger{
+    padding:12px 0;
+  }
+
+  .nav-dropdown a{
+    font-size:14px !important;
+    line-height:1.45;
+    padding:12px 10px;
+  }
+
+  .eyebrow,
+  .tag,
+  .editorial-kicker{
+    font-size:12px !important;
+  }
+
+  .hero-copy,
+  .page-hero p,
+  .editorial-hero-copy > p:not(.eyebrow),
+  .feature-copy > p,
+  .section-heading > p,
+  .info-card p,
+  .info-card li,
+  .project-card p,
+  .case-study > p,
+  .pa-card-desc,
+  .pa-card p,
+  .pa-card li{
+    font-size:17px !important;
+    line-height:1.7;
+  }
+
+  h1,
+  .page-hero h1,
+  .academy-hero .pa-main-title,
+  .editorial-hero h1,
+  .home-hero-title{
+    font-size:clamp(54px,8vw,88px) !important;
+    line-height:.98;
+  }
+
+  h2,
+  .section-heading h2,
+  .contact h2,
+  .editorial-intro h2,
+  .feature-copy h2{
+    font-size:clamp(38px,5.5vw,60px) !important;
+    line-height:1.02;
+  }
+
+  h3,
+  .project-card h3,
+  .info-card h3,
+  .pa-card-title{
+    font-size:clamp(22px,3vw,30px) !important;
+  }
+
+  .button,
+  .pa-btn,
+  .feature-links a,
+  .editorial-actions a,
+  .card-link{
+    font-size:14px !important;
+  }
+
+  .section,
+  .page-hero,
+  .academy-hero,
+  .editorial-hero-copy,
+  .editorial-intro,
+  .editorial-feature,
+  .editorial-contact,
+  .editorial-statement{
+    padding-left:max(32px,var(--safe-left));
+    padding-right:max(32px,var(--safe-right));
+  }
+
+  .project-card,
+  .case-study,
+  .info-card,
+  .pa-card,
+  .pa-lang-card,
+  .pa-build-card{
+    padding:28px;
+  }
+
+  .hero-actions,
+  .academy-actions,
+  .feature-links,
+  .editorial-actions{
+    gap:14px;
+  }
+
+  .menu-toggle{
+    font-size:28px;
+  }
+}
