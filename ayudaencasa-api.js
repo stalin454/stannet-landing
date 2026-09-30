@@ -158,6 +158,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
   if(session.role==='CUSTOMER'&&item.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
   if(session.role==='PROFESSIONAL'&&!['PUBLISHED','MATCHING','PROPOSALS','ASSIGNED','IN_PROGRESS','COMPLETED'].includes(item.status))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(session.role==='PROFESSIONAL'){const {customer_id,...safe}=item;return response({request:safe});}
   return response({request:item});
  }
  const publishMatch=path.match(/^\/requests\/([^/]+)\/publish$/);
@@ -233,17 +234,17 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/admin/privacy-requests'&&request.method==='GET'){
   const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
-  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.user_id,u.email,p.request_type,p.status,p.created_at,p.updated_at FROM aec_privacy_requests p JOIN aec_users u ON u.id=p.user_id WHERE p.status IN ('OPEN','IN_PROGRESS') ORDER BY p.created_at ASC LIMIT 100").all();
+  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.user_id,u.email,p.kind,p.status,p.created_at,p.completed_at FROM aec_privacy_requests p JOIN aec_users u ON u.id=p.user_id WHERE p.status IN ('REQUESTED','PROCESSING') ORDER BY p.created_at ASC LIMIT 100").all();
   return response({requests:rows.results||[]});
  }
  const adminPrivacyMatch=path.match(/^\/admin\/privacy-requests\/([^/]+)$/);
  if(adminPrivacyMatch&&request.method==='PATCH'){
   const session=await requireAnyRole(request,env,['ADMIN']);if(session instanceof Response)return session;
   const body=await readJson(request),status=String(body?.status||'').toUpperCase();
-  if(!['IN_PROGRESS','COMPLETED','REJECTED'].includes(status))return response({error:'Estado no válido.',code:'AEC_PRIVACY_STATE_INVALID'},400);
+  if(!['PROCESSING','COMPLETED','REJECTED'].includes(status))return response({error:'Estado no válido.',code:'AEC_PRIVACY_STATE_INVALID'},400);
   const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_privacy_requests WHERE id=?').bind(adminPrivacyMatch[1]).first();
   if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
-  await env.AYUDA_DB.prepare('UPDATE aec_privacy_requests SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,item.id).run();
+  await env.AYUDA_DB.prepare('UPDATE aec_privacy_requests SET status=?,completed_at=CASE WHEN ? IN ('COMPLETED','REJECTED') THEN CURRENT_TIMESTAMP ELSE completed_at END WHERE id=?').bind(status,status,item.id).run();
   await audit(env,session.id,'PRIVACY_REQUEST_UPDATED','privacy_request',item.id);return response({ok:true,status});
  }
  if(path==='/admin/reports'&&request.method==='GET'){
@@ -304,7 +305,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/privacy/requests'&&request.method==='POST'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
-  const kind=String((await readJson(request))?.kind||'').toUpperCase();if(!['EXPORT','DELETE'].includes(kind))return response({error:'Solicitud no válida.',code:'AEC_PRIVACY_INVALID'},400);
+  const privacyBody=await readJson(request),kind=String(privacyBody?.kind||privacyBody?.type||'').toUpperCase();if(!['EXPORT','DELETE'].includes(kind))return response({error:'Solicitud no válida.',code:'AEC_PRIVACY_INVALID'},400);
   const pending=await env.AYUDA_DB.prepare("SELECT id FROM aec_privacy_requests WHERE user_id=? AND kind=? AND status IN ('REQUESTED','PROCESSING')").bind(session.id,kind).first();
   if(pending)return response({ok:true,request:{id:pending.id,status:'REQUESTED'}});
   const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_privacy_requests(id,user_id,kind,status) VALUES(?,?,?,'REQUESTED')").bind(id,session.id,kind).run();
@@ -405,6 +406,11 @@ export async function handleAyudaEnCasaApi(request,env,url){
   const svc=await env.AYUDA_DB.prepare('SELECT COUNT(*) n FROM aec_professional_services WHERE professional_id=?').bind(session.id).first();if(Number(svc?.n||0)<1)return response({error:'Selecciona al menos un servicio.',code:'AEC_PROFILE_INCOMPLETE'},409);
   if(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){const u=await env.AYUDA_DB.prepare('SELECT email_verified_at FROM aec_users WHERE id=?').bind(session.id).first();if(!u?.email_verified_at)return response({error:'Verifica tu correo antes de publicar.',code:'AEC_EMAIL_UNVERIFIED'},409);}
   await env.AYUDA_DB.prepare('UPDATE aec_professional_profiles SET published=1,updated_at=CURRENT_TIMESTAMP WHERE user_id=?').bind(session.id).run();await audit(env,session.id,'PROFILE_PUBLISHED','user',session.id);return response({ok:true,published:true});
+ }
+ if(path==='/professional/profile/unpublish'&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  await env.AYUDA_DB.prepare('UPDATE aec_professional_profiles SET published=0,updated_at=CURRENT_TIMESTAMP WHERE user_id=?').bind(session.id).run();
+  await audit(env,session.id,'PROFILE_UNPUBLISHED','user',session.id);return response({ok:true,published:false});
  }
  if(path==='/professional/profile'&&request.method==='GET'){
   const session=await readSession(request,env);
