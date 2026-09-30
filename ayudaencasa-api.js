@@ -289,7 +289,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/professional/services'&&request.method==='PUT'){
   const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
-  const ids=Array.isArray((await readJson(request))?.categoryIds)?[...new Set((await readJson(request))?.categoryIds)]:[];
+  const serviceBody=await readJson(request),ids=Array.isArray(serviceBody?.categoryIds)?[...new Set(serviceBody.categoryIds)]:[];
   if(ids.length>20||ids.some(x=>typeof x!=='string'||x.length>64))return response({error:'Servicios no válidos.',code:'AEC_SERVICES_INVALID'},400);
   const valid=ids.length?await env.AYUDA_DB.prepare(`SELECT id FROM aec_categories WHERE status='ACTIVE' AND id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all():{results:[]};
   if((valid.results||[]).length!==ids.length)return response({error:'Alguna categoría no es válida.',code:'AEC_SERVICES_INVALID'},400);
