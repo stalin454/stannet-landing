@@ -83,3 +83,10 @@ assert.match(html, /¿Qué significa “fortalecimiento” dentro del Método Yu
 assert.match(html, /¿Qué es la sonoterapia\?/);
 assert.match(html, /¿Qué es Spine Healing\?/);
 assert.match(html, /¿Cómo elijo qué técnica probar\?/);
+
+assert.match(html, /id="comunidad"/);
+assert.match(html, /COMUNIDAD Y CONTENIDO/);
+assert.match(html, /site-footer/);
+assert.match(html, /WhatsApp: \+34 617 717 292/);
+assert.match(html, /¿Quién puede interesarse por el Método Yuen\?/);
+assert.match(html, /¿Cómo empiezo si nunca he probado una técnica energética\?/);
