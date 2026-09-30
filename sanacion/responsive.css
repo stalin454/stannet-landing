@@ -349,3 +349,53 @@ button,a,input,select,textarea{touch-action:manipulation}
   html{scroll-behavior:auto}
   .reveal{opacity:1!important;transform:none!important;transition:none!important}
 }
+
+
+/* Safari / iPadOS reliability */
+@supports (-webkit-touch-callout:none){
+  .reveal{
+    opacity:1 !important;
+    transform:none !important;
+    transition:none !important;
+  }
+
+  @media (min-width:768px) and (max-width:1366px){
+    .nav{
+      overflow:visible;
+      z-index:1000;
+    }
+
+    .menu{
+      display:inline-flex !important;
+    }
+
+    .nav nav{
+      display:none !important;
+      position:absolute;
+      top:76px;
+      left:0;
+      right:0;
+      width:100%;
+      max-height:calc(100dvh - 76px);
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      padding:20px max(28px,var(--safe-right)) max(28px,var(--safe-bottom)) max(28px,var(--safe-left));
+      background:rgba(16,41,29,.99);
+      border-top:1px solid rgba(255,255,255,.12);
+      box-shadow:0 20px 45px rgba(10,30,20,.22);
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px 18px;
+      z-index:1001;
+    }
+
+    .nav nav.open{
+      display:grid !important;
+    }
+
+    .nav nav a{
+      min-height:48px;
+      font-size:15px;
+      padding:10px 12px;
+    }
+  }
+}
