@@ -77,3 +77,9 @@ assert.match(html, /id="profesionales"/);
 assert.match(html, /QUIÉN TE ACOMPAÑA/);
 assert.match(html, /DIRECTORIO DEL EQUIPO/);
 assert.match(html, /CERTIFICACIONES/);
+
+assert.match(html, /Todo lo que conviene saber antes de tu sesión/);
+assert.match(html, /¿Qué significa “fortalecimiento” dentro del Método Yuen\?/);
+assert.match(html, /¿Qué es la sonoterapia\?/);
+assert.match(html, /¿Qué es Spine Healing\?/);
+assert.match(html, /¿Cómo elijo qué técnica probar\?/);
