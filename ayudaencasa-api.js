@@ -15,6 +15,8 @@ export async function handleAyudaEnCasaApi(request,env,url){
  const path=url.pathname.slice(PREFIX.length)||'/';
  if(path==='/auth/register'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const limited=await rateLimit(request,env,'register',5,900);
+  if(!limited.ok) return response({error:'Demasiados intentos. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429,{'Retry-After':String(limited.retryAfter)});
   const body=await readJson(request);
   if(!body) return response({error:'Solicitud no válida.',code:'AEC_BAD_JSON'},400);
   const email=String(body.email||'').trim().toLowerCase();
@@ -38,6 +40,8 @@ export async function handleAyudaEnCasaApi(request,env,url){
  }
  if(path==='/auth/login'&&request.method==='POST'){
   if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const limited=await rateLimit(request,env,'login',10,900);
+  if(!limited.ok) return response({error:'Demasiados intentos. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429,{'Retry-After':String(limited.retryAfter)});
   const body=await readJson(request);
   const email=String(body?.email||'').trim().toLowerCase();
   const password=String(body?.password||'');
@@ -80,6 +84,18 @@ export async function handleAyudaEnCasaApi(request,env,url){
   return response({error:'Función todavía no activada.',code:'AEC_NOT_READY'},503);
  }
  return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
+}
+
+async function rateLimit(request,env,bucket,limit,windowSeconds){
+ if(!env.AYUDA_DB) return {ok:true,retryAfter:0};
+ const ip=request.headers.get('CF-Connecting-IP')||'unknown';
+ const key=await sha256(bucket+':'+ip);
+ const cutoff=new Date(Date.now()-windowSeconds*1000).toISOString();
+ const row=await env.AYUDA_DB.prepare('SELECT COUNT(*) AS n FROM aec_rate_limits WHERE bucket=? AND key_hash=? AND created_at>?').bind(bucket,key,cutoff).first();
+ const count=Number(row?.n||0);
+ if(count>=limit)return {ok:false,retryAfter:windowSeconds};
+ await env.AYUDA_DB.prepare('INSERT INTO aec_rate_limits(id,bucket,key_hash,created_at) VALUES(?,?,?,CURRENT_TIMESTAMP)').bind(crypto.randomUUID(),bucket,key).run();
+ return {ok:true,retryAfter:0};
 }
 
 async function readJson(request){
