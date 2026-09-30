@@ -5,7 +5,7 @@ Base: `/api/ayudaencasa/v1`
 ## Público
 - GET `/health`
 - GET `/categories`
-- GET `/professionals?category=&postal=`
+- GET `/professionals?category=&postal=` — el filtro postal es exacto en esta versión. `service_radius_km` es una preferencia declarada del perfil y no se usa para afirmar distancia geográfica hasta incorporar coordenadas/geocodificación fiable.
 
 ## Identidad
 - POST `/auth/register`
