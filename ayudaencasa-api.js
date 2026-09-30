@@ -244,7 +244,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   if(!['PROCESSING','COMPLETED','REJECTED'].includes(status))return response({error:'Estado no válido.',code:'AEC_PRIVACY_STATE_INVALID'},400);
   const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_privacy_requests WHERE id=?').bind(adminPrivacyMatch[1]).first();
   if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
-  await env.AYUDA_DB.prepare('UPDATE aec_privacy_requests SET status=?,completed_at=CASE WHEN ? IN ('COMPLETED','REJECTED') THEN CURRENT_TIMESTAMP ELSE completed_at END WHERE id=?').bind(status,status,item.id).run();
+  await env.AYUDA_DB.prepare("UPDATE aec_privacy_requests SET status=?,completed_at=CASE WHEN ? IN ('COMPLETED','REJECTED') THEN CURRENT_TIMESTAMP ELSE completed_at END WHERE id=?").bind(status,status,item.id).run();
   await audit(env,session.id,'PRIVACY_REQUEST_UPDATED','privacy_request',item.id);return response({ok:true,status});
  }
  if(path==='/admin/reports'&&request.method==='GET'){
