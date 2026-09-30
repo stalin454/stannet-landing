@@ -42,7 +42,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
   if(verificationEnabled){
    const raw=randomToken(32),hash=await sha256(raw);
    await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'VERIFY_EMAIL',?,datetime('now','+24 hours'))").bind(crypto.randomUUID(),userId,hash).run();
-   await sendAuthEmail(env,{type:'verify_email',email,token:raw});
+   await sendAuthEmail(env,{type:'verify_email',email,token:raw,url:new URL('/pages/marketplace.html?verify='+encodeURIComponent(raw),url.origin).toString()});
    return response({ok:true,verificationRequired:true},201);
   }
   const session=await createSession(env,userId);
@@ -89,7 +89,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
    const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
    await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'RESET_PASSWORD',?,datetime('now','+30 minutes'))").bind(id,user.id,hash).run();
    // Delivery is intentionally delegated to a configured email provider.
-   await sendAuthEmail(env,{type:'password_reset',email,token:raw});
+   await sendAuthEmail(env,{type:'password_reset',email,token:raw,url:new URL('/pages/marketplace.html?reset='+encodeURIComponent(raw),url.origin).toString()});
   }
   return response({ok:true,message:'Si la cuenta existe, recibirás instrucciones para recuperar el acceso.'});
  }
