@@ -102,6 +102,23 @@ export async function handleAyudaEnCasaApi(request,env,url){
   }
   return response({ok:true},200,{'Set-Cookie':expiredCookie()});
  }
+ if(path==='/professional/profile'&&request.method==='GET'){
+  const session=await readSession(request,env);
+  if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const profile=await env.AYUDA_DB.prepare('SELECT display_name,bio,location_label,postal_prefix,hourly_rate_minor,currency,published FROM aec_professional_profiles WHERE user_id=?').bind(session.id).first();
+  return response({profile:profile||null});
+ }
+ if(path==='/professional/profile'&&request.method==='PUT'){
+  const session=await readSession(request,env);
+  if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const body=await readJson(request);
+  const name=String(body?.displayName||'').trim(),bio=String(body?.bio||'').trim(),location=String(body?.location||'').trim(),postal=String(body?.postalPrefix||'').trim(),rate=body?.hourlyRateMinor==null?null:Number(body.hourlyRateMinor);
+  if(name.length<2||name.length>80||bio.length>1500||location.length<2||location.length>120||(rate!==null&&(!Number.isInteger(rate)||rate<0||rate>100000))) return response({error:'Perfil no válido.',code:'AEC_PROFILE_INVALID'},400);
+  await env.AYUDA_DB.prepare(`INSERT INTO aec_professional_profiles(user_id,display_name,bio,location_label,postal_prefix,hourly_rate_minor,currency,published)
+   VALUES(?,?,?,?,?,?,'EUR',0)
+   ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name,bio=excluded.bio,location_label=excluded.location_label,postal_prefix=excluded.postal_prefix,hourly_rate_minor=excluded.hourly_rate_minor,updated_at=CURRENT_TIMESTAMP`).bind(session.id,name,bio,location,postal||null,rate).run();
+  return response({ok:true});
+ }
  if(path==='/categories'&&request.method==='GET'){
   if(env.AYUDA_DB){
    try{
