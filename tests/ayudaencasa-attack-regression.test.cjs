@@ -6,6 +6,8 @@ const invariants=[
  ["professional proposal ownership","professional_id=?"],
  ["job participant authorization","![job.customer_id,job.professional_id].includes(session.id)"],
  ["chat block enforcement","AEC_CHAT_BLOCKED"],
+ ["block relationship authorization","SELECT id FROM aec_jobs WHERE (customer_id=? AND professional_id=?) OR (customer_id=? AND professional_id=?)"],
+ ["block audit trail","USER_BLOCKED"],
  ["review participant authorization","![job.customer_id,job.professional_id].includes(session.id)"],
  ["privacy self-service binding","user_id=? AND kind=?"],
  ["moderator/admin gate","requireAnyRole(request,env,['MODERATOR','ADMIN'])"],
