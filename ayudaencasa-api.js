@@ -264,6 +264,22 @@ export async function handleAyudaEnCasaApi(request,env,url){
    WHERE j.customer_id=? OR j.professional_id=? ORDER BY c.created_at DESC LIMIT 50`).bind(session.id,session.id,session.id,session.id).all();
   return response({conversations:rows.results||[]});
  }
+ if(path==='/me/entitlements'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT code,starts_at,expires_at,source FROM aec_entitlements WHERE user_id=? AND (expires_at IS NULL OR expires_at>CURRENT_TIMESTAMP) ORDER BY code").bind(session.id).all();
+  return response({entitlements:rows.results||[]});
+ }
+ if(path==='/blocks'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT b.blocked_id,u.email,b.created_at FROM aec_blocks b JOIN aec_users u ON u.id=b.blocked_id WHERE b.blocker_id=? ORDER BY b.created_at DESC LIMIT 100").bind(session.id).all();
+  return response({blocks:rows.results||[]});
+ }
+ const unblockMatch=path.match(/^\/blocks\/([^/]+)$/);
+ if(unblockMatch&&request.method==='DELETE'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  await env.AYUDA_DB.prepare('DELETE FROM aec_blocks WHERE blocker_id=? AND blocked_id=?').bind(session.id,unblockMatch[1]).run();
+  await audit(env,session.id,'USER_UNBLOCKED','user',unblockMatch[1]);return response({ok:true});
+ }
  if(path==='/notifications'&&request.method==='GET'){
   const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
   const rows=await env.AYUDA_DB.prepare("SELECT id,kind,payload_json,status,created_at,sent_at FROM aec_notification_outbox WHERE user_id=? ORDER BY created_at DESC LIMIT 50").bind(session.id).all();
