@@ -137,6 +137,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  if(path==='/requests'&&request.method==='POST'){
   const session=await requireRole(request,env,'CUSTOMER');
   if(session instanceof Response)return session;
+  const limited=await rateLimit(request,env,'request-create:'+session.id,12,3600);if(!limited.ok)return response({error:'Has creado demasiadas solicitudes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const body=await readJson(request),title=clean(body?.title,120),description=clean(body?.description,3000),location=clean(body?.location,120),postal=clean(body?.postalPrefix,12),category=clean(body?.categoryId,64);
   if(title.length<4||description.length<10||location.length<2)return response({error:'Solicitud incompleta.',code:'AEC_REQUEST_INVALID'},400);
   if(category){const exists=await env.AYUDA_DB.prepare("SELECT id FROM aec_categories WHERE id=? AND status='ACTIVE'").bind(category).first();if(!exists)return response({error:'Categoría no válida.',code:'AEC_CATEGORY_INVALID'},400);}
@@ -176,6 +177,7 @@ export async function handleAyudaEnCasaApi(request,env,url){
  const proposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
  if(proposalMatch&&request.method==='POST'){
   const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const limited=await rateLimit(request,env,'proposal-create:'+session.id,30,3600);if(!limited.ok)return response({error:'Has enviado demasiadas propuestas. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
   const req=await env.AYUDA_DB.prepare("SELECT id,status FROM aec_requests WHERE id=? AND status IN ('PUBLISHED','MATCHING','PROPOSALS')").bind(proposalMatch[1]).first();
   if(!req)return response({error:'Solicitud no disponible.',code:'AEC_BAD_STATE'},409);
   const body=await readJson(request),message=clean(body?.message,2000),amount=body?.amountMinor==null?null:Number(body.amountMinor);
