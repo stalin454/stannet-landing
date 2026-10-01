@@ -3,6 +3,40 @@
    Applied site-wide. Keep this file loaded after page CSS.
    ============================================================ */
 
+/* ============================================================
+   STANNET MOBILE CONTRACT — REQUIRED ON EVERY PUBLIC PAGE
+   - iPhone / iPad Safari safe areas
+   - 16px form controls to avoid Safari focus zoom
+   - >=44px touch targets on coarse pointers
+   - no accidental horizontal overflow
+   - layouts must degrade cleanly to one column
+   Keep this stylesheet loaded on every public HTML page.
+   ============================================================ */
+
+@supports (-webkit-touch-callout:none){
+  body{
+    padding-bottom:var(--safe-bottom);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea{
+    font-size:16px !important;
+  }
+}
+
+@media (hover:none) and (pointer:coarse){
+  button,
+  [role="button"],
+  summary,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"]{
+    min-height:44px;
+  }
+}
+
+
 :root{
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
