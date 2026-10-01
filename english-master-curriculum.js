@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(window.stannetPlayEnglish)window.stannetPlayEnglish(text,{button:button,loadingText:'Loading…'});
   };
   const normalize=function(v){
-    return String(v||'').toLowerCase().replace(/[’']/g,"'").replace(/[?.!,;:]/g,'').replace(/s+/g,' ').trim();
+    return String(v||'').toLowerCase().replace(/[’']/g,"'").replace(/[?.!,;:]/g,'').replace(/\s+/g,' ').trim();
   };
 
   const levelData=function(){return api.getLevel(state.level);};
@@ -59,13 +59,59 @@ document.addEventListener('DOMContentLoaded',function(){
         '<div><span class="master-course-kicker">MASTER CURRICULUM · A1 → C2</span><h2>'+counts.lessons+' lecciones.<br><em>Una sola ruta.</em></h2><p>Todo el contenido queda ahora dentro de un mapa único: fundamentos, vocabulario, listening, reading, producción y evaluación en cada módulo.</p></div>'+
         '<div class="master-course-totals"><div><b>'+counts.levels+'</b><span>niveles</span></div><div><b>'+counts.modules+'</b><span>módulos</span></div><div><b>'+counts.lessons+'</b><span>lecciones</span></div><div><b id="masterOverall">'+overallProgress()+'%</b><span>global</span></div></div>'+
       '</header>'+
-      '<div class="master-level-tabs" id="masterLevelTabs"></div>'+
+      '<div class="master-course-tools"><label><span>BUSCAR EN 288 LECCIONES</span><input id="masterSearch" type="search" placeholder="present perfect, society, passive, writing…"></label><button id="masterContinue" type="button">Continuar donde quedé →</button></div>'+'<div class="master-search-results" id="masterSearchResults" hidden></div>'+'<div class="master-level-tabs" id="masterLevelTabs"></div>'+
       '<div class="master-level-summary" id="masterLevelSummary"></div>'+
       '<div class="master-course-layout">'+
         '<aside class="master-course-nav"><div id="masterModules"></div><div id="masterLessons"></div></aside>'+
         '<main class="master-lesson-panel" id="masterLessonPanel"></main>'+
       '</div>'+
     '</div>';
+
+  const bindMasterSearch=function(){
+    const input=document.querySelector('#masterSearch');
+    const results=document.querySelector('#masterSearchResults');
+    const cont=document.querySelector('#masterContinue');
+    if(cont)cont.addEventListener('click',function(){
+      render();
+      host.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    if(!input||!results)return;
+    input.addEventListener('input',function(){
+      const q=normalize(input.value);
+      if(q.length<2){results.setAttribute('hidden','');results.innerHTML='';return;}
+      const matches=[];
+      LEVELS.forEach(function(level){
+        const l=api.getLevel(level);
+        if(!l)return;
+        l.modules.forEach(function(m,mi){
+          const haystack=normalize([m.title,m.context,m.sourceBasis].concat(m.theory||[],m.patterns||[],(m.lexicon||[]).flat(),(m.examples||[]).flat(),m.writing,m.project).join(' '));
+          if(haystack.includes(q)){
+            m.lessons.forEach(function(lesson,li){
+              if(matches.length<24)matches.push({level:level,module:mi,lesson:li,title:lesson.title,skill:lesson.skill});
+            });
+          }else{
+            m.lessons.forEach(function(lesson,li){
+              const lh=normalize([lesson.title,lesson.objective,lesson.skill].join(' '));
+              if(lh.includes(q)&&matches.length<24)matches.push({level:level,module:mi,lesson:li,title:lesson.title,skill:lesson.skill});
+            });
+          }
+        });
+      });
+      results.innerHTML=matches.length?matches.map(function(x){
+        return '<button type="button" data-search-level="'+x.level+'" data-search-module="'+x.module+'" data-search-lesson="'+x.lesson+'"><b>'+x.level+' · '+esc(x.skill)+'</b><span>'+esc(x.title)+'</span></button>';
+      }).join(''):'<p>No se encontraron lecciones con ese término.</p>';
+      results.removeAttribute('hidden');
+      results.querySelectorAll('button').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          state.level=btn.getAttribute('data-search-level');
+          state.module=Number(btn.getAttribute('data-search-module'));
+          state.lesson=Number(btn.getAttribute('data-search-lesson'));
+          save();syncExternalLevel();input.value='';results.setAttribute('hidden','');render();
+          host.scrollIntoView({behavior:'smooth',block:'start'});
+        });
+      });
+    });
+  };
 
   const renderLevelTabs=function(){
     const el=document.querySelector('#masterLevelTabs');
@@ -237,6 +283,9 @@ document.addEventListener('DOMContentLoaded',function(){
     });
 
     const draft=document.querySelector('#masterWritingDraft');
+    if(draft){try{const saved=localStorage.getItem('stannetEnglishMasterDraft:'+lesson.id);if(saved)draft.value=saved;}catch(e){}
+      draft.addEventListener('input',function(){try{localStorage.setItem('stannetEnglishMasterDraft:'+lesson.id,draft.value);}catch(e){}});
+    }
     const listenDraft=document.querySelector('#masterListenDraft');
     if(listenDraft&&draft)listenDraft.addEventListener('click',function(){if(draft.value.trim())speak(draft.value.trim(),listenDraft);});
     const sendCoach=document.querySelector('#masterSendCoach');
@@ -300,6 +349,7 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   });
 
+  bindMasterSearch();
   syncExternalLevel();
   render();
 });
