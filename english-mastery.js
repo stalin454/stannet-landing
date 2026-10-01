@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   const renderCoach=function(){
     const el=document.querySelector('#masteryCoach');
-    const last=state.lastCoach||{};
+    const last=state.lastCoach||{};let incomingDraft='';try{incomingDraft=localStorage.getItem('stannetEnglishCoachDraft')||'';}catch(e){}if(incomingDraft){last.text=incomingDraft;try{localStorage.removeItem('stannetEnglishCoachDraft');}catch(e){}}
     el.innerHTML=
       '<div class="mastery-intro"><div><span class="mastery-kicker">AI ENGLISH COACH</span><h3>Escribe. Corrige. Entiende.</h3></div><p>El tutor separa errores reales de preferencias estilísticas y explica en español. Úsalo después de intentar escribir sin ayuda.</p></div>'+
       '<div class="coach-layout"><div class="coach-editor">'+
