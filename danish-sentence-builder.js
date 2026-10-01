@@ -27,11 +27,11 @@ document.addEventListener('DOMContentLoaded', function(){
     '<div class="builder-shell">'+
       '<div class="builder-head"><div><span class="builder-kicker">CONSTRUCTOR INTERACTIVO</span><h3>Construye la oración por bloques.</h3><p>Elige cada pieza. La academia coloca el verbo, la negación y el orden V2 automáticamente.</p></div><div class="builder-actions"><button id="builderRandom" type="button">Ejemplo aleatorio</button><button id="builderReset" type="button">Reiniciar</button></div></div>'+
       '<div class="builder-grid">'+
-        '<label><span>1 · SUJETO</span><select id="builderSubject">'+optionList(data.subjects,null,null)+'</select></label>'+
+        '<label><span>1 · SUJETO</span><select id="builderSubject">'+data.subjects.map(function(x,i){return '<option value="'+i+'">'+esc(x.da)+' · '+esc(x.es)+'</option>';}).join('')+'</select></label>'+
         '<label><span>2 · TIPO DE ORACIÓN</span><select id="builderMode">'+data.modes.map(function(x){return '<option value="'+x.id+'">'+esc(x.label)+'</option>';}).join('')+'</select></label>'+
         '<label><span>3 · TIEMPO VERBAL</span><select id="builderTense">'+data.tenses.map(function(x){return '<option value="'+x.id+'">'+esc(x.label)+'</option>';}).join('')+'</select></label>'+
         '<label><span>4 · VERBO</span><select id="builderVerb">'+data.verbs.map(function(v,i){return '<option value="'+i+'">'+esc(v.da)+' · '+esc(v.esInf)+'</option>';}).join('')+'</select></label>'+
-        '<label id="builderWhWrap"><span>5 · INTERROGATIVO</span><select id="builderWh">'+optionList(data.whWords,null,null)+'</select></label>'+
+        '<label id="builderWhWrap"><span>5 · INTERROGATIVO</span><select id="builderWh">'+data.whWords.map(function(x,i){return '<option value="'+i+'">'+esc(x.da)+' · '+esc(x.es)+'</option>';}).join('')+'</select></label>'+
         '<label><span>6 · ADVERBIO</span><select id="builderAdverb">'+optionList(data.adverbs,null,null)+'</select></label>'+
         '<label><span>7 · COMPLEMENTO / FRASE</span><select id="builderComplement"></select></label>'+
         '<label><span>8 · LUGAR</span><select id="builderPlace">'+optionList(data.places,null,null)+'</select></label>'+
