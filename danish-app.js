@@ -3,65 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const data = window.stannetDanishData;
   if (!data) return;
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const danishAudio = new Audio();
+  danishAudio.preload = 'auto';
+  danishAudio.setAttribute('playsinline','');
 
-  const speakWithSystemVoice = (text, feedback) => {
-    if (!('speechSynthesis' in window) || !text) return false;
-
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'da-DK';
-      utterance.rate = 0.86;
-      utterance.pitch = 1;
-
-      const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
-      const danishVoice = voices.find(function(voice){
-        return /^da(?:-|_)/i.test(voice.lang || '') || /danish|dansk/i.test(voice.name || '');
-      });
-      if (danishVoice) utterance.voice = danishVoice;
-
-      utterance.onstart = function(){
-        if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
-      };
-      utterance.onerror = function(){
-        if (feedback) feedback.textContent = 'No se pudo reproducir la voz danesa del dispositivo.';
-      };
-
-      window.speechSynthesis.resume();
-      window.speechSynthesis.speak(utterance);
-      return true;
-    } catch (error) {
-      if (feedback) feedback.textContent = 'No se pudo reproducir la voz danesa del dispositivo.';
-      return false;
-    }
-  };
-
-  if ('speechSynthesis' in window && window.speechSynthesis.getVoices) {
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.addEventListener && window.speechSynthesis.addEventListener('voiceschanged', function(){
-      window.speechSynthesis.getVoices();
-    });
-  }
-
-  const playDanish = async (text, options = {}) => {
+  const playDanish = (text, options = {}) => {
     const button = options.button || null;
     const feedback = options.feedback || null;
-    const loadingText = options.loadingText || 'Generando voz danesa natural...';
+    const loadingText = options.loadingText || 'Cargando voz danesa...';
     const original = button ? button.textContent : '';
 
     if (!text) {
       if (feedback) feedback.textContent = 'No hay texto danés para reproducir.';
       return false;
-    }
-
-    /*
-      Safari/iPadOS can block media playback after an awaited network request because
-      the original user gesture is no longer considered active. Use system TTS
-      immediately on iOS so playback starts inside the tap/click event.
-    */
-    if (isIOS) {
-      return speakWithSystemVoice(text, feedback);
     }
 
     if (button) {
@@ -70,33 +24,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (feedback) feedback.textContent = loadingText;
 
-    try {
-      const response = await fetch('/api/speech', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text, lang: 'da-DK' })
-      });
-      if (!response.ok) throw new Error('speech');
+    danishAudio.pause();
+    try { danishAudio.currentTime = 0; } catch (error) {}
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio();
-      audio.preload = 'auto';
-      audio.src = url;
-      audio.onended = function(){ URL.revokeObjectURL(url); };
-      audio.onerror = function(){ URL.revokeObjectURL(url); };
-      await audio.play();
+    const src = '/api/speech?lang=da-DK&text=' + encodeURIComponent(text);
+    danishAudio.src = src;
 
-      if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
-      return true;
-    } catch (error) {
-      return speakWithSystemVoice(text, feedback);
-    } finally {
+    danishAudio.onplaying = function(){
       if (button) {
         button.classList.remove('loading');
         button.textContent = original;
       }
+      if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
+    };
+
+    danishAudio.onended = function(){
+      if (button) {
+        button.classList.remove('loading');
+        button.textContent = original;
+      }
+    };
+
+    danishAudio.onerror = function(){
+      if (button) {
+        button.classList.remove('loading');
+        button.textContent = original;
+      }
+      if (feedback) feedback.textContent = 'No se pudo reproducir tu voz danesa conectada. Revisa el servicio de voz.';
+    };
+
+    const promise = danishAudio.play();
+    if (promise && typeof promise.catch === 'function') {
+      promise.catch(function(){
+        if (button) {
+          button.classList.remove('loading');
+          button.textContent = original;
+        }
+        if (feedback) feedback.textContent = 'Safari bloqueó el audio. Toca de nuevo el botón de escuchar.';
+      });
     }
+    return true;
   };
 
   window.stannetPlayDanish = playDanish;
