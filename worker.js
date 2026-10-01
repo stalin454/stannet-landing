@@ -156,25 +156,38 @@ export default {
 
       let text = '';
       let requestedLang = 'da-DK';
+      let requestedVoice = '';
 
       if (request.method === 'GET') {
         text = (url.searchParams.get('text') || '').trim();
         requestedLang = (url.searchParams.get('lang') || 'da-DK').trim();
+        requestedVoice = (url.searchParams.get('voice') || '').trim();
       } else {
         let body;
         try { body = await request.json(); }
         catch { return json({ error: 'Solicitud no válida.' }, 400); }
         text = typeof body?.text === 'string' ? body.text.trim() : '';
         requestedLang = typeof body?.lang === 'string' ? body.lang : 'da-DK';
+        requestedVoice = typeof body?.voice === 'string' ? body.voice.trim() : '';
       }
 
       const voiceMap = {
-        'da-DK': 'da-DK-ChristelNeural',
-        'en-US': 'en-US-JennyNeural',
-        'en-GB': 'en-GB-SoniaNeural'
+        'da-DK': {
+          default: 'da-DK-ChristelNeural',
+          allowed: ['da-DK-ChristelNeural']
+        },
+        'en-GB': {
+          default: 'en-GB-SoniaNeural',
+          allowed: ['en-GB-SoniaNeural','en-GB-RyanNeural']
+        },
+        'en-US': {
+          default: 'en-US-AriaNeural',
+          allowed: ['en-US-AriaNeural','en-US-GuyNeural']
+        }
       };
       const language = voiceMap[requestedLang] ? requestedLang : 'da-DK';
-      const voice = voiceMap[language];
+      const config = voiceMap[language];
+      const voice = config.allowed.includes(requestedVoice) ? requestedVoice : config.default;
       const region = env.AZURE_SPEECH_REGION;
       const key = env.AZURE_SPEECH_KEY;
 
