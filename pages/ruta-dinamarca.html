@@ -235,8 +235,47 @@ body{overflow-x:hidden}
 </div>
 </section>
 
+
+<section class="route-section" id="gasolineras">
+<div class="route-heading"><span>06 / GASOLINERAS</span><div><h2>Encuentra combustible o carga cerca de ti.</h2><p>Usa tu ubicación actual o elige una ciudad manualmente. El buscador abre una búsqueda cercana y, además, tienes acceso directo a los localizadores oficiales de las principales redes.</p></div></div>
+
+<div class="fuel-finder" data-fuel-finder>
+  <div class="fuel-controls">
+    <div class="fuel-field">
+      <label for="fuelCity">Ciudad</label>
+      <select id="fuelCity">
+        <option value="">Elegir ciudad…</option>
+        <option>Copenhague</option>
+        <option>Aarhus</option>
+        <option>Odense</option>
+        <option>Vejle</option>
+        <option>Fredericia</option>
+        <option>Kolding</option>
+        <option>Horsens</option>
+      </select>
+    </div>
+    <div class="fuel-actions">
+      <button type="button" class="fuel-btn primary" id="fuelNearMe">⛽ Gasolineras cerca de mí</button>
+      <button type="button" class="fuel-btn" id="chargeNearMe">⚡ Cargadores cerca de mí</button>
+      <button type="button" class="fuel-btn" id="fuelByCity">Buscar en la ciudad elegida</button>
+    </div>
+    <p class="fuel-status" id="fuelStatus" aria-live="polite">Puedes usar ubicación o seleccionar una ciudad. No se guarda tu ubicación.</p>
+  </div>
+
+  <div class="fuel-providers">
+    <a href="https://www.circlek.dk/stationer" target="_blank" rel="noopener noreferrer"><strong>Circle K</strong><span>Buscar estación oficial ↗</span></a>
+    <a href="https://www.q8.dk/find-station/" target="_blank" rel="noopener noreferrer"><strong>Q8 / F24</strong><span>Buscar estación oficial ↗</span></a>
+    <a href="https://www.ok.dk/privat/produkter/tankning/find-tankstation" target="_blank" rel="noopener noreferrer"><strong>OK</strong><span>Buscar estación oficial ↗</span></a>
+    <a href="https://www.shell.dk/business-customers/find-station.html" target="_blank" rel="noopener noreferrer"><strong>Shell</strong><span>Buscar estación oficial ↗</span></a>
+    <a href="https://clever.dk/ladeloesninger/clever-app/" target="_blank" rel="noopener noreferrer"><strong>Clever</strong><span>Buscar carga eléctrica ↗</span></a>
+  </div>
+
+  <p class="fuel-note">Consejo práctico: revisa en el proveedor el tipo de combustible, horario, servicios y método de pago antes de desplazarte. Para vehículos eléctricos, la disponibilidad de puntos puede cambiar en tiempo real.</p>
+</div>
+</section>
+
 <section class="route-section" id="ciudades">
-<div class="route-heading"><span>06 / CIUDADES</span><div><h2>Ciudades bajo el radar.</h2><p>La lista irá cambiando a medida que comparemos estudios, empleo, vivienda y calidad de vida.</p></div></div>
+<div class="route-heading"><span>07 / CIUDADES</span><div><h2>Ciudades bajo el radar.</h2><p>La lista irá cambiando a medida que comparemos estudios, empleo, vivienda y calidad de vida.</p></div></div>
 <div class="city-grid">
 <div class="city"><strong>Fredericia</strong><span>Base posible · Jutlandia</span></div>
 <div class="city"><strong>Vejle</strong><span>Estudios · conexiones</span></div>
@@ -250,7 +289,7 @@ body{overflow-x:hidden}
 
 
 <section class="route-section" id="fuentes">
-<div class="route-heading"><span>07 / FIABILIDAD</span><div><h2>Información verificada, no rumores.</h2><p>Los trámites, salud, impuestos, movilidad y empleo se documentan priorizando fuentes públicas danesas. Cada guía operativa indicará qué autoridad es responsable, el enlace oficial y la fecha de la última comprobación.</p></div></div>
+<div class="route-heading"><span>08 / FIABILIDAD</span><div><h2>Información verificada, no rumores.</h2><p>Los trámites, salud, impuestos, movilidad y empleo se documentan priorizando fuentes públicas danesas. Cada guía operativa indicará qué autoridad es responsable, el enlace oficial y la fecha de la última comprobación.</p></div></div>
 <div class="route-grid">
 <article class="route-panel"><b>FUENTE PRIMARIA</b><h3>Autoridad competente</h3><p>SIRI / New to Denmark para residencia UE; Life in Denmark y Borgerservice para CPR, salud y servicios públicos; SKAT para impuestos; Workindenmark para empleo.</p></article>
 <article class="route-panel"><b>TRANSPORTE</b><h3>Datos vigentes</h3><p>La guía de movilidad se contrastará con Rejsekort, Rejseplanen, DSB y los operadores regionales antes de publicarse.</p></article>
@@ -265,6 +304,7 @@ body{overflow-x:hidden}
 </div>
 </section>
 </main>
+<script src="../denmark-mobility-search.js?v=20261001-1"></script>
 <script src="/stannet-global-nav.js?v=20261001-8"></script>
 </body>
 </html>
