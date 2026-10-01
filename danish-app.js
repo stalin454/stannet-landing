@@ -192,6 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => playDanish(item[3][phraseIndex][0], { button, loadingText: 'Cargando...' }));
       });
       itemList.querySelectorAll('.course-item').forEach((button, itemIndex) => button.classList.toggle('active', itemIndex === index));
+      document.dispatchEvent(new CustomEvent('stannet:danish-course-changed', {
+        detail: { level: levelValue, index: index, item: item }
+      }));
     };
 
     const renderIndex = () => {
@@ -245,6 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
           render();
         });
       });
+      document.dispatchEvent(new CustomEvent('stannet:danish-grammar-changed', {
+        detail: { index: activeIndex, item: item }
+      }));
     };
 
     render();
