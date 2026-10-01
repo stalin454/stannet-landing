@@ -75,6 +75,8 @@ window.stannetDanishCore = {
     ['futureSkal','Plan futuro con skal'],
     ['futurePrediction','Predicción con kommer til at'],
     ['futurePerfect','Futuro perfecto'],
+    ['conditional','Condicional con ville'],
+    ['conditionalPerfect','Condicional perfecto'],
     ['presentParticiple','Participio presente'],
     ['pastParticiple','Participio pasado']
   ]
