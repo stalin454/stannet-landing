@@ -3,14 +3,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const data = window.stannetDanishData;
   if (!data) return;
 
-  const danishAudio = new Audio();
-  danishAudio.preload = 'auto';
-  danishAudio.setAttribute('playsinline','');
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  let danishAudioContext = null;
+  let danishSource = null;
+  let danishFallbackAudio = null;
 
-  const playDanish = (text, options = {}) => {
+  const unlockDanishAudio = () => {
+    if (!AudioContextClass) return null;
+    if (!danishAudioContext) danishAudioContext = new AudioContextClass();
+    if (danishAudioContext.state === 'suspended') {
+      try { danishAudioContext.resume(); } catch (error) {}
+    }
+    return danishAudioContext;
+  };
+
+  const stopDanishAudio = () => {
+    if (danishSource) {
+      try { danishSource.stop(0); } catch (error) {}
+      try { danishSource.disconnect(); } catch (error) {}
+      danishSource = null;
+    }
+    if (danishFallbackAudio) {
+      try { danishFallbackAudio.pause(); } catch (error) {}
+      danishFallbackAudio = null;
+    }
+  };
+
+  const playDanish = async (text, options = {}) => {
     const button = options.button || null;
     const feedback = options.feedback || null;
-    const loadingText = options.loadingText || 'Cargando voz danesa...';
+    const loadingText = options.loadingText || 'Generando voz danesa natural...';
     const original = button ? button.textContent : '';
 
     if (!text) {
@@ -18,52 +40,85 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     }
 
+    /*
+      IMPORTANT FOR iOS/Safari:
+      Resume/unlock Web Audio synchronously from the user's tap BEFORE awaiting
+      the Cloudflare/Azure request. The returned MP3 can then be decoded and
+      played through the already-authorized AudioContext.
+    */
+    const audioContext = unlockDanishAudio();
+    stopDanishAudio();
+
     if (button) {
       button.classList.add('loading');
       button.textContent = loadingText;
     }
     if (feedback) feedback.textContent = loadingText;
 
-    danishAudio.pause();
-    try { danishAudio.currentTime = 0; } catch (error) {}
-
-    const src = '/api/speech?lang=da-DK&text=' + encodeURIComponent(text);
-    danishAudio.src = src;
-
-    danishAudio.onplaying = function(){
-      if (button) {
-        button.classList.remove('loading');
-        button.textContent = original;
-      }
-      if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
-    };
-
-    danishAudio.onended = function(){
-      if (button) {
-        button.classList.remove('loading');
-        button.textContent = original;
-      }
-    };
-
-    danishAudio.onerror = function(){
-      if (button) {
-        button.classList.remove('loading');
-        button.textContent = original;
-      }
-      if (feedback) feedback.textContent = 'No se pudo reproducir tu voz danesa conectada. Revisa el servicio de voz.';
-    };
-
-    const promise = danishAudio.play();
-    if (promise && typeof promise.catch === 'function') {
-      promise.catch(function(){
-        if (button) {
-          button.classList.remove('loading');
-          button.textContent = original;
-        }
-        if (feedback) feedback.textContent = 'Safari bloqueó el audio. Toca de nuevo el botón de escuchar.';
+    try {
+      const response = await fetch('/api/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+        body: JSON.stringify({ text: text, lang: 'da-DK' }),
+        cache: 'no-store'
       });
+
+      if (!response.ok) {
+        let detail = '';
+        try {
+          const payload = await response.json();
+          detail = payload && payload.error ? payload.error : '';
+        } catch (error) {}
+        throw new Error(detail || ('Speech HTTP ' + response.status));
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.toLowerCase().includes('audio')) {
+        throw new Error('La API no devolvió audio.');
+      }
+
+      const bytes = await response.arrayBuffer();
+      if (!bytes || bytes.byteLength < 1000) {
+        throw new Error('El audio recibido está vacío o incompleto.');
+      }
+
+      if (audioContext) {
+        const bufferCopy = bytes.slice(0);
+        const decoded = await audioContext.decodeAudioData(bufferCopy);
+        const source = audioContext.createBufferSource();
+        source.buffer = decoded;
+        source.connect(audioContext.destination);
+        source.onended = function(){
+          if (danishSource === source) danishSource = null;
+        };
+        danishSource = source;
+        source.start(0);
+      } else {
+        const blob = new Blob([bytes], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.setAttribute('playsinline','');
+        danishFallbackAudio = audio;
+        audio.onended = function(){
+          URL.revokeObjectURL(url);
+          if (danishFallbackAudio === audio) danishFallbackAudio = null;
+        };
+        audio.onerror = function(){ URL.revokeObjectURL(url); };
+        await audio.play();
+      }
+
+      if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
+      return true;
+    } catch (error) {
+      const message = error && error.message ? error.message : 'No se pudo reproducir el audio.';
+      if (feedback) feedback.textContent = 'Audio danés: ' + message;
+      return false;
+    } finally {
+      if (button) {
+        button.classList.remove('loading');
+        button.textContent = original;
+      }
     }
-    return true;
   };
 
   window.stannetPlayDanish = playDanish;
