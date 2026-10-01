@@ -123,6 +123,7 @@ document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
 
 // StanNet AI: load the shared floating assistant on every page that uses script.js.
 (()=>{
+  if(document.body.classList.contains('vocal-studio-page'))return;
   if(document.querySelector('script[data-stannet-ai-loader]'))return;
   const ai=document.createElement('script');
   ai.src='/stannet-ai.js';
