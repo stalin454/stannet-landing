@@ -1,0 +1,58 @@
+/* StanNet English Academy — engine styles inspired by Danish Academy structure. */
+.english-engine-section{background:linear-gradient(135deg,rgba(139,216,255,.055),rgba(255,180,94,.045),transparent 72%)}
+.english-core-shell{border:1px solid rgba(139,216,255,.18);background:rgba(7,21,37,.88);padding:clamp(18px,3vw,30px)}
+.english-core-tabs{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:12px;margin-bottom:22px;border-bottom:1px solid rgba(139,216,255,.12)}
+.english-core-tabs button{min-height:42px;border:1px solid rgba(139,216,255,.18);background:transparent;color:#9db8c6;padding:0 15px;font:500 9px var(--font-main);cursor:pointer}
+.english-core-tabs button.active{border-color:var(--academy-blue);background:rgba(139,216,255,.09);color:#fff}
+.english-core-panel{display:none}.english-core-panel.active{display:block}
+.english-core-intro{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:24px;align-items:end;margin-bottom:22px}
+.english-core-intro h3{font-size:clamp(30px,4.5vw,58px);line-height:.98;letter-spacing:-.06em;margin:7px 0 0}
+.english-core-intro p{margin:0;color:#b9cdd8;line-height:1.75}
+.english-core-kicker{display:block;color:var(--academy-blue);font:600 9px var(--font-main);letter-spacing:.14em}
+.english-pronoun-grid{display:grid;gap:10px}
+.english-pronoun-row{display:grid;grid-template-columns:1.15fr repeat(5,minmax(100px,.76fr)) 1.7fr;gap:9px;padding:13px;border:1px solid rgba(139,216,255,.13)}
+.english-pronoun-person,.english-pronoun-cell,.english-pronoun-example{min-width:0}
+.english-pronoun-person{padding:10px;background:rgba(139,216,255,.035)}
+.english-pronoun-person span{display:block;color:#fff;font:600 10px var(--font-main)}
+.english-pronoun-person small{display:block;color:#8fa8b6;font-size:11px;line-height:1.45;margin-top:6px}
+.english-pronoun-cell{display:flex;flex-direction:column;gap:7px;padding:10px;border-left:1px solid rgba(139,216,255,.08)}
+.english-pronoun-cell b,.english-pronoun-example b{color:#7692a1;font:600 8px var(--font-main);letter-spacing:.1em}
+.english-pronoun-cell button{min-height:36px;border:1px solid rgba(139,216,255,.18);background:transparent;color:#fff;padding:0 9px;text-align:left;font:600 12px var(--font-main);cursor:pointer}
+.english-pronoun-cell button span{float:right;color:var(--academy-blue)}
+.english-pronoun-cell button:disabled{opacity:.4;cursor:default}
+.english-pronoun-example{padding:10px}.english-pronoun-example span{display:block;color:#d6e4ea;font-size:12px;line-height:1.55;margin:7px 0 9px}
+.english-pronoun-example button{border:0;background:transparent;color:var(--academy-blue);padding:0;font:500 9px var(--font-main);cursor:pointer}
+.english-verb-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.english-verb-controls label{display:grid;gap:7px;color:#7896a5;font:600 8px var(--font-main);letter-spacing:.1em}
+.english-verb-controls select,.english-verb-controls input{min-height:44px;border:1px solid rgba(139,216,255,.18);background:#081827;color:#fff;padding:0 12px}
+.english-verb-hero{display:flex;justify-content:space-between;gap:20px;align-items:end;padding:22px;border:1px solid rgba(139,216,255,.16);background:linear-gradient(120deg,rgba(139,216,255,.06),rgba(255,180,94,.04))}
+.english-verb-hero h4{font-size:clamp(36px,5vw,64px);line-height:.95;margin:7px 0}.english-verb-hero p{margin:0;color:#b4c9d4}
+.english-verb-hero>button{min-height:44px;border:1px solid var(--academy-blue);background:transparent;color:var(--academy-blue);padding:0 14px;font:500 9px var(--font-main);cursor:pointer}
+.english-base-forms{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:10px 0 16px}
+.english-base-forms button{min-height:72px;border:1px solid rgba(139,216,255,.12);background:rgba(139,216,255,.025);color:#fff;display:grid;place-items:center;gap:2px;padding:9px;cursor:pointer}
+.english-base-forms b{color:#7896a5;font:600 8px var(--font-main)}.english-base-forms span{font-size:13px}.english-base-forms i{font-style:normal;color:var(--academy-blue);font-size:10px}
+.english-tense-list{display:grid;gap:10px}.english-tense-block{border:1px solid rgba(139,216,255,.13);padding:14px}
+.english-tense-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.english-tense-head span{color:#fff;font:600 11px var(--font-main)}
+.english-tense-head button{border:0;background:transparent;color:var(--academy-orange);font:500 9px var(--font-main);cursor:pointer}
+.english-tense-persons{display:grid;grid-template-columns:repeat(7,minmax(95px,1fr));gap:7px}
+.english-tense-persons button{min-height:62px;border:1px solid rgba(139,216,255,.1);background:rgba(139,216,255,.02);color:#fff;display:grid;place-items:center;gap:2px;padding:8px;cursor:pointer}
+.english-tense-persons b{color:var(--academy-blue);font:600 10px var(--font-main)}.english-tense-persons span{font-size:11px;text-align:center;line-height:1.35}.english-tense-persons i{font-style:normal;color:#7692a1;font-size:9px}
+.english-aux-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.english-aux-card{padding:18px;border:1px solid rgba(139,216,255,.14);background:rgba(139,216,255,.025)}
+.english-aux-head{display:flex;justify-content:space-between;gap:14px;align-items:start}.english-aux-head span{display:block;color:var(--academy-orange);font:600 8px var(--font-main);letter-spacing:.09em}.english-aux-head h4{font-size:34px;margin:6px 0 2px}.english-aux-head small{color:#91a8b4}
+.english-aux-head>button{width:42px;height:42px;border:1px solid var(--academy-blue);background:transparent;color:var(--academy-blue);cursor:pointer}
+.english-aux-forms,.english-aux-pattern,.english-aux-example{margin-top:12px;padding:12px;border:1px solid rgba(139,216,255,.1)}
+.english-aux-forms b,.english-aux-pattern b{display:block;color:#7896a5;font:600 8px var(--font-main);letter-spacing:.1em;margin-bottom:6px}
+.english-aux-forms button,.english-aux-example button{border:0;background:transparent;color:var(--academy-blue);padding:0;font:500 9px var(--font-main);cursor:pointer}
+.english-aux-pattern{border-left:2px solid var(--academy-orange);background:rgba(255,180,94,.04)}.english-aux-pattern code{color:#fff;white-space:normal}
+.english-aux-example strong{display:block;color:#fff;line-height:1.55}.english-aux-example span{display:block;color:#a9bdc7;font-size:12px;line-height:1.55;margin:6px 0 8px}
+.english-voice-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;padding:18px;border:1px solid rgba(139,216,255,.18);background:linear-gradient(120deg,rgba(139,216,255,.07),rgba(255,180,94,.045))}
+.english-voice-copy span{display:block;color:var(--academy-blue);font:600 8px var(--font-main);letter-spacing:.12em}.english-voice-copy strong{display:block;color:#fff;font-size:18px;margin:5px 0}.english-voice-copy small{color:#99b2bf;line-height:1.5}
+.english-voice-options{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.english-voice-options label{display:grid;gap:5px}.english-voice-options label span{color:#7896a5;font:600 8px var(--font-main)}
+.english-voice-options select{min-height:42px;border:1px solid rgba(139,216,255,.18);background:#081827;color:#fff;padding:0 10px}
+.english-voice-options button{min-height:42px;border:1px solid var(--academy-blue);background:transparent;color:var(--academy-blue);padding:0 13px;font:500 9px var(--font-main);cursor:pointer}
+@media(max-width:1180px){.english-pronoun-row{grid-template-columns:1fr 1fr 1fr}.english-pronoun-example{grid-column:1/-1}.english-tense-persons{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.english-core-intro{grid-template-columns:1fr}.english-aux-grid,.english-verb-controls{grid-template-columns:1fr}.english-base-forms{grid-template-columns:repeat(3,1fr)}.english-tense-persons{grid-template-columns:repeat(3,1fr)}.english-voice-bar{grid-template-columns:1fr}}
+@media(max-width:620px){.english-core-shell{padding:15px}.english-core-tabs{display:grid;grid-template-columns:1fr}.english-core-tabs button{width:100%}.english-pronoun-row{grid-template-columns:1fr}.english-pronoun-example{grid-column:auto}.english-base-forms{grid-template-columns:1fr 1fr}.english-tense-persons{grid-template-columns:1fr 1fr}.english-verb-hero{align-items:flex-start;flex-direction:column}.english-verb-hero>button{width:100%}.english-voice-options{display:grid}.english-voice-options select,.english-voice-options button{width:100%}}
+@media(max-width:420px){.english-base-forms,.english-tense-persons{grid-template-columns:1fr}.english-verb-controls select,.english-verb-controls input,.english-voice-options select{font-size:16px}}
+@supports (-webkit-touch-callout:none){.english-engine-section input,.english-engine-section select,.english-voice-bar select{font-size:16px}.english-engine-section button,.english-voice-bar button{touch-action:manipulation}}
