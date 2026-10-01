@@ -11,6 +11,14 @@ const levelsData = fs.readFileSync('english-levels-data.js','utf8');
 const levels = fs.readFileSync('english-levels.js','utf8');
 const masteryData = fs.readFileSync('english-mastery-data.js','utf8');
 const mastery = fs.readFileSync('english-mastery.js','utf8');
+const masterBase = fs.readFileSync('english-master-curriculum-base.js','utf8');
+const masterA1 = fs.readFileSync('english-curriculum-a1.js','utf8');
+const masterA2 = fs.readFileSync('english-curriculum-a2.js','utf8');
+const masterB1 = fs.readFileSync('english-curriculum-b1.js','utf8');
+const masterB2 = fs.readFileSync('english-curriculum-b2.js','utf8');
+const masterC1 = fs.readFileSync('english-curriculum-c1.js','utf8');
+const masterC2 = fs.readFileSync('english-curriculum-c2.js','utf8');
+const masterEngine = fs.readFileSync('english-master-curriculum.js','utf8');
 const a1 = fs.readFileSync('english-a1-deep.js','utf8');
 const expansion = fs.readFileSync('english-expansion.js','utf8');
 const worker = fs.readFileSync('worker.js','utf8');
@@ -20,11 +28,13 @@ assert.ok(html.includes('id="englishCoreLab"'),'English Core Lab mount missing')
 assert.ok(html.includes('id="englishSentenceBuilder"'),'English Sentence Builder mount missing');
 assert.ok(html.includes('id="englishLevelHub"'),'English CEFR level hub mount missing');
 assert.ok(html.includes('id="englishMasteryOS"'),'English Mastery OS mount missing');
+assert.ok(html.includes('id="englishMasterCurriculum"'),'English Master Curriculum mount missing');
 assert.strictEqual((html.match(/data-level="(?:A1|A2|B1|B2|C1|C2)"/g)||[]).length,6,'All six CEFR level buttons must be present');
 assert.ok(html.includes('../english-engine.css'),'English engine stylesheet missing');
 assert.ok(html.includes('../english-sentence-builder.css'),'English sentence builder stylesheet missing');
 assert.ok(html.includes('../english-levels.css'),'English CEFR campus stylesheet missing');
 assert.ok(html.includes('../english-mastery.css'),'English Mastery OS stylesheet missing');
+assert.ok(html.includes('../english-master-curriculum.css'),'English Master Curriculum stylesheet missing');
 
 [
   '../english-speech.js',
@@ -35,7 +45,15 @@ assert.ok(html.includes('../english-mastery.css'),'English Mastery OS stylesheet
   '../english-levels-data.js',
   '../english-levels.js',
   '../english-mastery-data.js',
-  '../english-mastery.js'
+  '../english-mastery.js',
+  '../english-master-curriculum-base.js',
+  '../english-curriculum-a1.js',
+  '../english-curriculum-a2.js',
+  '../english-curriculum-b1.js',
+  '../english-curriculum-b2.js',
+  '../english-curriculum-c1.js',
+  '../english-curriculum-c2.js',
+  '../english-master-curriculum.js'
 ].forEach((asset)=>assert.ok(html.includes(asset),asset+' missing from English Academy'));
 
 const speechPos=html.indexOf('../english-speech.js');
@@ -89,6 +107,29 @@ assert.ok(mastery.includes("'/api/english-coach'"),'AI English Coach client miss
 assert.ok(mastery.includes('gradeReview'),'Spaced repetition grading missing');
 assert.ok(worker.includes("url.pathname === '/api/english-coach'"),'English Coach API route missing');
 assert.ok(worker.includes('async function handleEnglishCoach'),'English Coach handler missing');
+
+const vm = require('vm');
+const curriculumContext = { window:{} };
+vm.runInNewContext(masterBase, curriculumContext);
+[masterA1,masterA2,masterB1,masterB2,masterC1,masterC2].forEach((code)=>vm.runInNewContext(code,curriculumContext));
+const curriculumApi = curriculumContext.window.stannetEnglishMasterCurriculum;
+const masterCounts = curriculumApi.count();
+assert.strictEqual(masterCounts.levels,6,'Master curriculum must contain 6 CEFR levels');
+assert.strictEqual(masterCounts.modules,48,'Master curriculum must contain 48 modules');
+assert.strictEqual(masterCounts.lessons,288,'Master curriculum must contain 288 lessons');
+['A1','A2','B1','B2','C1','C2'].forEach((level)=>{
+  const item=curriculumApi.getLevel(level);
+  assert.ok(item,'Missing master level '+level);
+  assert.strictEqual(item.modules.length,8,level+' must contain 8 master modules');
+  assert.strictEqual(item.lessons.length,48,level+' must contain 48 lessons');
+  item.modules.forEach((module)=>{
+    ['title','sourceBasis','theory','patterns','lexicon','examples','pronunciation','listening','listeningEs','reading','readingEs','speaking','writing','drills','project'].forEach((field)=>assert.ok(module[field],level+' module missing '+field));
+    assert.strictEqual(module.lessons.length,6,'Each master module must generate six lessons');
+  });
+});
+assert.ok(masterEngine.includes('stannetEnglishMasterCurriculumV1'),'Master curriculum progress store missing');
+assert.ok(masterEngine.includes('stannetPlayEnglish'),'Master curriculum Azure audio missing');
+assert.ok(masterEngine.includes('masterSendCoach'),'Master curriculum to AI Coach handoff missing');
 
 assert.ok(expansion.includes('verb-audio'),'100-verb table audio controls missing');
 assert.ok(expansion.includes('phrasal-audio'),'Phrasal verb audio controls missing');
