@@ -19,7 +19,10 @@ assert.ok(data.includes('window.stannetDanishData'));
 assert.ok(data.includes('curriculum:'));
 assert.ok(data.includes('mastery:'));
 assert.ok(data.includes('memoryLessons:'));
-assert.ok(app.includes("fetch('/api/speech'"));
+assert.ok(
+  app.includes("fetch('/api/speech'") || app.includes("'/api/speech?") || app.includes('"/api/speech?'),
+  'Danish app must use the Cloudflare /api/speech endpoint'
+);
 assert.ok(!app.includes('../api/speech.js'));
 assert.ok(!html.includes('../api/speech.js'));
 
