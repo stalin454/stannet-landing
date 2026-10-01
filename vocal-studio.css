@@ -14,15 +14,15 @@ body{
 }
 .page-hero.grid-bg{
   position:relative;overflow:hidden;color:var(--studio-ink);
-  min-height:clamp(420px,58vw,610px);
+  min-height:clamp(560px,64vw,760px);
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding-top:clamp(180px,30vw,330px);
-  background:url("assets/stannet-vocal-studio-bg.png") center center / cover no-repeat;
+  padding-top:clamp(360px,42vw,520px);
+  background:url("assets/stannet-vocal-studio-bg.png") center 42% / cover no-repeat;
   border-bottom:1px solid var(--studio-line)
 }
 .page-hero.grid-bg:after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(9,18,34,.02) 0%,rgba(9,18,34,.05) 48%,rgba(9,18,34,.76) 100%);
+  background:linear-gradient(180deg,transparent 0%,transparent 66%,rgba(9,18,34,.18) 78%,rgba(9,18,34,.68) 100%);
 }
 .page-hero.grid-bg>*{position:relative;z-index:1}
 .page-hero.grid-bg h1{color:#fff;text-shadow:0 4px 22px rgba(0,0,0,.45);font-size:clamp(38px,6vw,72px);line-height:.95;margin:.35rem 0 .75rem}
@@ -101,8 +101,8 @@ body{
 @media(max-width:760px){
   body{background:#f7f9ff}
   .page-hero.grid-bg{
-    min-height:520px;padding-top:290px;
-    background:url("assets/stannet-vocal-studio-bg.png") 64% center / cover no-repeat;
+    min-height:620px;padding-top:390px;
+    background:url("assets/stannet-vocal-studio-bg.png") 64% 42% / cover no-repeat;
   }
 }
 @media(max-width:650px){.stem-grid{grid-template-columns:1fr}}
