@@ -1,0 +1,243 @@
+/* Ruta Dinamarca — StanNet Soft Neumorphic Learning UI
+   Same visual family as English/Danish Academy, adapted to travel/blog content. */
+body.denmark-route-neumorphic{
+  --nm-bg:#f7f8fc;
+  --nm-surface:#f7f8fc;
+  --nm-ink:#141d59;
+  --nm-ink-2:#263262;
+  --nm-muted:#66728f;
+  --nm-purple:#af26e0;
+  --nm-violet:#ad63de;
+  --nm-cyan:#94d6f7;
+  --nm-pink:#d065a1;
+  --nm-coral:#f8615c;
+  --nm-orange:#fd8f57;
+  --dk-red:#c8102e;
+  --dk-red-2:#e5484d;
+  --nm-gradient:linear-gradient(135deg,#af26e0 0%,#d065a1 28%,#94d6f7 55%,#fd8f57 82%,#f8615c 100%);
+  --dk-gradient:linear-gradient(135deg,#c8102e 0%,#e5484d 28%,#d065a1 52%,#94d6f7 78%,#af26e0 100%);
+  --nm-shadow:14px 14px 34px rgba(44,57,94,.13),-14px -14px 34px rgba(255,255,255,.96);
+  --nm-shadow-sm:7px 7px 18px rgba(44,57,94,.12),-7px -7px 18px rgba(255,255,255,.94);
+  --nm-inset:inset 4px 4px 9px rgba(44,57,94,.10),inset -4px -4px 9px rgba(255,255,255,.96);
+  margin:0;
+  background:
+    radial-gradient(circle at 7% 5%,rgba(200,16,46,.08),transparent 24rem),
+    radial-gradient(circle at 93% 10%,rgba(148,214,247,.17),transparent 28rem),
+    var(--nm-bg);
+  color:var(--nm-ink);
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body.denmark-route-neumorphic *,body.denmark-route-neumorphic *::before,body.denmark-route-neumorphic *::after{box-sizing:border-box}
+body.denmark-route-neumorphic :focus-visible{outline:3px solid rgba(200,16,46,.24);outline-offset:3px}
+body.denmark-route-neumorphic a{color:inherit}
+body.denmark-route-neumorphic main{overflow:hidden}
+
+/* injected global nav */
+body.denmark-route-neumorphic #stannet-global-nav{
+  background:rgba(247,248,252,.88)!important;
+  color:var(--nm-ink)!important;
+  border-bottom:1px solid rgba(20,29,89,.07)!important;
+  box-shadow:0 10px 30px rgba(44,57,94,.08)!important;
+  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-brand{color:var(--nm-ink)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-brand .net{color:var(--nm-purple)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-brand i{color:#66728f!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-nav>a,
+body.denmark-route-neumorphic #stannet-global-nav .sgn-group>button{color:var(--nm-ink-2)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-nav>a:hover,
+body.denmark-route-neumorphic #stannet-global-nav .sgn-group>button:hover{color:var(--dk-red)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-drop,
+body.denmark-route-neumorphic #stannet-global-nav .sgn-nav{
+  background:rgba(247,248,252,.98)!important;
+  border-color:rgba(255,255,255,.94)!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-drop a{color:var(--nm-ink-2)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-drop a:hover{background:rgba(148,214,247,.18)!important;color:var(--nm-ink)!important}
+body.denmark-route-neumorphic #stannet-global-nav .sgn-menu{
+  color:var(--nm-ink)!important;background:var(--nm-surface)!important;border-color:rgba(20,29,89,.08)!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+
+/* hero */
+body.denmark-route-neumorphic .route-hero{
+  position:relative;
+  width:min(1480px,calc(100% - 48px));
+  min-height:680px;
+  margin:34px auto 46px;
+  padding:clamp(38px,6vw,82px);
+  grid-template-columns:minmax(0,1.04fr) minmax(340px,.96fr)!important;
+  gap:clamp(28px,5vw,72px)!important;
+  background:rgba(247,248,252,.94)!important;
+  border:1px solid rgba(255,255,255,.96)!important;
+  border-radius:42px;
+  box-shadow:18px 18px 42px rgba(44,57,94,.14),-16px -16px 40px rgba(255,255,255,.98);
+  overflow:hidden;
+}
+body.denmark-route-neumorphic .route-hero::after{
+  content:"";position:absolute;left:8%;right:8%;bottom:0;height:5px;background:var(--dk-gradient);border-radius:999px;
+}
+body.denmark-route-neumorphic .route-kicker{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .route-hero h1{
+  color:var(--nm-ink)!important;
+  font-size:clamp(58px,7.4vw,118px)!important;
+  line-height:.88!important;
+  letter-spacing:-.075em!important;
+  font-weight:800!important;
+}
+body.denmark-route-neumorphic .route-hero h1 em{color:var(--nm-ink)!important;font-style:normal}
+body.denmark-route-neumorphic .route-hero h1 span{
+  color:transparent!important;background:var(--dk-gradient);-webkit-background-clip:text;background-clip:text;
+}
+body.denmark-route-neumorphic .route-lead{color:var(--nm-muted)!important;font-size:clamp(16px,1.5vw,20px)!important;line-height:1.75!important}
+body.denmark-route-neumorphic .route-actions a{
+  min-height:50px!important;padding:0 20px!important;border-radius:16px!important;
+  color:var(--nm-ink)!important;background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.94)!important;box-shadow:var(--nm-shadow-sm)!important;
+  text-decoration:none!important;transition:transform .16s ease;
+}
+body.denmark-route-neumorphic .route-actions .primary{
+  color:#fff!important;background:linear-gradient(135deg,#141d59,#c8102e 60%,#af26e0)!important;
+  border:0!important;box-shadow:7px 7px 16px rgba(72,45,96,.20),-6px -6px 16px rgba(255,255,255,.94)!important;
+}
+@media(hover:hover){body.denmark-route-neumorphic .route-actions a:hover{transform:translateY(-2px)}}
+
+/* hero destination card */
+body.denmark-route-neumorphic .dk-card{
+  min-height:500px!important;padding:32px!important;border:0!important;border-radius:34px!important;
+  background:var(--dk-gradient)!important;
+  box-shadow:0 28px 58px rgba(111,55,170,.23),inset 0 1px rgba(255,255,255,.36)!important;
+}
+body.denmark-route-neumorphic .dk-card::after{
+  content:"";position:absolute;left:24px;right:24px;bottom:24px;top:235px;
+  background:rgba(255,255,255,.88);border-radius:24px;
+  box-shadow:12px 14px 30px rgba(61,33,107,.18),inset 0 1px rgba(255,255,255,.95);
+  backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px);
+  z-index:0;
+}
+body.denmark-route-neumorphic .dk-card>*{position:relative;z-index:2}
+body.denmark-route-neumorphic .dk-card small{color:#fff!important}
+body.denmark-route-neumorphic .dk-card strong{color:var(--nm-ink)!important;margin-top:245px!important}
+body.denmark-route-neumorphic .dk-card p{color:var(--nm-muted)!important}
+body.denmark-route-neumorphic .dk-flag{border-radius:14px!important;box-shadow:0 18px 40px rgba(61,33,107,.22)!important}
+
+/* sections */
+body.denmark-route-neumorphic .route-section{
+  background:transparent!important;border-bottom:0!important;
+  padding-top:clamp(62px,7vw,98px)!important;padding-bottom:clamp(62px,7vw,98px)!important;
+}
+body.denmark-route-neumorphic .route-heading span{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .route-heading h2{color:var(--nm-ink)!important}
+body.denmark-route-neumorphic .route-heading p{color:var(--nm-muted)!important}
+
+/* blog posts */
+body.denmark-route-neumorphic .blog-grid{gap:22px!important}
+body.denmark-route-neumorphic .post{
+  padding:32px!important;
+  background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+  border-radius:28px!important;
+  box-shadow:var(--nm-shadow)!important;
+}
+body.denmark-route-neumorphic .post time{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .post h3{color:var(--nm-ink)!important;font-family:Inter,ui-sans-serif,sans-serif!important;font-size:clamp(24px,2.6vw,34px)!important}
+body.denmark-route-neumorphic .post p{color:var(--nm-muted)!important}
+body.denmark-route-neumorphic .post .status{
+  border:0!important;border-radius:999px!important;padding:8px 12px!important;
+  color:var(--dk-red)!important;background:rgba(200,16,46,.08)!important;
+  box-shadow:var(--nm-inset)!important;
+}
+
+/* timeline */
+body.denmark-route-neumorphic .timeline{gap:12px!important}
+body.denmark-route-neumorphic .stage-row{
+  padding:22px!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+  border-radius:20px!important;
+  background:var(--nm-surface)!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+body.denmark-route-neumorphic .stage-row:last-child{border-bottom:1px solid rgba(255,255,255,.94)!important}
+body.denmark-route-neumorphic .stage-row span{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .stage-row h3{color:var(--nm-ink)!important;font-family:Inter,ui-sans-serif,sans-serif!important}
+body.denmark-route-neumorphic .stage-row p{color:var(--nm-muted)!important}
+
+/* area cards */
+body.denmark-route-neumorphic .route-grid{gap:18px!important}
+body.denmark-route-neumorphic .route-panel{
+  min-height:250px!important;padding:27px!important;
+  background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+  border-radius:24px!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+@media(hover:hover){body.denmark-route-neumorphic .route-panel:hover{transform:translateY(-3px);box-shadow:var(--nm-shadow)!important}}
+body.denmark-route-neumorphic .route-panel b{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .route-panel h3{color:var(--nm-ink)!important;font-family:Inter,ui-sans-serif,sans-serif!important}
+body.denmark-route-neumorphic .route-panel p,
+body.denmark-route-neumorphic .route-panel li{color:var(--nm-muted)!important}
+body.denmark-route-neumorphic .route-panel a{
+  min-height:40px;align-items:center;padding:0 12px!important;
+  color:var(--nm-ink)!important;background:rgba(148,214,247,.15)!important;
+  border-radius:12px!important;box-shadow:var(--nm-shadow-sm)!important;text-decoration:none!important;
+}
+
+/* cities */
+body.denmark-route-neumorphic .city-grid{gap:16px!important}
+body.denmark-route-neumorphic .city{
+  min-height:170px!important;padding:24px!important;
+  background:var(--nm-surface)!important;border:1px solid rgba(255,255,255,.94)!important;
+  border-radius:22px!important;box-shadow:var(--nm-shadow-sm)!important;
+  position:relative;overflow:hidden;
+}
+body.denmark-route-neumorphic .city::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--dk-gradient);opacity:.82;
+}
+body.denmark-route-neumorphic .city strong{color:var(--nm-ink)!important;font-family:Inter,ui-sans-serif,sans-serif!important;font-size:21px!important}
+body.denmark-route-neumorphic .city span{color:var(--nm-muted)!important}
+
+/* academy callout */
+body.denmark-route-neumorphic .academy-callout{
+  padding:clamp(30px,5vw,58px)!important;border:0!important;border-radius:32px!important;
+  background:var(--nm-surface)!important;box-shadow:var(--nm-shadow)!important;position:relative;overflow:hidden;
+}
+body.denmark-route-neumorphic .academy-callout::before{
+  content:"";position:absolute;inset:0 auto 0 0;width:8px;background:var(--dk-gradient);
+}
+body.denmark-route-neumorphic .academy-callout h2{color:var(--nm-ink)!important;font-family:Inter,ui-sans-serif,sans-serif!important}
+body.denmark-route-neumorphic .academy-callout p{color:var(--nm-muted)!important}
+body.denmark-route-neumorphic .academy-callout a{
+  min-height:50px!important;padding:0 20px!important;border-radius:15px!important;
+  color:#fff!important;background:linear-gradient(135deg,#141d59,#c8102e 58%,#af26e0)!important;
+  box-shadow:7px 7px 16px rgba(72,45,96,.20),-6px -6px 16px rgba(255,255,255,.95)!important;
+  text-decoration:none!important;
+}
+
+/* responsive */
+@media(max-width:1180px){
+  body.denmark-route-neumorphic .route-hero{width:min(calc(100% - 34px),980px);grid-template-columns:1fr!important;min-height:auto!important}
+  body.denmark-route-neumorphic .dk-card{min-height:430px!important}
+}
+@media(max-width:760px){
+  body.denmark-route-neumorphic .route-hero{width:calc(100% - 24px);margin:18px auto 28px;padding:28px!important;border-radius:28px}
+  body.denmark-route-neumorphic .route-hero h1{font-size:clamp(48px,15vw,76px)!important}
+  body.denmark-route-neumorphic .dk-card{min-height:380px!important;border-radius:24px!important}
+  body.denmark-route-neumorphic .dk-card::after{top:190px}
+  body.denmark-route-neumorphic .dk-card strong{margin-top:190px!important}
+  body.denmark-route-neumorphic .post,
+  body.denmark-route-neumorphic .route-panel,
+  body.denmark-route-neumorphic .city,
+  body.denmark-route-neumorphic .academy-callout{border-radius:20px!important}
+}
+@media(max-width:520px){
+  body.denmark-route-neumorphic .route-hero h1{font-size:clamp(44px,14vw,64px)!important}
+  body.denmark-route-neumorphic .dk-card{min-height:350px!important}
+  body.denmark-route-neumorphic .dk-card::after{top:165px}
+  body.denmark-route-neumorphic .dk-card strong{margin-top:165px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.denmark-route-neumorphic *,body.denmark-route-neumorphic *::before,body.denmark-route-neumorphic *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
