@@ -100,10 +100,10 @@
   keyFinger[' '] = 'th';
 
   const keyboardRows = [
-    ['1','2','3','4','5','6','7','8','9','0'],
-    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['1','2','3','4','5','6','7','8','9','0','BACKSPACE'],
+    ['TAB','Q','W','E','R','T','Y','U','I','O','P','ENTER'],
     ['A','S','D','F','G','H','J','K','L','Ñ'],
-    ['Z','X','C','V','B','N','M',',','.','-'],
+    ['SHIFT','Z','X','C','V','B','N','M',',','.','-','SHIFT'],
     ['ESPACIO']
   ];
 
@@ -141,7 +141,52 @@
 
   function normalizeKey(ch) {
     if (ch === ' ') return 'ESPACIO';
+    if (ch === '\n') return 'ENTER';
     return String(ch || '').toUpperCase();
+  }
+
+  function normalizePhysicalKey(event) {
+    if (!event) return '';
+    if (event.key === ' ') return 'ESPACIO';
+    if (event.key === 'Backspace') return 'BACKSPACE';
+    if (event.key === 'Enter') return 'ENTER';
+    if (event.key === 'Tab') return 'TAB';
+    if (event.key === 'Shift') return 'SHIFT';
+    return String(event.key || '').toUpperCase();
+  }
+
+  function virtualKeys(label) {
+    return [...document.querySelectorAll('.finger-key')].filter(key => key.dataset.char === label);
+  }
+
+  function setPhysicalKeyState(event, down) {
+    const label = normalizePhysicalKey(event);
+    if (!label) return;
+    const keys = virtualKeys(label);
+    if (!keys.length) return;
+
+    const input = $('typingInput');
+    const typingFocused = document.activeElement === input;
+    const expected = typingFocused ? target[input.value.length] : '';
+    const expectedLabel = normalizeKey(expected);
+    const correctness = typingFocused && !['SHIFT','TAB','BACKSPACE'].includes(label)
+      ? (label === expectedLabel ? 'correct' : 'error')
+      : '';
+
+    keys.forEach(key => {
+      key.classList.toggle('pressed-key', down);
+      key.classList.toggle('pressed-correct', down && correctness === 'correct');
+      key.classList.toggle('pressed-error', down && correctness === 'error');
+      if (!down) key.classList.remove('pressed-correct','pressed-error');
+    });
+
+    if (down && typingFocused) {
+      const finger = event.key === ' ' ? 'th' : keyFinger[String(event.key || '').toLowerCase()] || '';
+      if (finger) {
+        document.querySelectorAll('.hands-diagram .active-finger').forEach(el => el.classList.remove('active-finger'));
+        document.querySelectorAll('.hands-diagram .finger-' + finger).forEach(el => el.classList.add('active-finger'));
+      }
+    }
   }
 
   function playClick(ok = true, isSpace = false, deleting = false) {
@@ -174,7 +219,8 @@
         const key = document.createElement('span');
         const lookup = label === 'ESPACIO' ? ' ' : label.toLowerCase();
         const finger = keyFinger[lookup] || '';
-        key.className = 'finger-key ' + (finger ? 'finger-' + finger : '') + (label === 'ESPACIO' ? ' space-key' : '');
+        const special = ['BACKSPACE','TAB','ENTER','SHIFT'].includes(label);
+        key.className = 'finger-key ' + (finger ? 'finger-' + finger : '') + (label === 'ESPACIO' ? ' space-key' : '') + (special ? ' special-key' : '');
         key.dataset.char = label;
         key.textContent = label;
         if (['F','J'].includes(label)) key.classList.add('home-marker');
@@ -457,6 +503,20 @@
   });
 
   $('typingInput').addEventListener('paste', e => e.preventDefault());
+
+  window.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    setPhysicalKeyState(e, true);
+  }, true);
+
+  window.addEventListener('keyup', e => {
+    setPhysicalKeyState(e, false);
+    if (document.activeElement === $('typingInput')) updateCoach($('typingInput').value.length);
+  }, true);
+
+  window.addEventListener('blur', () => {
+    document.querySelectorAll('.finger-key.pressed-key').forEach(key => key.classList.remove('pressed-key','pressed-correct','pressed-error'));
+  });
 
   $('typingInput').addEventListener('keydown', e => {
     if (mode === 'code' && e.key === 'Tab') {

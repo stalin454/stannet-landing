@@ -819,3 +819,42 @@ body.typing-page{
 .finger-motion-guide strong{color:#294760;font-size:10px}
 .finger-motion-guide small{margin-top:2px;color:#71869a;font-size:8px;line-height:1.35}
 @media(max-width:420px){.finger-motion-guide{grid-template-columns:1fr}}
+
+
+/* Physical keyboard mirror */
+.finger-key.special-key{
+  width:auto;
+  min-width:clamp(48px,6vw,78px);
+  padding:0 8px;
+  font-size:8px;
+  letter-spacing:.02em;
+  color:#aebfcb;
+  border-top:3px solid #5d7284;
+}
+.finger-key.pressed-key{
+  transform:translateY(3px) scale(.97)!important;
+  box-shadow:0 1px 0 rgba(0,0,0,.28)!important;
+  background:#26394a;
+  transition:transform .045s ease,background .045s ease,box-shadow .045s ease;
+}
+.finger-key.pressed-correct{
+  color:#062019!important;
+  background:#7cf0c5!important;
+  border-color:#8ff6d2!important;
+  box-shadow:0 0 0 4px rgba(67,222,170,.14)!important;
+}
+.finger-key.pressed-error{
+  color:#2c060d!important;
+  background:#ff8fa3!important;
+  border-color:#ffacb8!important;
+  box-shadow:0 0 0 4px rgba(255,96,124,.14)!important;
+}
+.finger-key.next-key.pressed-key{
+  animation:none;
+}
+@media(max-width:620px){
+  .finger-key.special-key{min-width:40px;padding:0 5px;font-size:7px}
+}
+@media(max-width:420px){
+  .finger-key.special-key{min-width:34px;padding:0 3px;font-size:6px}
+}
