@@ -71,6 +71,10 @@ body.english-neumorphic .nav-dropdown{
 body.english-neumorphic .nav-dropdown a{color:var(--nm-ink-2)!important}
 body.english-neumorphic .nav-dropdown a:hover,
 body.english-neumorphic .nav-dropdown a.active{background:rgba(148,214,247,.22)!important;color:var(--nm-ink)!important}
+body.english-neumorphic .brand-stan{color:var(--nm-ink)!important}
+body.english-neumorphic .brand-net{color:var(--nm-purple)!important}
+body.english-neumorphic .brand-lockup>i{color:#66728f!important}
+body.english-neumorphic .brand-mark{filter:drop-shadow(0 7px 12px rgba(44,57,94,.14))}
 body.english-neumorphic .nav-cta{
   background:var(--nm-ink)!important;
   color:#fff!important;
