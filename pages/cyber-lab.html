@@ -12,8 +12,9 @@
 .lab-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-top:2rem}.lab-tool{display:flex;flex-direction:column;min-height:260px;padding:1.5rem;border:1px solid rgba(255,255,255,.14);background:rgba(8,14,20,.72);text-decoration:none;color:inherit;transition:.2s ease}.lab-tool:hover{transform:translateY(-3px);border-color:#22d3ee}.lab-tool .tag{color:#22d3ee}.lab-tool h2{margin:.5rem 0}.lab-tool p{line-height:1.65}.lab-tool strong{margin-top:auto;color:#22d3ee}.lab-note{margin-top:2rem;padding:1.25rem;border-left:3px solid #22d3ee;background:rgba(34,211,238,.06)}
 </style>
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
+<link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
-<body id="top">
+<body id="top" class="stannet-global stannet-page-cyber-lab">
 <header class="site-header">
 <a class="brand brand-lockup" href="../index.html" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="../assets/brand/stannet-shield.png" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -28,7 +29,7 @@
 </nav>
 </header>
 <main>
-<section class="page-hero grid-bg"><p class="eyebrow">CYBER DEFENSE / PRÁCTICA</p><h1>StanNet Cyber<br><em>Defense Lab.</em></h1><p>Zona práctica separada de la ruta teórica. Aquí viven las herramientas, pruebas y proyectos defensivos de StanNet.</p><a href="cybersecurity.html">← Volver a la ruta teórica</a></section>
+<section class="page-hero grid-bg" data-page-icon="SEC"><p class="eyebrow">CYBER DEFENSE / PRÁCTICA</p><h1>StanNet Cyber<br><em>Defense Lab.</em></h1><p>Zona práctica separada de la ruta teórica. Aquí viven las herramientas, pruebas y proyectos defensivos de StanNet.</p><a href="cybersecurity.html">← Volver a la ruta teórica</a></section>
 <section class="section"><p class="eyebrow">HERRAMIENTAS DE LABORATORIO</p><div class="lab-tools">
 <a class="lab-tool" href="../sentinel/"><p class="tag">ANÁLISIS · YARA-X</p><h2>StanNet Sentinel</h2><p>Laboratorio de análisis estático local con hashes, indicadores, reglas YARA-X, historial y evaluación de reglas.</p><strong>Abrir Sentinel →</strong></a>
 <a class="lab-tool" href="../shield/"><p class="tag">DEFENSA · WINDOWS</p><h2>StanNet Shield</h2><p>Proyecto antivirus defensivo: scanner local, motor Sentinel/YARA-X y aplicación Windows con cuarentena reversible y limpieza segura.</p><strong>Abrir Shield →</strong></a>

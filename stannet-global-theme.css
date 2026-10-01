@@ -1,0 +1,134 @@
+/* StanNet Global Theme 2026 — shared visual identity */
+body.stannet-global{
+  --bg:#f4f9ff;--panel:#fff;--ink:#0b1830;--muted:#60718a;--line:rgba(27,73,118,.13);
+  --cyan:#09cfe8;--blue:#2878ff;--violet:#8a39ff;--pink:#d739ff;--lime:#2edbb7;
+  --stannet-shadow:0 18px 50px rgba(47,92,140,.11);--stannet-shadow-soft:0 10px 28px rgba(47,92,140,.08);
+  background:#f4f9ff;color:#0b1830;color-scheme:light;
+}
+body.stannet-global:before{opacity:.28;background:linear-gradient(90deg,transparent 49.9%,rgba(40,120,255,.035) 50%,transparent 50.1%);background-size:80px 80px}
+.stannet-global a{transition:color .2s,background .2s,border-color .2s,transform .2s,box-shadow .2s}
+
+/* Shared header */
+.stannet-global .site-header{background:rgba(255,255,255,.94)!important;border-bottom:1px solid var(--line)!important;box-shadow:0 10px 34px rgba(42,78,116,.06);backdrop-filter:blur(18px)}
+.stannet-global .site-header .brand-stan{color:#0a1730!important}
+.stannet-global .site-header .brand-net{color:#2878ff!important;text-shadow:none!important}
+.stannet-global .site-header .brand>i{color:#8a39ff!important}
+.stannet-global .site-header .brand-mark{filter:drop-shadow(0 5px 12px rgba(40,120,255,.16))}
+.stannet-global .site-nav>a,.stannet-global .nav-trigger{color:#33445f!important}
+.stannet-global .site-nav>a:hover,.stannet-global .site-nav>a.active,.stannet-global .nav-group:hover>.nav-trigger,.stannet-global .nav-group:focus-within>.nav-trigger{color:#2878ff!important}
+.stannet-global .nav-trigger span{color:#8a39ff!important}
+.stannet-global .nav-dropdown{background:rgba(255,255,255,.98)!important;border-color:var(--line)!important;box-shadow:0 22px 60px rgba(29,58,93,.15)!important}
+.stannet-global .site-nav .nav-dropdown a{color:#50617a!important}
+.stannet-global .site-nav .nav-dropdown a:hover{background:#eef7ff!important;color:#2878ff!important}
+.stannet-global .site-nav .nav-cta{color:#fff!important;background:linear-gradient(135deg,#09cfe8,#2878ff 52%,#8a39ff)!important;border-color:transparent!important;border-radius:999px!important;box-shadow:0 10px 24px rgba(40,120,255,.20)}
+.stannet-global .menu-toggle{color:#0b1830!important}
+
+/* Dark, vivid hero + light content */
+.stannet-global .page-hero,.stannet-global .academy-hero,.stannet-global .password-hero,.stannet-global .vocal-hero,.stannet-global .nutri-hero{
+  position:relative;overflow:hidden;color:#fff!important;
+  background:radial-gradient(circle at 76% 26%,rgba(9,207,232,.23),transparent 25%),radial-gradient(circle at 88% 76%,rgba(138,57,255,.24),transparent 28%),linear-gradient(125deg,#03111f,#061b35 55%,#101444)!important;
+  border-color:rgba(119,211,255,.18)!important
+}
+.stannet-global .page-hero:after,.stannet-global .academy-hero:after,.stannet-global .password-hero:after,.stannet-global .vocal-hero:after,.stannet-global .nutri-hero:after{
+  content:attr(data-page-icon);position:absolute;right:clamp(22px,7vw,105px);top:50%;transform:translateY(-50%);
+  width:clamp(92px,13vw,170px);aspect-ratio:1;border-radius:32px;display:grid;place-items:center;color:#bdf6ff;
+  font:700 clamp(20px,3vw,38px)/1 var(--font-display,Orbitron,sans-serif);border:1px solid rgba(130,231,255,.26);
+  background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.03));box-shadow:0 28px 80px rgba(0,0,0,.20);backdrop-filter:blur(14px);opacity:.92;pointer-events:none
+}
+.stannet-global .page-hero h1,.stannet-global .academy-hero h1,.stannet-global .password-hero h1,.stannet-global .vocal-hero h1,.stannet-global .nutri-hero h1{color:#fff!important;position:relative;z-index:1}
+.stannet-global .page-hero p,.stannet-global .academy-hero p,.stannet-global .password-hero>p,.stannet-global .vocal-hero p,.stannet-global .nutri-hero p{color:#c9dae8!important;position:relative;z-index:1}
+.stannet-global .eyebrow,.stannet-global .tag{color:#28cfe8!important}
+
+/* Shared cards and sections */
+.stannet-global .section{background:transparent}
+.stannet-global .section-heading h2,.stannet-global .contact h2{color:#0b1830}
+.stannet-global .section-heading>p,.stannet-global .hero-copy{color:#60718a}
+.stannet-global .project-card,.stannet-global .info-card,.stannet-global .case-study,.stannet-global .music-form,.stannet-global .pa-card,.stannet-global .pa-lang-card,.stannet-global .pa-build-card{
+  background:#fff!important;color:#0b1830!important;border-color:var(--line)!important;border-radius:22px!important;box-shadow:var(--stannet-shadow-soft)!important
+}
+.stannet-global .project-card:hover,.stannet-global .info-card:hover,.stannet-global .case-study:hover,.stannet-global .pa-card:hover,.stannet-global .pa-lang-card:hover,.stannet-global .pa-build-card:hover{border-color:rgba(40,120,255,.30)!important;box-shadow:var(--stannet-shadow)!important}
+.stannet-global .project-card h3,.stannet-global .info-card h3,.stannet-global .case-study h3,.stannet-global .pa-card h3{color:#0b1830!important}
+.stannet-global .project-card p,.stannet-global .info-card p,.stannet-global .info-card li,.stannet-global .case-study p,.stannet-global .pa-card p{color:#60718a!important}
+.stannet-global .symbol{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,#e9fbff,#f3edff);font-size:28px!important;box-shadow:0 12px 24px rgba(40,120,255,.10)}
+.stannet-global .card-link,.stannet-global .contact-link{color:#2878ff!important}
+.stannet-global .manifesto{background:linear-gradient(180deg,#fff,#eef7ff);border-color:var(--line)}
+.stannet-global .manifesto blockquote{color:#0b1830}
+.stannet-global .contact{background:linear-gradient(120deg,#eefbff,#f5f0ff)!important}
+
+/* Forms and actions */
+.stannet-global input:not([type=checkbox]):not([type=radio]):not([type=range]),.stannet-global select,.stannet-global textarea{
+  background:#fff!important;color:#14213a!important;border-color:#cbd9e8!important;border-radius:12px!important
+}
+.stannet-global input:focus,.stannet-global select:focus,.stannet-global textarea:focus{outline:3px solid rgba(40,120,255,.13)!important;border-color:#2878ff!important}
+.stannet-global .button.primary,.stannet-global .pa-btn-primary,.stannet-global button.primary-action,.stannet-global .primary-download{
+  background:linear-gradient(135deg,#09cfe8,#2878ff 55%,#8a39ff)!important;color:#fff!important;border-color:transparent!important;border-radius:999px!important;box-shadow:0 10px 26px rgba(40,120,255,.20)
+}
+.stannet-global .button.ghost,.stannet-global .secondary-action,.stannet-global .pa-btn-secondary{background:#fff!important;color:#2878ff!important;border-color:#c9d8e8!important;border-radius:999px!important}
+
+/* Study interfaces already light: harmonize, don't flatten them */
+.stannet-global.programming-campus,.stannet-global.professional-academy{background:#f4f9ff!important;color:#0b1830!important}
+.stannet-global.programming-campus .lesson-card,.stannet-global.programming-campus .academy-card,.stannet-global.programming-campus .courseware-card,.stannet-global.programming-campus .lab-card{border-radius:18px!important;box-shadow:var(--stannet-shadow-soft)!important}
+.stannet-global.english-neumorphic,.stannet-global.danish-neumorphic,.stannet-global.denmark-route-neumorphic{color-scheme:light}
+
+/* Vocal Studio */
+.stannet-global.vocal-studio-page .vocal-workspace,.stannet-global.vocal-studio-page .upload-card,.stannet-global.vocal-studio-page .studio-card{border-radius:22px!important;box-shadow:var(--stannet-shadow-soft)!important}
+
+/* Nutri IA */
+.stannet-global.nutri-page{background:#f4fbf8!important;color:#123127!important}
+.stannet-global.nutri-page .hero-console,.stannet-global.nutri-page .auth-card,.stannet-global.nutri-page .profile-card,.stannet-global.nutri-page .module-card,.stannet-global.nutri-page .metric-card,.stannet-global.nutri-page .meal-card,.stannet-global.nutri-page .exercise-card,.stannet-global.nutri-page .empty-state,.stannet-global.nutri-page .error-state{
+  background:#fff!important;color:#17372d!important;border-color:rgba(28,133,102,.15)!important;border-radius:20px!important;box-shadow:0 14px 38px rgba(31,105,83,.09)!important
+}
+.stannet-global.nutri-page .metric-card strong,.stannet-global.nutri-page .nutrition-overview strong{color:#079d82!important}
+.stannet-global.nutri-page .meal-card p,.stannet-global.nutri-page .meal-card li,.stannet-global.nutri-page .exercise-card li{color:#496b60!important}
+
+/* Password Security */
+.stannet-global .password-main{color:#0b1830!important}
+.stannet-global .password-panel,.stannet-global .security-node,.stannet-global .credential-item,.stannet-global .audit-row,.stannet-global .sync-user-row div{background:#fff!important;color:#0b1830!important;border-color:#d4e1ed!important;border-radius:18px!important;box-shadow:var(--stannet-shadow-soft)}
+.stannet-global .password-panel p,.stannet-global .password-panel li,.stannet-global .credential-meta,.stannet-global .audit-row span{color:#60718a!important}
+.stannet-global .password-tabs{border-color:#d5e2ed!important}
+.stannet-global .password-tabs button{color:#52667d!important}
+.stannet-global .password-tabs button.active{background:#eaf7ff!important;color:#096aa9!important;border-color:#b9dcee!important}
+.stannet-global .password-output-row code{background:#f2f7fb!important;color:#17324f!important;border-color:#d0deea!important}
+
+/* Radio */
+.stannet-global.radio-page{background:#f4f9ff!important;color:#0b1830!important}
+.stannet-global.radio-page .radio-news-card,.stannet-global.radio-page .radio-auto-card,.stannet-global.radio-page .radio-bulletin,.stannet-global.radio-page .radio-queue-wrap,.stannet-global.radio-page .radio-playout-status>div{border-radius:18px!important;box-shadow:var(--stannet-shadow-soft)}
+
+/* Sentinel */
+body.stannet-global.stannet-page-sentinel{background:#f3f8fd!important;color:#0b1830!important}
+.stannet-page-sentinel header{background:#fff;border:1px solid #d8e4ef;border-radius:0 0 20px 20px;box-shadow:var(--stannet-shadow-soft)}
+.stannet-page-sentinel .brand{color:#0b1830!important}.stannet-page-sentinel .brand span{color:#08a9c5!important}.stannet-page-sentinel .brand i{color:#8a39ff!important}
+.stannet-page-sentinel .lede,.stannet-page-sentinel p,.stannet-page-sentinel .cards span,.stannet-page-sentinel th{color:#60718a!important}
+.stannet-page-sentinel .upload-panel,.stannet-page-sentinel .cards article,.stannet-page-sentinel .panel,.stannet-page-sentinel .hash-panel,.stannet-page-sentinel .concept-card,.stannet-page-sentinel .analyst-flow{background:#fff!important;color:#0b1830!important;border-color:#d4e1ed!important;border-radius:18px!important;box-shadow:var(--stannet-shadow-soft)}
+.stannet-page-sentinel .concept-example,.stannet-page-sentinel .analyst-flow li{background:#f3f8fd!important;border-color:#dce7f0!important}
+.stannet-page-sentinel code,.stannet-page-sentinel .match-title{color:#173b5b!important}
+.stannet-page-sentinel textarea,.stannet-page-sentinel input[type=search],.stannet-page-sentinel input[type=file]{background:#fff!important;color:#16324d!important;border-color:#cbdce9!important}
+.stannet-page-sentinel .tabs .active{background:#e8f7fb!important;color:#078ba3!important;border-color:#a8dce6!important}
+.stannet-page-sentinel .secondary{background:#edf4fa!important;color:#23415c!important;border-color:#cbd9e6!important}
+
+/* Shield web landing */
+body.stannet-global.stannet-page-shield{background:#f3f8fd!important;color:#0b1830!important}
+.stannet-page-shield header{background:#fff;border-bottom-color:#d8e4ef!important}
+.stannet-page-shield header .brand{color:#0b1830!important}.stannet-page-shield nav a{color:#445b72!important}
+.stannet-page-shield .hero{position:relative;max-width:none;padding-left:max(24px,calc((100vw - 1132px)/2));padding-right:max(24px,calc((100vw - 1132px)/2));color:#fff;background:radial-gradient(circle at 80% 10%,rgba(9,207,232,.20),transparent 28%),linear-gradient(125deg,#03111f,#071e36 65%,#151744)}
+.stannet-page-shield .hero>p{color:#c6d7e5!important}
+.stannet-page-shield .scanner,.stannet-page-shield .grid article,.stannet-page-shield .result,.stannet-page-shield .download-card,.stannet-page-shield .download-box{background:#fff!important;color:#0b1830!important;border-color:#d4e1ed!important;border-radius:20px!important;box-shadow:var(--stannet-shadow-soft)}
+.stannet-page-shield .grid p,.stannet-page-shield .scanner>div>p,.stannet-page-shield .notice,.stannet-page-shield .scan-status{color:#60718a!important}
+.stannet-page-shield .drop{background:#f5f9fd!important;border-color:#bdd4e4!important;color:#17324f!important}
+.stannet-page-shield .result-grid p{background:#f4f8fb!important}.stannet-page-shield .result-grid code{color:#25435f!important}
+.stannet-page-shield .ghost{background:#fff!important;color:#2878ff!important;border-color:#c6d8e7!important}
+
+/* Footer */
+.stannet-global button:not(.nav-trigger):not(.menu-toggle){border-radius:10px}
+.stannet-global footer{background:#071320!important;color:#9eb1c4!important;border-top:1px solid rgba(255,255,255,.08)!important}
+.stannet-global footer .brand-stan{color:#fff!important}.stannet-global footer .brand-net{color:#5edfff!important}.stannet-global footer .brand>i{color:#b77cff!important}
+.stannet-global footer a{color:#d9e7f4!important}
+
+@media(max-width:1180px){
+  .stannet-global .site-nav,.stannet-global .home-nav{background:#fff!important;border-bottom-color:var(--line)!important}
+  .stannet-global .site-nav>a,.stannet-global .nav-trigger{color:#233751!important}
+}
+@media(max-width:760px){
+  .stannet-global .page-hero:after,.stannet-global .academy-hero:after,.stannet-global .password-hero:after,.stannet-global .vocal-hero:after,.stannet-global .nutri-hero:after{width:72px;border-radius:20px;right:16px;top:28px;transform:none;opacity:.46}
+  .stannet-global .page-hero h1,.stannet-global .academy-hero h1,.stannet-global .password-hero h1,.stannet-global .vocal-hero h1,.stannet-global .nutri-hero h1{max-width:82%}
+}
