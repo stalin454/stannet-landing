@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       label.textContent = `${activeLevel} · LECCION ${item[0]}`;
       title.textContent = item[1];
       goal.textContent = item[2];
-      task.innerHTML = `<strong>${item[3][0]}</strong>${item[3][1]}`;
+      task.innerHTML = `<strong>${item[3][0]}</strong><span class="mastery-example">${item[3][1]}</span><div class="mastery-translation"><b>ESPAÑOL</b><span>${item[4][0]}</span><span>${item[4][1]}</span></div>`;
       progress.textContent = `${activeIndex + 1} de ${lessons.length} lecciones · ${activeLevel}`;
       list.innerHTML = lessons.map((lesson, index) =>
         `<button class="mastery-item${index === activeIndex ? ' active' : ''}" data-mastery-index="${index}" type="button">${lesson[0]} · ${lesson[1]}</button>`
