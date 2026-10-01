@@ -171,7 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const courseGoal = document.querySelector('#courseGoal');
     const phraseList = document.querySelector('#coursePhrases');
     const courseProgress = document.querySelector('#courseProgress');
-    if (!level || !itemList || !courseLabel || !courseTitle || !courseGoal || !phraseList || !courseProgress) return;
+    const courseGrammar = document.querySelector('#courseGrammar');
+    const courseMission = document.querySelector('#courseMission');
+    if (!level || !itemList || !courseLabel || !courseTitle || !courseGoal || !phraseList || !courseProgress || !courseGrammar || !courseMission) return;
 
     const renderCourse = (levelValue, index = 0) => {
       const lessons = data.curriculum[levelValue];
@@ -180,6 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
       courseTitle.textContent = item[1];
       courseGoal.textContent = item[2];
       courseProgress.textContent = `${index + 1} de ${lessons.length} lecciones · ${levelValue}`;
+      courseGrammar.textContent = item[4] || '';
+      courseMission.textContent = item[5] || '';
       phraseList.innerHTML = item[3].map(([danish, spanish]) =>
         `<div class="course-phrase"><div><strong>${danish}</strong><span>${spanish}</span></div><button class="course-speak" type="button">Escuchar</button></div>`
       ).join('');
@@ -203,6 +207,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     level.addEventListener('change', renderIndex);
     renderIndex();
+  };
+
+  const setupGrammar = () => {
+    const list = document.querySelector('#grammarItems');
+    const label = document.querySelector('#grammarLabel');
+    const title = document.querySelector('#grammarTitle');
+    const focus = document.querySelector('#grammarFocus');
+    const rule = document.querySelector('#grammarRule');
+    const examples = document.querySelector('#grammarExamples');
+    const progress = document.querySelector('#grammarProgress');
+    if (!list || !label || !title || !focus || !rule || !examples || !progress || !data.grammarPath) return;
+
+    let activeIndex = 0;
+
+    const render = () => {
+      const item = data.grammarPath[activeIndex];
+      label.textContent = 'GRAMÁTICA · CAPÍTULO ' + item.id;
+      title.textContent = item.title;
+      focus.textContent = item.focus;
+      rule.textContent = item.rule;
+      progress.textContent = (activeIndex + 1) + ' de ' + data.grammarPath.length + ' capítulos';
+      examples.innerHTML = item.examples.map(function(pair){
+        return '<div class="grammar-example"><div><strong>' + pair[0] + '</strong><span>' + pair[1] + '</span></div><button class="grammar-speak" type="button">Escuchar</button></div>';
+      }).join('');
+      examples.querySelectorAll('.grammar-speak').forEach(function(button, exampleIndex){
+        button.addEventListener('click', function(){
+          playDanish(item.examples[exampleIndex][0], { button: button, loadingText: 'Cargando...' });
+        });
+      });
+      list.innerHTML = data.grammarPath.map(function(chapter, index){
+        return '<button class="grammar-item' + (index === activeIndex ? ' active' : '') + '" data-grammar-index="' + index + '" type="button">' + chapter.id + ' · ' + chapter.title + '</button>';
+      }).join('');
+      list.querySelectorAll('.grammar-item').forEach(function(button){
+        button.addEventListener('click', function(){
+          activeIndex = Number(button.dataset.grammarIndex);
+          render();
+        });
+      });
+    };
+
+    render();
   };
 
   const setupMemory = () => {
@@ -308,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupMastery();
   setupCourse();
+  setupGrammar();
   setupMemory();
   setupHeroPractice();
 });
