@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded',function(){
   const renderLesson=function(){
     const l=levelData(),m=moduleData(),lesson=lessonData(),el=document.querySelector('#masterLessonPanel');
     const done=Boolean(state.completed[lesson.id]);
-    const overallIndex=LEVELS.slice(0,LEVELS.indexOf(state.level)).reduce(function(sum,level){return sum+(api.getLevel(level)?.lessons.length||0);},0)+lesson.number;
+    const overallIndex=LEVELS.slice(0,LEVELS.indexOf(state.level)).reduce(function(sum,level){var prev=api.getLevel(level);return sum+(prev?prev.lessons.length:0);},0)+lesson.number;
     el.innerHTML=
       '<header class="master-lesson-head">'+
         '<div><span class="master-lesson-code">'+state.level+' · M'+String(state.module+1).padStart(2,'0')+' · L'+String(state.lesson+1).padStart(2,'0')+' · '+esc(lesson.skill)+'</span><h3>'+esc(lesson.title)+'</h3><p>'+esc(lesson.objective)+'</p></div>'+
