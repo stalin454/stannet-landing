@@ -292,3 +292,38 @@ body.denmark-route-neumorphic .academy-callout a{
 @media(prefers-reduced-motion:reduce){
   body.denmark-route-neumorphic *,body.denmark-route-neumorphic *::before,body.denmark-route-neumorphic *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+
+/* Housing safety */
+body.denmark-route-neumorphic .housing-safety{max-width:1150px;margin:auto}
+body.denmark-route-neumorphic .housing-alert{
+  padding:clamp(22px,4vw,34px);border-radius:26px;border:1px solid rgba(200,16,46,.26);
+  background:linear-gradient(135deg,rgba(200,16,46,.10),rgba(255,255,255,.55));
+  box-shadow:var(--nm-shadow);margin-bottom:20px
+}
+body.denmark-route-neumorphic .housing-alert-badge{
+  display:inline-flex;align-items:center;min-height:34px;padding:0 11px;border-radius:999px;
+  background:#c8102e;color:#fff;font:700 9px Orbitron,sans-serif;letter-spacing:.11em
+}
+body.denmark-route-neumorphic .housing-alert h3{
+  margin:16px 0 10px;color:var(--nm-ink);font:700 clamp(26px,3.5vw,42px)/1.08 Inter,sans-serif;max-width:980px
+}
+body.denmark-route-neumorphic .housing-alert p{margin:0;color:var(--nm-muted);line-height:1.7;max-width:1000px}
+body.denmark-route-neumorphic .housing-safety-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px
+}
+body.denmark-route-neumorphic .housing-check{
+  padding:24px;border-radius:22px;background:var(--nm-surface);border:1px solid rgba(255,255,255,.95);box-shadow:var(--nm-shadow-sm)
+}
+body.denmark-route-neumorphic .housing-check h3{margin:0 0 12px;color:var(--nm-ink);font:700 21px/1.2 Inter,sans-serif}
+body.denmark-route-neumorphic .housing-check p,
+body.denmark-route-neumorphic .housing-check li{
+  color:var(--nm-muted);font-size:13px;line-height:1.65
+}
+body.denmark-route-neumorphic .housing-check ul{margin:0;padding-left:20px}
+body.denmark-route-neumorphic .housing-source-note{
+  margin:16px 0 0;color:var(--nm-muted);font-size:12px;line-height:1.55
+}
+@media(max-width:780px){
+  body.denmark-route-neumorphic .housing-safety-grid{grid-template-columns:1fr}
+}
