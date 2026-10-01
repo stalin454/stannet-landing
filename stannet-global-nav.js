@@ -1,33 +1,174 @@
-(()=>{if(document.getElementById('stannet-global-nav'))return;
-const css=`
-#stannet-global-nav{position:relative;z-index:100000;background:#070b11;color:#eefbff;border-bottom:1px solid rgba(89,232,255,.18);font-family:Orbitron,Inter,system-ui,sans-serif}
-#stannet-global-nav *{box-sizing:border-box}
-.sgn-inner{min-height:60px;padding:0 clamp(14px,4vw,54px);display:flex;align-items:center;gap:18px}
-.sgn-brand{display:flex;align-items:center;gap:8px;color:#fff!important;text-decoration:none!important;font-weight:700;white-space:nowrap}.sgn-brand img{width:28px;height:28px;object-fit:contain}.sgn-brand .net{color:#59e8ff}.sgn-brand i{color:#9d7bff;font-style:normal;font-size:.72em}
-.sgn-nav{margin-left:auto;display:flex;align-items:center;gap:8px}.sgn-nav>a,.sgn-group>button{min-height:44px;border:0;background:transparent;color:#c9dbe4!important;text-decoration:none!important;padding:10px 9px;font:600 11px Orbitron,system-ui,sans-serif;cursor:pointer}.sgn-nav>a:hover,.sgn-group>button:hover{color:#59e8ff!important}
-.sgn-group{position:relative}.sgn-drop{display:none;position:absolute;top:100%;left:0;min-width:230px;padding:8px;background:#0b111a;border:1px solid rgba(89,232,255,.2);box-shadow:0 20px 55px rgba(0,0,0,.45);border-radius:12px}.sgn-group.open .sgn-drop{display:grid}.sgn-drop a{padding:9px 10px;color:#dceaf0!important;text-decoration:none!important;font:500 11px Inter,system-ui,sans-serif;border-radius:8px}.sgn-drop a:hover{background:rgba(89,232,255,.08);color:#59e8ff!important}.sgn-cv{border:1px solid rgba(89,232,255,.28)!important;border-radius:999px!important}
-.sgn-menu{display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid rgba(89,232,255,.2);background:#0b111a;color:#fff;border-radius:9px;padding:7px 10px;font-size:18px}
-@media(max-width:1180px){.sgn-menu{display:block}.sgn-nav{display:none;position:absolute;top:60px;left:10px;right:10px;padding:10px;background:#0b111a;border:1px solid rgba(89,232,255,.2);border-radius:12px;flex-direction:column;align-items:stretch}.sgn-nav.open{display:flex}.sgn-group>button,.sgn-nav>a{width:100%;text-align:left}.sgn-drop{position:static;box-shadow:none;margin:0 6px 5px}.sgn-inner{min-height:60px}}
+(()=>{
+'use strict';
+const NAV_ID='stannet-canonical-nav';
+if(document.getElementById(NAV_ID))return;
 
-@supports (-webkit-touch-callout:none){@media(max-width:1366px){.sgn-menu{display:block}.sgn-nav{display:none;position:absolute;top:60px;left:10px;right:10px;padding:10px;background:#0b111a;border:1px solid rgba(89,232,255,.2);border-radius:12px;flex-direction:column;align-items:stretch;max-height:calc(100dvh - 70px);overflow-y:auto;-webkit-overflow-scrolling:touch}.sgn-nav.open{display:flex}.sgn-group>button,.sgn-nav>a{width:100%;text-align:left;font-size:14px!important}.sgn-drop{position:static;box-shadow:none;margin:0 6px 5px}.sgn-drop a{font-size:14px!important}}}
+const style=document.createElement('style');
+style.textContent=`
+#${NAV_ID}.site-header{
+  position:relative;z-index:100000;min-height:76px;width:100%;
+  display:flex;align-items:center;gap:24px;padding:0 clamp(18px,4vw,54px);
+  background:rgba(255,255,255,.96)!important;border-bottom:1px solid rgba(27,73,118,.12)!important;
+  box-shadow:0 10px 34px rgba(42,78,116,.06);backdrop-filter:blur(18px);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+#${NAV_ID} *{box-sizing:border-box}
+#${NAV_ID} .brand{display:flex;align-items:center;gap:8px;text-decoration:none!important;white-space:nowrap}
+#${NAV_ID} .brand-mark{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(40,120,255,.16))}
+#${NAV_ID} .brand>span{font:700 20px/1 Orbitron,Inter,sans-serif}
+#${NAV_ID} .brand-stan{color:#0a1730!important}
+#${NAV_ID} .brand-net{color:#2878ff!important}
+#${NAV_ID} .brand>i{color:#8a39ff!important;font:600 11px Orbitron,Inter,sans-serif;font-style:normal}
+#${NAV_ID} .site-nav{margin-left:auto;display:flex;align-items:center;gap:4px}
+#${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{
+  min-height:46px;display:flex;align-items:center;gap:5px;padding:10px 9px;
+  border:0;background:transparent;color:#33445f!important;text-decoration:none!important;
+  font:600 11px Orbitron,Inter,sans-serif;white-space:nowrap;cursor:pointer
+}
+#${NAV_ID} .site-nav>a:hover,#${NAV_ID} .site-nav>a.active,#${NAV_ID} .nav-trigger:hover,#${NAV_ID} .nav-group.active>.nav-trigger{color:#2878ff!important}
+#${NAV_ID} .nav-trigger span{color:#8a39ff!important}
+#${NAV_ID} .nav-group{position:relative}
+#${NAV_ID} .nav-dropdown{
+  display:none;position:absolute;top:100%;left:0;min-width:250px;padding:8px;
+  background:rgba(255,255,255,.99)!important;border:1px solid rgba(27,73,118,.12)!important;
+  border-radius:14px;box-shadow:0 22px 60px rgba(29,58,93,.15)!important
+}
+#${NAV_ID} .nav-group.open>.nav-dropdown{display:grid}
+#${NAV_ID} .nav-dropdown a{padding:10px 11px;border-radius:9px;color:#50617a!important;text-decoration:none!important;font:500 12px Inter,system-ui,sans-serif}
+#${NAV_ID} .nav-dropdown a:hover,#${NAV_ID} .nav-dropdown a.active{background:#eef7ff!important;color:#2878ff!important}
+#${NAV_ID} .nav-cta{
+  margin-left:4px;color:#fff!important;background:linear-gradient(135deg,#09cfe8,#2878ff 52%,#8a39ff)!important;
+  border-radius:999px!important;padding:11px 18px!important;box-shadow:0 10px 24px rgba(40,120,255,.20)
+}
+#${NAV_ID} .menu-toggle{
+  display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid #d5e3ee;background:#fff;color:#17324c!important;
+  border-radius:11px;font-size:20px;cursor:pointer
+}
+@media(max-width:1180px){
+  #${NAV_ID}{min-height:68px!important;padding:0 14px!important}
+  #${NAV_ID} .menu-toggle{display:block}
+  #${NAV_ID} .site-nav{
+    display:none;position:absolute;top:68px;left:10px;right:10px;margin:0;padding:10px;
+    background:#fff!important;border:1px solid #dbe6ef;border-radius:16px;box-shadow:0 22px 55px rgba(29,58,93,.16);
+    flex-direction:column;align-items:stretch;max-height:calc(100dvh - 84px);overflow-y:auto
+  }
+  #${NAV_ID} .site-nav.open{display:flex}
+  #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{width:100%;justify-content:space-between;text-align:left;font-size:13px}
+  #${NAV_ID} .nav-dropdown{position:static;box-shadow:none!important;margin:0 4px 5px;border-radius:10px}
+  #${NAV_ID} .nav-cta{justify-content:center!important;margin:4px 0 0}
+}
 `;
-const style=document.createElement('style');style.textContent=css;document.head.appendChild(style);
-const bar=document.createElement('div');bar.id='stannet-global-nav';bar.innerHTML=`
-<div class="sgn-inner">
-<a class="sgn-brand" href="/"><img src="/assets/brand/stannet-shield.png" alt=""><span>Stan<span class="net">Net</span></span><i>.Space</i></a>
-<button class="sgn-menu" type="button" aria-label="Abrir menú StanNet">☰</button>
-<nav class="sgn-nav" aria-label="Navegación global StanNet">
-<a href="/">Inicio</a>
-<div class="sgn-group"><button type="button">Web Development ⌄</button><div class="sgn-drop"><a href="/pages/web-development.html">Portfolio web</a><a href="/sanacion/">Proyecto 01 · Alfa y Omega</a><a href="/pages/programming.html">Programming Academy</a><a href="/pages/programming-fullstack.html">Full-Stack Lab</a></div></div>
-<div class="sgn-group"><button type="button">Apps ⌄</button><div class="sgn-drop"><a href="/pages/apps.html">Apps & productos</a><a href="/nutri-ia/">Nutri IA</a><a href="/pages/vocal-studio.html">Vocal Studio</a><a href="/pages/marketplace.html">AyudaEnCasa</a></div></div>
-<div class="sgn-group"><button type="button">Ciberseguridad ⌄</button><div class="sgn-drop"><a href="/pages/cybersecurity.html">StanNet Cybersecurity</a><a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a><a href="/sentinel/">Sentinel</a><a href="/shield/">StanNet Shield</a><a href="/pages/password-security.html">Password Security</a><a href="/pages/cyber-lab.html">Cyber Defense Lab</a></div></div>
-<div class="sgn-group"><button type="button">Ruta Dinamarca ⌄</button><div class="sgn-drop"><a href="/pages/ruta-dinamarca.html">Blog · Ruta Dinamarca</a><a href="/pages/danish.html">Danish Academy</a><a href="/pages/ruta-dinamarca.html#plan">Plan de preparación</a><a href="/pages/ruta-dinamarca.html#ciudades">Ciudades</a><a href="/pages/ruta-dinamarca.html#areas">Estudios · Trabajo · Vivienda</a></div></div>
-<div class="sgn-group"><button type="button">Academias ⌄</button><div class="sgn-drop"><a href="/pages/programming.html">Programming Academy</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/shortcuts.html">Atajos de teclado</a><a href="/pages/english.html">StanNet English Academy</a><a href="/pages/callan.html">Callan English Coach</a><a href="/pages/language-music.html">Language Music Lab</a><a href="/pages/guitar.html">Guitar Academy</a><a href="/pages/danish.html">Danish Academy</a></div></div>
-<div class="sgn-group"><button type="button">Laboratorios ⌄</button><div class="sgn-drop"><a href="/pages/programming-fullstack.html">Full-Stack Lab</a><a href="/pages/vocal-studio.html">Vocal Studio</a></div></div>
-<a href="/pages/education.html">Formación</a><a href="/pages/cv.html">Sobre mí</a><a class="sgn-cv" href="/pages/cv.html">Ver CV</a>
-</nav></div>`;
-document.body.prepend(bar);
-const nav=bar.querySelector('.sgn-nav');const menu=bar.querySelector('.sgn-menu');menu.setAttribute('aria-expanded','false');menu.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'×':'☰'});
-bar.querySelectorAll('.sgn-group>button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();const g=b.parentElement;bar.querySelectorAll('.sgn-group').forEach(x=>{if(x!==g)x.classList.remove('open')});g.classList.toggle('open')}));
-document.addEventListener('click',e=>{if(!bar.contains(e.target)){bar.querySelectorAll('.sgn-group').forEach(x=>x.classList.remove('open'));nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}});bar.querySelectorAll('.sgn-drop a,.sgn-nav>a').forEach(a=>a.addEventListener('click',()=>{if(window.matchMedia('(max-width:1366px)').matches){nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}}));window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width:1366px)').matches){nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}});
+document.head.appendChild(style);
+
+const path=(location.pathname||'/').replace(/\/$/,'')||'/';
+const is=(prefix)=>prefix==='/'?path==='/':path===prefix||path.startsWith(prefix+'/')||path.startsWith(prefix+'.');
+const header=document.createElement('header');
+header.id=NAV_ID;
+header.className='site-header';
+header.innerHTML=`
+<a class="brand brand-lockup" href="/" aria-label="StanNet.Space, inicio">
+  <img class="brand-mark" src="/assets/brand/stannet-shield.png" alt="">
+  <span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i>
+</a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav home-nav" aria-label="Navegación principal">
+  <a data-nav="/" href="/">Inicio</a>
+  <div class="nav-group" data-group="/pages/web-development">
+    <button class="nav-trigger" type="button" aria-expanded="false">Web Development <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/web-development.html">Portfolio web</a>
+      <a href="/sanacion/">Proyecto 01 · Alfa y Omega</a>
+      <a href="/pages/programming.html">Programming Academy</a>
+      <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
+    </div>
+  </div>
+  <div class="nav-group" data-group="/pages/apps">
+    <button class="nav-trigger" type="button" aria-expanded="false">Apps <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/apps.html">Apps & productos</a>
+      <a href="/pages/marketplace.html">AyudaEnCasa</a>
+      <a href="/nutri-ia/">Nutri IA</a>
+      <a href="/pages/vocal-studio.html">Vocal Studio</a>
+      <a href="/pages/marketplace.html">Marketplace</a>
+    </div>
+  </div>
+  <div class="nav-group" data-group="/pages/cybersecurity">
+    <button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/cybersecurity.html">Cybersecurity Hub</a>
+      <a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a>
+      <a href="/sentinel/">Sentinel</a>
+      <a href="/shield/">Shield</a>
+      <a href="/pages/password-security.html">Password Security</a>
+      <a href="/pages/cyber-lab.html">Cyber Defense Lab</a>
+    </div>
+  </div>
+  <div class="nav-group" data-group="/pages/ruta-dinamarca">
+    <button class="nav-trigger" type="button" aria-expanded="false">Ruta Dinamarca <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/ruta-dinamarca.html">Blog · Ruta Dinamarca</a>
+      <a href="/pages/danish.html">Danish Academy</a>
+      <a href="/pages/ruta-dinamarca.html#plan">Plan de preparación</a>
+      <a href="/pages/ruta-dinamarca.html#ciudades">Ciudades</a>
+      <a href="/pages/ruta-dinamarca.html#areas">Estudios · Trabajo · Vivienda</a>
+    </div>
+  </div>
+  <div class="nav-group" data-group="/pages/academias">
+    <button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/cybersecurity.html">Cybersecurity Academy</a>
+      <a href="/pages/programming.html">Programming Academy</a>
+      <a href="/pages/typing.html">Typing Lab · Mecanografía</a>
+      <a href="/pages/shortcuts.html">Atajos de teclado</a>
+      <a href="/pages/english.html">StanNet English Academy</a>
+      <a href="/pages/callan.html">Callan English Coach</a>
+      <a href="/pages/language-music.html">Language Music Lab</a>
+      <a href="/pages/guitar.html">Guitar Academy</a>
+      <a href="/pages/danish.html">Danish Academy</a>
+    </div>
+  </div>
+  <div class="nav-group" data-group="/pages/labs">
+    <button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/cyber-lab.html">Cyber Defense Lab</a>
+      <a href="/sentinel/">Sentinel</a>
+      <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
+      <a href="/pages/vocal-studio.html">Vocal Studio</a>
+    </div>
+  </div>
+  <a data-nav="/pages/education" href="/pages/education.html">Formación</a>
+  <a data-nav="/pages/cv" href="/pages/cv.html">Sobre mí</a>
+  <a class="nav-cta" href="/pages/cv.html">Ver CV</a>
+</nav>`;
+
+const existing=document.querySelector('header.site-header');
+if(existing)existing.replaceWith(header);
+else document.body.prepend(header);
+
+const nav=header.querySelector('.site-nav');
+const menu=header.querySelector('.menu-toggle');
+const groups=[...header.querySelectorAll('.nav-group')];
+
+header.querySelectorAll('[data-nav]').forEach(a=>{if(is(a.dataset.nav))a.classList.add('active')});
+const groupMatch=(g)=>{
+  const hrefs=[...g.querySelectorAll('.nav-dropdown a')].map(a=>new URL(a.href,location.origin).pathname.replace(/\/$/,''));
+  return hrefs.some(h=>h && (path===h||path.startsWith(h+'/')));
+};
+groups.forEach(g=>{if(groupMatch(g))g.classList.add('active')});
+
+menu.addEventListener('click',e=>{
+  e.stopPropagation();const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'×':'☰';
+});
+groups.forEach(g=>{
+  const b=g.querySelector('.nav-trigger');
+  b.addEventListener('click',e=>{
+    e.stopPropagation();
+    groups.forEach(x=>{if(x!==g){x.classList.remove('open');x.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false')}});
+    const open=g.classList.toggle('open');b.setAttribute('aria-expanded',String(open));
+  });
+});
+document.addEventListener('click',e=>{
+  if(!header.contains(e.target)){groups.forEach(g=>g.classList.remove('open'));nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}
+});
+header.querySelectorAll('.nav-dropdown a,.site-nav>a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}));
 })();
