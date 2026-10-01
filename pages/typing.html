@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="StanNet Typing Lab: practica mecanografía en español, inglés y código; mide velocidad, precisión y progreso.">
 <title>Typing Lab | StanNet Programming Academy</title>
-<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../typing.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../typing.css?v=20261002-2">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
@@ -20,26 +20,94 @@
 <a href="education.html">Formación</a><a href="cv.html">Sobre mí</a><a class="nav-cta" href="cv.html">Ver CV</a>
 </nav></header>
 <main class="typing-shell">
-<div class="typing-heading"><div><p class="eyebrow">STANNET / PROGRAMMING ACADEMY</p><h1>Typing <em>Lab.</em></h1><p>Practica mecanografía y gana soltura escribiendo código. Empieza a teclear para activar el cronómetro.</p><a class="typing-shortcuts-link" href="shortcuts.html">Aprender atajos de teclado ↗</a></div><div class="typing-record"><span>Tu mejor marca</span><strong id="bestWpm">—</strong><small>PPM en este modo</small></div></div>
+<div class="typing-heading">
+  <div>
+    <p class="eyebrow">STANNET / PROGRAMMING ACADEMY</p>
+    <h1>Typing <em>Lab.</em></h1>
+    <p>No se trata solo de escribir rápido. Aprende qué dedo pulsa cada tecla, memoriza el teclado por zonas y desarrolla automatismos con práctica repetitiva.</p>
+    <a class="typing-shortcuts-link" href="shortcuts.html">Aprender atajos de teclado ↗</a>
+  </div>
+  <div class="typing-record"><span>Tu mejor marca</span><strong id="bestWpm">—</strong><small>PPM en este modo</small></div>
+</div>
+
+<section class="typing-technique" aria-labelledby="techniqueTitle">
+  <div class="typing-section-heading">
+    <div>
+      <p class="eyebrow">TÉCNICA / MAPA DE DEDOS</p>
+      <h2 id="techniqueTitle">Cada dedo tiene <em>su territorio.</em></h2>
+      <p>Coloca los dedos sobre <strong>ASDF · JKLÑ</strong>. Los índices descansan en <strong>F</strong> y <strong>J</strong>, las teclas con relieve. No mires el teclado: deja que el mapa te indique el dedo correcto.</p>
+    </div>
+    <div class="typing-home-row"><span>A</span><span>S</span><span>D</span><span class="home-key">F</span><i></i><span class="home-key">J</span><span>K</span><span>L</span><span>Ñ</span></div>
+  </div>
+
+  <div class="typing-technique-grid">
+    <div class="typing-keyboard-card">
+      <div class="typing-card-head">
+        <div><span>MAPA QWERTY ESPAÑOL</span><strong>Teclado por dedos</strong></div>
+        <div id="fingerCoach" class="finger-coach" aria-live="polite"><small>SIGUIENTE TECLA</small><b>—</b><span>Empieza un ejercicio</span></div>
+      </div>
+      <div id="fingerKeyboard" class="finger-keyboard" aria-label="Mapa visual del teclado y los dedos"></div>
+      <div class="finger-legend" aria-label="Leyenda de dedos">
+        <span class="finger-lp">Meñique izq.</span><span class="finger-lr">Anular izq.</span><span class="finger-lm">Medio izq.</span><span class="finger-li">Índice izq.</span>
+        <span class="finger-ri">Índice der.</span><span class="finger-rm">Medio der.</span><span class="finger-rr">Anular der.</span><span class="finger-rp">Meñique der.</span><span class="finger-th">Pulgares</span>
+      </div>
+    </div>
+
+    <aside class="typing-hands-card" aria-label="Posición de las manos">
+      <div class="typing-card-head"><div><span>POSICIÓN BASE</span><strong>Manos y movimiento</strong></div></div>
+      <div class="hands-diagram">
+        <div class="hand-diagram hand-left">
+          <strong>MANO IZQUIERDA</strong>
+          <div class="hand-fingers">
+            <span class="finger-lp"><i></i><b>Meñique</b><small>Q · A · Z</small></span>
+            <span class="finger-lr"><i></i><b>Anular</b><small>W · S · X</small></span>
+            <span class="finger-lm"><i></i><b>Medio</b><small>E · D · C</small></span>
+            <span class="finger-li"><i></i><b>Índice</b><small>R T · F G · V B</small></span>
+          </div>
+          <div class="hand-palm">ASDF</div>
+        </div>
+        <div class="hand-diagram hand-right">
+          <strong>MANO DERECHA</strong>
+          <div class="hand-fingers">
+            <span class="finger-ri"><i></i><b>Índice</b><small>Y U · H J · N M</small></span>
+            <span class="finger-rm"><i></i><b>Medio</b><small>I · K · ,</small></span>
+            <span class="finger-rr"><i></i><b>Anular</b><small>O · L · .</small></span>
+            <span class="finger-rp"><i></i><b>Meñique</b><small>P · Ñ · -</small></span>
+          </div>
+          <div class="hand-palm">JKLÑ</div>
+        </div>
+      </div>
+      <div class="thumb-guide"><span class="finger-th">PULGARES</span><strong>Barra espaciadora</strong><p>Después de cada pulsación, el dedo vuelve a su posición base. Los brazos permanecen relajados y las muñecas casi rectas.</p></div>
+    </aside>
+  </div>
+</section>
+
+<section class="typing-drills-section" aria-labelledby="drillsTitle">
+  <div class="typing-section-heading compact">
+    <div><p class="eyebrow">ENTRENAMIENTO PROGRESIVO</p><h2 id="drillsTitle">Repite hasta que <em>el teclado desaparezca.</em></h2><p>Los drills aíslan movimientos concretos. Empieza por la fila base y avanza solo cuando puedas mantener precisión sin mirar las manos.</p></div>
+    <div class="drill-rule"><strong>Objetivo</strong><span>≥ 95% precisión</span><span>ritmo estable</span><span>sin mirar</span></div>
+  </div>
+  <div id="drillGrid" class="drill-grid" aria-label="Ejercicios repetitivos de mecanografía"></div>
+</section>
 <section class="typing-workspace" aria-label="Práctica de mecanografía">
 <div class="typing-settings">
-<fieldset class="typing-mode"><legend>Modo</legend><button type="button" data-mode="text" class="selected" aria-pressed="true">Texto</button><button type="button" data-mode="code" aria-pressed="false">Código</button></fieldset>
+<fieldset class="typing-mode"><legend>Modo</legend><button type="button" data-mode="drill" aria-pressed="false">Técnica guiada</button><button type="button" data-mode="text" class="selected" aria-pressed="true">Texto</button><button type="button" data-mode="code" aria-pressed="false">Código</button></fieldset>
 <label>Idioma del texto<select id="textLanguage"><option value="es">Español</option><option value="en">English</option></select></label>
 <label id="codeLanguageLabel" hidden>Lenguaje<select id="codeLanguage"><option value="javascript">JavaScript</option><option value="python">Python</option><option value="html">HTML</option><option value="css">CSS</option></select></label>
 <label>Duración<select id="duration"><option value="60" selected>1 minuto</option><option value="120">2 minutos</option><option value="300">5 minutos</option><option value="600">10 minutos</option><option value="900">15 minutos</option><option value="1800">30 minutos</option></select></label>
-<button class="typing-restart" id="restart" type="button">↻ Nuevo ejercicio</button>
+<button class="typing-sound" id="typingSound" type="button" aria-pressed="true" title="Activar o desactivar sonido de tecleo">🔊 Sonido ON</button><button class="typing-restart" id="restart" type="button">↻ Nuevo ejercicio</button>
 </div>
 <div class="typing-status"><span>TIEMPO RESTANTE <strong id="timeLeft">01:00</strong></span><span>VELOCIDAD <strong id="liveWpm">0</strong><small>PPM</small></span><span>PRECISIÓN <strong id="liveAccuracy">100</strong><small>%</small></span><span>CARACTERES <strong id="charCount">0</strong><small>acumulados</small></span></div>
 <div class="typing-target" id="target" aria-label="Texto que debes escribir"></div>
 <label class="typing-input-label" for="typingInput">Escribe aquí el texto de arriba</label>
 <textarea id="typingInput" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="typingHint" placeholder="Haz clic aquí y empieza a escribir…"></textarea>
-<p class="typing-hint" id="typingHint">Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.</p>
+<div class="typing-live-guide"><div><span>DEDO ACTIVO</span><strong id="activeFinger">—</strong></div><div><span>TECLA SIGUIENTE</span><strong id="nextKey">—</strong></div><div><span>CONSEJO</span><strong id="movementHint">Mantén los dedos sobre ASDF · JKLÑ</strong></div></div><p class="typing-hint" id="typingHint">Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.</p>
 <div class="typing-result" id="result" hidden role="status"></div>
 </section>
 <section class="typing-progress" aria-labelledby="progressTitle"><div><p class="eyebrow">TU PROGRESO</p><h2 id="progressTitle">Cada práctica cuenta.</h2><p>Resultados guardados solo en este navegador. La velocidad se calcula con caracteres correctos ÷ 5 por minuto.</p></div><div class="typing-progress-data"><div class="typing-summary" id="summary"></div><div class="typing-history" id="history"></div></div></section>
 <a class="typing-return" href="programming.html">← Volver a Programming Academy</a>
 </main>
 <footer><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><p>© <span id="year"></span></p><a href="#top">VOLVER ARRIBA ↑</a></footer>
-<script src="../script.js?v=20261001-7"></script><script src="../typing.js"></script>
+<script src="../script.js?v=20261001-7"></script><script src="../typing.js?v=20261002-2"></script>
 <script src="/stannet-global-nav.js?v=20261002-2" defer></script>
 </body></html>
