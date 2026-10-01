@@ -1,0 +1,12 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const html = fs.readFileSync('pages/denmark-cv.html','utf8');
+const js = fs.readFileSync('denmark-cv.js','utf8');
+assert.ok(html.includes('id="cvFile"'),'PDF input missing');
+assert.ok(html.includes('/vendor/pdf.min.js'),'Local PDF.js dependency missing');
+assert.ok(html.includes('id="cvPreview"'),'CV preview missing');
+assert.ok(html.includes('workindenmark.dk/job-search-in-denmark/your-cv'),'Official Workindenmark CV source missing');
+assert.ok(js.includes("'/vendor/pdf.worker.min.js'"),'Local PDF worker missing');
+assert.ok(js.includes('localStorage'),'Local draft persistence missing');
+assert.ok(js.includes('file.size > 8 * 1024 * 1024'),'PDF size guard missing');
+console.log('PASS: Denmark CV Builder architecture verified.');
