@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function(){
       futureSkal:'skal '+verb.da,
       futurePrediction:'kommer til at '+verb.da,
       futurePerfect:'vil '+futurePerfectAux+' '+verb.part,
+      conditional:'ville '+verb.da,
+      conditionalPerfect:'ville '+futurePerfectAux+' '+verb.part,
       presentParticiple:presentParticiple(verb),
       pastParticiple:verb.part
     };
