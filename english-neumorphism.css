@@ -397,7 +397,7 @@ body.english-neumorphic footer a{color:var(--nm-ink)!important}
 
 /* responsive */
 @media(max-width:1180px){
-  body.english-neumorphic .academy-hero{grid-template-columns:1fr;width:min(100% - 34px,980px)}
+  body.english-neumorphic .academy-hero{grid-template-columns:1fr;width:min(calc(100% - 34px),980px)}
   body.english-neumorphic .academy-hero-showcase{min-height:420px}
 }
 @media(max-width:760px){
