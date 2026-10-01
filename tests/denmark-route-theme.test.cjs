@@ -19,3 +19,9 @@ assert.ok(html.includes('¿Qué es el CPR?'),'Plain-language CPR explainer missi
 assert.ok(html.includes('¿Qué es SKAT?'),'Plain-language SKAT explainer missing');
 assert.ok(html.includes('lifeindenmark.borger.dk/theme/when-you-arrive'),'Official CPR source missing');
 assert.ok(html.includes('get-a-tax-card-as-a-non-danish-employee'),'Official SKAT source missing');
+
+assert.ok(html.includes('id="taxi-uber"'),'Taxi/Uber newcomer guide missing');
+assert.ok(html.includes('+45 48 48 48 48'),'Dantaxi phone missing');
+assert.ok(html.includes('+45 35 35 35 35'),'Copenhagen TAXA phone missing');
+assert.ok(html.includes('+45 89 48 48 48'),'Aarhus Taxa phone missing');
+assert.ok(html.includes('uber.com/dk/en/r/cities'),'Official Uber Denmark link missing');
