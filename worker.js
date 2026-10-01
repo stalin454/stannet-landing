@@ -454,6 +454,10 @@ export default {
       return handlePasswordDevices(request, env, url);
     }
 
+    if (url.pathname === '/api/english-coach') {
+      return handleEnglishCoach(request, env);
+    }
+
     if (url.pathname === '/api/stannet-ai') {
       return handleStanNetAi(request, env);
     }
@@ -1237,6 +1241,59 @@ function buildRadioSsml(text,voice) {
 
 function escapeRadioSsml(value) {
   return String(value||'').replace(/[&<>"']/g,char=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;' }[char]));
+}
+
+async function handleEnglishCoach(request, env) {
+  const headers = stannetAiCorsHeaders(request, env);
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
+  if (request.method !== 'POST') return json({ error:'Método no permitido.' }, 405, headers);
+
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ error:'Solicitud no válida.' }, 400, headers); }
+
+  const text = typeof body?.text === 'string' ? body.text.trim() : '';
+  const level = /^(A1|A2|B1|B2|C1|C2)$/.test(body?.level || '') ? body.level : 'A1';
+  const mode = ['writing','grammar','explain','upgrade'].includes(body?.mode) ? body.mode : 'writing';
+  if (!text || text.length > 3000) return json({ error:'Texto no válido.' }, 400, headers);
+
+  const apiUrl = env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+  const model = env.AI_MODEL || 'openai/gpt-oss-20b';
+  const apiKey = env.AI_API_KEY || env.GROQ_API_KEY || env.GROQ_KEY;
+  if (!apiKey) return json({ error:'English Coach no está configurado.' }, 503, headers);
+
+  const instructions = {
+    writing: 'Corrige el texto manteniendo la intención del alumno. Devuelve: 1) versión corregida, 2) errores explicados en español, 3) tres mejoras útiles, 4) una versión natural apropiada para el nivel.',
+    grammar: 'Analiza solamente la gramática. Identifica patrón, error, regla, corrección y dos ejemplos adicionales. Explica en español con ejemplos en inglés.',
+    explain: 'Explica el texto frase por frase: significado, estructura, vocabulario y por qué se usa cada tiempo o auxiliar relevante.',
+    upgrade: 'Reescribe el texto un nivel CEFR por encima sin cambiar el mensaje. Explica qué vocabulario, conectores y estructuras elevan el nivel.'
+  };
+
+  const system = `Eres StanNet English Coach, tutor bilingüe inglés-español para un alumno de nivel ${level}.
+Tu prioridad es enseñar, no simplemente corregir. Sé preciso, amable y concreto.
+Nunca inventes una regla gramatical. Distingue entre error real, preferencia estilística y variante británica/americana.
+Respeta el nivel CEFR del alumno y no conviertas un texto A1 en prosa C2 salvo que el modo sea upgrade.
+Usa ejemplos originales y cortos. Si una frase ya es correcta, dilo.
+${instructions[mode]}`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method:'POST',
+      headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model,
+        messages:[{role:'system',content:system},{role:'user',content:text}],
+        temperature:0.3
+      })
+    });
+    const data = await response.json().catch(()=>({}));
+    if (!response.ok) return json({ error:'El tutor no pudo procesar el texto.', providerStatus:response.status }, 502, headers);
+    const answer=data?.choices?.[0]?.message?.content;
+    if(typeof answer!=='string'||!answer.trim()) return json({ error:'El tutor devolvió una respuesta vacía.' }, 502, headers);
+    return json({ answer:answer.trim(), level, mode }, 200, headers);
+  } catch {
+    return json({ error:'No se pudo conectar con English Coach.' }, 502, headers);
+  }
 }
 
 async function handleStanNetAi(request, env) {
