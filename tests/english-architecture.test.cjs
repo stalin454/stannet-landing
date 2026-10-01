@@ -7,6 +7,8 @@ const coreData = fs.readFileSync('english-core-data.js','utf8');
 const core = fs.readFileSync('english-core.js','utf8');
 const builderData = fs.readFileSync('english-sentence-builder-data.js','utf8');
 const builder = fs.readFileSync('english-sentence-builder.js','utf8');
+const levelsData = fs.readFileSync('english-levels-data.js','utf8');
+const levels = fs.readFileSync('english-levels.js','utf8');
 const a1 = fs.readFileSync('english-a1-deep.js','utf8');
 const expansion = fs.readFileSync('english-expansion.js','utf8');
 const worker = fs.readFileSync('worker.js','utf8');
@@ -14,15 +16,20 @@ const worker = fs.readFileSync('worker.js','utf8');
 assert.ok(html.includes('id="englishVoiceControls"'),'English voice selector mount missing');
 assert.ok(html.includes('id="englishCoreLab"'),'English Core Lab mount missing');
 assert.ok(html.includes('id="englishSentenceBuilder"'),'English Sentence Builder mount missing');
+assert.ok(html.includes('id="englishLevelHub"'),'English CEFR level hub mount missing');
+assert.strictEqual((html.match(/data-level="(?:A1|A2|B1|B2|C1|C2)"/g)||[]).length,6,'All six CEFR level buttons must be present');
 assert.ok(html.includes('../english-engine.css'),'English engine stylesheet missing');
 assert.ok(html.includes('../english-sentence-builder.css'),'English sentence builder stylesheet missing');
+assert.ok(html.includes('../english-levels.css'),'English CEFR campus stylesheet missing');
 
 [
   '../english-speech.js',
   '../english-core-data.js',
   '../english-sentence-builder-data.js',
   '../english-core.js',
-  '../english-sentence-builder.js'
+  '../english-sentence-builder.js',
+  '../english-levels-data.js',
+  '../english-levels.js'
 ].forEach((asset)=>assert.ok(html.includes(asset),asset+' missing from English Academy'));
 
 const speechPos=html.indexOf('../english-speech.js');
@@ -57,6 +64,16 @@ assert.ok(builder.includes("'did'"),'Sentence Builder did logic missing');
 assert.ok(builder.includes('ebSpanish'),'Sentence Builder Spanish translation panel missing');
 assert.ok(builder.includes('ebStructure'),'Sentence Builder structure panel missing');
 assert.ok(builder.includes('stannetPlayEnglish'),'Sentence Builder Azure audio missing');
+assert.ok(levelsData.includes("order:['A1','A2','B1','B2','C1','C2']"),'CEFR level order missing');
+['A1','A2','B1','B2','C1','C2'].forEach((level)=>assert.ok(levelsData.includes(level+':{'),'Curriculum missing '+level));
+assert.ok((levelsData.match(/name:'Grammar'/g)||[]).length===6,'Every level needs Grammar branch');
+assert.ok((levelsData.match(/name:'Listening & Podcast'/g)||[]).length===6,'Every level needs Listening & Podcast branch');
+assert.ok((levelsData.match(/name:'Review & Exam'/g)||[]).length===6,'Every level needs Review & Exam branch');
+assert.ok((levelsData.match(/video:{title:/g)||[]).length===6,'Every level needs video resource');
+assert.ok((levelsData.match(/podcast:{/g)||[]).length===6,'Every level needs podcast');
+assert.ok(levels.includes('stannetEnglishLevelJourneyV1'),'Daily progress storage missing');
+assert.ok(levels.includes('stannetPlayEnglish'),'CEFR campus Azure audio missing');
+assert.ok(levels.includes('levelFinishToday'),'Daily session tracking missing');
 
 assert.ok(expansion.includes('verb-audio'),'100-verb table audio controls missing');
 assert.ok(expansion.includes('phrasal-audio'),'Phrasal verb audio controls missing');
