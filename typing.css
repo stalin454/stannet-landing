@@ -788,3 +788,34 @@ body.typing-page{
   .finger-key.next-key{animation:none}
   .drill-card,.hand-fingers>span{transition:none}
 }
+
+
+/* Finger movement directions */
+.finger-motion-guide{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.finger-motion-guide>div{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  padding:10px;
+  border:1px solid #dce6ee;
+  border-radius:12px;
+  background:#f8fbfd;
+}
+.finger-motion-guide b{
+  width:30px;height:30px;flex:0 0 30px;
+  display:grid;place-items:center;
+  border-radius:9px;
+  background:linear-gradient(135deg,#e9fbff,#f1efff);
+  color:#2878ff;
+  font-size:15px;
+}
+.finger-motion-guide span,.finger-motion-guide strong,.finger-motion-guide small{display:block}
+.finger-motion-guide strong{color:#294760;font-size:10px}
+.finger-motion-guide small{margin-top:2px;color:#71869a;font-size:8px;line-height:1.35}
+@media(max-width:420px){.finger-motion-guide{grid-template-columns:1fr}}
