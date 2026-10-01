@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded',function(){
   });
 
   const stats=function(){
-    const due=vocab.filter(function(card){return (state.review[card.id]?.due||today())<=today();}).length;
-    const known=vocab.filter(function(card){return (state.review[card.id]?.box||0)>=4;}).length;
+    const due=vocab.filter(function(card){return ((state.review[card.id]&&state.review[card.id].due)||today())<=today();}).length;
+    const known=vocab.filter(function(card){return ((state.review[card.id]&&state.review[card.id].box)||0)>=4;}).length;
     const projects=Object.values(state.projects).filter(function(x){return x&&x.complete;}).length;
     const streak=calculateStreak();
     const el=document.querySelector('#masteryStats');
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded',function(){
     let cursor=new Date();
     for(let i=0;i<60;i++){
       const key=cursor.toISOString().slice(0,10);
-      if(state.daily[key]?.done)streak+=1;
+      if(state.daily[key]&&state.daily[key].done)streak+=1;
       else if(i===0){cursor.setDate(cursor.getDate()-1);continue;}
       else break;
       cursor.setDate(cursor.getDate()-1);
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const day=state.daily[key];
     day.level=level;
     save();
-    const due=vocab.filter(function(card){return card.level===level && (state.review[card.id]?.due||key)<=key;}).length;
+    const due=vocab.filter(function(card){return card.level===level && ((state.review[card.id]&&state.review[card.id].due)||key)<=key;}).length;
     const items=[
       {id:'route',title:'Campus '+level,detail:'Completa una rama o una tarea del nivel.',target:'#englishLevelHub',minutes:20},
       {id:'audio',title:'Listening + shadowing',detail:'Escucha un podcast o tres ejemplos y repítelos.',target:'#englishLevelHub',minutes:10},
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   const buildReviewQueue=function(){
     const level=currentLevel(),date=today();
-    reviewQueue=vocab.filter(function(card){return card.level===level&&(state.review[card.id]?.due||date)<=date;});
+    reviewQueue=vocab.filter(function(card){return card.level===level&&((state.review[card.id]&&state.review[card.id].due)||date)<=date;});
     if(!reviewQueue.length)reviewQueue=vocab.filter(function(card){return card.level===level;}).slice(0,8);
     reviewIndex=Math.min(reviewIndex,Math.max(0,reviewQueue.length-1));
   };
