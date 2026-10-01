@@ -25,3 +25,9 @@ assert.ok(html.includes('+45 48 48 48 48'),'Dantaxi phone missing');
 assert.ok(html.includes('+45 35 35 35 35'),'Copenhagen TAXA phone missing');
 assert.ok(html.includes('+45 89 48 48 48'),'Aarhus Taxa phone missing');
 assert.ok(html.includes('uber.com/dk/en/r/cities'),'Official Uber Denmark link missing');
+
+// rental scam safety
+assert.ok(html.includes('id="vivienda"'),'Housing safety section missing');
+assert.ok(html.includes('Consejos oficiales de la Policía'),'Police rental scam guidance link missing');
+assert.ok(html.includes('renting-a-home'),'Life in Denmark renting guidance missing');
+assert.ok(html.includes('No pagues depósito, alquiler anticipado ni reserva'),'Rental payment warning missing');
