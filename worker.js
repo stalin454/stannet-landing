@@ -76,6 +76,34 @@ export default {
       return json(radioStatus(env, new Date()), 200, { 'Cache-Control': 'public, max-age=20, s-maxage=20' });
     }
 
+    if (url.pathname === '/api/speech/status') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const regionConfigured = Boolean(env.AZURE_SPEECH_REGION);
+      const keyConfigured = Boolean(env.AZURE_SPEECH_KEY);
+      let azureReachable = false;
+      let azureStatus = null;
+
+      if (regionConfigured && keyConfigured) {
+        try {
+          const probe = await fetch(`https://${env.AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/voices/list`, {
+            headers: { 'Ocp-Apim-Subscription-Key': env.AZURE_SPEECH_KEY }
+          });
+          azureStatus = probe.status;
+          azureReachable = probe.ok;
+        } catch (error) {
+          azureStatus = 0;
+        }
+      }
+
+      return json({
+        provider: 'azure-speech',
+        regionConfigured,
+        keyConfigured,
+        azureReachable,
+        azureStatus
+      }, 200, { 'Cache-Control': 'no-store' });
+    }
+
     if (url.pathname === '/api/speech') {
       if (!['GET','POST'].includes(request.method)) return json({ error: 'Método no permitido.' }, 405);
 
