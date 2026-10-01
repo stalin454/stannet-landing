@@ -23,10 +23,17 @@ const modelStatus=document.querySelector('#modelStatus');
 let url=null,file=null,vocalsUrl=null,instrumentalUrl=null,processor=null,modelReady=false;
 const allowed=f=>f&&(f.type==='audio/mpeg'||f.type==='audio/wav'||/\.(mp3|wav)$/i.test(f.name));
 const size=n=>n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
+const MAX_LOCAL_SECONDS=240;
 
 const cpuThreads=Math.min(4,Math.max(2,navigator.hardwareConcurrency||4));
 ort.env.wasm.numThreads=globalThis.crossOriginIsolated?cpuThreads:1;
 try{ort.env.webgpu={powerPreference:'high-performance'}}catch{}
+
+const clock=s=>{
+  const m=Math.floor(s/60);
+  const r=Math.floor(s%60).toString().padStart(2,'0');
+  return m+':'+r;
+};
 
 function revokeStemUrls(){
   if(vocalsUrl)URL.revokeObjectURL(vocalsUrl);
@@ -67,7 +74,7 @@ function makeProcessor(provider){
     onDownloadProgress:(loaded,total)=>{
       const pct=Math.max(2,Math.min(45,(loaded/total)*45));
       progressBar.style.width=pct.toFixed(1)+'%';
-      modelStatus.textContent='Descargando modelo Demucs desde StanNet… '+Math.round((loaded/total)*100)+'%';
+      modelStatus.textContent='Descargando modelo Demucs desde StanNet… '+Math.round((loaded/total)*100)+'% · solo la primera vez';
     },
     onProgress:info=>{
       const pct=45+(info.progress*55);
@@ -133,6 +140,10 @@ async function decodeTo44100Stereo(f){
   const bytes=await f.arrayBuffer();
   const ctx=new AudioContext();
   const decoded=await ctx.decodeAudioData(bytes.slice(0));
+  if(decoded.duration>MAX_LOCAL_SECONDS){
+    await ctx.close();
+    throw new Error('Esta versión local acepta pistas de hasta '+clock(MAX_LOCAL_SECONDS)+'. Recorta la canción o prueba un fragmento más corto.');
+  }
   let buffer=decoded;
   if(decoded.sampleRate!==44100){
     const offline=new OfflineAudioContext(2,Math.ceil(decoded.duration*44100),44100);
@@ -142,8 +153,9 @@ async function decodeTo44100Stereo(f){
   }
   const left=new Float32Array(buffer.getChannelData(0));
   const right=buffer.numberOfChannels>1?new Float32Array(buffer.getChannelData(1)):new Float32Array(left);
+  const duration=buffer.duration;
   await ctx.close();
-  return {left,right};
+  return {left,right,duration};
 }
 
 function mixInstrumental(result){
@@ -178,12 +190,21 @@ function wavBlob(stem,sampleRate=44100){
 separate.onclick=async()=>{
   if(!file)return;
   separate.disabled=true; stems.hidden=true; progress.hidden=false; progressBar.style.width='1%';
+  const started=Date.now();
+  let phase='Preparando audio';
+  const tick=setInterval(()=>{
+    modelStatus.textContent=phase+' · tiempo transcurrido '+clock((Date.now()-started)/1000);
+  },5000);
   status.textContent='Procesando en tu ordenador. La primera vez descarga el modelo; después queda en caché.';
   try{
-    const p=await ensureProcessor();
     modelStatus.textContent='Decodificando audio…';
-    const {left,right}=await decodeTo44100Stereo(file);
+    let {left,right,duration}=await decodeTo44100Stereo(file);
+    phase='Audio preparado ('+clock(duration)+'). Cargando modelo';
+    modelStatus.textContent=phase+'…';
+    const p=await ensureProcessor();
+    phase='Separando voz e instrumental';
     const result=await p.separate(left,right);
+    phase='Generando archivos WAV';
     const instrumental=mixInstrumental(result);
     revokeStemUrls();
     vocalsUrl=URL.createObjectURL(wavBlob(result.vocals));
@@ -198,8 +219,9 @@ separate.onclick=async()=>{
     const mem=navigator.deviceMemory?(' · RAM navegador aprox.: '+navigator.deviceMemory+' GB'):'';
     const gpu=navigator.gpu?'WebGPU detectado':'WebGPU no detectado';
     status.textContent='No se pudo separar localmente: '+msg;
-    modelStatus.textContent=gpu+mem+' · Si falla WebGPU, Vocal Studio intenta WASM automáticamente.';
+    modelStatus.textContent=gpu+mem+' · En canciones largas usa un fragmento corto; WebGPU o WASM multihilo son necesarios para terminar en un tiempo razonable.';
   }finally{
+    clearInterval(tick);
     separate.disabled=false;
     setTimeout(()=>{progress.hidden=true;progressBar.style.width='0%'},1200);
   }
