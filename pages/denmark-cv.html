@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="StanNet Denmark CV Builder: importa tu CV en PDF o créalo desde cero y adáptalo a una candidatura en Dinamarca.">
+<title>CV danés | Ruta Dinamarca · StanNet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../denmark-cv.css?v=20261001-1">
+<link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
+</head>
+<body class="denmark-cv-page">
+<main class="cv-shell">
+<section class="cv-hero">
+<div>
+<p class="cv-kicker">RUTA DINAMARCA / CV BUILDER</p>
+<h1>Convierte tu CV al mercado danés.</h1>
+<p>Importa un PDF o crea el currículum desde cero. La herramienta extrae el texto en tu propio navegador, te ayuda a reorganizarlo y genera una vista limpia para imprimir o guardar como PDF.</p>
+<div class="cv-badges"><span class="cv-badge">Procesamiento local</span><span class="cv-badge">PDF → texto</span><span class="cv-badge">Edición manual</span><span class="cv-badge">Vista A4</span></div>
+</div>
+<aside class="cv-hero-side"><strong>Un CV danés debe ser relevante, breve y específico.</strong><p>Workindenmark recomienda adaptar el CV al puesto y usar un perfil personal corto que conecte tus competencias con la vacante.</p></aside>
+</section>
+
+<div class="cv-grid">
+<section class="cv-panel" aria-labelledby="editorTitle">
+<h2 id="editorTitle">1. Importa o escribe</h2>
+<label class="upload-zone" id="uploadZone" for="cvFile">
+<input id="cvFile" type="file" accept="application/pdf">
+<strong>Arrastra aquí tu CV en PDF</strong>
+<span>o toca para elegirlo · máximo 8 MB · el archivo no se sube a StanNet</span>
+</label>
+<p class="cv-status" id="cvStatus" aria-live="polite"></p>
+
+<div class="field full"><label for="sourceText">Texto extraído del PDF</label><textarea class="tall" id="sourceText" placeholder="Aquí aparecerá el texto del PDF. También puedes pegar tu CV directamente."></textarea></div>
+<div class="cv-actions"><button class="cv-btn" id="smartImport" type="button">Distribuir contenido</button></div>
+
+<div class="cv-form">
+<div class="field"><label for="fullName">Nombre completo</label><input id="fullName" autocomplete="name"></div>
+<div class="field"><label for="headline">Titular profesional</label><input id="headline" placeholder="Network Analyst · Web Developer · Logistics"></div>
+<div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field"><label for="phone">Teléfono</label><input id="phone" autocomplete="tel"></div>
+<div class="field"><label for="city">Ciudad / país</label><input id="city" placeholder="Vejle, Denmark"></div>
+<div class="field"><label for="linkedin">LinkedIn / portfolio</label><input id="linkedin" placeholder="linkedin.com/in/..."></div>
+<div class="field full"><label for="targetRole">Puesto objetivo</label><input id="targetRole" placeholder="Ej. Junior Network Analyst"></div>
+<div class="field full"><label for="profile">Personal profile</label><textarea id="profile" placeholder="5–6 frases dirigidas al puesto: experiencia, competencias, valor y motivación profesional."></textarea></div>
+<div class="field full"><label for="experience">Work experience</label><textarea class="tall" id="experience" placeholder="Empresa · puesto · fechas · responsabilidades y resultados relevantes."></textarea></div>
+<div class="field full"><label for="education">Education</label><textarea id="education"></textarea></div>
+<div class="field full"><label for="skills">Skills / competences</label><textarea id="skills"></textarea></div>
+<div class="field full"><label for="languages">Languages</label><textarea id="languages"></textarea></div>
+</div>
+<div class="cv-actions">
+<button class="cv-btn primary" id="renderCv" type="button">Generar CV danés</button>
+<button class="cv-btn" id="printCv" type="button">Guardar / imprimir PDF</button>
+<button class="cv-btn danger" id="clearCv" type="button">Limpiar</button>
+</div>
+<p class="privacy-note"><strong>Privacidad:</strong> la extracción del PDF y los borradores se procesan en tu navegador. El borrador se guarda solo en el almacenamiento local del dispositivo hasta que pulses “Limpiar”.</p>
+<p class="official-note"><strong>Referencia oficial:</strong> antes de enviar una candidatura, revisa las recomendaciones actuales de <a href="https://workindenmark.dk/job-search-in-denmark/your-cv" target="_blank" rel="noopener noreferrer">Workindenmark sobre el CV</a>.</p>
+</section>
+
+<section class="cv-preview-card" aria-labelledby="previewTitle">
+<h2 id="previewTitle">2. Vista previa</h2>
+<article class="cv-preview" id="cvPreview" aria-live="polite"></article>
+</section>
+</div>
+</main>
+<script src="/vendor/pdf.min.js"></script>
+<script src="../denmark-cv.js?v=20261001-1"></script>
+<script src="/stannet-global-nav.js?v=20261001-8"></script>
+</body>
+</html>
