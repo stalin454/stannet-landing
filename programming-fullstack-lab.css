@@ -1,0 +1,83 @@
+/* ============================================================
+   STANNET FULL-STACK LAB
+   Unified multi-runtime programming workspace.
+   ============================================================ */
+body.fullstack-lab-page{background:#eef5fb!important;color:#122238!important;padding:0!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.fullstack-lab-page .site-header{position:sticky;top:0;z-index:1000}
+.fs-lab-hero{position:relative;overflow:hidden;padding:clamp(42px,6vw,76px) clamp(20px,5vw,72px);color:#fff;background:radial-gradient(circle at 78% 20%,rgba(9,207,232,.22),transparent 25%),radial-gradient(circle at 90% 78%,rgba(138,57,255,.26),transparent 28%),linear-gradient(125deg,#03111f,#071e39 58%,#111443)}
+.fs-lab-hero:after{content:"</>";position:absolute;right:clamp(24px,7vw,110px);top:50%;transform:translateY(-50%);width:clamp(90px,12vw,156px);aspect-ratio:1;border:1px solid rgba(125,229,255,.25);border-radius:32px;display:grid;place-items:center;color:#82ecff;background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.02));box-shadow:0 28px 70px rgba(0,0,0,.2);font:800 clamp(24px,4vw,44px) Orbitron,sans-serif}
+.fs-lab-hero .fs-kicker{margin:0 0 15px;color:#7feeff;font:700 10px Orbitron,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+.fs-lab-hero h1{max-width:880px;margin:0;color:#fff;font:800 clamp(46px,6.5vw,86px)/.96 Inter,sans-serif;letter-spacing:-.06em}
+.fs-lab-hero h1 span{display:block;background:linear-gradient(90deg,#16e4ef,#4c8cff,#b45cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.fs-lab-hero>p{max-width:760px;margin:22px 0 0;color:#c8d9e8;font-size:16px;line-height:1.75}
+.fs-runtime-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;max-width:850px}
+.fs-runtime-strip span{padding:7px 10px;border:1px solid rgba(129,226,255,.20);border-radius:999px;background:rgba(255,255,255,.07);color:#d8f8ff;font-size:11px}
+
+.fs-lab-shell{width:min(1600px,calc(100% - 28px));margin:18px auto 70px;display:grid;grid-template-columns:250px minmax(0,1fr) 300px;gap:14px;align-items:start}
+.fs-panel{min-width:0;border:1px solid #d5e2ed;border-radius:20px;background:#fff;box-shadow:0 12px 32px rgba(38,77,113,.075)}
+.fs-sidebar,.fs-route{position:sticky;top:94px;max-height:calc(100vh - 112px);overflow:auto}
+.fs-panel-head{padding:18px 18px 12px;border-bottom:1px solid #e3ebf2}
+.fs-panel-head small{display:block;margin-bottom:6px;color:#71869b;font:700 9px Orbitron,sans-serif;letter-spacing:.12em}
+.fs-panel-head h2{margin:0;color:#142944;font:800 18px Inter,sans-serif}
+.fs-tech-list{display:grid;gap:5px;padding:10px}
+.fs-tech-button{width:100%;display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:10px;min-height:52px;padding:7px 10px;border:1px solid transparent;border-radius:13px;background:transparent;color:#40566e;text-align:left;cursor:pointer}
+.fs-tech-button:hover{background:#f4f9fd}
+.fs-tech-button.active{border-color:#c8deec;background:linear-gradient(135deg,#ebfbff,#edf4ff 55%,#f4efff);color:#155b9b;box-shadow:0 7px 18px rgba(40,120,255,.08)}
+.fs-tech-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:#edf5fb;color:#2878ff;font:800 10px Orbitron,sans-serif}
+.fs-tech-button.active .fs-tech-icon{color:#fff;background:linear-gradient(135deg,#09cfe8,#2878ff 58%,#8a39ff)}
+.fs-tech-name strong,.fs-tech-name span{display:block}.fs-tech-name strong{font-size:12px}.fs-tech-name span{margin-top:3px;color:#8797a8;font-size:10px}
+.fs-runtime-dot{width:8px;height:8px;border-radius:50%;background:#12bfa0;box-shadow:0 0 0 4px rgba(18,191,160,.09)}
+.fs-runtime-dot.sim{background:#eaa62c;box-shadow:0 0 0 4px rgba(234,166,44,.10)}
+
+.fs-workspace{overflow:hidden}
+.fs-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid #dfe8f0;background:linear-gradient(180deg,#fff,#f9fbfd)}
+.fs-toolbar-left,.fs-toolbar-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.fs-mode-badge{padding:7px 10px;border-radius:999px;background:#e9f8fb;color:#07849b;font:800 9px Orbitron,sans-serif;letter-spacing:.08em}
+.fs-runtime-label{color:#75889b;font-size:11px}
+.fs-btn{min-height:40px;padding:9px 13px;border-radius:10px;border:1px solid #cbdbe8;background:#fff;color:#28669e;font:750 11px Inter,sans-serif;cursor:pointer}
+.fs-btn:hover{background:#f2f8fc;border-color:#abcbe0}
+.fs-btn.primary{border:0;color:#fff;background:linear-gradient(135deg,#09cfe8,#2878ff 58%,#8a39ff);box-shadow:0 8px 18px rgba(40,120,255,.18)}
+.fs-btn:disabled{opacity:.5;cursor:wait}
+
+.fs-challenge{padding:15px 18px;border-bottom:1px solid #dfe8f0;background:#f8fbfe}
+.fs-challenge strong{display:block;margin-bottom:5px;color:#153754;font-size:12px}
+.fs-challenge p{margin:0;color:#62788d;font-size:12px;line-height:1.55}
+.fs-editor-tabs{display:flex;gap:2px;padding:8px 12px 0;background:#0d1724}
+.fs-file-tab{padding:8px 13px;border-radius:8px 8px 0 0;background:#172334;color:#91a7ba;font:700 10px "Cascadia Code",Consolas,monospace}
+.fs-file-tab.active{background:#111c2a;color:#dfefff;border-top:2px solid #27cbe0}
+.fs-editor-wrap{position:relative;background:#111c2a}
+.fs-editor{display:block;width:100%;min-height:390px;resize:vertical;padding:18px;border:0;outline:0;background:#111c2a!important;color:#d9e8f5!important;font:14px/1.65 "Cascadia Code",Consolas,monospace!important;tab-size:2;border-radius:0!important}
+.fs-editor::selection{background:#27517a}
+.fs-editor-status{position:absolute;right:12px;bottom:10px;padding:5px 8px;border-radius:7px;background:rgba(5,12,20,.72);color:#7793aa;font:9px Orbitron,sans-serif;pointer-events:none}
+.fs-output-layout{display:grid;grid-template-columns:1fr 1fr;min-height:300px;border-top:1px solid #d8e3ec}
+.fs-output-pane{min-width:0;background:#fff}
+.fs-output-pane+.fs-output-pane{border-left:1px solid #d8e3ec}
+.fs-output-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;border-bottom:1px solid #e2eaf1;background:#f7fafc}
+.fs-output-head strong{color:#40566c;font:800 10px Orbitron,sans-serif;letter-spacing:.08em}
+.fs-output-head span{color:#8a9aac;font-size:10px}
+.fs-console{min-height:250px;max-height:430px;margin:0;padding:15px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#0d1724;color:#cce0ee;font:12px/1.65 "Cascadia Code",Consolas,monospace}
+.fs-console .ok{color:#68e0b5}.fs-console .err{color:#ff9cae}.fs-console .muted{color:#758b9f}
+.fs-preview{display:block;width:100%;height:100%;min-height:250px;border:0;background:#fff}
+.fs-preview-placeholder{min-height:250px;display:grid;place-items:center;padding:24px;color:#8a9baa;text-align:center;font-size:12px}
+
+.fs-test-panel{padding:14px;border-top:1px solid #dce6ee;background:#fbfdff}
+.fs-test-summary{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fs-test-summary strong{color:#1c405e;font-size:12px}.fs-test-summary span{color:#71879a;font-size:11px}
+.fs-test-list{display:grid;gap:6px;margin-top:10px}
+.fs-test-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:9px;background:#f3f7fa;color:#5c7388;font-size:11px}
+.fs-test-item.pass{background:#eefaf6;color:#23725f}.fs-test-item.fail{background:#fff3f5;color:#9c4151}
+
+.fs-route-list{padding:8px}
+.fs-route-phase{border-bottom:1px solid #e5ecf2;padding:11px 10px}
+.fs-route-phase:last-child{border-bottom:0}
+.fs-route-phase button{width:100%;padding:0;border:0;background:transparent;text-align:left;cursor:pointer}
+.fs-route-phase small{display:block;color:#2878ff;font:800 9px Orbitron,sans-serif;letter-spacing:.08em}
+.fs-route-phase strong{display:block;margin-top:4px;color:#27445f;font-size:12px}
+.fs-route-phase p{margin:5px 0 0;color:#8293a3;font-size:10px;line-height:1.5}
+.fs-projects-toggle{margin:8px 10px 14px}
+.fs-status-card{margin:10px;padding:13px;border:1px solid #dbe6ee;border-radius:13px;background:#f8fbfd}
+.fs-status-card strong{display:block;color:#173b59;font-size:11px}.fs-status-card p{margin:5px 0 0;color:#778b9e;font-size:10px;line-height:1.5}
+
+@media(max-width:1180px){.fs-lab-shell{grid-template-columns:220px minmax(0,1fr)}.fs-route{grid-column:1/-1;position:static;max-height:none}.fs-route-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.fs-route-phase{border:1px solid #e2eaf1;border-radius:12px;margin:4px}}
+@media(max-width:850px){.fs-lab-shell{grid-template-columns:1fr}.fs-sidebar{position:static;max-height:none}.fs-tech-list{grid-template-columns:repeat(2,minmax(0,1fr))}.fs-output-layout{grid-template-columns:1fr}.fs-output-pane+.fs-output-pane{border-left:0;border-top:1px solid #d8e3ec}.fs-lab-hero:after{opacity:.35}.fs-toolbar{align-items:flex-start;flex-direction:column}}
+@media(max-width:560px){.fs-lab-shell{width:min(100% - 16px,1600px);margin-top:8px}.fs-lab-hero{padding:36px 17px}.fs-lab-hero h1{max-width:88%;font-size:clamp(40px,13vw,58px)}.fs-tech-list{grid-template-columns:1fr}.fs-route-list{grid-template-columns:1fr}.fs-editor{min-height:330px;padding:14px;font-size:13px}.fs-toolbar-actions{width:100%}.fs-btn{flex:1}.fs-output-layout{min-height:240px}}
