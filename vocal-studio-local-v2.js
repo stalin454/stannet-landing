@@ -24,7 +24,9 @@ let url=null,file=null,vocalsUrl=null,instrumentalUrl=null,processor=null,modelR
 const allowed=f=>f&&(f.type==='audio/mpeg'||f.type==='audio/wav'||/\.(mp3|wav)$/i.test(f.name));
 const size=n=>n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
 
-ort.env.wasm.numThreads=1;
+const cpuThreads=Math.min(4,Math.max(2,navigator.hardwareConcurrency||4));
+ort.env.wasm.numThreads=globalThis.crossOriginIsolated?cpuThreads:1;
+try{ort.env.webgpu={powerPreference:'high-performance'}}catch{}
 
 function revokeStemUrls(){
   if(vocalsUrl)URL.revokeObjectURL(vocalsUrl);
@@ -56,7 +58,12 @@ function load(f){
 function makeProcessor(provider){
   return new DemucsProcessor({
     ort,
-    sessionOptions:{executionProviders:[provider],graphOptimizationLevel:'basic'},
+    sessionOptions:{
+      executionProviders:[provider],
+      graphOptimizationLevel:'basic',
+      enableCpuMemArena:provider!=='wasm',
+      enableMemPattern:provider!=='wasm'
+    },
     onDownloadProgress:(loaded,total)=>{
       const pct=Math.max(2,Math.min(45,(loaded/total)*45));
       progressBar.style.width=pct.toFixed(1)+'%';
@@ -65,10 +72,19 @@ function makeProcessor(provider){
     onProgress:info=>{
       const pct=45+(info.progress*55);
       progressBar.style.width=pct.toFixed(1)+'%';
-      modelStatus.textContent='Separando audio localmente… '+Math.round(info.progress*100)+'%';
+      const segment=Number(info.currentSegment||0);
+      const total=Number(info.totalSegments||0);
+      const segmentText=total?(' · bloque '+segment+'/'+total):'';
+      modelStatus.textContent='Separando audio localmente… '+Math.round(info.progress*100)+'%'+segmentText;
     },
     onLog:()=>{}
   });
+}
+
+async function getWebGpuAdapter(){
+  if(!navigator.gpu)return null;
+  try{return await navigator.gpu.requestAdapter({powerPreference:'high-performance'})}
+  catch{return null}
 }
 
 async function ensureProcessor(){
@@ -76,9 +92,10 @@ async function ensureProcessor(){
   progress.hidden=false; progressBar.style.width='2%';
 
   let firstError=null;
-  if(navigator.gpu){
+  const adapter=await getWebGpuAdapter();
+  if(adapter){
     try{
-      modelStatus.textContent='Probando aceleración WebGPU y descargando el modelo local (~172 MB)…';
+      modelStatus.textContent='WebGPU disponible. Descargando modelo Demucs (~172 MB)…';
       processor=makeProcessor('webgpu');
       await processor.loadModel('/api/vocal-model');
       modelReady=true;
@@ -88,15 +105,22 @@ async function ensureProcessor(){
       firstError=e;
       console.warn('WebGPU falló; se intenta WASM.',e);
       processor=null;
-      modelStatus.textContent='WebGPU no pudo iniciar. Probando modo compatible WASM…';
+      modelStatus.textContent='WebGPU no pudo completar el proceso. Probando WASM optimizado…';
     }
   }
 
   try{
+    if(!globalThis.crossOriginIsolated){
+      modelStatus.textContent='Modo compatible sin aislamiento: WASM funcionará con un solo hilo.';
+    }else{
+      modelStatus.textContent='Iniciando WASM optimizado con '+ort.env.wasm.numThreads+' hilos…';
+    }
     processor=makeProcessor('wasm');
     await processor.loadModel('/api/vocal-model');
     modelReady=true;
-    modelStatus.textContent='Modelo preparado en modo compatible WASM. Será más lento.';
+    modelStatus.textContent=globalThis.crossOriginIsolated
+      ? 'Modelo preparado en WASM multihilo ('+ort.env.wasm.numThreads+' hilos).'
+      : 'Modelo preparado en WASM de compatibilidad. Puede ser bastante más lento.';
     return processor;
   }catch(e){
     const a=String(firstError?.message||firstError||'');
