@@ -5,7 +5,7 @@ const html = fs.readFileSync('pages/ruta-dinamarca.html','utf8');
 
 assert.ok(html.includes('class="denmark-route-neumorphic"'),'Ruta Dinamarca neumorphism body scope missing');
 assert.ok(html.includes('../ruta-dinamarca-neumorphism.css'),'Ruta Dinamarca neumorphism stylesheet missing');
-['bitacora','plan','areas','ciudades','fuentes','academia'].forEach((id)=>{
+['bitacora','plan','diccionario','areas','ciudades','fuentes','academia'].forEach((id)=>{
   assert.ok(html.includes('id="'+id+'"'),'Ruta Dinamarca section missing: '+id);
 });
 assert.ok(html.includes('href="danish.html"'),'Danish Academy link missing from Ruta Dinamarca');
@@ -14,3 +14,8 @@ assert.ok(html.includes('Verificado: 1 de octubre de 2026'),'Verification date m
 assert.ok(html.includes('/stannet-global-nav.js'),'Global navigation missing from Ruta Dinamarca');
 
 console.log('PASS: Ruta Dinamarca structure and neumorphism theme verified.');
+
+assert.ok(html.includes('¿Qué es el CPR?'),'Plain-language CPR explainer missing');
+assert.ok(html.includes('¿Qué es SKAT?'),'Plain-language SKAT explainer missing');
+assert.ok(html.includes('lifeindenmark.borger.dk/theme/when-you-arrive'),'Official CPR source missing');
+assert.ok(html.includes('get-a-tax-card-as-a-non-danish-employee'),'Official SKAT source missing');
