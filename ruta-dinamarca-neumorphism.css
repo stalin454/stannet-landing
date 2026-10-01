@@ -327,3 +327,45 @@ body.denmark-route-neumorphic .housing-source-note{
 @media(max-width:780px){
   body.denmark-route-neumorphic .housing-safety-grid{grid-template-columns:1fr}
 }
+
+
+/* Fuel and EV finder */
+body.denmark-route-neumorphic .fuel-finder{
+  max-width:1150px;margin:auto;padding:26px;border-radius:28px;background:var(--nm-surface);
+  border:1px solid rgba(255,255,255,.95);box-shadow:var(--nm-shadow)
+}
+body.denmark-route-neumorphic .fuel-controls{display:grid;gap:16px}
+body.denmark-route-neumorphic .fuel-field{display:grid;gap:7px}
+body.denmark-route-neumorphic .fuel-field label{font-weight:800;font-size:12px;color:var(--nm-ink)}
+body.denmark-route-neumorphic .fuel-field select{
+  min-height:48px;border:0;border-radius:14px;background:var(--nm-surface);box-shadow:var(--nm-inset);
+  padding:0 14px;color:var(--nm-ink);font:600 15px Inter,sans-serif
+}
+body.denmark-route-neumorphic .fuel-actions{display:flex;flex-wrap:wrap;gap:10px}
+body.denmark-route-neumorphic .fuel-btn{
+  min-height:46px;border:0;border-radius:14px;padding:0 15px;cursor:pointer;background:var(--nm-surface);
+  color:var(--nm-ink);box-shadow:var(--nm-shadow-sm);font:700 10px Orbitron,sans-serif
+}
+body.denmark-route-neumorphic .fuel-btn.primary{
+  background:linear-gradient(135deg,#141d59,#c8102e 62%,#af26e0);color:#fff
+}
+body.denmark-route-neumorphic .fuel-status{margin:0;color:var(--nm-muted);font-size:12px;line-height:1.5}
+body.denmark-route-neumorphic .fuel-providers{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:22px
+}
+body.denmark-route-neumorphic .fuel-providers a{
+  display:grid;gap:7px;text-decoration:none;padding:16px;border-radius:17px;background:rgba(148,214,247,.08);
+  box-shadow:var(--nm-inset);min-width:0
+}
+body.denmark-route-neumorphic .fuel-providers strong{color:var(--nm-ink);font-size:13px}
+body.denmark-route-neumorphic .fuel-providers span{color:var(--nm-muted);font-size:11px;line-height:1.4}
+body.denmark-route-neumorphic .fuel-note{margin:18px 0 0;color:var(--nm-muted);font-size:12px;line-height:1.6}
+@media(max-width:900px){
+  body.denmark-route-neumorphic .fuel-providers{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  body.denmark-route-neumorphic .fuel-finder{padding:20px;border-radius:22px}
+  body.denmark-route-neumorphic .fuel-actions{display:grid}
+  body.denmark-route-neumorphic .fuel-btn{width:100%}
+  body.denmark-route-neumorphic .fuel-providers{grid-template-columns:1fr}
+}
