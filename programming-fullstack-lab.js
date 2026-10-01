@@ -56,7 +56,7 @@ const users: User[] = [
 ];
 
 function labels(items: User[]): string[] {
-  return items.map(user => `${user.id}: ${user.name} [${user.role}]`);
+  return items.map(user => user.id + ': ' + user.name + ' [' + user.role + ']');
 }
 
 console.log(labels(users));`,tests:[['Define tipos',c=>/interface\s+\w+|type\s+\w+\s*=/.test(c)],['Anota tipos',c=>/:\s*(string|number|boolean|\w+\[\])/.test(c)],['Produce salida',(_,o)=>o.trim().length>0]]},
@@ -132,7 +132,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&g
 function save(){store[current]=$('fs-editor').value;localStorage.setItem(KEY,JSON.stringify(store))}
 function mode(){return modes.find(x=>x.id===current)||modes[0]}
 function log(text,type=''){const c=$('fs-console');const line=document.createElement('div');if(type)line.className=type;line.textContent=String(text);c.append(line);c.scrollTop=c.scrollHeight}
-function clearOutput(){lastOutput='';$('fs-console').textContent='';$('fs-preview').srcdoc='';$('fs-preview').hidden=false;$('fs-preview-placeholder').hidden=true;$('fs-tests').innerHTML='';$('fs-test-summary').textContent='Sin comprobar'}
+function clearOutput(){lastOutput='';$('fs-console').textContent='';$('fs-preview').srcdoc='';const visual=['web','react'].includes(current);$('fs-preview').hidden=!visual;$('fs-preview-placeholder').hidden=visual;$('fs-tests').innerHTML='';$('fs-test-summary').textContent='Sin comprobar'}
 function renderModes(){
  $('fs-tech-list').innerHTML=modes.map(m=>`<button class="fs-tech-button ${m.id===current?'active':''}" data-mode="${m.id}"><span class="fs-tech-icon">${esc(m.icon)}</span><span class="fs-tech-name"><strong>${esc(m.name)}</strong><span>${m.kind==='real'?'runtime real':'simulación guiada'}</span></span><i class="fs-runtime-dot ${m.kind==='sim'?'sim':''}"></i></button>`).join('');
 }
