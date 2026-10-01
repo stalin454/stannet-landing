@@ -296,11 +296,32 @@
     coach.querySelector('span').textContent = info ? info.label + ' · vuelve a ' + info.home : next ? 'Tecla especial / símbolo' : 'Empieza un ejercicio';
   }
 
+  function keepActiveTargetVisible(index) {
+    const area = $('target');
+    const active = spans[index];
+    if (!area || !active) return;
+
+    requestAnimationFrame(() => {
+      const top = active.offsetTop;
+      const bottom = top + active.offsetHeight;
+      const viewTop = area.scrollTop;
+      const viewBottom = viewTop + area.clientHeight;
+      const upperSafe = viewTop + area.clientHeight * 0.22;
+      const lowerSafe = viewTop + area.clientHeight * 0.72;
+
+      if (bottom > lowerSafe || top < upperSafe) {
+        const desired = Math.max(0, top - area.clientHeight * 0.34);
+        area.scrollTo({ top: desired, behavior: 'auto' });
+      }
+    });
+  }
+
   function paint(value) {
     spans.forEach((span, i) => {
       span.className = i < value.length ? value[i] === target[i] ? 'correct' : 'incorrect' : i === value.length ? 'next' : '';
     });
     updateCoach(value.length);
+    keepActiveTargetVisible(value.length);
   }
 
   function stats(repaint = false) {
@@ -431,6 +452,7 @@
     });
     area.append(fragment);
     area.setAttribute('aria-label', target);
+    area.scrollTop = 0;
     updateCoach(0);
   }
 
