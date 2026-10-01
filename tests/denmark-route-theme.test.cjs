@@ -31,3 +31,17 @@ assert.ok(html.includes('id="vivienda"'),'Housing safety section missing');
 assert.ok(html.includes('Consejos oficiales de la Policía'),'Police rental scam guidance link missing');
 assert.ok(html.includes('renting-a-home'),'Life in Denmark renting guidance missing');
 assert.ok(html.includes('No pagues depósito, alquiler anticipado ni reserva'),'Rental payment warning missing');
+
+assert.ok(html.includes('data-denmark-city-assistant'),'City-aware Denmark assistant missing');
+assert.ok(html.includes('id="dkCity"'),'City selector missing');
+assert.ok(html.includes('id="dkUseLocation"'),'Geolocation control missing');
+assert.ok(html.includes('denmark-city-assistant.js'),'City assistant script missing');
+assert.ok(html.includes('denmark-city-assistant.css'),'City assistant stylesheet missing');
+['copenhagen','aarhus','odense','vejle','fredericia','kolding','horsens'].forEach((city)=>{
+  assert.ok(html.includes('value="'+city+'"'),'Supported Denmark city missing: '+city);
+});
+['journey','siri','hospital','bank','nemkonto','housing','car-rent','bicycle-rent','free-stuff','danish','university','school','daycare'].forEach((action)=>{
+  assert.ok(html.includes('data-local-action="'+action+'"'),'Local assistant action missing: '+action);
+});
+assert.ok(html.includes('112'),'Emergency number 112 missing');
+assert.ok(html.includes('114'),'Police service number 114 missing');
