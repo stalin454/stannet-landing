@@ -76,6 +76,53 @@ export default {
       return json(radioStatus(env, new Date()), 200, { 'Cache-Control': 'public, max-age=20, s-maxage=20' });
     }
 
+    if (url.pathname === '/api/speech/test') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const region = env.AZURE_SPEECH_REGION;
+      const key = env.AZURE_SPEECH_KEY;
+      if (!region || !key) {
+        return json({
+          ok: false,
+          provider: 'azure-speech',
+          reason: 'missing-credentials'
+        }, 200, { 'Cache-Control': 'no-store' });
+      }
+
+      const language = 'da-DK';
+      const voice = 'da-DK-ChristelNeural';
+      const ssml = '<speak version="1.0" xml:lang="da-DK"><voice name="da-DK-ChristelNeural"><prosody rate="-8%">Hej</prosody></voice></speak>';
+
+      try {
+        const azureResponse = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+          method: 'POST',
+          headers: {
+            'Ocp-Apim-Subscription-Key': key,
+            'Content-Type': 'application/ssml+xml',
+            'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3',
+            'User-Agent': 'stannet-danish-coach-diagnostic'
+          },
+          body: ssml
+        });
+
+        const bytes = await azureResponse.arrayBuffer();
+        return json({
+          ok: azureResponse.ok,
+          provider: 'azure-speech',
+          language,
+          voice,
+          azureStatus: azureResponse.status,
+          contentType: azureResponse.headers.get('content-type') || null,
+          byteLength: bytes.byteLength
+        }, 200, { 'Cache-Control': 'no-store' });
+      } catch (error) {
+        return json({
+          ok: false,
+          provider: 'azure-speech',
+          reason: 'network-error'
+        }, 200, { 'Cache-Control': 'no-store' });
+      }
+    }
+
     if (url.pathname === '/api/speech/status') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       const regionConfigured = Boolean(env.AZURE_SPEECH_REGION);
