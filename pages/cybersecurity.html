@@ -7,7 +7,7 @@
 <title>Ciberseguridad | StanNet.Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="../cyber-academy.css">
+<link rel="stylesheet" href="../cyber-academy.css?v=20261002-2">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
@@ -35,9 +35,18 @@
 </section>
 
 <section class="section cyber-hub" id="cyber-hub">
-<p class="eyebrow">STANNET CYBERSECURITY / CENTRO ÚNICO</p>
-<h2>Aprender, analizar y proteger.</h2>
-<p class="cyber-hub-lede">Toda el área de ciberseguridad organizada desde una sola entrada. La teoría vive en la Academy; las herramientas defensivas se abren desde este panel.</p>
+<div class="cyber-section-head">
+  <div>
+    <p class="eyebrow">STANNET CYBERSECURITY / CENTRO ÚNICO</p>
+    <h2>Aprender, analizar <em>y proteger.</em></h2>
+    <p class="cyber-hub-lede">Toda el área de ciberseguridad organizada desde una sola entrada. La teoría vive en la Academy; las herramientas defensivas se abren desde este panel.</p>
+  </div>
+  <div class="cyber-hub-stats" aria-label="Resumen del área">
+    <span><strong>5</strong> herramientas</span>
+    <span><strong>27+</strong> unidades</span>
+    <span><strong>SOC</strong> orientado a práctica</span>
+  </div>
+</div>
 <div class="cyber-tool-grid">
   <a class="cyber-tool-card" href="#cyber-classroom"><span>01</span><strong>Cybersecurity Academy</strong><p>Ruta SOC junior, redes, Linux, logs, SIEM, Wireshark, Nmap defensivo y portfolio.</p><b>ESTUDIAR →</b></a>
   <a class="cyber-tool-card" href="../sentinel/"><span>02</span><strong>Sentinel</strong><p>Laboratorio de análisis estático: SHA-256, YARA-X, entropía, strings, IOC y reglas.</p><b>ANALIZAR →</b></a>
@@ -47,12 +56,35 @@
 </div>
 </section>
 
-<section class="section">
-<div class="content-grid">
-<article class="info-card"><p class="tag">FUNDAMENTOS</p><h3>Seguridad digital</h3><p>Buenas prácticas, gestión de identidades y protección de la información.</p></article>
-<article class="info-card"><p class="tag">INFRAESTRUCTURA</p><h3>Redes y sistemas</h3><p>Protocolos, arquitectura de red y administración de entornos Linux.</p></article>
-<a class="info-card" href="cyber-lab.html" style="text-decoration:none;color:inherit"><p class="tag">PRÁCTICA · LABORATORIO</p><h3>Cyber Defense Lab</h3><p>Herramientas y proyectos prácticos en un espacio separado: Sentinel, Shield Antivirus y futuros laboratorios de redes/SOC.</p><strong>ENTRAR AL LAB →</strong></a>
-</div>
+<section class="section cyber-foundations">
+  <div class="cyber-section-head compact">
+    <div>
+      <p class="eyebrow">BASES / DEFENSA DIGITAL</p>
+      <h2>Construye criterio antes de usar herramientas.</h2>
+      <p class="cyber-hub-lede">La tecnología cambia. Los fundamentos de identidad, red, evidencia y respuesta son los que te permiten entender qué está ocurriendo.</p>
+    </div>
+  </div>
+  <div class="content-grid">
+    <article class="info-card cyber-info-card">
+      <span class="cyber-info-icon">ID</span>
+      <p class="tag">FUNDAMENTOS</p>
+      <h3>Seguridad digital</h3>
+      <p>Buenas prácticas, gestión de identidades, mínimo privilegio y protección de la información.</p>
+    </article>
+    <article class="info-card cyber-info-card">
+      <span class="cyber-info-icon">NET</span>
+      <p class="tag">INFRAESTRUCTURA</p>
+      <h3>Redes y sistemas</h3>
+      <p>Protocolos, arquitectura de red, Linux, registros y contexto operativo.</p>
+    </article>
+    <a class="info-card cyber-info-card" href="cyber-lab.html">
+      <span class="cyber-info-icon">LAB</span>
+      <p class="tag">PRÁCTICA · LABORATORIO</p>
+      <h3>Cyber Defense Lab</h3>
+      <p>Simulaciones defensivas, análisis y proyectos separados del contenido teórico.</p>
+      <strong>ENTRAR AL LAB →</strong>
+    </a>
+  </div>
 </section>
 </main>
 <script src="../cyber-curriculum.js" defer></script>
