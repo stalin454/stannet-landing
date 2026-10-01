@@ -35,6 +35,7 @@ body{overflow-x:hidden}
 </style>
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="../ruta-dinamarca-neumorphism.css?v=20261001-1">
+<link rel="stylesheet" href="../denmark-city-assistant.css?v=20261001-1">
 </head>
 <body class="denmark-route-neumorphic">
 <main>
@@ -274,19 +275,146 @@ body{overflow-x:hidden}
 </div>
 </section>
 
-<section class="route-section" id="ciudades">
-<div class="route-heading"><span>07 / CIUDADES</span><div><h2>Ciudades bajo el radar.</h2><p>La lista irá cambiando a medida que comparemos estudios, empleo, vivienda y calidad de vida.</p></div></div>
-<div class="city-grid">
-<div class="city"><strong>Fredericia</strong><span>Base posible · Jutlandia</span></div>
-<div class="city"><strong>Vejle</strong><span>Estudios · conexiones</span></div>
-<div class="city"><strong>Aarhus</strong><span>Universidad · tecnología</span></div>
-<div class="city"><strong>Kolding</strong><span>Alternativa regional</span></div>
-<div class="city"><strong>Horsens</strong><span>Estudios · Jutlandia</span></div>
-<div class="city"><strong>Odense</strong><span>Educación · tecnología</span></div>
-<div class="city"><strong>Copenhague</strong><span>Mercado laboral · capital</span></div>
+<section class="route-section" id="ciudades" data-denmark-city-assistant>
+<div class="route-heading"><span>07 / ASISTENTE LOCAL</span><div><h2>¿En qué ciudad estás?</h2><p>Elige tu ciudad o permite usar tu ubicación para adaptar transporte, trámites, sanidad, banca, vivienda, movilidad, idioma y educación. La ubicación se procesa únicamente en tu navegador y no se guarda.</p></div></div>
+
+<div class="dk-assistant">
+  <div class="dk-assistant-controls">
+    <div class="dk-assistant-field">
+      <label for="dkCity">CIUDAD DE REFERENCIA</label>
+      <select id="dkCity">
+        <option value="copenhagen">Copenhague</option>
+        <option value="aarhus">Aarhus</option>
+        <option value="odense">Odense</option>
+        <option value="vejle">Vejle</option>
+        <option value="fredericia">Fredericia</option>
+        <option value="kolding">Kolding</option>
+        <option value="horsens">Horsens</option>
+      </select>
+    </div>
+    <button class="dk-assistant-btn primary" type="button" id="dkUseLocation">⌖ Usar mi ubicación</button>
+    <p class="dk-assistant-status" id="dkCityStatus" aria-live="polite">Guía adaptada a Copenhague. Puedes cambiar de ciudad cuando quieras.</p>
+  </div>
+
+  <div class="dk-city-overview">
+    <div>
+      <span class="route-kicker">TU ZONA</span>
+      <h3 id="dkSelectedCityName">Copenhague</h3>
+      <p id="dkSelectedCitySummary">Capital y mayor nodo de transporte. Metro, S-train, tren regional y una red extensa de autobuses.</p>
+    </div>
+    <div class="dk-city-meta">
+      <div><b>TRANSPORTE LOCAL</b><span id="dkTransportName">DOT · bus, metro, tren y light rail</span><br><a id="dkTransportLink" href="https://dinoffentligetransport.dk/en" target="_blank" rel="noopener noreferrer">Abrir operador oficial ↗</a></div>
+      <div><b>SIRI</b><span id="dkSiriName">SIRI Copenhagen</span><br><span id="dkSiriAddress">Carl Jacobsens Vej 39, 2500 Valby</span></div>
+      <div><b>MUNICIPIO</b><a id="dkMunicipalLink" href="https://international.kk.dk/" target="_blank" rel="noopener noreferrer">Københavns Kommune ↗</a></div>
+    </div>
+  </div>
+
+  <div class="dk-service-grid">
+    <article class="dk-service">
+      <span class="tag">TRANSPORTE</span>
+      <h3>Bus, tren, metro o tranvía</h3>
+      <p>Rejseplanen reúne rutas nacionales. El segundo botón abre el operador que corresponde a tu ciudad.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="journey">Planear viaje</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="bus">Operador local</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">TRÁMITES</span>
+      <h3>SIRI y municipio</h3>
+      <p>Consulta oficinas SIRI, citas y horarios antes de desplazarte. Para servicios locales, abre el municipio de la ciudad elegida.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="siri">Oficinas SIRI</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="municipality">Municipio</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">SALUD</span>
+      <h3>Hospital o médico cercano</h3>
+      <p>Busca centros cercanos en tu ciudad. Para una emergencia real en Dinamarca, el número es 112.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="hospital">Hospital cercano</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="doctor">Médico cercano</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">BANCA</span>
+      <h3>Cuenta bancaria y NemKonto</h3>
+      <p>Busca bancos de la zona y compara condiciones. NemKonto no es un banco: es la cuenta que designas para recibir pagos de organismos públicos. Los documentos exigidos varían por entidad.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="bank">Buscar bancos</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="nemkonto">Guía oficial NemKonto</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">VIVIENDA</span>
+      <h3>Alquiler en tu ciudad</h3>
+      <p>Busca vivienda por zona, pero revisa primero la advertencia antifraude de esta guía y no envíes depósitos a ciegas.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="housing">Buscar alquiler</button>
+        <a class="dk-assistant-btn" href="#vivienda">Ver seguridad</a>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">MOVERME</span>
+      <h3>Coche, bici o moto</h3>
+      <p>Encuentra alquileres locales. Las condiciones comerciales dependen de cada empresa; para conducir, comprueba aparte si tu permiso extranjero es válido en Dinamarca.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="car-rent">Alquilar coche</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="bicycle-rent">Alquilar bici</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="motorbike">Moto / scooter</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="driving">Permiso de conducir</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">EMPEZAR CON POCO</span>
+      <h3>Segunda mano y cosas gratis</h3>
+      <p>Busca bicicletas usadas, mercados de segunda mano y puntos de reutilización o intercambio. Los grupos sociales son recursos comunitarios, no fuentes oficiales.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="bicycle-buy">Bici usada</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="free-stuff">Cosas gratis</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="reuse">Puntos de reutilización</button>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">DANÉS</span>
+      <h3>Aprender danés</h3>
+      <p>La información oficial indica que los cursos para recién llegados se ofrecen en centros de idiomas y que el municipio puede orientarte sobre la oferta local.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="danish">Guía oficial</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="danish-local">Buscar en mi municipio</button>
+        <a class="dk-assistant-btn" href="danish.html">StanNet Danish Academy</a>
+      </div>
+    </article>
+
+    <article class="dk-service">
+      <span class="tag">FAMILIA Y ESTUDIOS</span>
+      <h3>Universidad, colegio y guardería</h3>
+      <p>La escolarización y las guarderías dependen en parte del municipio. La guía te lleva a las reglas oficiales y te permite buscar centros de educación superior en tu ciudad.</p>
+      <div class="dk-service-actions">
+        <button class="dk-assistant-btn" type="button" data-local-action="university">Universidades</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="school">Colegio</button>
+        <button class="dk-assistant-btn" type="button" data-local-action="daycare">Guardería</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="dk-emergency" role="note" aria-label="Números de emergencia en Dinamarca">
+    <div><strong>112</strong><span>Emergencias: ambulancia, bomberos o policía en situaciones graves o con riesgo para la vida.</span></div>
+    <div><strong>114</strong><span>Policía danesa para consultas y hechos que no requieren presencia policial urgente.</span></div>
+    <button class="dk-assistant-btn" type="button" data-local-action="emergency">Guía oficial de emergencias</button>
+  </div>
+
+  <p class="dk-assistant-note">Fuentes operativas principales: SIRI / New to Denmark, Life in Denmark, Rejseplanen y operadores regionales. Las búsquedas de comercios, hospitales, vivienda, alquiler y segunda mano abren servicios externos y deben verificarse antes de contratar o pagar.</p>
 </div>
 </section>
-
 
 <section class="route-section" id="fuentes">
 <div class="route-heading"><span>08 / FIABILIDAD</span><div><h2>Información verificada, no rumores.</h2><p>Los trámites, salud, impuestos, movilidad y empleo se documentan priorizando fuentes públicas danesas. Cada guía operativa indicará qué autoridad es responsable, el enlace oficial y la fecha de la última comprobación.</p></div></div>
@@ -305,6 +433,7 @@ body{overflow-x:hidden}
 </section>
 </main>
 <script src="../denmark-mobility-search.js?v=20261001-1"></script>
+<script src="../denmark-city-assistant.js?v=20261001-1"></script>
 <script src="/stannet-global-nav.js?v=20261001-8"></script>
 </body>
 </html>
