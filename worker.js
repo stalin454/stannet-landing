@@ -77,19 +77,28 @@ export default {
     }
 
     if (url.pathname === '/api/speech') {
-      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+      if (!['GET','POST'].includes(request.method)) return json({ error: 'Método no permitido.' }, 405);
 
-      let body;
-      try { body = await request.json(); }
-      catch { return json({ error: 'Solicitud no válida.' }, 400); }
+      let text = '';
+      let requestedLang = 'da-DK';
 
-      const text = typeof body?.text === 'string' ? body.text.trim() : '';
+      if (request.method === 'GET') {
+        text = (url.searchParams.get('text') || '').trim();
+        requestedLang = (url.searchParams.get('lang') || 'da-DK').trim();
+      } else {
+        let body;
+        try { body = await request.json(); }
+        catch { return json({ error: 'Solicitud no válida.' }, 400); }
+        text = typeof body?.text === 'string' ? body.text.trim() : '';
+        requestedLang = typeof body?.lang === 'string' ? body.lang : 'da-DK';
+      }
+
       const voiceMap = {
         'da-DK': 'da-DK-ChristelNeural',
         'en-US': 'en-US-JennyNeural',
         'en-GB': 'en-GB-SoniaNeural'
       };
-      const language = voiceMap[body?.lang] ? body.lang : 'da-DK';
+      const language = voiceMap[requestedLang] ? requestedLang : 'da-DK';
       const voice = voiceMap[language];
       const region = env.AZURE_SPEECH_REGION;
       const key = env.AZURE_SPEECH_KEY;
@@ -116,7 +125,8 @@ export default {
         if (!azureResponse.ok) return json({ error: 'Azure no pudo generar el audio.' }, 502);
         const headers = new Headers();
         headers.set('Content-Type', 'audio/mpeg');
-        headers.set('Cache-Control', 'public, max-age=86400');
+        headers.set('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+        headers.set('X-Content-Type-Options', 'nosniff');
         return new Response(azureResponse.body, { status: 200, headers });
       } catch {
         return json({ error: 'No se pudo conectar con el servicio de voz.' }, 502);
