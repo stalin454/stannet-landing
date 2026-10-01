@@ -1,0 +1,329 @@
+/* StanNet Danish Academy — Accessible Neumorphism 2.0
+   Scoped to body.danish-neumorphic so the rest of StanNet remains untouched. */
+body.danish-neumorphic{
+  --nm-bg:#f7f8fc;
+  --nm-surface:#f7f8fc;
+  --nm-white:#ffffff;
+  --nm-ink:#141d59;
+  --nm-ink-2:#263262;
+  --nm-muted:#66728f;
+  --nm-purple:#af26e0;
+  --nm-violet:#ad63de;
+  --nm-cyan:#94d6f7;
+  --nm-pink:#d065a1;
+  --nm-coral:#f8615c;
+  --nm-orange:#fd8f57;
+  --dk-red:#c8102e;
+  --dk-red-2:#e5484d;
+  --danish-red:#c8102e;
+  --danish-ice:#5fc7e7;
+  --danish-deep:#141d59;
+  --nm-gradient:linear-gradient(135deg,#af26e0 0%,#d065a1 28%,#94d6f7 56%,#fd8f57 82%,#f8615c 100%);
+  --dk-gradient:linear-gradient(135deg,#c8102e 0%,#e5484d 30%,#d065a1 52%,#94d6f7 78%,#af26e0 100%);
+  --nm-shadow:14px 14px 34px rgba(44,57,94,.13),-14px -14px 34px rgba(255,255,255,.96);
+  --nm-shadow-sm:7px 7px 18px rgba(44,57,94,.12),-7px -7px 18px rgba(255,255,255,.94);
+  --nm-inset:inset 4px 4px 9px rgba(44,57,94,.10),inset -4px -4px 9px rgba(255,255,255,.96);
+  --nm-radius-xl:34px;
+  --nm-radius-lg:24px;
+  --nm-radius-md:16px;
+  margin:0;
+  background:
+    radial-gradient(circle at 7% 4%,rgba(200,16,46,.07),transparent 25rem),
+    radial-gradient(circle at 91% 8%,rgba(148,214,247,.16),transparent 27rem),
+    var(--nm-bg);
+  color:var(--nm-ink);
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body.danish-neumorphic *,body.danish-neumorphic *::before,body.danish-neumorphic *::after{box-sizing:border-box}
+body.danish-neumorphic main{overflow:hidden}
+body.danish-neumorphic h1,
+body.danish-neumorphic h2,
+body.danish-neumorphic h3,
+body.danish-neumorphic h4{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--nm-ink)}
+body.danish-neumorphic .eyebrow,
+body.danish-neumorphic .signal-tag,
+body.danish-neumorphic button,
+body.danish-neumorphic select{font-family:'Orbitron',ui-sans-serif,sans-serif}
+body.danish-neumorphic :focus-visible{outline:3px solid rgba(200,16,46,.24);outline-offset:3px}
+body.danish-neumorphic a{color:inherit}
+
+/* StanNet header on light surface */
+body.danish-neumorphic .site-header{
+  background:rgba(247,248,252,.86)!important;
+  border-bottom:1px solid rgba(20,29,89,.07)!important;
+  box-shadow:0 10px 30px rgba(44,57,94,.08)!important;
+  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+}
+body.danish-neumorphic .brand-stan{color:var(--nm-ink)!important}
+body.danish-neumorphic .brand-net{color:var(--nm-purple)!important}
+body.danish-neumorphic .brand-lockup>i{color:#66728f!important}
+body.danish-neumorphic .site-nav>a,
+body.danish-neumorphic .nav-trigger,
+body.danish-neumorphic .menu-toggle{color:var(--nm-ink)!important}
+body.danish-neumorphic .nav-trigger,
+body.danish-neumorphic .menu-toggle{background:transparent}
+body.danish-neumorphic .nav-dropdown{
+  background:rgba(247,248,252,.98)!important;
+  border:1px solid rgba(255,255,255,.92)!important;
+  border-radius:18px!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+body.danish-neumorphic .nav-dropdown a{color:var(--nm-ink-2)!important}
+body.danish-neumorphic .nav-dropdown a:hover,
+body.danish-neumorphic .nav-dropdown a.active{background:rgba(148,214,247,.20)!important;color:var(--nm-ink)!important}
+
+/* back bar */
+body.danish-neumorphic main>div:first-child{
+  background:transparent!important;
+  border-bottom:0!important;
+  padding-top:18px!important;
+  padding-bottom:0!important;
+}
+body.danish-neumorphic main>div:first-child a{
+  display:inline-flex;align-items:center;min-height:42px;padding:0 14px;
+  color:var(--nm-ink)!important;background:var(--nm-surface);
+  border:1px solid rgba(255,255,255,.92);border-radius:14px;
+  box-shadow:var(--nm-shadow-sm);text-decoration:none;
+}
+
+/* hero */
+body.danish-neumorphic .danish-hero{
+  position:relative;
+  width:min(1480px,calc(100% - 48px));
+  margin:24px auto 42px;
+  padding:clamp(42px,7vw,92px);
+  min-height:520px;
+  display:flex;flex-direction:column;justify-content:center;
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.96),rgba(247,248,252,.92))!important;
+  border:1px solid rgba(255,255,255,.96)!important;
+  border-radius:42px;
+  box-shadow:18px 18px 42px rgba(44,57,94,.14),-16px -16px 40px rgba(255,255,255,.98);
+  overflow:hidden;
+}
+body.danish-neumorphic .danish-hero::before{
+  content:"";position:absolute;right:-90px;top:-120px;width:520px;height:520px;border-radius:50%;
+  background:var(--dk-gradient);opacity:.98;filter:saturate(105%);
+  box-shadow:inset 0 1px rgba(255,255,255,.35),0 30px 60px rgba(114,48,137,.18);
+}
+body.danish-neumorphic .danish-hero::after{
+  content:"DANSK";position:absolute;right:60px;bottom:45px;
+  color:rgba(255,255,255,.93);font:700 clamp(44px,7vw,94px)/1 'Orbitron',sans-serif;
+  letter-spacing:-.06em;z-index:1;
+}
+body.danish-neumorphic .danish-hero>*{position:relative;z-index:2;max-width:800px}
+body.danish-neumorphic .flag-pair{margin-bottom:20px}
+body.danish-neumorphic .flag{border-radius:8px;overflow:hidden;box-shadow:var(--nm-shadow-sm)!important}
+body.danish-neumorphic .danish-hero .eyebrow{color:var(--dk-red)!important;font-weight:700;letter-spacing:.12em}
+body.danish-neumorphic .danish-hero h1{
+  margin:18px 0 24px;
+  color:var(--nm-ink)!important;
+  font-size:clamp(58px,7vw,112px)!important;
+  line-height:.88!important;
+  letter-spacing:-.075em!important;
+  font-weight:800!important;
+}
+body.danish-neumorphic .danish-hero h1 em{
+  color:transparent!important;
+  background:var(--dk-gradient);
+  -webkit-background-clip:text;background-clip:text;
+  font-style:normal;
+}
+body.danish-neumorphic .danish-copy{
+  max-width:700px!important;
+  color:var(--nm-muted)!important;
+  font-size:clamp(16px,1.4vw,20px);
+  line-height:1.75;
+}
+
+/* section headings */
+body.danish-neumorphic .section,
+body.danish-neumorphic .course-section,
+body.danish-neumorphic .grammar-section,
+body.danish-neumorphic .core-language-section,
+body.danish-neumorphic .sentence-builder-section,
+body.danish-neumorphic .memory-section,
+body.danish-neumorphic .mastery-section,
+body.danish-neumorphic .orbit-section,
+body.danish-neumorphic .danish-practice{background:transparent!important}
+body.danish-neumorphic .section-heading h2,
+body.danish-neumorphic .orbit-head h2{color:var(--nm-ink)!important}
+body.danish-neumorphic .section-heading h2 em,
+body.danish-neumorphic .orbit-head h2 em{color:var(--dk-red)!important;font-style:normal}
+body.danish-neumorphic .section-heading>p,
+body.danish-neumorphic .orbit-head>p{color:var(--nm-muted)!important}
+body.danish-neumorphic .eyebrow,
+body.danish-neumorphic .signal-tag,
+body.danish-neumorphic .deep-kicker,
+body.danish-neumorphic .deep-label{color:var(--dk-red)!important}
+
+/* major surfaces */
+body.danish-neumorphic :is(
+  .course-index,.course-lesson,.grammar-index,.grammar-lesson,
+  .memory-menu,.memory-card,.mastery-index,.mastery-lesson,
+  .danish-panel,.danish-side,.deep-course-shell,.deep-grammar-shell,
+  .core-shell,.builder-shell,.danish-practice-menu,.danish-practice-card,
+  .signal-card
+){
+  color:var(--nm-ink)!important;
+  background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+  border-radius:var(--nm-radius-xl)!important;
+  box-shadow:var(--nm-shadow)!important;
+}
+
+/* secondary cards */
+body.danish-neumorphic :is(
+  .course-learning-card,.course-phrase,.grammar-rule,.grammar-example,
+  .memory-prompt,.principle,.phrase,.deep-card,.deep-vocab-card,
+  .deep-example,.deep-exercise,.deep-listening,.deep-reading,
+  .pronoun-cell,.pronoun-row,.verb-card,.tense-card,.aux-card,
+  .builder-grid label,.builder-result,.builder-chip,
+  .danish-model,.danish-practice-status,.orbit-note
+){
+  background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.92)!important;
+  border-radius:var(--nm-radius-md)!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+
+/* readable text */
+body.danish-neumorphic :is(
+  .course-index,.course-lesson,.grammar-index,.grammar-lesson,.memory-menu,.memory-card,
+  .mastery-index,.mastery-lesson,.danish-panel,.danish-side,.deep-course-shell,.deep-grammar-shell,
+  .core-shell,.builder-shell,.danish-practice-menu,.danish-practice-card,.signal-card
+) :is(h2,h3,h4,strong,b){color:var(--nm-ink)!important}
+body.danish-neumorphic :is(
+  .course-goal,.course-learning-card p,.grammar-focus,.grammar-rule p,.grammar-example span,
+  .memory-result,.mastery-goal,.mastery-example,.mastery-translation span,
+  .danish-feedback,.danish-note,.principle span,.phrase span,.deep-course-top p,.deep-grammar-shell p,
+  .deep-card li,.deep-instruction,.builder-hint span,.builder-result-panel>p,.builder-structure-note,
+  .danish-task,.danish-model-translation,.danish-practice-status,.signal-card p,.signal-card li,.orbit-note
+){color:var(--nm-muted)!important}
+
+/* lists & selectors */
+body.danish-neumorphic :is(.course-item,.grammar-item,.mastery-item,.lesson-list button,.danish-exercise){
+  color:var(--nm-ink-2)!important;
+  background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.92)!important;
+  border-radius:13px!important;
+  box-shadow:4px 4px 10px rgba(44,57,94,.09),-4px -4px 10px rgba(255,255,255,.96)!important;
+}
+body.danish-neumorphic :is(.course-item.active,.grammar-item.active,.mastery-item.active,.lesson-list button.active,.danish-exercise.active){
+  color:var(--nm-ink)!important;
+  background:linear-gradient(135deg,rgba(200,16,46,.10),rgba(148,214,247,.16))!important;
+  border-color:rgba(200,16,46,.22)!important;
+  box-shadow:var(--nm-inset)!important;
+}
+body.danish-neumorphic :is(select,input,textarea){
+  color:var(--nm-ink)!important;
+  background:#f1f3f8!important;
+  border:1px solid rgba(20,29,89,.06)!important;
+  border-radius:13px!important;
+  box-shadow:var(--nm-inset)!important;
+}
+body.danish-neumorphic input::placeholder,
+body.danish-neumorphic textarea::placeholder{color:#8b94aa}
+
+/* buttons */
+body.danish-neumorphic button{
+  border-radius:13px!important;
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+}
+@media(hover:hover){body.danish-neumorphic button:hover{transform:translateY(-1px)}}
+body.danish-neumorphic :is(
+  .course-speak,.deep-course-status button,.deep-tabs button,.builder-result-tabs button,
+  #builderListen,.danish-actions button,.memory-actions button,.danish-practice-actions button
+){
+  color:var(--nm-ink)!important;
+  border:1px solid rgba(20,29,89,.08)!important;
+  background:var(--nm-surface)!important;
+  box-shadow:var(--nm-shadow-sm)!important;
+}
+body.danish-neumorphic :is(
+  .primary-dk,.memory-primary,.danish-primary,.builder-actions button:first-child
+){
+  color:#fff!important;
+  border:0!important;
+  background:linear-gradient(135deg,#141d59,#c8102e 60%,#af26e0)!important;
+  box-shadow:6px 6px 14px rgba(72,45,96,.20),-5px -5px 12px rgba(255,255,255,.92)!important;
+}
+
+/* progress & accents */
+body.danish-neumorphic .route-line{
+  background:#eef0f5!important;border-radius:999px;box-shadow:var(--nm-inset)!important;
+}
+body.danish-neumorphic .route-line span{background:var(--dk-gradient)!important;border-radius:inherit}
+body.danish-neumorphic .stage{
+  color:var(--dk-red)!important;background:rgba(200,16,46,.07)!important;
+  border-color:rgba(200,16,46,.16)!important;border-radius:12px!important;
+}
+body.danish-neumorphic .phrase,
+body.danish-neumorphic .grammar-rule,
+body.danish-neumorphic .mastery-task{
+  border-left:0!important;
+  background:linear-gradient(135deg,rgba(200,16,46,.07),rgba(148,214,247,.10))!important;
+}
+body.danish-neumorphic .phrase strong,
+body.danish-neumorphic .memory-prompt strong,
+body.danish-neumorphic .danish-model{color:var(--nm-ink)!important}
+
+/* core lab & builder */
+body.danish-neumorphic .core-tabs,
+body.danish-neumorphic .builder-result-tabs{border:0!important}
+body.danish-neumorphic :is(.core-tabs button,.builder-result-tabs button,.deep-tabs button){
+  color:var(--nm-muted)!important;background:var(--nm-surface)!important;
+  border:1px solid rgba(255,255,255,.92)!important;box-shadow:var(--nm-shadow-sm)!important;
+}
+body.danish-neumorphic :is(.core-tabs button.active,.builder-result-tabs button.active,.deep-tabs button.active){
+  color:var(--nm-ink)!important;
+  background:linear-gradient(135deg,rgba(200,16,46,.10),rgba(148,214,247,.18))!important;
+  border-color:rgba(200,16,46,.20)!important;box-shadow:var(--nm-inset)!important;
+}
+body.danish-neumorphic .builder-grid label>span,
+body.danish-neumorphic .builder-label{color:#727d99!important}
+body.danish-neumorphic .builder-result-panel>strong,
+body.danish-neumorphic .builder-chip span{color:var(--nm-ink)!important}
+body.danish-neumorphic .builder-chip.finite{background:rgba(148,214,247,.16)!important}
+body.danish-neumorphic .builder-chip.negative{background:rgba(200,16,46,.08)!important}
+body.danish-neumorphic .builder-chip.front,
+body.danish-neumorphic .builder-chip.wh{background:rgba(253,143,87,.11)!important}
+
+/* Orbit */
+body.danish-neumorphic .signal-grid{gap:18px!important}
+body.danish-neumorphic .signal-card a{
+  display:inline-flex;min-height:42px;align-items:center;margin-top:10px;padding:0 14px;
+  color:var(--nm-ink)!important;background:var(--nm-surface);border:1px solid rgba(255,255,255,.92);
+  border-radius:13px;box-shadow:var(--nm-shadow-sm);text-decoration:none;
+}
+body.danish-neumorphic .signal-card.featured{
+  background:linear-gradient(135deg,rgba(200,16,46,.07),rgba(148,214,247,.11))!important;
+}
+
+/* footer */
+body.danish-neumorphic footer{
+  background:#f2f4f9!important;border-top:1px solid rgba(20,29,89,.06)!important;color:var(--nm-muted)!important
+}
+body.danish-neumorphic footer a,
+body.danish-neumorphic footer .brand span{color:var(--nm-ink)!important}
+
+/* responsive */
+@media(max-width:1180px){
+  body.danish-neumorphic .danish-hero{width:min(calc(100% - 34px),980px);min-height:460px}
+  body.danish-neumorphic .danish-hero::before{right:-180px;opacity:.72}
+  body.danish-neumorphic .danish-hero::after{right:34px;bottom:26px;opacity:.85}
+}
+@media(max-width:760px){
+  body.danish-neumorphic .danish-hero{width:calc(100% - 24px);margin:18px auto 28px;padding:28px;min-height:auto;border-radius:28px}
+  body.danish-neumorphic .danish-hero h1{font-size:clamp(46px,15vw,76px)!important}
+  body.danish-neumorphic .danish-hero::before{width:240px;height:240px;right:-120px;top:-110px;opacity:.35}
+  body.danish-neumorphic .danish-hero::after{display:none}
+  body.danish-neumorphic :is(.course-index,.course-lesson,.grammar-index,.grammar-lesson,.memory-menu,.memory-card,.mastery-index,.mastery-lesson,.danish-panel,.danish-side,.deep-course-shell,.deep-grammar-shell,.core-shell,.builder-shell,.danish-practice-menu,.danish-practice-card,.signal-card){border-radius:22px!important}
+}
+@media(max-width:520px){
+  body.danish-neumorphic .danish-hero h1{font-size:clamp(42px,14vw,62px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.danish-neumorphic *,body.danish-neumorphic *::before,body.danish-neumorphic *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
