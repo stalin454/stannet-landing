@@ -185,6 +185,57 @@ body.denmark-route-neumorphic .route-panel a{
   border-radius:12px!important;box-shadow:var(--nm-shadow-sm)!important;text-decoration:none!important;
 }
 
+
+/* Plain-language newcomer glossary */
+body.denmark-route-neumorphic .plain-guide{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;max-width:1150px;margin:auto
+}
+body.denmark-route-neumorphic .plain-card{
+  padding:30px;background:var(--nm-surface);border:1px solid rgba(255,255,255,.95);border-radius:28px;box-shadow:var(--nm-shadow);min-width:0
+}
+body.denmark-route-neumorphic .plain-card-head{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+body.denmark-route-neumorphic .plain-code{
+  display:grid;place-items:center;flex:0 0 76px;height:76px;border-radius:22px;background:linear-gradient(135deg,#141d59,#c8102e 62%,#af26e0);color:#fff;
+  font:700 19px Orbitron,sans-serif;box-shadow:7px 7px 16px rgba(72,45,96,.18),-6px -6px 16px rgba(255,255,255,.96)
+}
+body.denmark-route-neumorphic .plain-eyebrow{margin:0 0 5px;color:var(--dk-red);font:700 9px Orbitron,sans-serif;letter-spacing:.12em}
+body.denmark-route-neumorphic .plain-card h3{margin:0;color:var(--nm-ink);font:700 clamp(25px,2.6vw,34px)/1.1 Inter,sans-serif}
+body.denmark-route-neumorphic .plain-lead{color:var(--nm-muted);line-height:1.72;font-size:15px}
+body.denmark-route-neumorphic .plain-facts{display:grid;gap:12px;margin:20px 0}
+body.denmark-route-neumorphic .plain-facts>div,
+body.denmark-route-neumorphic .plain-checklist,
+body.denmark-route-neumorphic .plain-mini-dictionary>div{
+  padding:16px;border-radius:17px;background:rgba(148,214,247,.09);box-shadow:var(--nm-inset)
+}
+body.denmark-route-neumorphic .plain-facts b,
+body.denmark-route-neumorphic .plain-checklist h4{color:var(--nm-ink)}
+body.denmark-route-neumorphic .plain-facts p,
+body.denmark-route-neumorphic .plain-checklist li,
+body.denmark-route-neumorphic .plain-note{color:var(--nm-muted);line-height:1.65;font-size:13px}
+body.denmark-route-neumorphic .plain-facts p{margin:6px 0 0}
+body.denmark-route-neumorphic .plain-checklist{margin-top:16px;background:rgba(200,16,46,.045)}
+body.denmark-route-neumorphic .plain-checklist h4{margin:0 0 10px;font-size:14px}
+body.denmark-route-neumorphic .plain-checklist ul{margin:0;padding-left:20px}
+body.denmark-route-neumorphic .plain-note{margin:12px 0 0}
+body.denmark-route-neumorphic .plain-mini-dictionary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+body.denmark-route-neumorphic .plain-mini-dictionary>div{display:grid;gap:5px;background:rgba(148,214,247,.08)}
+body.denmark-route-neumorphic .plain-mini-dictionary b{color:var(--nm-ink);font-size:13px}
+body.denmark-route-neumorphic .plain-mini-dictionary span{color:var(--nm-muted);font-size:12px;line-height:1.5}
+body.denmark-route-neumorphic .plain-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+body.denmark-route-neumorphic .plain-actions a{
+  display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:13px;text-decoration:none;
+  color:var(--nm-ink);background:var(--nm-surface);box-shadow:var(--nm-shadow-sm);font:700 10px Orbitron,sans-serif
+}
+body.denmark-route-neumorphic .plain-actions .plain-official{color:#fff;background:linear-gradient(135deg,#141d59,#c8102e 62%,#af26e0)}
+@media(max-width:900px){body.denmark-route-neumorphic .plain-guide{grid-template-columns:1fr}}
+@media(max-width:520px){
+  body.denmark-route-neumorphic .plain-card{padding:21px;border-radius:21px}
+  body.denmark-route-neumorphic .plain-card-head{align-items:flex-start}
+  body.denmark-route-neumorphic .plain-code{flex-basis:62px;height:62px;border-radius:18px;font-size:15px}
+  body.denmark-route-neumorphic .plain-mini-dictionary{grid-template-columns:1fr}
+  body.denmark-route-neumorphic .plain-actions a{width:100%;justify-content:center;text-align:center}
+}
+
 /* cities */
 body.denmark-route-neumorphic .city-grid{gap:16px!important}
 body.denmark-route-neumorphic .city{
