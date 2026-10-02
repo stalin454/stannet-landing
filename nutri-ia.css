@@ -2,3 +2,348 @@ body.nutri-page{background:#07110f;color:#eefcf5}.nutri-page:before{background:l
 .nutrition-controls,.nutrition-weeks,.nutrition-days,.nutrition-day-heading,.nutrition-overview{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:15px 0}.nutrition-controls button,.nutrition-weeks button,.nutrition-days button,.nutrition-day-heading button{border:1px solid rgba(205,255,224,.24);background:#10231c;color:#e1f5ea;border-radius:8px;padding:11px 15px;cursor:pointer}.nutrition-controls button[aria-pressed="true"],.nutrition-weeks button[aria-pressed="true"],.nutrition-days button[aria-pressed="true"]{background:#c8ff4d;color:#07110f;border-color:#c8ff4d}.nutrition-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.nutrition-days button{display:grid;gap:4px;min-width:0;padding:10px 4px;text-align:center}.nutrition-days button span{font-size:11px}.nutrition-days button strong{font-size:20px}.nutrition-day-heading,.nutrition-overview{justify-content:space-between}.nutrition-day-heading h3{margin:0;font-size:25px}.nutrition-day-heading button:disabled{opacity:.4;cursor:not-allowed}.nutrition-overview strong{color:#c8ff4d}.nutrition-shopping{margin-top:16px}.nutrition-shopping ul{columns:2;line-height:1.9;padding-left:20px}.nutrition-shopping li{break-inside:avoid}.nutrition-shopping li span{color:#a9c2b7}.nutrition-caution{margin-top:18px}.meal-card p{line-height:1.65;color:#d8eee4}@media(max-width:700px){.nutrition-days{grid-template-columns:repeat(4,minmax(0,1fr))}.nutrition-shopping ul{columns:1}}
 
 .training-boards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.training-board-title{display:flex;justify-content:space-between;align-items:center;gap:10px}.training-board-title span{color:#c8ff4d;font-size:12px}.training-tasks{list-style:none;margin:18px 0;padding:0}.training-tasks li{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(205,255,224,.14);padding:8px 0}.training-tasks li>button{border:0;background:none;color:#ffb6b6;font-size:24px;cursor:pointer}.training-task{display:flex;align-items:center;gap:12px;cursor:pointer;flex:1}.training-task input{position:absolute;opacity:0;width:1px}.training-mark{display:grid;place-items:center;width:36px;height:36px;border:1px solid #83aa91;border-radius:6px;font-size:24px;color:#c8ff4d}.training-task input:focus-visible+.training-mark{outline:3px solid #59e8ff}.training-task input:checked+.training-mark{background:#c8ff4d;color:#07110f}.training-task strong,.training-task small{display:block}.training-task small{color:#a9c2b7;margin-top:3px}.training-add{display:grid;grid-template-columns:1.5fr .7fr 1fr .65fr;gap:8px}.training-add button{grid-column:1/-1}@media(max-width:1100px){.training-boards{grid-template-columns:1fr}}@media(max-width:560px){.training-add{grid-template-columns:1fr 1fr}.training-add input:first-child{grid-column:1/-1}}
+
+
+/* Nutri IA VIP contrast pass: warm wellness palette, scoped to this page. */
+body.stannet-global.nutri-page {
+  --nutri-ink: #15372c;
+  --nutri-muted: #526b60;
+  --nutri-forest: #103b2f;
+  --nutri-green: #087b5a;
+  --nutri-lime: #d9fb70;
+  --nutri-coral: #ff9a70;
+  --nutri-violet: #7957cc;
+  color-scheme: light;
+  color: var(--nutri-ink) !important;
+  background:
+    radial-gradient(ellipse at 12% 14%, rgba(217,251,112,.19), transparent 27%),
+    radial-gradient(ellipse at 94% 50%, rgba(255,154,112,.12), transparent 23%),
+    linear-gradient(180deg,#f5faef 0%,#fffaf2 55%,#f1f8f1 100%) !important;
+}
+body.stannet-global.nutri-page:before {
+  opacity: .16;
+  background: linear-gradient(90deg,transparent 49.9%,rgba(8,123,90,.07) 50%,transparent 50.1%);
+  background-size: 64px 64px;
+}
+body.stannet-global.nutri-page .nutri-hero {
+  min-height: 0;
+  padding: clamp(48px,7vw,92px) clamp(20px,6vw,88px);
+  border: 1px solid rgba(217,251,112,.28) !important;
+  border-radius: 0 0 34px 34px;
+  background:
+    radial-gradient(circle at 78% 18%,rgba(217,251,112,.24),transparent 26%),
+    radial-gradient(circle at 94% 76%,rgba(255,154,112,.22),transparent 25%),
+    radial-gradient(circle at 60% 100%,rgba(121,87,204,.18),transparent 32%),
+    linear-gradient(128deg,#092b24 0%,#124a38 54%,#173e32 100%) !important;
+  box-shadow: 0 24px 64px rgba(14,60,43,.16);
+}
+body.stannet-global.nutri-page .nutri-hero:after {
+  right: clamp(22px,7vw,104px);
+  top: 50%;
+  width: clamp(82px,11vw,142px);
+  color: var(--nutri-lime);
+  border-color: rgba(217,251,112,.42);
+  border-radius: 28px;
+  background: linear-gradient(145deg,rgba(217,251,112,.16),rgba(255,255,255,.04));
+  box-shadow: 0 18px 54px rgba(0,0,0,.20);
+}
+body.stannet-global.nutri-page .nutri-hero .eyebrow {
+  color: var(--nutri-lime) !important;
+  letter-spacing: .16em;
+  font-weight: 800;
+}
+body.stannet-global.nutri-page .nutri-hero h1 {
+  max-width: 780px;
+  color: #fff !important;
+  font-size: clamp(38px,6.2vw,78px);
+  letter-spacing: -.055em;
+  line-height: .99;
+  text-wrap: balance;
+}
+body.stannet-global.nutri-page .nutri-hero p {
+  max-width: 620px;
+  color: #e5f5eb !important;
+  font-size: clamp(15px,1.6vw,18px);
+  line-height: 1.65;
+}
+body.stannet-global.nutri-page .nutri-actions { gap: 12px; margin-top: 24px; }
+body.stannet-global.nutri-page .hero-console {
+  min-height: 206px;
+  padding: clamp(20px,3vw,30px);
+  border: 1px solid rgba(255,255,255,.62) !important;
+  border-radius: 24px !important;
+  color: #163a2d !important;
+  background: linear-gradient(145deg,#e2ff8b 0%,#c9f56b 56%,#b1e96b 100%) !important;
+  box-shadow: 0 20px 48px rgba(3,25,19,.24), inset 0 1px 0 rgba(255,255,255,.76) !important;
+}
+body.stannet-global.nutri-page .hero-console span {
+  color: #305744 !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+body.stannet-global.nutri-page .hero-console strong {
+  color: #103b2f !important;
+  font-size: clamp(54px,7vw,76px);
+}
+body.stannet-global.nutri-page .hero-console p {
+  margin: 6px 0 0;
+  color: #274b3a !important;
+  font-size: 13px;
+  line-height: 1.5;
+}
+body.stannet-global.nutri-page .nutri-shell {
+  gap: 22px;
+  padding: 28px clamp(14px,3.5vw,48px) 76px;
+}
+body.stannet-global.nutri-page .nutri-sidebar {
+  gap: 16px;
+}
+body.stannet-global.nutri-page .auth-card,
+body.stannet-global.nutri-page .profile-card,
+body.stannet-global.nutri-page .module-card,
+body.stannet-global.nutri-page .metric-card,
+body.stannet-global.nutri-page .meal-card,
+body.stannet-global.nutri-page .exercise-card,
+body.stannet-global.nutri-page .empty-state,
+body.stannet-global.nutri-page .error-state {
+  color: var(--nutri-ink) !important;
+  border-color: #d9e7db !important;
+  border-radius: 20px !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 12px 30px rgba(28,75,54,.08), 0 2px 6px rgba(28,75,54,.04) !important;
+}
+body.stannet-global.nutri-page .auth-card,
+body.stannet-global.nutri-page .profile-card {
+  border-top: 4px solid var(--nutri-green) !important;
+}
+body.stannet-global.nutri-page .module-card { border-left: 3px solid #a4d95e !important; }
+body.stannet-global.nutri-page .metric-card {
+  min-height: 120px;
+  border-top: 4px solid #8ac957 !important;
+  background: linear-gradient(145deg,#fff 0%,#f4faed 100%) !important;
+}
+body.stannet-global.nutri-page .metric-card:nth-child(3n + 2) {
+  border-top-color: #ff9a70 !important;
+  background: linear-gradient(145deg,#fff 0%,#fff3e9 100%) !important;
+}
+body.stannet-global.nutri-page .metric-card:nth-child(3n) {
+  border-top-color: #9d82e1 !important;
+  background: linear-gradient(145deg,#fff 0%,#f5f0ff 100%) !important;
+}
+body.stannet-global.nutri-page .meal-card { border-top: 3px solid #ffb34c !important; }
+body.stannet-global.nutri-page .exercise-card { border-top: 3px solid #5fc7a0 !important; }
+body.stannet-global.nutri-page h2,
+body.stannet-global.nutri-page h3,
+body.stannet-global.nutri-page .panel-head h2 {
+  color: #173a2e !important;
+}
+body.stannet-global.nutri-page .panel-head p,
+body.stannet-global.nutri-page .module-card p,
+body.stannet-global.nutri-page .metric-card span,
+body.stannet-global.nutri-page .meal-card span,
+body.stannet-global.nutri-page .exercise-card span,
+body.stannet-global.nutri-page .meal-card p,
+body.stannet-global.nutri-page .meal-card li,
+body.stannet-global.nutri-page .exercise-card li,
+body.stannet-global.nutri-page .empty-state,
+body.stannet-global.nutri-page .micro,
+body.stannet-global.nutri-page .safe-note {
+  color: var(--nutri-muted) !important;
+  line-height: 1.65;
+}
+body.stannet-global.nutri-page .metric-card strong,
+body.stannet-global.nutri-page .nutrition-overview strong {
+  color: #087b5a !important;
+}
+body.stannet-global.nutri-page .notice {
+  border: 1px solid #f1d389;
+  border-left: 5px solid #d88918;
+  border-radius: 14px;
+  color: #543b16;
+  background: linear-gradient(110deg,#fff1c9,#fff8e8);
+}
+body.stannet-global.nutri-page .notice strong { color: #593a0a; }
+body.stannet-global.nutri-page label,
+body.stannet-global.nutri-page .check-row {
+  color: #294a3c !important;
+  font-weight: 650;
+}
+body.stannet-global.nutri-page input:not([type=checkbox]):not([type=radio]):not([type=range]),
+body.stannet-global.nutri-page select,
+body.stannet-global.nutri-page textarea {
+  min-height: 46px;
+  border: 1px solid #b9cec0 !important;
+  border-radius: 12px !important;
+  color: #173a2e !important;
+  background: #fff !important;
+  box-shadow: inset 0 1px 2px rgba(20,60,40,.04);
+}
+body.stannet-global.nutri-page input::placeholder,
+body.stannet-global.nutri-page textarea::placeholder { color: #687f72 !important; opacity: 1; }
+body.stannet-global.nutri-page input:focus,
+body.stannet-global.nutri-page select:focus,
+body.stannet-global.nutri-page textarea:focus {
+  outline: 3px solid rgba(8,123,90,.18) !important;
+  border-color: #087b5a !important;
+}
+body.stannet-global.nutri-page .button.primary {
+  min-height: 48px;
+  border: 1px solid #087b5a !important;
+  color: #fff !important;
+  background: linear-gradient(120deg,#087b5a,#0d9970 56%,#5b9d41) !important;
+  box-shadow: 0 10px 22px rgba(8,123,90,.22) !important;
+}
+body.stannet-global.nutri-page .button.ghost {
+  min-height: 46px;
+  border: 1px solid #a9c7b4 !important;
+  color: #176145 !important;
+  background: #fff !important;
+}
+body.stannet-global.nutri-page .app-tabs button {
+  min-height: 48px;
+  border: 1px solid #d6e4d9 !important;
+  border-radius: 13px !important;
+  color: #385b49 !important;
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(24,72,50,.05);
+}
+body.stannet-global.nutri-page .app-tabs button:hover,
+body.stannet-global.nutri-page .app-tabs button:focus-visible {
+  border-color: #84be70 !important;
+  color: #0e654a !important;
+  background: #f0f8e8 !important;
+}
+body.stannet-global.nutri-page .app-tabs button.active {
+  border-color: #087b5a !important;
+  color: #fff !important;
+  background: linear-gradient(120deg,#087b5a,#126b50) !important;
+  box-shadow: 0 8px 20px rgba(8,123,90,.2);
+}
+body.stannet-global.nutri-page .chip {
+  border-color: #c6dbcb;
+  color: #24543f;
+  background: #f0f8e8;
+}
+body.stannet-global.nutri-page .progress-bar { background: #dcebdc; }
+body.stannet-global.nutri-page .progress-bar span {
+  background: linear-gradient(90deg,#d9fb70 0%,#36c28b 58%,#13a67a 100%);
+}
+body.stannet-global.nutri-page .nutrition-controls button,
+body.stannet-global.nutri-page .nutrition-weeks button,
+body.stannet-global.nutri-page .nutrition-days button,
+body.stannet-global.nutri-page .nutrition-day-heading button {
+  min-height: 44px;
+  border: 1px solid #cbdccf;
+  border-radius: 12px;
+  color: #294e3c;
+  background: #fff;
+}
+body.stannet-global.nutri-page .nutrition-controls button[aria-pressed="true"],
+body.stannet-global.nutri-page .nutrition-weeks button[aria-pressed="true"],
+body.stannet-global.nutri-page .nutrition-days button[aria-pressed="true"] {
+  border-color: #087b5a;
+  color: #fff;
+  background: #087b5a;
+}
+body.stannet-global.nutri-page .training-mark {
+  border-color: #79a88a;
+  color: #087b5a;
+  background: #f2faed;
+}
+body.stannet-global.nutri-page .training-task input:checked + .training-mark {
+  color: #15372c;
+  background: #d9fb70;
+}
+body.stannet-global.nutri-page .training-board-title span { color: #087b5a !important; }
+body.stannet-global.nutri-page .training-tasks li { border-color: #dce8df; }
+body.stannet-global.nutri-page .error-state {
+  border-color: #e8a2a2 !important;
+  color: #8b2525 !important;
+  background: #fff3f2 !important;
+}
+@media (max-width: 760px) {
+  body.stannet-global.nutri-page .nutri-hero {
+    gap: 18px;
+    padding: 40px 20px 24px;
+    border-radius: 0 0 24px 24px;
+    align-items: stretch;
+  }
+  body.stannet-global.nutri-page .nutri-hero:after {
+    width: 60px;
+    right: 16px;
+    top: 20px;
+    transform: none;
+    border-radius: 17px;
+    opacity: .7;
+  }
+  body.stannet-global.nutri-page .nutri-hero h1 {
+    max-width: calc(100% - 58px);
+    font-size: clamp(35px,9.2vw,54px);
+    line-height: 1.02;
+  }
+  body.stannet-global.nutri-page .nutri-hero p { font-size: 15px; }
+  body.stannet-global.nutri-page .nutri-actions { gap: 9px; }
+  body.stannet-global.nutri-page .nutri-actions .button { flex: 1 1 145px; }
+  body.stannet-global.nutri-page .hero-console {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 17px 18px;
+    border-radius: 18px !important;
+  }
+  body.stannet-global.nutri-page .hero-console span { grid-column: 1; }
+  body.stannet-global.nutri-page .hero-console strong {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    font-size: 50px;
+  }
+  body.stannet-global.nutri-page .hero-console p { grid-column: 1; margin: 0; font-size: 11px; }
+  body.stannet-global.nutri-page .nutri-shell {
+    display: block;
+    padding: 18px 14px 52px;
+  }
+  body.stannet-global.nutri-page .nutri-sidebar {
+    position: static;
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  body.stannet-global.nutri-page .auth-card,
+  body.stannet-global.nutri-page .profile-card { padding: 18px; }
+  body.stannet-global.nutri-page .app-tabs {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px;
+  }
+  body.stannet-global.nutri-page .app-tabs button {
+    min-width: 0;
+    min-height: 48px;
+    padding: 8px 7px;
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.25;
+    letter-spacing: 0;
+    white-space: normal;
+  }
+  body.stannet-global.nutri-page .nutri-content,
+  body.stannet-global.nutri-page .tab-panel { min-width: 0; }
+  body.stannet-global.nutri-page .panel-head { gap: 8px; margin-top: 12px; }
+  body.stannet-global.nutri-page .panel-head h2 { font-size: clamp(28px,8vw,40px); }
+  body.stannet-global.nutri-page .nutrition-days { grid-template-columns: repeat(4,minmax(0,1fr)); }
+  body.stannet-global.nutri-page .nutrition-days button { min-height: 54px; }
+  body.stannet-global.nutri-page .module-card,
+  body.stannet-global.nutri-page .metric-card,
+  body.stannet-global.nutri-page .meal-card,
+  body.stannet-global.nutri-page .exercise-card { padding: 16px; }
+}
+@media (max-width: 380px) {
+  body.stannet-global.nutri-page .nutri-hero { padding: 34px 16px 20px; }
+  body.stannet-global.nutri-page .nutri-hero h1 { font-size: clamp(32px,9vw,38px); }
+  body.stannet-global.nutri-page .nutri-shell { padding-inline: 12px; }
+  body.stannet-global.nutri-page .app-tabs button { font-size: 10px; }
+  body.stannet-global.nutri-page .nutrition-days { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
