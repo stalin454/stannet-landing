@@ -105,7 +105,7 @@
       let last=0,match;
       while((match=pattern.exec(safe))){
         if(match.index>last) el.appendChild(document.createTextNode(safe.slice(last,match.index)));
-        const raw=match[0].replace(/[),.;!?]+$/,'');
+        const raw=match[0].replace(/[),.;!?}>]+$/,'');
         const trailing=match[0].slice(raw.length);
         const route=normalizeRoute(raw);
         const a=document.createElement('a');

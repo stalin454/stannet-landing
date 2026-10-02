@@ -14,6 +14,7 @@ assert.ok(worker.includes('Nunca respondas que no existe'), 'Danish course quest
 assert.ok(worker.includes('Ruta Dinamarca — /pages/ruta-dinamarca.html'), 'Denmark guide must be discoverable');
 assert.ok(widget.includes("'/pages/danish.html':'Entrar a Danish Academy →'"), 'Danish recommendation must render a friendly link');
 assert.ok(widget.includes("'/pages/ruta-dinamarca.html':'Abrir Ruta Dinamarca →'"), 'Denmark guide recommendation must render a friendly link');
+assert.ok(widget.includes("replace(/[),.;!?}>]+$/,'')"), 'Markdown angle bracket must be removed from generated links');
 
 for (const feature of ['course-route','grammar-route','language-core','sentence-builder','memory-lab','mastery-route']) {
   assert.ok(page.includes('id="'+feature+'"'), 'Danish page missing live section: '+feature);
