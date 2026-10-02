@@ -34,7 +34,7 @@ body{overflow-x:hidden}
 @media(max-width:640px){.route-hero,.route-section{padding-left:18px;padding-right:18px}.route-hero h1{font-size:clamp(48px,15vw,72px)}.dk-card{min-height:320px}.dk-flag{width:135px}.dk-flag:before{left:40px;width:14px}.dk-flag:after{top:58px;height:14px}.dk-card strong{margin-top:165px}.route-grid,.city-grid{grid-template-columns:1fr}.stage-row{grid-template-columns:1fr;gap:8px}.academy-callout a{white-space:normal;text-align:center;justify-content:center}}
 </style>
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
-<link rel="stylesheet" href="../ruta-dinamarca-neumorphism.css?v=20261001-1">
+<link rel="stylesheet" href="../ruta-dinamarca-neumorphism.css?v=20261002-2">
 <link rel="stylesheet" href="../denmark-city-assistant.css?v=20261001-1">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
@@ -65,18 +65,83 @@ body{overflow-x:hidden}
 
 <section class="route-section" id="plan">
 <div class="route-heading"><span>02 / PLAN</span><div><h2>Una ruta dividida en etapas.</h2><p>Cada etapa tendrá tareas, recursos y decisiones concretas. El blog irá registrando el progreso en lugar de mostrar una lista estática.</p></div></div>
-<div class="timeline">
-<div class="stage-row"><span>ETAPA 01</span><div><h3>Preparación</h3><p>Formación, inglés, primeras bases de danés, documentación y presupuesto.</p></div></div>
-<div class="stage-row"><span>ETAPA 02</span><div><h3>Exploración</h3><p>Comparar ciudades, estudios, vivienda, transporte y oportunidades profesionales.</p></div></div>
-<div class="stage-row"><span>ETAPA 03</span><div><h3>Aplicaciones</h3><p>Preparar CV, candidaturas, admisiones y contactos antes de la salida.</p></div></div>
-<div class="stage-row"><span>ETAPA 04</span><div><h3>Llegada</h3><p>Convertir la investigación previa en una checklist práctica de los primeros días.</p></div></div>
-<div class="stage-row"><span>ETAPA 05</span><div><h3>Construcción</h3><p>Documentar estudios, empleo, adaptación, idioma y evolución profesional desde Dinamarca.</p></div></div>
+<nav class="timeline" aria-label="Etapas de Ruta Dinamarca">
+<a class="stage-row stage-link" href="#etapa-preparacion"><span>ETAPA 01</span><div><h3>Preparación</h3><p>Formación, inglés, primeras bases de danés, documentación y presupuesto.</p></div><b aria-hidden="true">→</b></a>
+<a class="stage-row stage-link" href="#etapa-exploracion"><span>ETAPA 02</span><div><h3>Exploración</h3><p>Comparar ciudades, estudios, vivienda, transporte y oportunidades profesionales.</p></div><b aria-hidden="true">→</b></a>
+<a class="stage-row stage-link" href="#etapa-aplicaciones"><span>ETAPA 03</span><div><h3>Aplicaciones</h3><p>Preparar CV, candidaturas, admisiones y contactos antes de la salida.</p></div><b aria-hidden="true">→</b></a>
+<a class="stage-row stage-link" href="#etapa-llegada"><span>ETAPA 04</span><div><h3>Llegada</h3><p>Convertir la investigación previa en una checklist práctica de los primeros días.</p></div><b aria-hidden="true">→</b></a>
+<a class="stage-row stage-link" href="#etapa-construccion"><span>ETAPA 05</span><div><h3>Construcción</h3><p>Documentar estudios, empleo, adaptación, idioma y evolución profesional desde Dinamarca.</p></div><b aria-hidden="true">→</b></a>
+</nav>
+</section>
+
+<section class="route-section route-stages-detail" id="desarrollo-etapas">
+<div class="route-heading"><span>03 / DESARROLLO</span><div><h2>Cada etapa tiene su propio plan de acción.</h2><p>Las cinco fases anteriores ya no son una lista decorativa. Funcionan como accesos directos a lo que debes preparar, investigar y ejecutar en cada momento de la Ruta Dinamarca.</p></div></div>
+
+<div class="stage-detail-list">
+<article class="stage-detail" id="etapa-preparacion">
+  <div class="stage-detail-head"><span>ETAPA 01</span><div><p class="stage-detail-kicker">ANTES DE BUSCAR FECHAS</p><h3>Preparación</h3><p>Construye la base académica, lingüística, documental y financiera antes de empezar a aplicar.</p></div><strong>01</strong></div>
+  <div class="stage-detail-grid">
+    <div><b>Formación</b><p>Terminar la formación actual y registrar qué asignaturas, certificados y proyectos podrás acreditar.</p><a href="education.html">Ver formación →</a></div>
+    <div><b>Inglés</b><p>Consolidar el nivel necesario para estudiar y trabajar, especialmente comprensión, conversación y vocabulario técnico.</p><a href="english.html">English Academy →</a></div>
+    <div><b>Danés</b><p>Empezar por pronunciación, frases esenciales, números, transporte, compras y situaciones cotidianas.</p><a href="danish.html">Danish Academy →</a></div>
+    <div><b>Documentación</b><p>Crear una carpeta de pasaporte/DNI, títulos, certificados, contratos, referencias y documentación personal relevante.</p><a href="#areas">Ver área de documentos →</a></div>
+    <div><b>Presupuesto</b><p>Separar ahorro de viaje, instalación, vivienda y un margen de seguridad para los primeros meses.</p><a href="#areas">Ver presupuesto →</a></div>
+  </div>
+  <a class="stage-back" href="#plan">↑ Volver a las etapas</a>
+</article>
+
+<article class="stage-detail" id="etapa-exploracion">
+  <div class="stage-detail-head"><span>ETAPA 02</span><div><p class="stage-detail-kicker">COMPARAR ANTES DE ELEGIR</p><h3>Exploración</h3><p>Convierte “quiero ir a Dinamarca” en decisiones concretas sobre ciudad, estudio, vivienda, movilidad y trabajo.</p></div><strong>02</strong></div>
+  <div class="stage-detail-grid">
+    <div><b>Ciudades</b><p>Comparar Copenhague, Aarhus, Odense, Vejle, Fredericia, Kolding y Horsens según estudios, empleo, coste y transporte.</p><a href="#ciudades">Abrir asistente por ciudad →</a></div>
+    <div><b>Estudios</b><p>Registrar programas, requisitos, fechas, idioma, duración y posibles alternativas académicas.</p><a href="#areas">Ver continuidad académica →</a></div>
+    <div><b>Vivienda</b><p>Investigar precios, zonas y señales de fraude antes de contactar o enviar dinero.</p><a href="#vivienda">Guía segura de vivienda →</a></div>
+    <div><b>Transporte</b><p>Comprobar cómo te moverías desde cada ciudad: tren, bus, bici, coche y conexiones regionales.</p><a href="#ciudades">Ver movilidad local →</a></div>
+    <div><b>Trabajo</b><p>Identificar mercados de entrada, logística, tecnología y transición hacia IT/ciberseguridad.</p><a href="#areas">Ver entrada profesional →</a></div>
+  </div>
+  <a class="stage-back" href="#plan">↑ Volver a las etapas</a>
+</article>
+
+<article class="stage-detail" id="etapa-aplicaciones">
+  <div class="stage-detail-head"><span>ETAPA 03</span><div><p class="stage-detail-kicker">PASAR DE INVESTIGAR A ENVIAR</p><h3>Aplicaciones</h3><p>Preparar materiales reutilizables y empezar candidaturas académicas y laborales con seguimiento.</p></div><strong>03</strong></div>
+  <div class="stage-detail-grid">
+    <div><b>CV</b><p>Preparar una versión clara, breve y adaptada al mercado danés, con experiencia y formación verificables.</p><a href="denmark-cv.html">Crear CV danés →</a></div>
+    <div><b>Candidaturas</b><p>Crear un registro de empresas, puestos, fecha de envío, respuesta, entrevista y siguiente acción.</p><a href="#areas">Ver área de trabajo →</a></div>
+    <div><b>Admisiones</b><p>Guardar requisitos, documentos, pruebas de idioma y fechas límite de cada programa académico.</p><a href="#areas">Ver área de estudios →</a></div>
+    <div><b>Contactos</b><p>Preparar mensajes profesionales y una lista de centros, empresas, municipios y organismos relevantes.</p><a href="#fuentes">Abrir fuentes verificadas →</a></div>
+  </div>
+  <a class="stage-back" href="#plan">↑ Volver a las etapas</a>
+</article>
+
+<article class="stage-detail" id="etapa-llegada">
+  <div class="stage-detail-head"><span>ETAPA 04</span><div><p class="stage-detail-kicker">PRIMEROS DÍAS EN DINAMARCA</p><h3>Llegada</h3><p>Transforma todo lo investigado en una checklist operativa para no improvisar los primeros trámites.</p></div><strong>04</strong></div>
+  <div class="stage-detail-grid">
+    <div><b>Identidad y registro</b><p>Entender CPR, Borgerservice/ICS y qué documentación debes comprobar antes de acudir.</p><a href="#que-es-cpr">Qué es el CPR →</a></div>
+    <div><b>Fiscalidad</b><p>Comprender SKAT, tax card y los primeros pasos cuando empiezas a trabajar.</p><a href="#que-es-skat">Qué es SKAT →</a></div>
+    <div><b>Ciudad</b><p>Usar el asistente local para transporte, municipio, salud, banca, vivienda y servicios cercanos.</p><a href="#ciudades">Abrir asistente local →</a></div>
+    <div><b>Vivienda segura</b><p>Revisar contrato, identidad del arrendador y señales de fraude antes de transferir dinero.</p><a href="#vivienda">Abrir checklist de vivienda →</a></div>
+    <div><b>Movilidad</b><p>Localizar transporte público, taxi, combustible o carga eléctrica según la ciudad.</p><a href="#gasolineras">Movilidad práctica →</a></div>
+  </div>
+  <a class="stage-back" href="#plan">↑ Volver a las etapas</a>
+</article>
+
+<article class="stage-detail" id="etapa-construccion">
+  <div class="stage-detail-head"><span>ETAPA 05</span><div><p class="stage-detail-kicker">DESPUÉS DE LLEGAR</p><h3>Construcción</h3><p>La ruta no termina al aterrizar: empieza la fase de integración, estudio, trabajo, idioma y evolución profesional.</p></div><strong>05</strong></div>
+  <div class="stage-detail-grid">
+    <div><b>Idioma</b><p>Convertir el danés en una rutina continua y conectarlo con situaciones reales del día a día.</p><a href="danish.html">Continuar Danish Academy →</a></div>
+    <div><b>Estudios</b><p>Registrar progreso académico, módulos, proyectos, prácticas y nuevas oportunidades de especialización.</p><a href="#areas">Ver área de estudios →</a></div>
+    <div><b>Empleo</b><p>Documentar entrevistas, primeros trabajos, cambios de sector y crecimiento hacia tecnología/ciberseguridad.</p><a href="#areas">Ver área de trabajo →</a></div>
+    <div><b>Adaptación</b><p>Actualizar vivienda, transporte, banca, sanidad, hábitos y servicios según la ciudad real donde vivas.</p><a href="#ciudades">Asistente local →</a></div>
+    <div><b>Bitácora</b><p>Convertir lo aprendido en capítulos reales para que Ruta Dinamarca documente la experiencia completa.</p><a href="#bitacora">Volver a la bitácora →</a></div>
+  </div>
+  <a class="stage-back" href="#plan">↑ Volver a las etapas</a>
+</article>
 </div>
 </section>
 
 
 <section class="route-section" id="diccionario">
-<div class="route-heading"><span>03 / EXPLICADO PARA LATINOS</span><div><h2>Dinamarca sin siglas imposibles.</h2><p>Si acabas de llegar, palabras como CPR, SKAT o MitID pueden sonar a chino. Aquí las explicamos en castellano sencillo: qué son, para qué sirven, cuándo las necesitas y dónde hacer el trámite oficial.</p></div></div>
+<div class="route-heading"><span>04 / EXPLICADO PARA LATINOS</span><div><h2>Dinamarca sin siglas imposibles.</h2><p>Si acabas de llegar, palabras como CPR, SKAT o MitID pueden sonar a chino. Aquí las explicamos en castellano sencillo: qué son, para qué sirven, cuándo las necesitas y dónde hacer el trámite oficial.</p></div></div>
 
 <div class="plain-guide">
 <article class="plain-card" id="que-es-cpr">
@@ -167,7 +232,7 @@ body{overflow-x:hidden}
 </section>
 
 <section class="route-section" id="areas">
-<div class="route-heading"><span>04 / ÁREAS</span><div><h2>Todo lo que hay que preparar.</h2></div></div>
+<div class="route-heading"><span>05 / ÁREAS</span><div><h2>Todo lo que hay que preparar.</h2></div></div>
 <div class="route-grid">
 <article class="route-panel"><b>IDIOMA</b><h3>Danés + inglés</h3><p>Aprendizaje práctico para vida diaria, estudios y trabajo.</p><a href="danish.html">Abrir Danish Academy →</a></article>
 <article class="route-panel"><b>ESTUDIOS</b><h3>Continuidad académica</h3><p>Registrar programas, requisitos, alternativas y decisiones académicas.</p></article>
@@ -180,7 +245,7 @@ body{overflow-x:hidden}
 
 
 <section class="route-section" id="vivienda">
-<div class="route-heading"><span>05 / VIVIENDA</span><div><h2>Busca vivienda, pero no envíes dinero a ciegas.</h2><p>El mercado puede ir rápido y eso crea presión. La Policía danesa publica recomendaciones específicas para evitar estafas en alquileres. Esta advertencia debe leerse antes de contactar con un supuesto arrendador.</p></div></div>
+<div class="route-heading"><span>06 / VIVIENDA</span><div><h2>Busca vivienda, pero no envíes dinero a ciegas.</h2><p>El mercado puede ir rápido y eso crea presión. La Policía danesa publica recomendaciones específicas para evitar estafas en alquileres. Esta advertencia debe leerse antes de contactar con un supuesto arrendador.</p></div></div>
 
 <div class="housing-safety">
 <article class="housing-alert" role="note" aria-label="Advertencia de seguridad para alquileres">
@@ -239,7 +304,7 @@ body{overflow-x:hidden}
 
 
 <section class="route-section" id="gasolineras">
-<div class="route-heading"><span>06 / GASOLINERAS</span><div><h2>Encuentra combustible o carga cerca de ti.</h2><p>Usa tu ubicación actual o elige una ciudad manualmente. El buscador abre una búsqueda cercana y, además, tienes acceso directo a los localizadores oficiales de las principales redes.</p></div></div>
+<div class="route-heading"><span>07 / GASOLINERAS</span><div><h2>Encuentra combustible o carga cerca de ti.</h2><p>Usa tu ubicación actual o elige una ciudad manualmente. El buscador abre una búsqueda cercana y, además, tienes acceso directo a los localizadores oficiales de las principales redes.</p></div></div>
 
 <div class="fuel-finder" data-fuel-finder>
   <div class="fuel-controls">
@@ -277,7 +342,7 @@ body{overflow-x:hidden}
 </section>
 
 <section class="route-section" id="ciudades" data-denmark-city-assistant>
-<div class="route-heading"><span>07 / ASISTENTE LOCAL</span><div><h2>¿En qué ciudad estás?</h2><p>Elige tu ciudad o permite usar tu ubicación para adaptar transporte, trámites, sanidad, banca, vivienda, movilidad, idioma y educación. La ubicación se procesa únicamente en tu navegador y no se guarda.</p></div></div>
+<div class="route-heading"><span>08 / ASISTENTE LOCAL</span><div><h2>¿En qué ciudad estás?</h2><p>Elige tu ciudad o permite usar tu ubicación para adaptar transporte, trámites, sanidad, banca, vivienda, movilidad, idioma y educación. La ubicación se procesa únicamente en tu navegador y no se guarda.</p></div></div>
 
 <div class="dk-assistant">
   <div class="dk-assistant-controls">
@@ -418,7 +483,7 @@ body{overflow-x:hidden}
 </section>
 
 <section class="route-section" id="fuentes">
-<div class="route-heading"><span>08 / FIABILIDAD</span><div><h2>Información verificada, no rumores.</h2><p>Los trámites, salud, impuestos, movilidad y empleo se documentan priorizando fuentes públicas danesas. Cada guía operativa indicará qué autoridad es responsable, el enlace oficial y la fecha de la última comprobación.</p></div></div>
+<div class="route-heading"><span>09 / FIABILIDAD</span><div><h2>Información verificada, no rumores.</h2><p>Los trámites, salud, impuestos, movilidad y empleo se documentan priorizando fuentes públicas danesas. Cada guía operativa indicará qué autoridad es responsable, el enlace oficial y la fecha de la última comprobación.</p></div></div>
 <div class="route-grid">
 <article class="route-panel"><b>FUENTE PRIMARIA</b><h3>Autoridad competente</h3><p>SIRI / New to Denmark para residencia UE; Life in Denmark y Borgerservice para CPR, salud y servicios públicos; SKAT para impuestos; Workindenmark para empleo.</p></article>
 <article class="route-panel"><b>TRANSPORTE</b><h3>Datos vigentes</h3><p>La guía de movilidad se contrastará con Rejsekort, Rejseplanen, DSB y los operadores regionales antes de publicarse.</p></article>
