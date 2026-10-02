@@ -549,10 +549,19 @@ async function musicDictionaryLookup(word) {
     return true;
   };
 
-  const read = async target => {
-    const response = await fetch(target, { headers: { Accept: 'application/json', 'User-Agent': 'StanNetMusicDictionary/2.0' } });
-    if (!response.ok) throw new Error('provider');
-    return response.json();
+  const read = async (target, timeoutMs = 2600) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort('timeout'), timeoutMs);
+    try {
+      const response = await fetch(target, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json', 'User-Agent': 'StanNetMusicDictionary/2.1' }
+      });
+      if (!response.ok) throw new Error('provider');
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
   };
 
   const encoded = encodeURIComponent(word);

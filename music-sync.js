@@ -52,11 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(timeout);
       }
 
-      // Browser fallback: keeps the dictionary useful even if the Worker/provider is temporarily unavailable.
+      // Browser fallback with strict time limits: never leave the dictionary stuck on "Buscando".
       if(!data){
+        const timedJson=async(url,ms=3200)=>{
+          const controller=new AbortController();
+          const timer=setTimeout(()=>controller.abort(),ms);
+          try{
+            const response=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
+            if(!response.ok)throw new Error('provider');
+            return await response.json();
+          }finally{clearTimeout(timer);}
+        };
         const direct=await Promise.allSettled([
-          fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word)).then(r=>r.ok?r.json():Promise.reject(new Error('dictionary'))),
-          fetch('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:word,langpair:'en|es'})).then(r=>r.ok?r.json():Promise.reject(new Error('translation')))
+          timedJson('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word),3200),
+          timedJson('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:word,langpair:'en|es'}),3200)
         ]);
         const entry=direct[0].status==='fulfilled'?direct[0].value?.[0]:null;
         const definition=entry?.meanings?.flatMap(group=>group.definitions||[])?.find(item=>item?.definition);
@@ -89,7 +98,14 @@ document.addEventListener('DOMContentLoaded', () => {
   async function openDictionary(raw,source){
     const word=cleanWord(raw);if(!word)return;const token=++dictionaryRequest,panel=$('musicDictionary');panel.hidden=false;$('dictionaryWord').textContent=word;$('dictionaryPhonetic').textContent='';$('dictionaryTranslation').textContent='Buscando significado…';$('dictionaryMeaning').textContent='';$('dictionaryExample').textContent='';$('dictionarySpeak').dataset.audio='';$('dictionaryExternal').href='https://dictionary.cambridge.org/dictionary/english-spanish/'+encodeURIComponent(word);$('dictionarySave').textContent=savedWords.has(word)?'♥ Guardada':'♡ Guardar palabra';
     if(source){const r=source.getBoundingClientRect(),w=Math.min(380,innerWidth-24);panel.style.width=w+'px';panel.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';panel.style.top=Math.max(12,Math.min(innerHeight-panel.offsetHeight-12,r.bottom+10))+'px';}
-    try{const data=await lookupDictionary(word);if(token===dictionaryRequest&&!panel.hidden)showDictionary(data);}catch{if(token!==dictionaryRequest||panel.hidden)return;$('dictionaryTranslation').textContent='No se encontró una traducción fiable ahora.';$('dictionaryMeaning').textContent='Comprueba la palabra o abre «Más detalles».';}
+    try{
+      const data=await lookupDictionary(word);
+      if(token===dictionaryRequest&&!panel.hidden)showDictionary(data);
+    }catch{
+      if(token!==dictionaryRequest||panel.hidden)return;
+      $('dictionaryTranslation').textContent='No se pudo obtener la traducción ahora.';
+      $('dictionaryMeaning').textContent='La consulta agotó el tiempo de espera. Puedes reintentar pulsando de nuevo la palabra o abrir «Más detalles».';
+    }
   }
   function showDictionary(data){$('dictionaryWord').textContent=data.word;$('dictionaryPhonetic').textContent=data.phonetic||'';$('dictionaryTranslation').textContent=data.translation?('ES · '+data.translation):'Traducción no disponible';$('dictionaryMeaning').textContent=data.meaning?(data.curated?'Uso habitual · ':'Definición en inglés · ')+data.meaning:'';$('dictionaryExample').textContent=data.example?('Ejemplo · '+data.example):'';$('dictionarySpeak').dataset.audio=data.audio||'';}
   function speakDictionary(){const audio=$('dictionarySpeak').dataset.audio;if(audio){new Audio(audio).play().catch(()=>{});return;}const word=$('dictionaryWord').textContent;if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(word);u.lang='en-US';speechSynthesis.speak(u);}}
