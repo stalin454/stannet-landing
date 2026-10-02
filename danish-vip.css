@@ -1,0 +1,541 @@
+/* ============================================================
+   STANNET DANISH ACADEMY — VIP FUTURISTIC 2026
+   Final visual layer. Loaded after global theme.
+   High contrast, Danish identity, cyan/blue/violet StanNet accents.
+   ============================================================ */
+
+body.danish-neumorphic.stannet-page-danish{
+  --dkv-bg:#f2f7fc;
+  --dkv-surface:#ffffff;
+  --dkv-surface-soft:#f7fbff;
+  --dkv-ink:#0b1830;
+  --dkv-ink-2:#1d3552;
+  --dkv-muted:#536b82;
+  --dkv-line:#d4e2ec;
+  --dkv-red:#c8102e;
+  --dkv-red-bright:#e44459;
+  --dkv-cyan:#10cfe5;
+  --dkv-blue:#2878ff;
+  --dkv-violet:#8a39ff;
+  --dkv-shadow:0 18px 48px rgba(36,76,116,.10);
+  --dkv-shadow-soft:0 9px 24px rgba(36,76,116,.07);
+  --dkv-dark:#061523;
+  background:
+    radial-gradient(circle at 7% 7%,rgba(16,207,229,.075),transparent 25rem),
+    radial-gradient(circle at 94% 10%,rgba(138,57,255,.065),transparent 28rem),
+    var(--dkv-bg)!important;
+  color:var(--dkv-ink)!important;
+}
+
+/* ---------- Back link ---------- */
+body.danish-neumorphic main>div:first-child a{
+  color:#244765!important;
+  background:#fff!important;
+  border:1px solid var(--dkv-line)!important;
+  box-shadow:var(--dkv-shadow-soft)!important;
+}
+body.danish-neumorphic main>div:first-child a:hover{
+  color:var(--dkv-red)!important;
+  border-color:#e0b6c0!important;
+}
+
+/* ---------- Hero ---------- */
+body.danish-neumorphic .danish-hero{
+  position:relative;
+  width:min(1480px,calc(100% - 42px))!important;
+  min-height:540px!important;
+  margin:22px auto 46px!important;
+  padding:clamp(48px,7vw,92px)!important;
+  border:1px solid rgba(118,225,247,.18)!important;
+  border-radius:34px!important;
+  overflow:hidden;
+  color:#fff!important;
+  background:
+    radial-gradient(circle at 76% 22%,rgba(16,207,229,.19),transparent 25rem),
+    radial-gradient(circle at 92% 74%,rgba(138,57,255,.26),transparent 30rem),
+    linear-gradient(125deg,#03111f,#061a31 58%,#111442)!important;
+  box-shadow:0 30px 80px rgba(8,29,49,.18)!important;
+}
+body.danish-neumorphic .danish-hero::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  width:auto!important;height:auto!important;
+  right:auto!important;top:auto!important;
+  border-radius:0!important;
+  opacity:1!important;
+  background:
+    linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px)!important;
+  background-size:48px 48px!important;
+  box-shadow:none!important;
+  mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.8) 58%,transparent 100%);
+}
+body.danish-neumorphic .danish-hero::after{
+  content:"DANSK";
+  position:absolute;
+  right:clamp(24px,5vw,74px)!important;
+  bottom:clamp(32px,5vw,62px)!important;
+  color:rgba(255,255,255,.055)!important;
+  font:800 clamp(64px,11vw,160px)/.8 Orbitron,sans-serif!important;
+  letter-spacing:-.07em!important;
+}
+body.danish-neumorphic .danish-hero .eyebrow{
+  color:#7beaf5!important;
+}
+body.danish-neumorphic .danish-hero h1{
+  color:#fff!important;
+  text-shadow:0 6px 28px rgba(0,0,0,.16);
+}
+body.danish-neumorphic .danish-hero h1 em{
+  background:linear-gradient(90deg,#72edf4,#71a7ff 52%,#c27aff)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+  color:transparent!important;
+}
+body.danish-neumorphic .danish-copy{
+  color:#c9dbe8!important;
+  font-weight:500!important;
+}
+body.danish-neumorphic .flag{
+  box-shadow:0 7px 18px rgba(0,0,0,.24)!important;
+}
+
+/* ---------- Section headings ---------- */
+body.danish-neumorphic .section{
+  border-bottom-color:rgba(28,64,99,.08)!important;
+}
+body.danish-neumorphic .section-heading h2,
+body.danish-neumorphic .orbit-head h2{
+  color:var(--dkv-ink)!important;
+  font-weight:800!important;
+  letter-spacing:-.055em!important;
+}
+body.danish-neumorphic .section-heading h2 em,
+body.danish-neumorphic .orbit-head h2 em{
+  color:transparent!important;
+  background:linear-gradient(90deg,var(--dkv-red),var(--dkv-violet))!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+}
+body.danish-neumorphic .section-heading>p,
+body.danish-neumorphic .orbit-head>p{
+  color:var(--dkv-muted)!important;
+  font-weight:500!important;
+}
+body.danish-neumorphic .eyebrow,
+body.danish-neumorphic .signal-tag,
+body.danish-neumorphic .deep-kicker,
+body.danish-neumorphic .deep-label,
+body.danish-neumorphic .core-kicker,
+body.danish-neumorphic .builder-kicker{
+  color:#0c8da8!important;
+  font-weight:800!important;
+}
+
+/* ---------- Main surfaces ---------- */
+body.danish-neumorphic :is(
+  .course-index,.course-lesson,.grammar-index,.grammar-lesson,
+  .memory-menu,.memory-card,.mastery-index,.mastery-lesson,
+  .danish-panel,.danish-side,.deep-course-shell,.deep-grammar-shell,
+  .core-shell,.builder-shell,.danish-practice-menu,.danish-practice-card,
+  .signal-card
+){
+  background:#fff!important;
+  color:var(--dkv-ink)!important;
+  border:1px solid var(--dkv-line)!important;
+  border-radius:24px!important;
+  box-shadow:var(--dkv-shadow)!important;
+}
+
+/* ---------- ALL readable text: explicit contrast ---------- */
+body.danish-neumorphic :is(
+  .course-index,.course-lesson,.grammar-index,.grammar-lesson,
+  .memory-menu,.memory-card,.mastery-index,.mastery-lesson,
+  .danish-panel,.danish-side,.deep-course-shell,.deep-grammar-shell,
+  .core-shell,.builder-shell,.danish-practice-menu,.danish-practice-card,
+  .signal-card
+) :is(h2,h3,h4,strong,b){
+  color:var(--dkv-ink)!important;
+}
+body.danish-neumorphic :is(
+  .course-goal,.course-learning-card p,.course-phrase span,
+  .grammar-focus,.grammar-rule p,.grammar-example span,
+  .memory-result,.mastery-goal,.mastery-example,.mastery-translation span,
+  .danish-feedback,.danish-note,.principle span,.phrase span,
+  .deep-course-top p,.deep-grammar-shell p,.deep-card li,.deep-instruction,
+  .builder-head p,.builder-hint span,.builder-result-panel>p,.builder-structure-note,
+  .danish-task,.danish-model-translation,.danish-practice-status,
+  .signal-card p,.signal-card li,.orbit-note,.core-intro p,.core-notes li
+){
+  color:var(--dkv-muted)!important;
+}
+
+/* ---------- Secondary cards ---------- */
+body.danish-neumorphic :is(
+  .course-learning-card,.course-phrase,.grammar-rule,.grammar-example,
+  .memory-prompt,.principle,.phrase,.deep-card,.deep-vocab-card,
+  .deep-example,.deep-exercise,.deep-listening,.deep-reading,
+  .pronoun-cell,.pronoun-row,.verb-card,.tense-card,.aux-card,
+  .builder-grid label,.builder-result,.builder-chip,
+  .danish-model,.danish-practice-status
+){
+  background:linear-gradient(145deg,#fff,#f7fbfe)!important;
+  border:1px solid #d8e5ee!important;
+  border-radius:16px!important;
+  box-shadow:var(--dkv-shadow-soft)!important;
+}
+
+/* ---------- Course / grammar navigation ---------- */
+body.danish-neumorphic :is(.course-item,.grammar-item,.mastery-item,.lesson-choice,.danish-exercise){
+  color:#3b526b!important;
+  background:#f8fbfd!important;
+  border:1px solid #d9e5ed!important;
+  box-shadow:none!important;
+}
+body.danish-neumorphic :is(.course-item,.grammar-item,.mastery-item,.lesson-choice,.danish-exercise):hover{
+  color:#185f97!important;
+  background:#eef8fd!important;
+  border-color:#a8d4e4!important;
+}
+body.danish-neumorphic :is(.course-item.active,.grammar-item.active,.mastery-item.active,.lesson-choice.active,.danish-exercise.active){
+  color:#fff!important;
+  background:linear-gradient(135deg,#0aaec5,#2878ff 56%,#8a39ff)!important;
+  border-color:transparent!important;
+  box-shadow:0 9px 20px rgba(40,120,255,.18)!important;
+}
+
+/* ---------- Selects / inputs ---------- */
+body.danish-neumorphic :is(select,input,textarea){
+  color:#18334e!important;
+  background:#fff!important;
+  border:1px solid #cbdbe7!important;
+  box-shadow:0 3px 10px rgba(36,76,116,.045)!important;
+}
+body.danish-neumorphic :is(select,input,textarea):focus{
+  border-color:#5f9ee3!important;
+  outline:3px solid rgba(40,120,255,.10)!important;
+}
+
+/* ---------- Buttons ---------- */
+body.danish-neumorphic button{
+  color:#24506e!important;
+  background:#fff!important;
+  border:1px solid #cbdce8!important;
+  box-shadow:0 5px 13px rgba(36,76,116,.055)!important;
+}
+body.danish-neumorphic button:hover{
+  color:#0f668f!important;
+  background:#f2fafd!important;
+  border-color:#9ecada!important;
+}
+body.danish-neumorphic :is(.primary-dk,.memory-primary,.danish-primary,.builder-actions button:first-child,.deep-exam-submit,.deep-check){
+  color:#fff!important;
+  border-color:transparent!important;
+  background:linear-gradient(135deg,#0ab9cf,#2878ff 53%,#8a39ff)!important;
+  box-shadow:0 10px 22px rgba(40,120,255,.21)!important;
+}
+
+/* ---------- Pronoun table: screenshot problem ---------- */
+body.danish-neumorphic .pronoun-grid{
+  gap:12px!important;
+}
+body.danish-neumorphic .pronoun-row{
+  padding:16px!important;
+  border:1px solid #d5e2ec!important;
+  border-radius:20px!important;
+  background:#fff!important;
+  box-shadow:0 10px 26px rgba(36,76,116,.075)!important;
+}
+body.danish-neumorphic .pronoun-person{
+  padding:13px!important;
+  border-radius:13px;
+  background:linear-gradient(145deg,#edf8fd,#f4f1ff)!important;
+}
+body.danish-neumorphic .pronoun-person span{
+  color:#14284b!important;
+  font-weight:800!important;
+}
+body.danish-neumorphic .pronoun-person small{
+  color:#5d7187!important;
+  font-weight:550!important;
+}
+body.danish-neumorphic .pronoun-cell{
+  padding:11px!important;
+  border-left:0!important;
+  border:1px solid #dce7ef!important;
+  border-radius:14px!important;
+  background:#fbfdff!important;
+}
+body.danish-neumorphic .pronoun-cell b,
+body.danish-neumorphic .pronoun-example b{
+  color:#253866!important;
+  font-weight:800!important;
+  letter-spacing:.09em!important;
+}
+body.danish-neumorphic .core-word-audio{
+  min-height:40px!important;
+  color:#24445f!important;
+  background:#fff!important;
+  border:1px solid #c9dce7!important;
+  border-radius:11px!important;
+  box-shadow:none!important;
+  font-weight:750!important;
+}
+body.danish-neumorphic .core-word-audio:hover{
+  background:#eef9fd!important;
+  border-color:#83cfe0!important;
+  color:#0b6f92!important;
+}
+body.danish-neumorphic .core-word-audio.main{
+  color:#fff!important;
+  border-color:transparent!important;
+  background:linear-gradient(135deg,#08bdd2,#2878ff)!important;
+  box-shadow:0 7px 18px rgba(40,120,255,.16)!important;
+}
+body.danish-neumorphic .core-word-audio span{
+  color:#1aa8c2!important;
+}
+body.danish-neumorphic .core-word-audio.main span{color:#fff!important}
+body.danish-neumorphic .pronoun-example{
+  padding:12px!important;
+}
+body.danish-neumorphic .pronoun-example span{
+  color:#445d74!important;
+  font-weight:550!important;
+}
+body.danish-neumorphic .pronoun-example button{
+  color:#1483a5!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-weight:800!important;
+}
+
+/* ---------- Core lab ---------- */
+body.danish-neumorphic .core-tabs{
+  padding:8px!important;
+  border:1px solid #d8e5ee!important;
+  border-radius:16px!important;
+  background:#f6f9fc!important;
+}
+body.danish-neumorphic .core-tabs button{
+  color:#536b82!important;
+  background:transparent!important;
+  border:1px solid transparent!important;
+  box-shadow:none!important;
+}
+body.danish-neumorphic .core-tabs button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#0ab6ca,#2878ff 58%,#8a39ff)!important;
+  border-color:transparent!important;
+  box-shadow:0 8px 18px rgba(40,120,255,.17)!important;
+}
+body.danish-neumorphic .core-notes{
+  border-left:0!important;
+  border:1px solid #d7e5ee!important;
+  border-radius:15px!important;
+  background:linear-gradient(135deg,#f0fbfd,#f8f5ff)!important;
+}
+body.danish-neumorphic .core-notes li{color:#435b73!important}
+
+/* ---------- Verb / auxiliary areas ---------- */
+body.danish-neumorphic .verb-hero{
+  border:1px solid #d7e4ed!important;
+  border-radius:18px!important;
+  background:linear-gradient(135deg,#eefaff,#f7f4ff)!important;
+}
+body.danish-neumorphic .verb-hero h4,
+body.danish-neumorphic .verb-tense-row strong,
+body.danish-neumorphic .pronoun-conj span,
+body.danish-neumorphic .verb-example-card span,
+body.danish-neumorphic .verb-extra span,
+body.danish-neumorphic .aux-head h4,
+body.danish-neumorphic .aux-forms span,
+body.danish-neumorphic .aux-pattern code,
+body.danish-neumorphic .aux-example strong{
+  color:#152c48!important;
+}
+body.danish-neumorphic .verb-hero p,
+body.danish-neumorphic .verb-note span,
+body.danish-neumorphic .verb-tense-row>span,
+body.danish-neumorphic .verb-pronoun-block p,
+body.danish-neumorphic .pronoun-conj i,
+body.danish-neumorphic .aux-head small,
+body.danish-neumorphic .aux-example span,
+body.danish-neumorphic .aux-card>p{
+  color:#5b7187!important;
+}
+body.danish-neumorphic :is(.verb-tense-row,.verb-pronoun-block,.pronoun-conj,.verb-example-card,.verb-extra,.aux-card,.aux-forms button,.aux-pattern,.aux-example){
+  border-color:#d8e4ed!important;
+  background:#fbfdff!important;
+}
+body.danish-neumorphic .pronoun-conj b,
+body.danish-neumorphic .aux-head span,
+body.danish-neumorphic .aux-pattern b{
+  color:#a91c38!important;
+}
+
+/* ---------- Deep course ---------- */
+body.danish-neumorphic .deep-tabs{
+  border-bottom:0!important;
+  padding:8px!important;
+  border:1px solid #d8e5ed!important;
+  border-radius:16px!important;
+  background:#f5f9fc!important;
+}
+body.danish-neumorphic .deep-tabs button{
+  color:#526b81!important;
+  background:transparent!important;
+  border:1px solid transparent!important;
+  box-shadow:none!important;
+}
+body.danish-neumorphic .deep-tabs button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#10bfd4,#2878ff 58%,#8a39ff)!important;
+  border-color:transparent!important;
+}
+body.danish-neumorphic .deep-vocab-item{
+  border:1px solid #d8e4ed!important;
+  border-radius:14px!important;
+  background:#fbfdff!important;
+}
+body.danish-neumorphic .deep-vocab-item strong,
+body.danish-neumorphic .deep-dialogue-line strong,
+body.danish-neumorphic .deep-pattern code,
+body.danish-neumorphic .deep-exam-question legend{
+  color:#17314b!important;
+}
+body.danish-neumorphic .deep-vocab-item span,
+body.danish-neumorphic .deep-theory p,
+body.danish-neumorphic .deep-dialogue-line small,
+body.danish-neumorphic .deep-exercise p,
+body.danish-neumorphic .deep-exam-question label,
+body.danish-neumorphic .deep-exam-result{
+  color:#536b82!important;
+}
+body.danish-neumorphic .deep-pattern{
+  border-color:#e8c3ca!important;
+  background:#fff7f8!important;
+}
+body.danish-neumorphic .deep-pattern b{color:#a91d39!important}
+body.danish-neumorphic .deep-dialogue-line,
+body.danish-neumorphic .deep-exam-question{
+  border:1px solid #d8e5ed!important;
+  border-radius:14px!important;
+  background:#fbfdff!important;
+}
+
+/* ---------- Sentence builder ---------- */
+body.danish-neumorphic .builder-grid label{
+  background:#fbfdff!important;
+}
+body.danish-neumorphic .builder-grid label>span,
+body.danish-neumorphic .builder-output-label,
+body.danish-neumorphic .builder-chip b{
+  color:#53677e!important;
+  font-weight:800!important;
+}
+body.danish-neumorphic .builder-result{
+  background:linear-gradient(135deg,#f2fbfd,#f8f5ff)!important;
+}
+body.danish-neumorphic .builder-result-panel>strong,
+body.danish-neumorphic .builder-chip span{
+  color:#17314b!important;
+}
+body.danish-neumorphic .builder-result-tabs{
+  border-bottom:1px solid #d8e4ed!important;
+}
+body.danish-neumorphic .builder-result-tabs button{
+  color:#526a80!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.danish-neumorphic .builder-result-tabs button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#10bfd4,#2878ff 58%,#8a39ff)!important;
+}
+
+/* ---------- Phrase / practice ---------- */
+body.danish-neumorphic .phrase{
+  border:1px solid #d9e4ed!important;
+  background:linear-gradient(135deg,#fff6f7,#f4fbff)!important;
+}
+body.danish-neumorphic .phrase small{
+  color:#8b3146!important;
+}
+body.danish-neumorphic .phrase strong{
+  color:#132b47!important;
+}
+body.danish-neumorphic .phrase span{
+  color:#536b82!important;
+}
+body.danish-neumorphic .danish-feedback{
+  border:1px solid #d7e4ed!important;
+  border-radius:13px!important;
+  background:#f7fbfd!important;
+  color:#506a80!important;
+}
+
+/* ---------- Orbit ---------- */
+body.danish-neumorphic .orbit-section{
+  background:
+    radial-gradient(circle at 76% 18%,rgba(16,207,229,.16),transparent 24rem),
+    radial-gradient(circle at 90% 76%,rgba(138,57,255,.20),transparent 27rem),
+    linear-gradient(125deg,#04121f,#081a30 60%,#11143d)!important;
+}
+body.danish-neumorphic .orbit-head h2{color:#fff!important}
+body.danish-neumorphic .orbit-head h2 em{
+  background:linear-gradient(90deg,#70edf3,#8ea8ff,#c27aff)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;
+}
+body.danish-neumorphic .orbit-head>p{color:#c5d7e4!important}
+body.danish-neumorphic .signal-card{
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(130,224,244,.18)!important;
+  box-shadow:0 20px 48px rgba(0,0,0,.14)!important;
+  backdrop-filter:blur(12px);
+}
+body.danish-neumorphic .signal-card h3,
+body.danish-neumorphic .signal-card strong{color:#fff!important}
+body.danish-neumorphic .signal-card p,
+body.danish-neumorphic .signal-card li{color:#c6d8e4!important}
+body.danish-neumorphic .signal-card a{
+  color:#bceff6!important;
+  background:rgba(255,255,255,.07)!important;
+  border-color:rgba(140,228,244,.18)!important;
+}
+
+/* ---------- Footer ---------- */
+body.danish-neumorphic footer{
+  background:#06131f!important;
+  color:#9eb2c3!important;
+}
+body.danish-neumorphic footer a,
+body.danish-neumorphic footer .brand span{color:#fff!important}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1180px){
+  body.danish-neumorphic .pronoun-row{
+    grid-template-columns:1fr 1fr 1fr!important;
+  }
+}
+@media(max-width:760px){
+  body.danish-neumorphic .danish-hero{
+    width:calc(100% - 22px)!important;
+    min-height:auto!important;
+    padding:34px 20px!important;
+    border-radius:24px!important;
+  }
+  body.danish-neumorphic .danish-hero::after{display:none!important}
+  body.danish-neumorphic .pronoun-row{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+@media(max-width:560px){
+  body.danish-neumorphic .pronoun-row{
+    grid-template-columns:1fr!important;
+  }
+  body.danish-neumorphic .pronoun-example{grid-column:auto!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.danish-neumorphic *{transition:none!important}
+}
