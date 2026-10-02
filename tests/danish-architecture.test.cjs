@@ -24,7 +24,7 @@ assert.ok(html.includes('../danish-sentence-builder-data.js'), 'Sentence builder
 assert.ok(html.includes('../danish-sentence-builder.js'), 'Sentence builder engine missing');
 assert.ok(html.includes('../danish-sentence-builder.css'), 'Sentence builder CSS missing');
 assert.ok(html.includes('../danish-neumorphism.css'), 'Danish neumorphism theme missing');
-assert.ok(html.includes('class="danish-neumorphic"'), 'Danish neumorphism body scope missing');
+assert.match(html, /class="[^"]*\\bdanish-neumorphic\\b[^"]*"/, 'Danish neumorphism body scope missing');
 assert.ok(!html.includes('\\n'), 'Literal \\n tokens leaked into Danish HTML');
 assert.ok(html.includes('id="danishSentenceBuilder"'), 'Sentence builder mount missing');
 assert.ok(html.includes('id="danishCoreLab"'), 'Danish Core Lab mount missing');
