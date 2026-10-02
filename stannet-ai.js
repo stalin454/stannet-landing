@@ -27,7 +27,7 @@
   .snai-logo{width:38px;height:38px;object-fit:contain}.snai-title{flex:1}.snai-title strong{display:block;font-size:14px;letter-spacing:.08em}.snai-title small{font-family:Inter,sans-serif;color:#86f2ff;font-size:11px}.snai-close{border:0;background:transparent;color:#fff;font-size:24px;cursor:pointer}
   .snai-modes{display:flex;gap:7px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);overflow:auto}.snai-modes button{border:1px solid rgba(255,255,255,.12);background:#0d1420;color:#cfe7f0;border-radius:999px;padding:7px 10px;font:600 10px Inter,sans-serif;white-space:nowrap;cursor:pointer}.snai-modes button.active{border-color:#59e8ff;color:#fff;box-shadow:0 0 12px rgba(89,232,255,.2)}
   .snai-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.snai-msg{max-width:86%;padding:10px 12px;border-radius:15px;font:14px/1.45 Inter,sans-serif;white-space:pre-wrap}.snai-msg.bot{align-self:flex-start;background:#111a28;border:1px solid rgba(89,232,255,.18)}.snai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#15475a,#3b286b)}.snai-msg.error{border-color:#ff6a8f;color:#ffd9e3}
-  .snai-form{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.08)}.snai-form textarea{flex:1;resize:none;height:44px;max-height:100px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#0c121c;color:#fff;padding:11px 12px;font:14px Inter,sans-serif;outline:none}.snai-form textarea:focus{border-color:#59e8ff}.snai-send{width:46px;border:0;border-radius:14px;background:linear-gradient(135deg,#59e8ff,#9d7bff);color:#071017;font-weight:900;cursor:pointer}.snai-send:disabled{opacity:.5;cursor:wait}
+  .snai-form{display:block;padding:10px 12px 9px;border-top:1px solid rgba(255,255,255,.08)}.snai-form-row{display:flex;align-items:flex-end;gap:7px}.snai-form textarea{flex:1;min-width:0;resize:none;height:44px;max-height:100px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#0c121c;color:#fff;padding:11px 12px;font:14px Inter,sans-serif;outline:none}.snai-form textarea:focus{border-color:#59e8ff}.snai-send,.snai-voice-toggle{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:14px;cursor:pointer}.snai-send{background:linear-gradient(135deg,#59e8ff,#9d7bff);color:#071017;font-weight:900}.snai-voice-toggle{border:1px solid rgba(89,232,255,.32);background:#0d1420;color:#b9f8ff;font-size:19px}.snai-voice-toggle.active{background:linear-gradient(135deg,#ff6584,#9d7bff);color:#fff}.snai-voice-note,.snai-voice-status{display:block;padding:5px 2px 0;color:#9db4c2;font:10px/1.4 Inter,sans-serif}.snai-voice-status{color:#86f2ff;min-height:14px}.snai-speak{display:inline-grid;place-items:center;width:27px;height:27px;margin:4px 0 0 7px;border:1px solid rgba(89,232,255,.24);border-radius:9px;background:rgba(89,232,255,.08);color:#9ef5ff;font-size:13px;cursor:pointer;vertical-align:middle}.snai-speak.is-speaking{border-color:#ff6584;color:#ffb2c1}
   @keyframes snai-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
   @keyframes snai-arm-a{from{transform:rotate(13deg)}to{transform:rotate(-15deg)}}@keyframes snai-arm-b{from{transform:rotate(-13deg)}to{transform:rotate(15deg)}}
   @keyframes snai-leg-a{from{transform:rotate(-8deg)}to{transform:rotate(9deg)}}@keyframes snai-leg-b{from{transform:rotate(8deg)}to{transform:rotate(-9deg)}}
@@ -41,7 +41,7 @@
       <div class="snai-headbar"><img class="snai-logo" src="/assets/brand/stannet-shield.png" alt=""><div class="snai-title"><strong>StanNet AI</strong><small>Asistente del ecosistema StanNet</small></div><button class="snai-close" type="button" aria-label="Cerrar">×</button></div>
       <div class="snai-modes"><button class="active" data-mode="auto">Auto</button><button data-mode="general">General</button><button data-mode="programming">Programación</button><button data-mode="cyber">Ciberseguridad</button></div>
       <div class="snai-messages"><div class="snai-msg bot">Hola. Soy StanNet AI. Puedo ayudarte con el ecosistema StanNet, programación y ciberseguridad.</div></div>
-      <form class="snai-form"><textarea maxlength="4000" placeholder="Escribe tu mensaje…" aria-label="Mensaje"></textarea><button class="snai-send" type="submit">➜</button></form>
+      <form class="snai-form"><div class="snai-form-row"><textarea maxlength="4000" placeholder="Escribe o pulsa el micrófono…" aria-label="Mensaje"></textarea><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false" title="Hablar con StanNet AI">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div><small class="snai-voice-note">Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</small><small class="snai-voice-status" aria-live="polite">La voz funciona en navegadores compatibles; también puedes escribir.</small></form>
     </section>
     <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-expanded="false">
       <div class="snai-bot"><div class="snai-head"></div><div class="snai-neck"></div><div class="snai-body"><img src="/assets/brand/stannet-shield.png" alt=""></div><i class="snai-arm a"></i><i class="snai-arm b"></i><i class="snai-leg a"></i><i class="snai-leg b"></i><span class="snai-status"></span></div>
@@ -49,13 +49,152 @@
     <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">AI</button>`;
   document.body.appendChild(root);
 
-  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send');
+  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status');
   const UI_KEY='stannet-ai-hidden-v1';
   const HISTORY_KEY='stannet-ai-history-v1';
   let mode='auto';
   let history=[];
   try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(history))history=[]}catch{history=[]}
   const saveHistory=()=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)))}catch{}};
+  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false;
+  let currentAudio=null,activeSpeechButton=null,speechToken=0;
+  const updateVoiceButton=()=>{
+    voiceToggle.classList.toggle('active',voiceEnabled);
+    voiceToggle.setAttribute('aria-pressed',String(voiceEnabled));
+    voiceToggle.setAttribute('aria-label',voiceEnabled?'Detener conversación por voz':'Activar conversación por voz');
+    voiceToggle.title=voiceEnabled?'Detener conversación por voz':'Hablar con StanNet AI';
+    voiceToggle.textContent=voiceEnabled?'■':'🎙️';
+  };
+  const cleanSpeechText=(value)=>String(value||'')
+    .replace(/https?:\\/\\/\\S+/g,' ')
+    .replace(/\\/(?:pages|nutri-ia|sentinel)\\/\\S+/g,' ')
+    .replace(/[*_\x60#>]/g,' ')
+    .replace(/^\\s*[-•]+\\s/gm,'')
+    .replace(/\\s+/g,' ').trim();
+  const speechChunks=(value,max=460)=>{
+    const words=String(value||'').split(/\\s+/); const chunks=[]; let chunk='';
+    for(const word of words){const candidate=chunk?chunk+' '+word:word;if(candidate.length>max&&chunk){chunks.push(chunk);chunk=word}else chunk=candidate}
+    if(chunk)chunks.push(chunk);return chunks;
+  };
+  const stopSpeech=()=>{
+    speechToken++;
+    if(currentAudio){const audio=currentAudio;currentAudio=null;audio.pause();audio.onended?.()}
+    if(window.speechSynthesis)window.speechSynthesis.cancel();
+    if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
+  };
+  const playAzureChunk=async(chunk,token)=>{
+    const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:'es-ES',voice:'es-ES-ElviraNeural',purpose:'chat'})});
+    if(!response.ok)throw new Error('Azure TTS unavailable');
+    const audioUrl=URL.createObjectURL(await response.blob()),audio=new Audio(audioUrl);
+    currentAudio=audio;
+    try{
+      await new Promise((resolve,reject)=>{audio.onended=resolve;audio.onerror=()=>reject(new Error('Audio playback failed'));audio.play().catch(reject)});
+    }finally{
+      URL.revokeObjectURL(audioUrl);
+      if(currentAudio===audio)currentAudio=null;
+    }
+    return token===speechToken;
+  };
+  const finishVoiceTurn=()=>{
+    if(!voiceEnabled)return;
+    voiceThinking=false;
+    voiceStatus.textContent='Te escucho…';
+    startListening();
+  };
+  async function speakReply(value,{button=null,listenAfter=false}={}){
+    const speech=cleanSpeechText(value);
+    if(!speech)return;
+    stopSpeech();
+    const token=speechToken;
+    if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
+    voiceStatus.textContent=listenAfter?'StanNet AI está hablando…':'Reproduciendo respuesta…';
+    try{
+      for(const chunk of speechChunks(speech)){
+        if(token!==speechToken)return;
+        const completed=await playAzureChunk(chunk,token);
+        if(!completed)return;
+      }
+    }catch{
+      if(token!==speechToken)return;
+      if(window.speechSynthesis&&window.SpeechSynthesisUtterance){
+        try{
+          window.speechSynthesis.cancel();
+          const utterance=new SpeechSynthesisUtterance(speech);
+          utterance.lang='es-ES';
+          const spanishVoice=window.speechSynthesis.getVoices().find(v=>/^es[-_]/i.test(v.lang));
+          if(spanishVoice)utterance.voice=spanishVoice;
+          await new Promise(resolve=>{utterance.onend=resolve;utterance.onerror=resolve;window.speechSynthesis.speak(utterance)});
+        }catch{}
+      }else{
+        voiceStatus.textContent='No pude reproducir audio en este navegador.';
+      }
+    }finally{
+      if(token===speechToken){
+        if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
+        if(listenAfter&&voiceEnabled)finishVoiceTurn();
+        else if(!voiceEnabled)voiceStatus.textContent='La voz funciona en navegadores compatibles; también puedes escribir.';
+      }
+    }
+  }
+  function startListening(){
+    if(!voiceEnabled||voiceThinking||recognitionRunning||!Recognition)return;
+    if(!recognition){
+      recognition=new Recognition();
+      recognition.lang='es-ES';
+      recognition.continuous=false;
+      recognition.interimResults=false;
+      recognition.maxAlternatives=1;
+      recognition.onstart=()=>{recognitionRunning=true;voiceStatus.textContent='Te escucho… habla ahora.'};
+      recognition.onresult=(event)=>{
+        const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
+        if(!transcript)return;
+        voiceThinking=true;
+        voiceStatus.textContent='He oído: '+transcript;
+        input.value=transcript;
+        form.requestSubmit();
+      };
+      recognition.onerror=(event)=>{
+        recognitionRunning=false;
+        if(['not-allowed','service-not-allowed'].includes(event.error)){
+          stopVoiceMode('No se concedió acceso al micrófono. Puedes seguir escribiendo.');
+        }else if(event.error==='no-speech'){
+          voiceStatus.textContent='No te he oído; sigo escuchando…';
+        }else{
+          voiceStatus.textContent='El reconocimiento de voz falló. Comprueba la conexión o escribe tu mensaje.';
+          stopVoiceMode(voiceStatus.textContent);
+        }
+      };
+      recognition.onend=()=>{
+        recognitionRunning=false;
+        if(voiceEnabled&&!voiceThinking)setTimeout(startListening,350);
+      };
+    }
+    try{
+      recognition.start();
+      recognitionRunning=true;
+      voiceStatus.textContent='Te escucho… habla ahora.';
+    }catch{
+      recognitionRunning=false;
+      voiceStatus.textContent='No pude iniciar el micrófono. Pulsa para intentarlo de nuevo.';
+    }
+  }
+  function stopVoiceMode(message='Conversación por voz detenida.'){
+    voiceEnabled=false;voiceThinking=false;
+    if(recognition){try{recognition.abort()}catch{}}
+    recognitionRunning=false;
+    stopSpeech();
+    updateVoiceButton();
+    voiceStatus.textContent=message;
+  }
+  voiceToggle.addEventListener('click',()=>{
+    if(voiceEnabled){stopVoiceMode();return}
+    if(!Recognition){
+      voiceStatus.textContent='Este navegador no admite dictado por voz. Puedes escribir y pulsar 🔊 para oír las respuestas.';
+      return;
+    }
+    voiceEnabled=true;voiceThinking=false;updateVoiceButton();startListening();
+  });
   const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
   const setHidden=(hidden)=>{
     launcher.classList.toggle('is-hidden',hidden);
@@ -131,6 +270,13 @@
     }else{
       el.textContent=text;
     }
+    if(kind==='bot'){
+      const speak=document.createElement('button');
+      speak.type='button';speak.className='snai-speak';speak.textContent='🔊';
+      speak.setAttribute('aria-label','Escuchar respuesta');speak.title='Escuchar respuesta';
+      speak.addEventListener('click',()=>activeSpeechButton===speak?(stopSpeech(),voiceStatus.textContent='Audio detenido.'):speakReply(text,{button:speak}));
+      el.appendChild(speak);
+    }
     messages.appendChild(el);
     messages.scrollTop=messages.scrollHeight;
     if(persist){
@@ -152,12 +298,23 @@
   if(initiallyHidden)setHidden(true);
 
   form.addEventListener('submit',async(e)=>{
-    e.preventDefault(); const text=input.value.trim(); if(!text)return; add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot',false);
+    e.preventDefault(); const text=input.value.trim(); if(!text)return;
+    if(voiceEnabled){voiceThinking=true;voiceStatus.textContent='Procesando tu mensaje…'}
+    add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot',false);
     try{
       const pref=mode==='auto'?'':`Modo ${mode}. `;
       const r=await fetch('/api/stannet-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:pref+text})});
-      const data=await r.json().catch(()=>({})); pending.remove(); if(!r.ok)throw new Error(data.error||'No pude responder ahora.'); add(data.answer||'No recibí respuesta.','bot');
-    }catch(err){pending.remove();add(err.message||'Error de conexión.','bot error')}finally{send.disabled=false;input.focus()}
+      const data=await r.json().catch(()=>({})); pending.remove(); if(!r.ok)throw new Error(data.error||'No pude responder ahora.');
+      const answer=data.answer||'No recibí respuesta.';
+      add(answer,'bot');
+      if(voiceEnabled)await speakReply(answer,{listenAfter:true});
+    }catch(err){
+      pending.remove();add(err.message||'Error de conexión.','bot error');
+      if(voiceEnabled){voiceThinking=false;voiceStatus.textContent='No pude obtener respuesta; sigo escuchando.'}
+    }finally{
+      send.disabled=false;input.focus();
+      if(voiceEnabled&&!voiceThinking)startListening();
+    }
   });
   input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 })();

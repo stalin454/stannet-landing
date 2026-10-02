@@ -157,6 +157,7 @@ export default {
       let text = '';
       let requestedLang = 'da-DK';
       let requestedVoice = '';
+      let purpose = '';
 
       if (request.method === 'GET') {
         text = (url.searchParams.get('text') || '').trim();
@@ -169,6 +170,7 @@ export default {
         text = typeof body?.text === 'string' ? body.text.trim() : '';
         requestedLang = typeof body?.lang === 'string' ? body.lang : 'da-DK';
         requestedVoice = typeof body?.voice === 'string' ? body.voice.trim() : '';
+        purpose = typeof body?.purpose === 'string' ? body.purpose : '';
       }
 
       const voiceMap = {
@@ -183,6 +185,10 @@ export default {
         'en-US': {
           default: 'en-US-AriaNeural',
           allowed: ['en-US-AriaNeural','en-US-GuyNeural']
+        },
+        'es-ES': {
+          default: 'es-ES-ElviraNeural',
+          allowed: ['es-ES-ElviraNeural','es-ES-AlvaroNeural']
         }
       };
       const language = voiceMap[requestedLang] ? requestedLang : 'da-DK';
@@ -213,7 +219,7 @@ export default {
         if (!azureResponse.ok) return json({ error: 'Azure no pudo generar el audio.' }, 502);
         const headers = new Headers();
         headers.set('Content-Type', 'audio/mpeg');
-        headers.set('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+        headers.set('Cache-Control', purpose === 'chat' ? 'no-store' : 'public, max-age=86400, s-maxage=604800');
         headers.set('X-Content-Type-Options', 'nosniff');
         return new Response(azureResponse.body, { status: 200, headers });
       } catch {
