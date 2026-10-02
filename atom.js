@@ -8,7 +8,6 @@
     radius: Number(element.dataset.radius),
   }));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const coarsePointer = window.matchMedia('(hover: none), (pointer: coarse)');
   const tilt = -28 * Math.PI / 180;
   let size = atom.clientWidth;
   let elapsed = 0;
@@ -32,7 +31,7 @@
     }
   };
 
-  const isStatic = () => reduceMotion.matches || coarsePointer.matches;
+  const isStatic = () => reduceMotion.matches;
   const isPaused = () => atom.classList.contains('is-interacting') || document.hidden;
 
   const animate = (time) => {
@@ -90,7 +89,6 @@
   document.addEventListener('visibilitychange', () => { previousTime = 0; });
   const onMotionChange = () => start();
   reduceMotion.addEventListener?.('change', onMotionChange);
-  coarsePointer.addEventListener?.('change', onMotionChange);
 
   if ('ResizeObserver' in window) {
     new ResizeObserver((entries) => {
