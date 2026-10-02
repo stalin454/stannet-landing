@@ -6,7 +6,7 @@ const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'atom.css'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'atom.js'), 'utf8');
-const anchors = [...html.matchAll(/<a class="atom-node" href="([^"]+)" aria-label="([^"]+)"/g)];
+const anchors = [...html.matchAll(/<a class="atom-node[^\"]*" href="([^\"]+)" aria-label="([^\"]+)"/g)];
 
 assert.equal(anchors.length, 7, 'all seven project nodes must remain in the atom');
 for (const [, href, label] of anchors) {
@@ -17,18 +17,25 @@ for (const [, href, label] of anchors) {
 assert.equal((html.match(/data-radius="\.26"/g) || []).length, 3, 'inner orbit has three evenly spaced nodes');
 assert.equal((html.match(/data-radius="\.47"/g) || []).length, 4, 'outer orbit has four evenly spaced nodes');
 assert.match(css, /prefers-reduced-motion:\s*reduce/);
-assert.match(css, /\.home-hero \.atom-node\s*\{[^}]*min-width:\s*52px/s);
-assert.ok(css.includes('.home-hero .atom-node { min-width: 46px; min-height: 46px;'), 'mobile target must remain easy to tap');
+assert.match(css, /\.home-hero \.atom-node\s*\{[^}]*min-width:\s*58px/s);
+assert.ok(css.includes('.home-hero .atom-node { min-width: 44px; min-height: 44px;'), 'mobile target must remain easy to tap');
+assert.equal((html.match(/class="atom-track atom-track--cross/g) || []).length, 2, 'crossed elliptical planes create the reference atom silhouette');
+assert.equal((html.match(/class="atom-node [^"]+" href=/g) || []).length, 7, 'each orbiting area is a real link');
+assert.equal((html.match(/<i><\/i>/g) || []).length, 9, 'the nucleus has layered particle volume');
 assert.doesNotMatch(css, /@keyframes\s+atom-orbit/);
 assert.match(js, /requestAnimationFrame/);
 assert.match(js, /prefers-reduced-motion/);
 
 // Both paths are homothetic ellipses. Their minimum distance is the radial gap
 // times the ellipse's minor-axis ratio, regardless of their independent phase.
-for (const width of [288, 330, 430, 520]) {
+for (const width of [268, 310, 350, 430, 520, 700]) {
   const minimumGap = (.47 - .26) * .8 * width;
-  const targetDiameter = width <= 350 ? 46 : Math.min(58, Math.max(46, width * .05)) + 6;
+  const targetDiameter = width <= 640 ? 44 : 58;
   assert.ok(minimumGap > targetDiameter, `${width}px layout can overlap orbit hit areas`);
+  const innerOrbitMinorRadius = .26 * .8 * width;
+  const coreRadius = .26 * width / 2;
+  const bubbleRadius = width <= 640 ? 18 : Math.max(54, Math.min(72, width * .052)) / 2;
+  assert.ok(innerOrbitMinorRadius > coreRadius + bubbleRadius, `${width}px layout can hide an inner bubble behind the nucleus`);
   const tilt = 28 * Math.PI / 180;
   const horizontalOrbitExtent = .47 * width * Math.sqrt(Math.cos(tilt) ** 2 + (.8 * Math.sin(tilt)) ** 2);
   const maximumExtent = horizontalOrbitExtent + targetDiameter / 2;
