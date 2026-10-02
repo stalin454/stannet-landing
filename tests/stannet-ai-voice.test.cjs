@@ -8,6 +8,7 @@ assert.ok(widget.includes('window.SpeechRecognition||window.webkitSpeechRecognit
 assert.ok(widget.includes("recognition.lang='es-ES'"), 'Voice input must recognize Spanish');
 assert.ok(widget.includes("fetch('/api/speech'"), 'Assistant must use the protected Cloudflare TTS endpoint');
 assert.ok(widget.includes("purpose:'chat'"), 'Assistant audio must be marked as dynamic chat content');
+assert.ok(widget.includes('split(/[ \\t\\r\\n]+/)'), 'Speech replies must be chunked safely below the TTS payload limit');
 assert.ok(widget.includes('aria-label="Activar conversación por voz"'), 'Voice controls must be accessible');
 assert.ok(widget.includes('StanNet recibe la transcripción'), 'Voice processing disclosure must be visible');
 assert.ok(widget.includes('Escuchar respuesta'), 'Text replies must be playable by browser users');
