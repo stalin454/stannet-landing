@@ -126,7 +126,7 @@ document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
   if(document.body.classList.contains('vocal-studio-page'))return;
   if(document.querySelector('script[data-stannet-ai-loader]'))return;
   const ai=document.createElement('script');
-  ai.src='/stannet-ai.js?v=20261002-voice1';
+  ai.src='/stannet-ai.js?v=20261002-palette1';
   ai.defer=true;
   ai.dataset.stannetAiLoader='true';
   document.body.appendChild(ai);
