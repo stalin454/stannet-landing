@@ -76,6 +76,8 @@
     '/pages/cybersecurity.html':'Entrar a Cyber Defense Academy →',
     '/pages/cyber-lab.html':'Abrir Cyber Defense Lab →',
     '/pages/callan.html':'Entrar a Callan English Coach →',
+    '/pages/danish.html':'Entrar a Danish Academy →',
+    '/pages/ruta-dinamarca.html':'Abrir Ruta Dinamarca →',
     '/pages/language-music.html':'Abrir Language Music Lab →',
     '/pages/guitar.html':'Entrar a Guitar Academy →',
     '/pages/typing.html':'Abrir Typing Lab →',
