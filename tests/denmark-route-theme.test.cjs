@@ -3,7 +3,7 @@ const fs = require('node:fs');
 
 const html = fs.readFileSync('pages/ruta-dinamarca.html','utf8');
 
-assert.ok(html.includes('class="denmark-route-neumorphic"'),'Ruta Dinamarca neumorphism body scope missing');
+assert.match(html, /class="[^"]*\bdenmark-route-neumorphic\b[^"]*"/, 'Ruta Dinamarca neumorphism body scope missing');
 assert.ok(html.includes('../ruta-dinamarca-neumorphism.css'),'Ruta Dinamarca neumorphism stylesheet missing');
 ['bitacora','plan','diccionario','areas','ciudades','fuentes','academia'].forEach((id)=>{
   assert.ok(html.includes('id="'+id+'"'),'Ruta Dinamarca section missing: '+id);

@@ -36,7 +36,7 @@ assert.ok(html.includes('../english-levels.css'),'English CEFR campus stylesheet
 assert.ok(html.includes('../english-mastery.css'),'English Mastery OS stylesheet missing');
 assert.ok(html.includes('../english-master-curriculum.css'),'English Master Curriculum stylesheet missing');
 assert.ok(html.includes('../english-neumorphism.css'),'English neumorphism theme stylesheet missing');
-assert.ok(html.includes('class="english-neumorphic"'),'English neumorphism body scope missing');
+assert.match(html, /class="[^"]*\benglish-neumorphic\b[^"]*"/, 'English neumorphism body scope missing');
 assert.ok(html.includes('academy-hero-showcase'),'English premium hero showcase missing');
 
 [
