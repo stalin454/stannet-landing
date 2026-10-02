@@ -22,7 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefetch=async words=>{for(const word of words){if(version!==vocabularyGeneration)return;try{await lookupDictionary(word);}catch{}}};
     if(candidates.length)setTimeout(()=>{prefetch(candidates.filter((_,i)=>i%2===0));prefetch(candidates.filter((_,i)=>i%2===1));},300);
   }
-  const dictionaryCache=new Map(), dictionaryPending=new Map(), savedWords=new Set(JSON.parse(localStorage.getItem('stannetMusicWords')||'[]'));
+  const dictionaryCache=new Map(), dictionaryPending=new Map(), savedWords=new Set();
+  try {
+    const storedWords=JSON.parse(localStorage.getItem('stannetMusicWords')||'[]');
+    if(Array.isArray(storedWords)) for(const word of storedWords) if(typeof word==='string') savedWords.add(word);
+  } catch {
+    try { localStorage.removeItem('stannetMusicWords'); } catch {}
+  }
   let dictionaryRequest=0;
   try{const stored=JSON.parse(localStorage.getItem('stannetMusicDictionaryV2')||'{}');for(const [word,record] of Object.entries(stored))if(record.at>Date.now()-7*86400000&&record.data)dictionaryCache.set(word,record.data);}catch{}
   const cleanWord=value=>(value||'').toLowerCase().replace(/^[^a-z]+|[^a-z']+$/g,'');
@@ -31,17 +37,52 @@ document.addEventListener('DOMContentLoaded', () => {
     if(curated)return {...curated,curated:true};
     if(dictionaryCache.has(word))return dictionaryCache.get(word);
     if(dictionaryPending.has(word))return dictionaryPending.get(word);
+
     const task=(async()=>{
-      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),11000);
+      let data=null;
+      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),6500);
       try{
-        const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal});
-        const data=await response.json();
-        if(!response.ok||(!data.translation&&!data.meaning))throw new Error('not-found');
-        dictionaryCache.set(word,data);
-        try{const recent=[...dictionaryCache].slice(-120);localStorage.setItem('stannetMusicDictionaryV2',JSON.stringify(Object.fromEntries(recent.map(([w,d])=>[w,{at:Date.now(),data:d}]))));}catch{}
-        return data;
-      }finally{clearTimeout(timeout);dictionaryPending.delete(word)}
-    })();
+        const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal,headers:{Accept:'application/json'}});
+        const raw=await response.text();
+        try{data=raw?JSON.parse(raw):null;}catch{data=null;}
+        if(!response.ok||!data||(!data.translation&&!data.meaning))data=null;
+      }catch{
+        data=null;
+      }finally{
+        clearTimeout(timeout);
+      }
+
+      // Browser fallback: keeps the dictionary useful even if the Worker/provider is temporarily unavailable.
+      if(!data){
+        const direct=await Promise.allSettled([
+          fetch('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word)).then(r=>r.ok?r.json():Promise.reject(new Error('dictionary'))),
+          fetch('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:word,langpair:'en|es'})).then(r=>r.ok?r.json():Promise.reject(new Error('translation')))
+        ]);
+        const entry=direct[0].status==='fulfilled'?direct[0].value?.[0]:null;
+        const definition=entry?.meanings?.flatMap(group=>group.definitions||[])?.find(item=>item?.definition);
+        const translation=direct[1].status==='fulfilled'?direct[1].value?.responseData?.translatedText||'':'';
+        if(entry||translation){
+          data={
+            word:entry?.word||word,
+            phonetic:entry?.phonetic||entry?.phonetics?.find(x=>x.text)?.text||'',
+            audio:entry?.phonetics?.find(x=>x.audio)?.audio||'',
+            translation,
+            meaning:definition?.definition||'',
+            example:definition?.example||'',
+            source:'browser-fallback'
+          };
+        }
+      }
+
+      if(!data||(!data.translation&&!data.meaning))throw new Error('not-found');
+      dictionaryCache.set(word,data);
+      try{
+        const recent=[...dictionaryCache].slice(-120);
+        localStorage.setItem('stannetMusicDictionaryV2',JSON.stringify(Object.fromEntries(recent.map(([w,d])=>[w,{at:Date.now(),data:d}]))));
+      }catch{}
+      return data;
+    })().finally(()=>dictionaryPending.delete(word));
+
     dictionaryPending.set(word,task);
     return task;
   }
@@ -57,7 +98,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function render(text,synced){
     lines=synced?parse(text):[];current=-1;$('karaokeLines').replaceChildren();
     const rows=lines.length?lines:text.split('\n').filter(Boolean).map(text=>({text}));
-    rows.forEach(line=>{const el=document.createElement(lines.length?'button':'p');el.textContent=line.text||'♪';el.className='karaoke-line';if(lines.length){el.type='button';el.onclick=()=>{player?.seekTo(Math.max(0,line.time-Number($('syncOffset').value||0)),true);player?.playVideo();};}$('karaokeLines').append(el);});
+    rows.forEach(line=>{
+      const el=document.createElement('div');
+      el.textContent=line.text||'♪';
+      el.className='karaoke-line';
+      if(lines.length){
+        el.classList.add('karaoke-line-synced');
+        el.tabIndex=0;
+        el.setAttribute('role','button');
+        el.setAttribute('aria-label','Reproducir frase: '+(line.text||''));
+        const replay=()=>{player?.seekTo(Math.max(0,line.time-Number($('syncOffset').value||0)),true);player?.playVideo();};
+        el.addEventListener('click',event=>{if(!event.target.closest('.lyric-word'))replay();});
+        el.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&!event.target.matches('.lyric-word')){event.preventDefault();replay();}});
+      }
+      $('karaokeLines').append(el);
+    });
     makeLyricsClickable();const plain=rows.map(x=>x.text).join('\n');$('labLyrics').value=plain;vocabulary(plain);$('labOutput').textContent='Crea un ejercicio con la letra cargada.';
   }
   function select(index){const t=tracks[index];if(!t)return;$('trackIdentity').textContent=`${t.artist} · ${t.title} · ${t.album||''}`;render(t.synced||t.plain,!!t.synced);$('labLyricsStatus').textContent=t.instrumental?'Pista identificada como instrumental.':t.synced?'Letra sincronizada. Confirma la versión y ajusta el desfase si hace falta.':'Letra disponible sin tiempos: puedes leerla, pero no tiene sincronización.';}
@@ -71,7 +126,75 @@ document.addEventListener('DOMContentLoaded', () => {
   function tick(){if(!lines.length||!player?.getCurrentTime)return;const time=player.getCurrentTime()+Number($('syncOffset').value||0);let index=-1;for(let i=0;i<lines.length&&lines[i].time<=time;i++)index=i;if(index===current)return;const rows=$('karaokeLines').children;if(rows[current])rows[current].removeAttribute('aria-current');current=index;if(rows[index]){rows[index].setAttribute('aria-current','true');if($('followLyrics').checked){const box=$('karaokeLines');const target=rows[index].offsetTop-(box.clientHeight-rows[index].offsetHeight)/2;box.scrollTo({top:Math.max(0,target),behavior:'smooth'});}}}
   $('trackSelect').onchange=()=>select(Number($('trackSelect').value));$('lyricsSearch').onclick=()=>{const q=$('trackQuery').value.trim();if(q)search(q);};$('trackQuery').onkeydown=e=>{if(e.key==='Enter')$('lyricsSearch').click();};$('syncOffset').oninput=tick;
   $('lrcFile').onchange=async()=>{const file=$('lrcFile').files[0];if(!file)return;if(file.size>100000){$('labLyricsStatus').textContent='Máximo 100 KB.';return;}request?.abort();const token=++generation;const text=await file.text();if(token!==generation)return;render(text,true);$('trackIdentity').textContent=file.name;$('labLyricsStatus').textContent=lines.length?'Archivo LRC cargado.':'No se encontraron marcas [minuto:segundo].';};
-  $('labMake').onclick=()=>{$('labOutput').replaceChildren();const rows=$('labLyrics').value.split('\n').filter(x=>x.trim()).slice(0,12);if(!rows.length){$('labOutput').textContent='Carga primero una letra.';return;}rows.forEach((line,i)=>{const words=line.split(/\s+/),target=words.findIndex(w=>w.replace(/[^a-z]/gi,'').length>3),card=document.createElement('div');card.className='lab-line';if(target<0){card.textContent=line;$('labOutput').append(card);return;}const input=document.createElement('input');input.setAttribute('aria-label',`Palabra que falta en frase ${i+1}`);input.autocomplete='off';card.append(document.createTextNode(words.slice(0,target).join(' ')+' '),input,document.createTextNode(' '+words.slice(target+1).join(' ')));const button=document.createElement('button'),result=document.createElement('span');button.textContent='Comprobar';result.setAttribute('role','status');button.onclick=()=>{const normalize=s=>s.toLowerCase().replace(/[^a-z']/g,'');result.textContent=normalize(input.value)===normalize(words[target])?' Correcto.':' Modelo: '+words[target];};card.append(button,result);$('labOutput').append(card);});vocabulary($('labLyrics').value);};
+  function makeExercises(){
+    const output=$('labOutput'), raw=$('labLyrics').value.trim();
+    output.replaceChildren();
+    const rows=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean).slice(0,16);
+    if(!rows.length){
+      output.textContent='Carga una canción o pega una letra en «Texto de estudio» y vuelve a pulsar Crear ejercicio.';
+      $('labLyrics')?.focus();
+      return;
+    }
+
+    let created=0;
+    rows.forEach((line,i)=>{
+      const words=line.split(/\s+/);
+      const candidates=words.map((word,index)=>({word,index,clean:word.replace(/[^a-z']/gi,'')})).filter(x=>x.clean.length>3);
+      if(!candidates.length)return;
+      const choice=candidates[(i*3)%candidates.length], targetIndex=choice.index, answer=words[targetIndex];
+      const card=document.createElement('div');
+      card.className='lab-line';
+      card.dataset.answer=answer;
+
+      const number=document.createElement('small');
+      number.className='lab-line-number';
+      number.textContent=String(i+1).padStart(2,'0');
+
+      const sentence=document.createElement('div');
+      sentence.className='lab-line-sentence';
+      const input=document.createElement('input');
+      input.setAttribute('aria-label',`Palabra que falta en frase ${i+1}`);
+      input.autocomplete='off';
+      input.spellcheck=false;
+      sentence.append(
+        document.createTextNode(words.slice(0,targetIndex).join(' ')+(targetIndex?' ':'')),
+        input,
+        document.createTextNode((targetIndex<words.length-1?' ':'')+words.slice(targetIndex+1).join(' '))
+      );
+
+      const actions=document.createElement('div');
+      actions.className='lab-line-actions';
+      const button=document.createElement('button');
+      const result=document.createElement('span');
+      button.type='button';
+      button.textContent='Comprobar';
+      result.setAttribute('role','status');
+
+      const check=()=>{
+        const normalize=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z']/g,'');
+        const ok=normalize(input.value)===normalize(answer);
+        card.classList.toggle('is-correct',ok);
+        card.classList.toggle('is-wrong',!ok);
+        result.textContent=ok?'✓ Correcto':'Respuesta: '+answer;
+      };
+      button.addEventListener('click',check);
+      input.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();check();}});
+      actions.append(button,result);
+      card.append(number,sentence,actions);
+      output.append(card);
+      created++;
+    });
+
+    if(!created) output.textContent='No encontré palabras adecuadas para ocultar en este texto. Prueba con otra parte de la letra.';
+    else {
+      const header=document.createElement('div');
+      header.className='lab-exercise-summary';
+      header.textContent=`${created} frases preparadas · escribe la palabra que falta y pulsa Comprobar.`;
+      output.prepend(header);
+    }
+    vocabulary(raw);
+  }
+  $('labMake')?.addEventListener('click',makeExercises);
   $('labClear').onclick=()=>{request?.abort();generation++;tracks=[];$('trackSelect').replaceChildren();$('trackIdentity').textContent='';render('',false);$('labLyricsStatus').textContent='Carga una canción para empezar.';};window.addEventListener('pagehide',()=>{clearInterval(timer);request?.abort();});
   const searchButton=$('youtubeSearchButton'), searchInput=$('youtubeSearch'), results=$('youtubeResults');
   async function youtubeSearch(){const query=searchInput.value.trim();if(!query)return;results.textContent='Buscando vídeos...';try{const response=await fetch('/api/youtube-search?q='+encodeURIComponent(query));const raw=await response.text();let data={};try{data=raw?JSON.parse(raw):{};}catch{throw new Error('La búsqueda de YouTube no está disponible en este servidor. Pega un enlace de YouTube abajo para continuar.');}if(!response.ok)throw new Error(data.error||'No se pudo buscar en YouTube.');results.innerHTML='';(data.results||[]).forEach(video=>{const button=document.createElement('button');button.type='button';button.className='youtube-result';button.innerHTML=`<img src="${video.thumbnail}" alt=""><span><strong>${video.title}</strong><small>${video.channel}</small></span>`;button.onclick=()=>{$('labYoutubeUrl').value='https://www.youtube.com/watch?v='+video.id;$('labLoad').click();};results.append(button);});if(!data.results?.length)results.textContent='No encontramos vídeos insertables para esa búsqueda.';}catch(error){results.textContent=error.message;}}

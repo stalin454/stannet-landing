@@ -5,3 +5,123 @@
 
 /* In-page StanNet Dictionary */
 .music-dictionary[hidden]{display:none}.music-dictionary{position:fixed;z-index:10000;max-width:380px;padding:18px;border:1px solid #19dfe5;border-radius:14px;background:rgba(5,22,28,.98);box-shadow:0 22px 70px rgba(0,0,0,.55);backdrop-filter:blur(18px);color:#f2fbfc}.music-dictionary-close{position:absolute;top:8px;right:9px!important;min-height:32px!important;width:32px;padding:0!important;border:0!important;background:transparent!important;color:#9db2b7!important;font-size:24px!important}.music-dictionary h3{margin:3px 0 0;font-size:27px;text-transform:none}.music-dictionary-head{display:flex;align-items:center;justify-content:space-between;gap:14px}.dictionary-phonetic{margin:2px 0!important;color:#76e9ef!important}.dictionary-speak{min-width:46px;padding:9px!important;background:#0a3038!important;color:#19e0e5!important}.dictionary-translation{margin:14px 0 6px!important;color:#19e0e5!important;font-size:18px;font-weight:750}.dictionary-meaning{margin:4px 0!important;color:#e8f3f5!important}.dictionary-example{margin:10px 0!important;padding-left:11px;border-left:2px solid #1a5963;color:#9fb4b9!important;font-style:italic}.music-dictionary-actions{display:flex;align-items:center;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid #174b55}.music-dictionary-actions button{background:#19e0e5!important;color:#041417!important}.music-dictionary-actions a{margin-left:auto;font-size:12px}.lab-vocab .vocab-word{min-height:0;padding:9px 13px;border:1px solid #1a5963;background:#071a20;color:#eaf7f8;border-radius:999px}.lab-vocab .vocab-word:hover,.lab-vocab .vocab-word:focus-visible{border-color:#19e0e5;color:#19e0e5}.lyric-word{display:inline;border-radius:4px;cursor:pointer}.lyric-word:hover,.lyric-word:focus-visible{color:#19e0e5;background:#0c343b;outline:1px solid #1a6974;outline-offset:2px}@media(max-width:600px){.music-dictionary{left:10px!important;right:10px;bottom:10px;top:auto!important;width:auto!important;max-width:none;border-radius:18px}.music-dictionary-actions{flex-wrap:wrap}}
+
+
+/* ============================================================
+   LANGUAGE MUSIC LAB — EXERCISE + DICTIONARY REPAIR 2026-10-02
+   ============================================================ */
+#labOutput{
+  display:grid;
+  gap:10px;
+  margin-top:16px;
+}
+.lab-exercise-summary{
+  padding:12px 14px;
+  border:1px solid #bfe2e8;
+  border-radius:12px;
+  background:linear-gradient(135deg,#effcff,#f4f5ff);
+  color:#27637b;
+  font:700 12px Inter,system-ui,sans-serif;
+}
+.lab-line{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:14px!important;
+  border:1px solid #d5e4eb!important;
+  border-radius:14px;
+  background:#fff;
+  color:#233d55;
+  line-height:1.6!important;
+  box-shadow:0 7px 20px rgba(35,73,105,.05);
+}
+.lab-line-number{
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  background:linear-gradient(145deg,#eafaff,#f3efff);
+  color:#2878ff;
+  font:800 9px Orbitron,sans-serif;
+}
+.lab-line-sentence{
+  min-width:0;
+  color:#3e566b;
+  font:600 14px/1.8 Inter,system-ui,sans-serif;
+}
+.lab-line-sentence input{
+  width:clamp(110px,18vw,190px)!important;
+  min-width:100px!important;
+  margin:2px 5px!important;
+  padding:8px 10px!important;
+  border:1px solid #c8dbe7!important;
+  border-radius:9px!important;
+  background:#f8fbfd!important;
+  color:#17344f!important;
+  font:700 13px "Cascadia Code",Consolas,monospace!important;
+}
+.lab-line-actions{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.lab-line-actions button{
+  min-height:38px!important;
+  padding:8px 11px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:linear-gradient(135deg,#09cfe8,#2878ff 58%,#8a39ff)!important;
+  color:#fff!important;
+  font:750 11px Inter,sans-serif!important;
+  box-shadow:0 7px 17px rgba(40,120,255,.17);
+}
+.lab-line-actions span{
+  min-width:90px;
+  color:#6c7f90;
+  font-size:11px;
+}
+.lab-line.is-correct{
+  border-color:#9edfc9!important;
+  background:linear-gradient(145deg,#f3fff9,#fff);
+}
+.lab-line.is-correct .lab-line-actions span{color:#168065;font-weight:700}
+.lab-line.is-wrong{
+  border-color:#efc5cd!important;
+  background:linear-gradient(145deg,#fff7f8,#fff);
+}
+.lab-line.is-wrong .lab-line-actions span{color:#a44658;font-weight:700}
+
+/* Dictionary must sit above the canonical navigation and app panels. */
+.music-dictionary{
+  z-index:120000!important;
+}
+.lyric-word{
+  position:relative;
+  z-index:1;
+  padding:1px 2px;
+}
+.lyric-word:hover,
+.lyric-word:focus-visible{
+  color:#19e0e5!important;
+  background:rgba(25,224,229,.12)!important;
+}
+.karaoke-line-synced{
+  cursor:pointer;
+}
+.karaoke-line-synced:focus-visible{
+  outline:2px solid #19e0e5;
+  outline-offset:2px;
+}
+
+@media(max-width:760px){
+  .lab-line{grid-template-columns:36px minmax(0,1fr)}
+  .lab-line-actions{grid-column:1/-1;justify-content:flex-start;padding-left:48px}
+}
+@media(max-width:520px){
+  .lab-line{grid-template-columns:1fr;padding:12px!important}
+  .lab-line-number{width:30px;height:30px}
+  .lab-line-actions{grid-column:auto;padding-left:0}
+  .lab-line-sentence input{width:100%!important;margin:6px 0!important}
+}
