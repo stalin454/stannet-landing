@@ -1,20 +1,291 @@
-.dk-assistant{max-width:1150px;margin:0 auto;display:grid;gap:18px}
-.dk-assistant-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end;padding:22px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035)}
-.dk-assistant-field{display:grid;gap:8px}.dk-assistant-field label{font:600 10px Orbitron,sans-serif;letter-spacing:.12em;color:var(--cyan)}
-.dk-assistant-field select{width:100%;min-height:48px;border:1px solid rgba(255,255,255,.15);background:#0b1018;color:#fff;padding:0 14px;font:500 16px Inter,sans-serif;border-radius:10px}
-.dk-assistant-btn{min-height:48px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:#fff;padding:0 16px;border-radius:10px;font:600 11px Orbitron,sans-serif;cursor:pointer}
-.dk-assistant-btn:hover,.dk-assistant-btn:focus-visible{border-color:var(--cyan);outline:none}.dk-assistant-btn.primary{background:var(--dk-red);border-color:var(--dk-red)}
-.dk-assistant-status{grid-column:1/-1;margin:0;color:#9eb4bd;font:400 13px/1.55 Inter,sans-serif}
-.dk-city-overview{padding:24px;border:1px solid rgba(89,232,255,.22);background:linear-gradient(135deg,rgba(89,232,255,.08),rgba(200,16,46,.08));display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
-.dk-city-overview h3{margin:6px 0 8px;font:600 clamp(26px,3vw,38px)/1.05 Orbitron,sans-serif}.dk-city-overview p{margin:0;color:#b7c8cf;line-height:1.65}
-.dk-city-meta{display:grid;gap:10px}.dk-city-meta div{padding:14px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.16)}
-.dk-city-meta b{display:block;margin-bottom:5px;font:600 10px Orbitron,sans-serif;color:var(--cyan);letter-spacing:.08em}.dk-city-meta span{color:#c6d3d8;font-size:13px;line-height:1.5}
-.dk-city-meta a{display:inline-flex;margin-top:7px;color:var(--cyan);font-size:12px;font-weight:700}
-.dk-service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.dk-service{padding:20px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.025);min-width:0}
-.dk-service .tag{display:block;color:var(--dk-red);font:600 9px Orbitron,sans-serif;letter-spacing:.12em}.dk-service h3{margin:12px 0 8px;font:600 19px/1.2 Orbitron,sans-serif}.dk-service p{min-height:68px;color:#9fb3bc;font:400 13px/1.6 Inter,sans-serif}
-.dk-service-actions{display:flex;flex-wrap:wrap;gap:8px}.dk-service-actions .dk-assistant-btn{min-height:42px;padding:0 12px;font-size:9px}
-.dk-emergency{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px;border:1px solid rgba(255,111,111,.3);background:rgba(200,16,46,.08)}
-.dk-emergency strong{display:block;font:700 24px Orbitron,sans-serif;color:#fff}.dk-emergency span{color:#c7d2d7;font-size:13px}.dk-emergency .dk-assistant-btn{justify-self:end;align-self:center}
-.dk-assistant-note{margin:0;color:#91a8b2;font:400 12px/1.6 Inter,sans-serif}
-@media(max-width:900px){.dk-service-grid{grid-template-columns:1fr 1fr}.dk-city-overview{grid-template-columns:1fr}.dk-assistant-controls{grid-template-columns:1fr}.dk-assistant-controls .dk-assistant-btn{width:100%}}
-@media(max-width:640px){.dk-service-grid,.dk-emergency{grid-template-columns:1fr}.dk-service p{min-height:0}.dk-emergency .dk-assistant-btn{justify-self:stretch;width:100%}.dk-assistant-btn{font-size:10px}.dk-service-actions{display:grid}.dk-service-actions .dk-assistant-btn{width:100%}}
+/* ============================================================
+   STANNET RUTA DINAMARCA — LOCAL CITY ASSISTANT 2026
+   High-contrast light UI aligned with Ruta Dinamarca.
+   ============================================================ */
+
+body.denmark-route-neumorphic .dk-assistant{
+  max-width:1150px;
+  margin:0 auto;
+  display:grid;
+  gap:18px;
+  color:#141d59;
+}
+
+/* Controls */
+body.denmark-route-neumorphic .dk-assistant-controls{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:14px;
+  align-items:end;
+  padding:22px;
+  border:1px solid rgba(20,29,89,.09);
+  border-radius:22px;
+  background:#ffffff;
+  box-shadow:var(--nm-shadow-sm);
+}
+body.denmark-route-neumorphic .dk-assistant-field{display:grid;gap:8px}
+body.denmark-route-neumorphic .dk-assistant-field label{
+  color:#33426f!important;
+  font:800 9px Orbitron,sans-serif;
+  letter-spacing:.12em;
+}
+body.denmark-route-neumorphic .dk-assistant-field select{
+  width:100%;
+  min-height:50px;
+  padding:0 14px;
+  border:1px solid #cddbe7!important;
+  border-radius:13px!important;
+  background:#fff!important;
+  color:#141d59!important;
+  font:650 16px Inter,sans-serif!important;
+  box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(44,57,94,.05);
+}
+body.denmark-route-neumorphic .dk-assistant-field select:focus{
+  border-color:#6a9de2!important;
+  outline:3px solid rgba(40,120,255,.10)!important;
+}
+body.denmark-route-neumorphic .dk-assistant-status{
+  grid-column:1/-1;
+  margin:0!important;
+  color:#5a6b86!important;
+  font:500 13px/1.6 Inter,sans-serif!important;
+}
+
+/* Shared buttons */
+body.denmark-route-neumorphic .dk-assistant-btn{
+  min-height:46px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 14px;
+  border:1px solid #cbd9e5!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  color:#24345f!important;
+  text-decoration:none!important;
+  font:750 10px Orbitron,sans-serif!important;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(44,57,94,.06);
+  transition:.18s ease;
+}
+body.denmark-route-neumorphic .dk-assistant-btn:hover,
+body.denmark-route-neumorphic .dk-assistant-btn:focus-visible{
+  border-color:#8ebdd5!important;
+  background:#f2f9fd!important;
+  color:#0f5d8d!important;
+  transform:translateY(-1px);
+  outline:none!important;
+}
+body.denmark-route-neumorphic .dk-assistant-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(135deg,#141d59,#c8102e 60%,#af26e0)!important;
+  color:#fff!important;
+  box-shadow:0 10px 24px rgba(87,48,121,.20)!important;
+}
+
+/* Selected city overview */
+body.denmark-route-neumorphic .dk-city-overview{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:20px;
+  padding:26px;
+  border:1px solid #cfe0eb!important;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(175,38,224,.08),transparent 18rem),
+    linear-gradient(135deg,#f2fbff,#fff 52%,#faf5ff)!important;
+  box-shadow:var(--nm-shadow-sm);
+}
+body.denmark-route-neumorphic .dk-city-overview h3{
+  margin:6px 0 9px!important;
+  color:#141d59!important;
+  font:800 clamp(28px,3vw,40px)/1.05 Inter,sans-serif!important;
+  letter-spacing:-.04em;
+}
+body.denmark-route-neumorphic .dk-city-overview p{
+  margin:0!important;
+  color:#526680!important;
+  font:500 14px/1.7 Inter,sans-serif!important;
+}
+body.denmark-route-neumorphic .dk-city-meta{
+  display:grid;
+  gap:10px;
+}
+body.denmark-route-neumorphic .dk-city-meta div{
+  padding:14px;
+  border:1px solid #d9e5ed!important;
+  border-radius:14px;
+  background:#fff!important;
+  box-shadow:0 5px 14px rgba(44,57,94,.045);
+}
+body.denmark-route-neumorphic .dk-city-meta b{
+  display:block;
+  margin-bottom:6px;
+  color:#a01734!important;
+  font:800 9px Orbitron,sans-serif!important;
+  letter-spacing:.08em;
+}
+body.denmark-route-neumorphic .dk-city-meta span{
+  color:#445c76!important;
+  font-size:12px!important;
+  line-height:1.55!important;
+}
+body.denmark-route-neumorphic .dk-city-meta a{
+  display:inline-flex;
+  margin-top:7px;
+  color:#1d669f!important;
+  font-size:12px!important;
+  font-weight:750!important;
+}
+
+/* Service cards */
+body.denmark-route-neumorphic .dk-service-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+body.denmark-route-neumorphic .dk-service{
+  position:relative;
+  overflow:hidden;
+  min-width:0;
+  min-height:285px;
+  display:flex;
+  flex-direction:column;
+  padding:22px;
+  border:1px solid #d8e4ed!important;
+  border-radius:20px;
+  background:#fff!important;
+  box-shadow:0 10px 26px rgba(44,57,94,.065);
+}
+body.denmark-route-neumorphic .dk-service::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:3px;
+  background:linear-gradient(90deg,#94d6f7,#c8102e,#af26e0);
+  opacity:.85;
+}
+body.denmark-route-neumorphic .dk-service:nth-child(3n+2)::before{
+  background:linear-gradient(90deg,#141d59,#94d6f7,#af26e0);
+}
+body.denmark-route-neumorphic .dk-service:nth-child(3n+3)::before{
+  background:linear-gradient(90deg,#c8102e,#fd8f57,#94d6f7);
+}
+body.denmark-route-neumorphic .dk-service .tag{
+  display:block;
+  margin-top:3px;
+  color:#087e9b!important;
+  font:800 9px Orbitron,sans-serif!important;
+  letter-spacing:.12em!important;
+}
+body.denmark-route-neumorphic .dk-service h3{
+  margin:12px 0 9px!important;
+  color:#151f50!important;
+  font:800 21px/1.18 Inter,sans-serif!important;
+  letter-spacing:-.025em;
+}
+body.denmark-route-neumorphic .dk-service p{
+  min-height:74px;
+  margin:0 0 18px!important;
+  color:#526a82!important;
+  font:500 13px/1.65 Inter,sans-serif!important;
+}
+body.denmark-route-neumorphic .dk-service-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:auto;
+}
+body.denmark-route-neumorphic .dk-service-actions .dk-assistant-btn{
+  min-height:40px;
+  padding:0 11px;
+  background:#f4f8fb!important;
+  border-color:#d4e1ea!important;
+  color:#274a68!important;
+  font-size:8.5px!important;
+  box-shadow:none;
+}
+body.denmark-route-neumorphic .dk-service-actions .dk-assistant-btn:hover{
+  background:linear-gradient(135deg,#eafaff,#f3f0ff)!important;
+  color:#175f94!important;
+  border-color:#9fc9dd!important;
+}
+
+/* Emergency block */
+body.denmark-route-neumorphic .dk-emergency{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:22px;
+  border:1px solid rgba(200,16,46,.23)!important;
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 0 100%,rgba(200,16,46,.08),transparent 15rem),
+    linear-gradient(135deg,#fff5f6,#fff 58%,#faf5ff)!important;
+  box-shadow:0 9px 25px rgba(114,43,64,.06);
+}
+body.denmark-route-neumorphic .dk-emergency>div{
+  min-width:0;
+}
+body.denmark-route-neumorphic .dk-emergency strong{
+  display:block;
+  margin-bottom:5px;
+  color:#9e1530!important;
+  font:850 28px/1 Inter,sans-serif!important;
+  letter-spacing:-.035em;
+}
+body.denmark-route-neumorphic .dk-emergency span{
+  color:#465d75!important;
+  font:500 12px/1.55 Inter,sans-serif!important;
+}
+body.denmark-route-neumorphic .dk-emergency .dk-assistant-btn{
+  justify-self:end;
+  align-self:center;
+  white-space:nowrap;
+  background:linear-gradient(135deg,#141d59,#c8102e 62%,#af26e0)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+
+body.denmark-route-neumorphic .dk-assistant-note{
+  margin:0!important;
+  color:#536b82!important;
+  font:500 12px/1.65 Inter,sans-serif!important;
+}
+
+/* Stronger accessibility contrast */
+body.denmark-route-neumorphic .dk-assistant a:not(.dk-assistant-btn){
+  color:#155f98!important;
+}
+body.denmark-route-neumorphic .dk-assistant a:not(.dk-assistant-btn):hover{
+  color:#971832!important;
+}
+body.denmark-route-neumorphic .dk-assistant button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+/* Responsive */
+@media(max-width:900px){
+  body.denmark-route-neumorphic .dk-service-grid{grid-template-columns:1fr 1fr}
+  body.denmark-route-neumorphic .dk-city-overview{grid-template-columns:1fr}
+  body.denmark-route-neumorphic .dk-assistant-controls{grid-template-columns:1fr}
+  body.denmark-route-neumorphic .dk-assistant-controls .dk-assistant-btn{width:100%}
+  body.denmark-route-neumorphic .dk-emergency{grid-template-columns:1fr 1fr}
+  body.denmark-route-neumorphic .dk-emergency .dk-assistant-btn{
+    grid-column:1/-1;
+    justify-self:stretch;
+  }
+}
+@media(max-width:640px){
+  body.denmark-route-neumorphic .dk-service-grid,
+  body.denmark-route-neumorphic .dk-emergency{grid-template-columns:1fr}
+  body.denmark-route-neumorphic .dk-service p{min-height:0}
+  body.denmark-route-neumorphic .dk-service-actions{display:grid}
+  body.denmark-route-neumorphic .dk-service-actions .dk-assistant-btn{width:100%}
+  body.denmark-route-neumorphic .dk-emergency .dk-assistant-btn{grid-column:auto;width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  body.denmark-route-neumorphic .dk-assistant-btn{transition:none}
+}
