@@ -32,61 +32,110 @@ document.addEventListener('DOMContentLoaded', () => {
   let dictionaryRequest=0;
   try{const stored=JSON.parse(localStorage.getItem('stannetMusicDictionaryV2')||'{}');for(const [word,record] of Object.entries(stored))if(record.at>Date.now()-7*86400000&&record.data)dictionaryCache.set(word,record.data);}catch{}
   const cleanWord=value=>(value||'').toLowerCase().replace(/^[^a-z]+|[^a-z']+$/g,'');
+  function dictionaryForms(word){
+    const forms=[word];
+    const add=value=>{value=cleanWord(value);if(value&&value.length>1&&!forms.includes(value))forms.push(value);};
+    if(/n't$/.test(word)) add(word.replace(/n't$/,''));
+    if(/'(?:s|re|ve|ll|d|m)$/.test(word)) add(word.replace(/'(?:s|re|ve|ll|d|m)$/,''));
+    if(/ies$/.test(word)&&word.length>4) add(word.slice(0,-3)+'y');
+    if(/ing$/.test(word)&&word.length>5){add(word.slice(0,-3));add(word.slice(0,-3)+'e');}
+    if(/ed$/.test(word)&&word.length>4){add(word.slice(0,-2));add(word.slice(0,-1));}
+    if(/es$/.test(word)&&word.length>4) add(word.slice(0,-2));
+    if(/s$/.test(word)&&word.length>3) add(word.slice(0,-1));
+    return forms;
+  }
+
+  async function fetchJsonTimed(url,ms=7000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),ms);
+    try{
+      const response=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
+      if(!response.ok)throw new Error('provider');
+      return await response.json();
+    }finally{clearTimeout(timer);}
+  }
+
+  async function directDictionary(word){
+    const forms=dictionaryForms(word);
+    let entry=null,matched=word;
+    for(const form of forms){
+      try{
+        const data=await fetchJsonTimed('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(form),6500);
+        if(Array.isArray(data)&&data[0]){entry=data[0];matched=form;break;}
+      }catch{}
+    }
+
+    let translation='';
+    for(const form of [word,matched,...forms]){
+      if(!form)continue;
+      try{
+        const data=await fetchJsonTimed('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:form,langpair:'en|es'}),6500);
+        const value=data?.responseData?.translatedText?.trim()||'';
+        if(value&&!/^(?:NO QUERY SPECIFIED|MYMEMORY WARNING|QUERY LENGTH LIMIT)/i.test(value)){translation=value;break;}
+      }catch{}
+    }
+
+    const senses=(entry?.meanings||[]).flatMap(group=>(group.definitions||[]).map(def=>({
+      part:group.partOfSpeech||'',
+      definition:def.definition||'',
+      example:def.example||''
+    })));
+    const sense=senses.find(x=>x.definition)||null;
+
+    if(!entry&&!translation)return null;
+    return {
+      word,
+      matchedWord:matched!==word?matched:'',
+      phonetic:entry?.phonetic||entry?.phonetics?.find(x=>x.text)?.text||'',
+      audio:entry?.phonetics?.find(x=>x.audio)?.audio||'',
+      translation,
+      meaning:sense?.definition||'',
+      example:sense?.example||'',
+      partOfSpeech:sense?.part||'',
+      source:'direct'
+    };
+  }
+
+  async function workerDictionary(word){
+    try{
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+      try{
+        const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal,headers:{Accept:'application/json'}});
+        const raw=await response.text();
+        let data=null;try{data=raw?JSON.parse(raw):null;}catch{}
+        if(response.ok&&data&&(data.translation||data.meaning))return data;
+      }finally{clearTimeout(timer);}
+    }catch{}
+    return null;
+  }
+
   async function lookupDictionary(word){
     const curated=window.StanNetMusicWords?.[word];
-    if(curated)return {...curated,curated:true};
+    if(curated)return {...curated,word,curated:true};
     if(dictionaryCache.has(word))return dictionaryCache.get(word);
     if(dictionaryPending.has(word))return dictionaryPending.get(word);
 
     const task=(async()=>{
-      let data=null;
-      const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),6500);
-      try{
-        const response=await fetch('/api/music-dictionary?word='+encodeURIComponent(word),{signal:controller.signal,headers:{Accept:'application/json'}});
-        const raw=await response.text();
-        try{data=raw?JSON.parse(raw):null;}catch{data=null;}
-        if(!response.ok||!data||(!data.translation&&!data.meaning))data=null;
-      }catch{
-        data=null;
-      }finally{
-        clearTimeout(timeout);
-      }
+      // Restore the original resolver that worked well in Music Lab:
+      // direct dictionary + translation first, Cloudflare only as backup.
+      let data=await directDictionary(word);
+      if(!data||(!data.translation&&!data.meaning))data=await workerDictionary(word);
 
-      // Browser fallback with strict time limits: never leave the dictionary stuck on "Buscando".
-      if(!data){
-        const timedJson=async(url,ms=3200)=>{
-          const controller=new AbortController();
-          const timer=setTimeout(()=>controller.abort(),ms);
-          try{
-            const response=await fetch(url,{signal:controller.signal,headers:{Accept:'application/json'}});
-            if(!response.ok)throw new Error('provider');
-            return await response.json();
-          }finally{clearTimeout(timer);}
-        };
-        const direct=await Promise.allSettled([
-          timedJson('https://api.dictionaryapi.dev/api/v2/entries/en/'+encodeURIComponent(word),3200),
-          timedJson('https://api.mymemory.translated.net/get?'+new URLSearchParams({q:word,langpair:'en|es'}),3200)
-        ]);
-        const entry=direct[0].status==='fulfilled'?direct[0].value?.[0]:null;
-        const definition=entry?.meanings?.flatMap(group=>group.definitions||[])?.find(item=>item?.definition);
-        const translation=direct[1].status==='fulfilled'?direct[1].value?.responseData?.translatedText||'':'';
-        if(entry||translation){
-          data={
-            word:entry?.word||word,
-            phonetic:entry?.phonetic||entry?.phonetics?.find(x=>x.text)?.text||'',
-            audio:entry?.phonetics?.find(x=>x.audio)?.audio||'',
-            translation,
-            meaning:definition?.definition||'',
-            example:definition?.example||'',
-            source:'browser-fallback'
-          };
+      // Last chance: try normalized/base forms through the Worker.
+      if(!data||(!data.translation&&!data.meaning)){
+        for(const form of dictionaryForms(word).slice(1)){
+          data=await workerDictionary(form);
+          if(data&&(data.translation||data.meaning)){
+            data={...data,word,matchedWord:form};
+            break;
+          }
         }
       }
 
       if(!data||(!data.translation&&!data.meaning))throw new Error('not-found');
       dictionaryCache.set(word,data);
       try{
-        const recent=[...dictionaryCache].slice(-120);
+        const recent=[...dictionaryCache].slice(-160);
         localStorage.setItem('stannetMusicDictionaryV2',JSON.stringify(Object.fromEntries(recent.map(([w,d])=>[w,{at:Date.now(),data:d}]))));
       }catch{}
       return data;
@@ -107,7 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
       $('dictionaryMeaning').textContent='La consulta agotó el tiempo de espera. Puedes reintentar pulsando de nuevo la palabra o abrir «Más detalles».';
     }
   }
-  function showDictionary(data){$('dictionaryWord').textContent=data.word;$('dictionaryPhonetic').textContent=data.phonetic||'';$('dictionaryTranslation').textContent=data.translation?('ES · '+data.translation):'Traducción no disponible';$('dictionaryMeaning').textContent=data.meaning?(data.curated?'Uso habitual · ':'Definición en inglés · ')+data.meaning:'';$('dictionaryExample').textContent=data.example?('Ejemplo · '+data.example):'';$('dictionarySpeak').dataset.audio=data.audio||'';}
+  function showDictionary(data){
+    $('dictionaryWord').textContent=data.word;
+    $('dictionaryPhonetic').textContent=data.phonetic||'';
+    $('dictionaryTranslation').textContent=data.translation?('ES · '+data.translation):'Traducción no disponible';
+    const base=data.matchedWord&&data.matchedWord!==data.word?' · base: '+data.matchedWord:'';
+    $('dictionaryMeaning').textContent=data.meaning?(data.curated?'Uso habitual · ':'Definición en inglés · ')+data.meaning+base:(base?'Forma base'+base:'');
+    $('dictionaryExample').textContent=data.example?('Ejemplo · '+data.example):'';
+    $('dictionarySpeak').dataset.audio=data.audio||'';
+  }
   function speakDictionary(){const audio=$('dictionarySpeak').dataset.audio;if(audio){new Audio(audio).play().catch(()=>{});return;}const word=$('dictionaryWord').textContent;if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(word);u.lang='en-US';speechSynthesis.speak(u);}}
   function saveDictionaryWord(){const word=cleanWord($('dictionaryWord').textContent);if(!word)return;if(savedWords.has(word))savedWords.delete(word);else savedWords.add(word);localStorage.setItem('stannetMusicWords',JSON.stringify([...savedWords]));$('dictionarySave').textContent=savedWords.has(word)?'♥ Guardada':'♡ Guardar palabra';}
   function makeLyricsClickable(){for(const row of $('karaokeLines').children){const text=row.textContent;row.replaceChildren();for(const part of text.split(/(\s+)/)){if(/^\s+$/.test(part)){row.append(document.createTextNode(part));continue;}const word=cleanWord(part);if(!word){row.append(document.createTextNode(part));continue;}const button=document.createElement('span');button.className='lyric-word';button.tabIndex=0;button.role='button';button.dataset.word=word;button.textContent=part;row.append(button);}}}
