@@ -12,8 +12,8 @@
   const runners = [...atom.querySelectorAll('.atom-runner')].map((element) => ({
     element,
     phase: Number(element.dataset.phase) * Math.PI / 180,
-    radius: Number(element.dataset.radius),
-    period: Number(element.dataset.period) || (Number(element.dataset.radius) > .4 ? 72 : 56),
+    radius: Number(element.dataset.orbitRadius),
+    period: Number(element.dataset.period) || (Number(element.dataset.orbitRadius) > .4 ? 72 : 56),
     type: 'runner',
   }));
   const movers = [...nodes, ...runners];
