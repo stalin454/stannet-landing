@@ -347,3 +347,15 @@ body.stannet-global.nutri-page .error-state {
   body.stannet-global.nutri-page .app-tabs button { font-size: 10px; }
   body.stannet-global.nutri-page .nutrition-days { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
+
+/* Keep secondary actions and generated helper text readable on light cards. */
+body.stannet-global.nutri-page .mini-danger,
+body.stannet-global.nutri-page .training-task small,
+body.stannet-global.nutri-page .nutrition-shopping li span {
+  color: #526b60 !important;
+}
+body.stannet-global.nutri-page .mini-danger:hover,
+body.stannet-global.nutri-page .mini-danger:focus-visible,
+body.stannet-global.nutri-page .training-tasks li > button {
+  color: #a33125 !important;
+}
