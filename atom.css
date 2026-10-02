@@ -67,13 +67,13 @@
   color: #8deaff;
   stroke: rgba(181, 241, 255, .96);
   stroke-dasharray: 46 1554;
-  animation: atom-orbit-runner-outer 72s linear infinite;
+  animation: atom-light-trail-outer 72s linear infinite;
 }
 .home-hero .atom-runner--inner {
   color: #c4a8ff;
   stroke: rgba(203, 180, 255, .96);
   stroke-dasharray: 34 852;
-  animation: atom-orbit-runner-inner 56s linear infinite;
+  animation: atom-light-trail-inner 56s linear infinite;
 }
 .home-hero .atom-visual.is-interacting .atom-runner { animation-play-state: paused; }
 
@@ -283,8 +283,8 @@
 .home-hero .atom-node:focus-visible { outline: 2px solid var(--node-accent); outline-offset: 2px; }
 .home-hero .atom-node:active { scale: .98; }
 
-@keyframes atom-orbit-runner-outer { to { stroke-dashoffset: -1600; } }
-@keyframes atom-orbit-runner-inner { to { stroke-dashoffset: -886; } }
+@keyframes atom-light-trail-outer { to { stroke-dashoffset: -1600; } }
+@keyframes atom-light-trail-inner { to { stroke-dashoffset: -886; } }
 @keyframes atom-electron-glow { from { opacity: .66; } to { opacity: 1; } }
 @keyframes atom-core-light { from { filter: brightness(.97); } to { filter: brightness(1.035); } }
 
