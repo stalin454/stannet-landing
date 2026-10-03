@@ -12,8 +12,17 @@ assert.ok((html.match(/class="nav-group"/g)||[]).length >= 5);
 assert.ok(html.includes('pages/typing.html'));
 assert.ok(html.includes('pages/shortcuts.html'));
 assert.ok(html.includes('pages/vocal-studio.html'));
+assert.ok(html.includes('pages/radio.html'), 'StanNet Radio must be directly accessible from the menu');
+assert.ok(!html.includes('pages/cybersecurity.html">Cybersecurity Academy'), 'Cybersecurity Academy must not repeat under Academias');
+assert.ok(!html.includes('pages/cyber-lab.html">Cyber Defense Lab'), 'Cyber Defense Lab belongs only under Ciberseguridad');
+assert.ok(!html.includes('href="sentinel/">Sentinel'), 'Sentinel belongs only under Ciberseguridad');
 assert.ok(script.includes("document.querySelectorAll('.nav-trigger')"));
 assert.ok(script.includes("classList.add('open')"));
 assert.ok(css.includes('.nav-group.open .nav-dropdown'));
 
-console.log('PASS: home dropdown navigation and mobile click behavior verified.');
+const sharedNav = require('node:fs').readFileSync('stannet-global-nav.js','utf8');
+assert.ok(sharedNav.includes('data-nav="/pages/radio"'));
+assert.equal((sharedNav.match(/Cybersecurity Academy/g)||[]).length,1);
+assert.ok(!sharedNav.includes('<a href="/pages/cyber-lab.html">Cyber Defense Lab</a>'));
+assert.ok(!sharedNav.includes('<a href="/sentinel/">Sentinel</a>'));
+console.log('PASS: radio link is direct and cybersecurity entries occur only in their own menu.');

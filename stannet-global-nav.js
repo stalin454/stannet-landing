@@ -92,6 +92,7 @@ header.innerHTML=`
       <a href="/pages/marketplace.html">Marketplace</a>
     </div>
   </div>
+  <a data-nav="/pages/radio" href="/pages/radio.html">StanNet Radio</a>
   <div class="nav-group" data-group="/pages/cybersecurity">
     <button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button>
     <div class="nav-dropdown">
@@ -116,7 +117,6 @@ header.innerHTML=`
   <div class="nav-group" data-group="/pages/academias">
     <button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button>
     <div class="nav-dropdown">
-      <a href="/pages/cybersecurity.html">Cybersecurity Academy</a>
       <a href="/pages/programming.html">Programming Academy</a>
       <a href="/pages/typing.html">Typing Lab · Mecanografía</a>
       <a href="/pages/shortcuts.html">Atajos de teclado</a>
@@ -130,8 +130,6 @@ header.innerHTML=`
   <div class="nav-group" data-group="/pages/labs">
     <button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button>
     <div class="nav-dropdown">
-      <a href="/pages/cyber-lab.html">Cyber Defense Lab</a>
-      <a href="/sentinel/">Sentinel</a>
       <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
       <a href="/pages/vocal-studio.html">Vocal Studio</a>
     </div>
