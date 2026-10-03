@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="../radio.css">
+<link rel="stylesheet" href="../radio.css?v=20261003-1">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
@@ -29,25 +29,25 @@
 <main>
 <section class="radio-hero">
 <div class="radio-hero-copy">
-<p class="eyebrow">STANNET / AUTONOMOUS DIGITAL RADIO</p>
-<h1>Music <span>•</span> Tech <span>•</span><br>Cyber <span>•</span> AI</h1>
-<p class="radio-lead">Una radio digital preparada para música, podcasts y boletines automatizados de tecnología, ciberseguridad e inteligencia artificial.</p>
+<p class="eyebrow radio-station-label">STANNET / AUTONOMOUS DIGITAL RADIO</p>
+<h1>STAN<span>NET</span><br><em>RADIO</em></h1>
+<p class="radio-lead">Una frecuencia donde se encuentran música, tecnología, ciberseguridad e inteligencia artificial. Sintoniza el universo StanNet.</p>
+<div class="radio-signal-tags" aria-label="Canales de StanNet Radio"><span>MUSIC</span><span>TECH</span><span>CYBER</span><span>AI</span></div>
 <div class="radio-state"><i aria-hidden="true"></i><span id="radioState">ETAPA 7 · MUSIC LIBRARY + STREAM SERVER</span></div>
+<a class="radio-hero-link" href="#radioSchedule">Descubre la programación <b aria-hidden="true">↓</b></a>
 </div>
-<div class="radio-console" aria-label="Reproductor StanNet Radio">
-<div class="radio-console-top"><span>STANNET RADIO</span><span id="liveBadge">STANDBY</span></div>
-<div class="radio-art" role="img" aria-label="Visualización sonora futurista de StanNet Radio"><img class="radio-artwork" src="../assets/radio/stannet-radio-spectrum.webp" alt=""><img class="radio-mark" src="../assets/brand/stannet-shield.png" alt=""><div class="radio-rings" aria-hidden="true"></div></div>
-<div class="radio-now">
-<small>NOW PLAYING</small>
-<h2 id="nowTitle">StanNet Radio</h2>
-<p id="nowMeta">Music · Tech · Cyber · AI</p>
+<div class="radio-console radio-deck" aria-label="Reproductor StanNet Radio">
+<div class="radio-console-top"><span>STANNET RADIO · CONTROL DESK</span><span id="liveBadge">STANDBY</span></div>
+<div class="radio-deck-visual">
+<img class="radio-deck-image" src="../assets/radio/stannet-radio-console.jpg" alt="Consola de StanNet Radio con controles Music, Tech, Cyber y AI.">
+<button id="radioPlay" class="radio-play" type="button" aria-label="Reproducir radio"><span aria-hidden="true">▶</span></button>
+</div>
+<div class="radio-deck-track">
+<div class="radio-now"><small>AHORA EN STANNET RADIO</small><h2 id="nowTitle">StanNet Radio</h2><p id="nowMeta">Music · Tech · Cyber · AI</p></div>
+<div class="radio-volume"><label for="radioVolume">VOL</label><input id="radioVolume" type="range" min="0" max="1" step=".05" value=".8" aria-label="Volumen de la radio"></div>
 </div>
 <audio id="radioAudio" preload="none"></audio>
-<div class="radio-controls">
-<button id="radioPlay" class="radio-play" type="button" aria-label="Reproducir radio">▶</button>
-<div class="radio-volume"><label for="radioVolume">VOL</label><input id="radioVolume" type="range" min="0" max="1" step=".05" value=".8"></div>
-</div>
-<p id="radioMessage" class="radio-message" role="status">El stream se conectará desde la configuración de Cloudflare cuando activemos la emisión.</p>
+<p id="radioMessage" class="radio-message" role="status">Conectando con el stream de StanNet Radio…</p>
 </div>
 </section>
 
@@ -106,7 +106,7 @@
 </main>
 <footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
 <script src="../script.js?v=20261001-7"></script>
-<script src="../radio.js"></script>
+<script src="../radio.js?v=20261003-1"></script>
 <script src="/stannet-global-nav.js?v=20261003-1" defer></script>
 </body>
 </html>
