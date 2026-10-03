@@ -73,3 +73,24 @@
 .practice-description{color:#c7d9e0;font-size:13px;line-height:1.55;margin:-8px 0 13px}
 .practice-description[hidden]{display:none}
 @media(max-width:600px){.shortcut-row .shortcut-description{font-size:12px}.lab-description{font-size:13px}}
+
+/* Mapa visual del teclado español del laboratorio */
+.lab-keyboard-panel{margin:13px 0;padding:12px 10px;border:1px solid rgba(118,222,240,.22);border-radius:9px;background:#09151d;overflow:hidden}
+.lab-keyboard-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#edf8fb;font-size:12px}
+.lab-keyboard-heading span{color:#8eb4c0;font-size:9px;letter-spacing:.08em}
+.lab-keyboard-step{min-height:30px;margin:7px 0 9px;color:#a9c6d1;font-size:11px;line-height:1.4}
+.lab-keyboard-layout{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:7px;align-items:center}
+.lab-keyboard-main,.lab-keyboard-nav{display:grid;gap:4px;min-width:0}
+.lab-key-row{display:flex;gap:3px;min-width:0}
+.lab-key{display:flex;align-items:center;justify-content:center;flex:var(--key-wide,1) 1 0;min-width:0;height:27px;padding:2px 1px;border:1px solid #314653;border-radius:4px;background:#14232c;color:#b8cbd3;font:600 8px/1.05 var(--font-body);text-align:center;overflow:hidden}
+.lab-key[data-role]{color:#8ab9c8}
+.lab-key.is-lit{color:#06151b;background:#72def0;border-color:#a8f5ff;box-shadow:0 0 10px rgba(75,223,255,.65),inset 0 0 0 1px rgba(255,255,255,.28);z-index:1}
+.lab-key.is-modifier{color:#fff;background:#986cff;border-color:#c3a7ff;box-shadow:0 0 10px rgba(155,112,255,.65),inset 0 0 0 1px rgba(255,255,255,.22);z-index:1}
+.lab-key.is-current-step{animation:lab-key-pulse 1.2s ease-in-out infinite alternate}
+.lab-keyboard-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:9px;color:#a9bdc6;font-size:9px}
+.lab-keyboard-legend span{display:inline-flex;align-items:center;gap:5px}
+.lab-keyboard-legend i{width:9px;height:9px;border-radius:3px;background:#72def0;box-shadow:0 0 5px rgba(75,223,255,.5)}
+.lab-keyboard-legend i.modifier-swatch{background:#986cff;box-shadow:0 0 5px rgba(155,112,255,.5)}
+@keyframes lab-key-pulse{from{filter:brightness(.85)}to{filter:brightness(1.3)}}
+@media(max-width:420px){.lab-keyboard-layout{grid-template-columns:minmax(0,1fr) 64px;gap:4px}.lab-key-row{gap:2px}.lab-key{height:24px;font-size:7px;padding-inline:0}.lab-keyboard-panel{padding:10px 7px}.lab-keyboard-step{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.lab-key.is-current-step{animation:none}}
