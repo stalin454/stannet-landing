@@ -12,7 +12,7 @@ assert.ok((html.match(/class="nav-group"/g)||[]).length >= 5);
 assert.ok(html.includes('pages/typing.html'));
 assert.ok(html.includes('pages/shortcuts.html'));
 assert.ok(html.includes('pages/vocal-studio.html'));
-const homeNav = html.match(/<nav\b(?=[^>]*class="[^\"]*\bsite-nav\b")[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
+const homeNav = html.match(/<nav\b(?=[^>]*class="[^\"]*\bsite-nav\b[^\"]*")[^>]*>([\s\S]*?)<\/nav>/)?.[1] || '';
 assert.ok(homeNav.includes('href="pages/radio.html">StanNet Radio'), 'StanNet Radio must be directly accessible from the menu');
 assert.equal((homeNav.match(/Cybersecurity Academy/g)||[]).length,1, 'Cybersecurity Academy appears only in the cybersecurity menu');
 assert.equal((homeNav.match(/Cyber Defense Lab/g)||[]).length,1, 'Cyber Defense Lab appears only in the cybersecurity menu');
