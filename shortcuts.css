@@ -94,3 +94,8 @@
 @keyframes lab-key-pulse{from{filter:brightness(.85)}to{filter:brightness(1.3)}}
 @media(max-width:420px){.lab-keyboard-layout{grid-template-columns:minmax(0,1fr) 64px;gap:4px}.lab-key-row{gap:2px}.lab-key{height:24px;font-size:7px;padding-inline:0}.lab-keyboard-panel{padding:10px 7px}.lab-keyboard-step{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.lab-key.is-current-step{animation:none}}
+
+/* Mantiene legible el laboratorio aunque el tema global use fondos claros */
+body.shortcuts-page.stannet-global{background:#0b1118!important;color:#f2f8fb!important;color-scheme:dark}
+.shortcuts-page.stannet-global .shortcuts-heading h1{color:#f2f8fb!important}
+.shortcuts-page.stannet-global .shortcut-lab .lab-intro{color:#acc4ce!important}
