@@ -49,7 +49,7 @@
     host.append(layout);
     host.querySelectorAll('[data-role="meta"]').forEach(k=>k.textContent=isMac?'⌘ Cmd':'⊞ Win');
     host.querySelectorAll('[data-role="alt"]').forEach(k=>k.textContent=isMac?'⌥ Option':'Alt');
-    const label=chord ? (chords.length>1?'Paso '+(step+1)+' de '+chords.length+': '+chord:'Atajo: '+chord)+( /\\bclic\\b/i.test(chord) ? ' · Mantén Alt y haz clic izquierdo en el editor.' : '') : 'Inicia un reto para ver las teclas iluminadas.';
+    const label=chord ? (chords.length>1?'Paso '+(step+1)+' de '+chords.length+': '+chord:'Atajo: '+chord)+( /\bclic\b/i.test(chord) ? (isMac ? ' · Mantén Option y haz clic izquierdo en el editor.' : ' · Mantén Alt y haz clic izquierdo en el editor.') : '') : 'Inicia un reto para ver las teclas iluminadas.';
     const hint=document.getElementById('labKeyboardStep'); if(hint)hint.textContent=label;
     host.setAttribute('aria-label',chord?'Teclado español. Teclas iluminadas para: '+chord:'Teclado español de referencia.');
   }
