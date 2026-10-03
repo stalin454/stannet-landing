@@ -19,7 +19,7 @@ body.radio-page.stannet-global.stannet-page-radio{--radio-cyan:#48f1ff;--radio-b
 .radio-page.stannet-global .radio-hero{min-height:calc(100vh - 78px);grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(30px,5vw,78px);padding:clamp(52px,7vw,100px) clamp(20px,6.7vw,108px);background:radial-gradient(ellipse at 78% 50%,rgba(40,128,255,.14),transparent 42%)}
 .radio-page.stannet-global .radio-hero-copy{position:relative;z-index:1}
 .radio-page.stannet-global .radio-station-label{color:#70eaff!important;letter-spacing:.22em}
-.radio-page.stannet-global .radio-hero h1{margin:16px 0 24px;color:#f4f7ff!important;font:700 clamp(58px,8vw,112px)/.91 Orbitron,var(--font-main);letter-spacing:-.075em;text-shadow:0 8px 42px rgba(67,144,255,.22)}
+.radio-page.stannet-global .radio-hero h1{margin:16px 0 24px;color:#f4f7ff!important;font:700 clamp(56px,6.2vw,88px)/.91 Orbitron,var(--font-main);letter-spacing:-.075em;text-shadow:0 8px 42px rgba(67,144,255,.22)}
 .radio-page.stannet-global .radio-hero h1 span{color:#48f1ff}
 .radio-page.stannet-global .radio-hero h1 em{font-style:normal;background:linear-gradient(95deg,#48f1ff 0%,#4f9dff 40%,#c272ff 73%,#ff6bdc 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
 .radio-page.stannet-global .radio-hero .radio-lead{max-width:620px;color:#c6d6e9!important;font-size:clamp(16px,1.4vw,19px);line-height:1.75}
