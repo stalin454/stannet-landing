@@ -119,7 +119,7 @@
     const keyMatches = expectedKey === '+' ? actual === '+' : actual === expectedKey || (expectedKey.length === 1 && actual === expectedKey.toLowerCase());
     if (!keyMatches) return false;
     if (expected.ctrl !== event.ctrlKey || expected.alt !== event.altKey || expected.meta !== event.metaKey) return false;
-    if (expected.shift !== event.shiftKey && !(expectedKey === '+' && event.shiftKey)) return false;
+    if (expected.shift !== event.shiftKey && !(['+','/'].includes(expectedKey) && event.shiftKey && !expected.shift)) return false;
     return true;
   }
   function expectedKeys(card) {

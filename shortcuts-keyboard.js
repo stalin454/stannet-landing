@@ -24,8 +24,8 @@
     const lit = new Set(), mods = new Set();
     for (const token of chord.split(/\s*\+\s*/).filter(Boolean)) {
       const n = norm(token);
-      if (['ctrl','alt','shift','meta'].includes(n)) mods.add(n);
-      else if (token.trim() === '/') lit.add('/');
+      if (['ctrl','alt','shift','meta','altgr'].includes(n)) mods.add(n);
+      else if (token.trim() === '/') { mods.add('shift'); lit.add('7'); }
       else (token.split(/\s*\/\s*/).length>1 ? token.split(/\s*\/\s*/) : [token]).forEach(v=>lit.add(norm(v)));
     }
     host.replaceChildren();
@@ -38,8 +38,7 @@
           const key=document.createElement('span'); key.className='lab-key'; key.textContent=item.t; key.dataset.key=item.k;
           if(item.r) key.dataset.role=item.r;
           if(item.w) key.style.setProperty('--key-wide',String(item.w));
-          const role=item.r==='altgr'?'alt':item.r;
-          if(item.r&&mods.has(role))key.classList.add('is-modifier');
+          if(item.r&&mods.has(item.r))key.classList.add('is-modifier');
           else if(!item.r&&lit.has(norm(item.k)))key.classList.add('is-lit');
           line.append(key);
         }
