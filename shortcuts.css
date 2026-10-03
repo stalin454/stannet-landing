@@ -66,3 +66,10 @@
  .lab-session select,.lab-session button{width:100%}
  .lab-capture{min-height:92px}
 }
+
+.shortcut-row .shortcut-description{color:#d5e2e7;font-size:13px;line-height:1.55;margin:5px 0 0}
+.shortcut-row .shortcut-note{color:#9eb5bf;font-size:11px;line-height:1.45;margin:6px 0 0}
+.lab-description{color:#d3e0e6;font-size:13px;line-height:1.55;margin:0 0 10px}
+.practice-description{color:#c7d9e0;font-size:13px;line-height:1.55;margin:-8px 0 13px}
+.practice-description[hidden]{display:none}
+@media(max-width:600px){.shortcut-row .shortcut-description{font-size:12px}.lab-description{font-size:13px}}

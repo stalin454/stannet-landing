@@ -5,9 +5,79 @@
     basics:'Edición y escritura', system:'Sistema y ventanas',
     browser:'Chrome', vscode:'VS Code'
   };
+  const descriptions = {
+    'copy':'Copia el texto seleccionado al portapapeles para pegarlo en otro lugar.',
+    'paste':'Inserta en la posición del cursor el último contenido que copiaste o cortaste.',
+    'cut':'Quita el texto seleccionado y lo guarda en el portapapeles para moverlo.',
+    'undo':'Revierte el último cambio realizado en el documento o campo activo.',
+    'redo':'Vuelve a aplicar un cambio que acabas de deshacer.',
+    'select-all':'Selecciona todo el contenido del documento, página o campo activo.',
+    'save':'Guarda el archivo o los cambios del documento que tienes abierto.',
+    'find':'Busca una palabra o frase dentro de la página o documento actual.',
+    'print':'Abre las opciones para imprimir el documento o la página actual.',
+    'new-document':'Crea un documento o una ventana nueva en la aplicación activa.',
+    'open-document':'Abre el selector para buscar y abrir un archivo existente.',
+    'bold':'Aplica o quita la negrita al texto seleccionado en un editor compatible.',
+    'italic':'Aplica o quita la cursiva al texto seleccionado en un editor compatible.',
+    'start-line':'Mueve el cursor al comienzo de la línea actual.',
+    'end-line':'Mueve el cursor al final de la línea actual.',
+    'start-document':'Lleva el cursor al principio del documento o página.',
+    'end-document':'Lleva el cursor al final del documento o página.',
+    'select-word':'Amplía la selección por palabras hacia la izquierda o la derecha.',
+    'delete-word':'Borra la palabra situada antes del cursor.',
+    'app-switch':'Cambia entre las aplicaciones abiertas sin usar el ratón.',
+    'lock':'Bloquea la sesión para proteger la pantalla y pedir autenticación al volver.',
+    'screenshot-area':'Permite seleccionar una zona de la pantalla y copiar o guardar su captura.',
+    'screenshot-full':'Captura la pantalla completa y la guarda como imagen.',
+    'new-folder':'Crea una carpeta nueva en el Explorador de archivos o Finder.',
+    'task-view':'Muestra las ventanas abiertas y los escritorios disponibles.',
+    'new-desktop':'Crea un escritorio virtual independiente para organizar ventanas.',
+    'switch-desktop':'Cambia al escritorio virtual anterior o al siguiente.',
+    'close-window':'Cierra la ventana activa; en Mac, este atajo no siempre cierra toda la aplicación.',
+    'explorer':'Abre el Explorador de archivos para localizar carpetas y documentos.',
+    'system-search':'Abre la búsqueda del sistema para encontrar aplicaciones y archivos.',
+    'emoji':'Abre el selector de emojis para insertarlos en un campo compatible.',
+    'clipboard-history':'Muestra elementos copiados anteriormente, si el historial está activado.',
+    'tab-new':'Abre una pestaña nueva en el navegador.',
+    'tab-close':'Cierra la pestaña activa del navegador.',
+    'tab-restore':'Vuelve a abrir la última pestaña que cerraste.',
+    'tab-next':'Activa la pestaña que está a la derecha de la actual.',
+    'tab-previous':'Activa la pestaña que está a la izquierda de la actual.',
+    'tab-first':'Salta directamente a la primera pestaña.',
+    'tab-last':'Salta directamente a la última pestaña.',
+    'address':'Lleva el cursor a la barra de direcciones para escribir una URL o búsqueda.',
+    'browser-find':'Busca una palabra dentro de la página web abierta.',
+    'reload':'Vuelve a cargar la página actual.',
+    'hard-reload':'Recarga la página solicitando de nuevo sus recursos en lugar de reutilizar la caché.',
+    'browser-back':'Regresa a la página anterior del historial de navegación.',
+    'browser-forward':'Avanza a la siguiente página del historial si ya habías retrocedido.',
+    'browser-bookmark':'Guarda la página actual en los marcadores o favoritos del navegador.',
+    'incognito':'Abre una ventana privada; no guarda el historial local de esa ventana.',
+    'zoom-in':'Aumenta el tamaño del contenido de la página.',
+    'zoom-out':'Reduce el tamaño del contenido de la página.',
+    'zoom-reset':'Restablece el zoom de la página al tamaño predeterminado.',
+    'palette':'Abre la paleta de comandos para buscar y ejecutar funciones de VS Code.',
+    'quick-open':'Abre rápidamente un archivo del proyecto escribiendo su nombre.',
+    'shortcuts-editor':'Abre la configuración para consultar o personalizar atajos de VS Code.',
+    'settings':'Abre los ajustes de VS Code.',
+    'terminal':'Muestra u oculta la terminal integrada para ejecutar comandos.',
+    'sidebar':'Muestra u oculta la barra lateral del editor.',
+    'files-search':'Busca texto en todos los archivos del proyecto.',
+    'go-line':'Salta directamente a un número de línea del archivo actual.',
+    'go-definition':'Navega desde un símbolo hasta el lugar donde está definido.',
+    'rename-symbol':'Cambia el nombre de un símbolo y actualiza sus referencias compatibles.',
+    'toggle-comment':'Añade o quita el comentario de la línea o selección actual.',
+    'format-file':'Ordena y aplica el formato automático al documento con el formateador configurado.',
+    'duplicate-line':'Crea una copia de la línea actual junto a su posición.',
+    'move-line':'Mueve la línea actual hacia arriba sin tener que cortarla y pegarla.',
+    'multi-cursor':'Añade otro cursor para editar varios lugares al mismo tiempo.',
+    'select-occurrences':'Selecciona la siguiente coincidencia para editar varias apariciones juntas.',
+    'editor-split':'Divide el editor para ver dos archivos o partes del código a la vez.',
+    'explorer-view':'Abre el explorador lateral de archivos del proyecto.'
+  };
   const shortcuts = [];
   const add = (category, rows) => rows.forEach(([id, action, windows, mac, note]) =>
-    shortcuts.push({ id, category, action, windows, mac, note:note || '' }));
+    shortcuts.push({ id, category, action, windows, mac, note:note || '', description:descriptions[id] || '' }));
   add('basics', [
     ['copy','Copiar selección','Ctrl + C','⌘ + C'],
     ['paste','Pegar','Ctrl + V','⌘ + V'],
@@ -96,7 +166,7 @@
     return shortcuts.filter(item => item[system] &&
       ($('shortcutCategory').value === 'all' || item.category === $('shortcutCategory').value) &&
       (!$('onlyFavorites').checked || favorites.has(item.id)) &&
-      (!search || normal([item.action,item[system],item.note,groups[item.category]].join(' ')).includes(search)));
+      (!search || normal([item.action,item[system],item.description,item.note,groups[item.category]].join(' ')).includes(search)));
   }
   function render() {
     visible = filtered(); const list = $('shortcutList'); list.replaceChildren();
@@ -104,11 +174,12 @@
     for (const item of visible) {
       const row = document.createElement('article'), text = document.createElement('div'),
         category = document.createElement('small'), title = document.createElement('h3'),
-        note = document.createElement('p'), keys = document.createElement('kbd'), favorite = document.createElement('button');
+        description = document.createElement('p'), note = document.createElement('p'), keys = document.createElement('kbd'), favorite = document.createElement('button');
       row.className = 'shortcut-row';
       category.textContent = groups[item.category] + (learned.has(item.id) ? ' · Aprendido ✓' : '');
       title.textContent = item.action; text.append(category,title);
-      if (item.note) { note.textContent = item.note; text.append(note); }
+      description.className = 'shortcut-description'; description.textContent = item.description; text.append(description);
+      if (item.note) { note.className = 'shortcut-note'; note.textContent = item.note; text.append(note); }
       keys.textContent = item[system];
       favorite.type = 'button'; favorite.className = 'shortcut-favorite'; favorite.dataset.id = item.id;
       favorite.setAttribute('aria-label',(favorites.has(item.id) ? 'Quitar de favoritos: ' : 'Guardar favorito: ') + item.action);
@@ -125,6 +196,8 @@
     current = item;
     $('practiceCategory').textContent = item ? groups[item.category] : 'SIN TARJETAS';
     $('practiceAction').textContent = item ? item.action : 'Cambia los filtros para continuar.';
+    $('practiceDescription').textContent = item ? item.description : '';
+    $('practiceDescription').hidden = true;
     $('practiceAnswer').textContent = item ? item[system] : '';
     $('practiceAnswer').hidden = true;
     $('revealShortcut').disabled = !item;
@@ -149,7 +222,7 @@
     if (favorites.has(button.dataset.id)) favorites.delete(button.dataset.id); else favorites.add(button.dataset.id);
     saveSet('stannet-shortcuts-favorites-v1',favorites); render();
   });
-  $('revealShortcut').addEventListener('click',() => { $('practiceAnswer').hidden = false; $('practiceAgain').disabled = false; $('practiceLearned').disabled = false; });
+  $('revealShortcut').addEventListener('click',() => { $('practiceDescription').hidden = false; $('practiceAnswer').hidden = false; $('practiceAgain').disabled = false; $('practiceLearned').disabled = false; });
   $('practiceAgain').addEventListener('click',nextCard);
   $('practiceLearned').addEventListener('click',() => { if (!current) return; learned.add(current.id); saveSet('stannet-shortcuts-learned-v1',learned); render(); nextCard(); });
   $('nextShortcut').addEventListener('click',nextCard);

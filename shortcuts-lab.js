@@ -67,6 +67,7 @@
     return [...list.querySelectorAll('.shortcut-row')].map(row => ({
       id: row.querySelector('.shortcut-favorite')?.dataset.id || '',
       action: row.querySelector('h3')?.textContent.trim() || '',
+      description: row.querySelector('.shortcut-description')?.textContent.trim() || '',
       keys: row.querySelector('kbd')?.textContent.trim() || '',
       category: row.querySelector('small')?.textContent.replace(/ · Aprendido ✓$/, '').trim() || '',
       note: row.querySelector('p')?.textContent.trim() || ''
@@ -164,6 +165,7 @@
     step = 0;
     $('labCategory').textContent = current.category + ' · ' + appFor(current);
     $('labTask').textContent = current.action;
+    $('labDescription').textContent = current.description;
     $('labCaptureText').textContent = active ? 'Pulsa aquí y prueba la combinación' : 'Inicia una sesión para activar el teclado';
     $('labPressedKeys').textContent = '⌨';
     $('labAppName').textContent = appFor(current);
