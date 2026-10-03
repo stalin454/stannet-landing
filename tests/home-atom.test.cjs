@@ -15,7 +15,7 @@ for (const [, href, label] of nodes) {
 }
 
 assert.match(html, /Chip central StanNet\.Space/);
-assert.match(html, /chip-network\.js\?v=20261003-2/);
+assert.match(html, /chip-network\.js\?v=20261003-3/);
 const flowGroup = html.match(/<g class="wire-light">([\s\S]*?)<\/g>/)?.[1] || '';
 assert.equal((flowGroup.match(/<path\b/g) || []).length, 3, 'only three lightweight signals animate at once');
 assert.match(css, /\.chip-board\.is-running \.wire-light path\{[^}]*animation:chip-current/s);
