@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Aprende atajos de Windows, macOS, Chrome y Visual Studio Code con el catálogo y las tarjetas de práctica de StanNet.">
 <title>Atajos de teclado | StanNet Typing Lab</title>
-<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../shortcuts.css">
+<link rel="stylesheet" href="../style.css"><link rel="stylesheet" href="../shortcuts.css?v=20261003-1">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 </head>
@@ -24,11 +24,34 @@
 <section class="shortcut-controls" aria-label="Buscar atajos"><div class="system-switch" role="group" aria-label="Sistema operativo"><button type="button" data-system="windows" aria-pressed="true">Windows</button><button type="button" data-system="mac" aria-pressed="false">Mac</button></div><label for="shortcutSearch">Buscar acción o combinación<input type="search" id="shortcutSearch" placeholder="Ej.: captura, pestaña, terminal, Ctrl + P" autocomplete="off"></label><label for="shortcutCategory">Área<select id="shortcutCategory"><option value="all">Todas las áreas</option><option value="basics">Edición y escritura</option><option value="system">Sistema y ventanas</option><option value="browser">Chrome</option><option value="vscode">VS Code</option></select></label><label class="favorites-toggle"><input type="checkbox" id="onlyFavorites"> Solo favoritos</label></section>
 <div class="shortcut-overview"><p id="resultCount" role="status"></p><p id="masteryCount"></p></div>
 <div class="shortcut-layout"><section class="shortcut-catalog" aria-label="Catálogo de atajos"><div id="shortcutList"></div><p id="noShortcuts" hidden>Sin resultados. Prueba otra palabra o cambia el filtro.</p></section>
-<aside class="shortcut-practice" aria-labelledby="practiceTitle"><p class="eyebrow">PRACTICA SIN SALIR DE AQUÍ</p><h2 id="practiceTitle">Tarjetas de memoria</h2><p id="practiceHint">Intenta recordar el atajo antes de revelar la respuesta. El navegador puede reservar algunas teclas; no necesitas pulsarlas aquí.</p><div class="practice-card"><span id="practiceCategory"></span><h3 id="practiceAction"></h3><div id="practiceAnswer" hidden></div><button type="button" id="revealShortcut">Mostrar atajo</button></div><div class="practice-actions"><button type="button" id="practiceAgain" disabled>Repetir después</button><button type="button" id="practiceLearned" disabled>Ya lo sé ✓</button></div><button type="button" id="nextShortcut" class="next-practice">Otra tarjeta →</button><p class="practice-note">Tu progreso y favoritos se guardan en este navegador.</p></aside></div>
+<aside class="shortcut-practice shortcut-lab" aria-labelledby="labTitle">
+<p class="eyebrow">LABORATORIO INTERACTIVO</p><h2 id="labTitle">Practica y ejecuta.</h2>
+<p class="lab-intro">Resuelve una tarea con el atajo. Púlsalo dentro del panel o elige la combinación; verás el resultado en el entorno simulado.</p>
+<div class="lab-session">
+<label for="labDuration">Duración de la sesión</label><select id="labDuration"><option value="1">1 minuto</option><option value="2">2 minutos</option><option value="5" selected>5 minutos</option><option value="10">10 minutos</option><option value="15">15 minutos</option><option value="30">30 minutos</option></select>
+<button type="button" id="labStart">Iniciar sesión</button>
+</div>
+<div class="lab-progress" aria-live="polite"><span id="labTimer">05:00</span><span id="labScore">0 aciertos · racha 0</span></div>
+<section class="lab-challenge" aria-label="Reto actual">
+<span id="labCategory" class="lab-category"></span><h3 id="labTask">Inicia una sesión para recibir un reto.</h3>
+<p id="labFeedback" role="status">Escoge una duración y pulsa «Iniciar sesión».</p>
+</section>
+<div id="labCapture" class="lab-capture is-disabled" tabindex="0" role="group" aria-label="Zona de práctica de teclado">
+<span class="lab-capture-label">ZONA DE TECLADO</span><strong id="labCaptureText">Pulsa aquí y prueba el atajo</strong><kbd id="labPressedKeys">⌨</kbd>
+</div>
+<p class="lab-or">O selecciona la combinación correcta</p>
+<div id="labChoices" class="lab-choices" role="group" aria-label="Combinaciones posibles"></div>
+<button type="button" id="labHint" class="lab-hint" disabled>Mostrar pista</button>
+<div class="lab-simulation" aria-live="polite"><div><span>ENTORNO DE PRÁCTICA</span><b id="labAppName">StanNet Lab</b></div><p id="labSimulation">Aquí aparecerá el efecto de cada acción dentro del simulador.</p></div>
+<section class="lab-console" aria-labelledby="labConsoleTitle"><div class="lab-console-head"><span id="labConsoleTitle">CONSOLA DE ACTIVIDAD</span><span id="labConsoleState">EN ESPERA</span></div><div id="labConsole" role="log" aria-live="polite"><p class="console-muted">StanNet Lab listo. Inicia una sesión para comenzar.</p></div></section>
+<button type="button" id="labNext" class="next-practice" disabled>Siguiente reto →</button>
+<details class="legacy-practice-review"><summary>Repasar con tarjetas de memoria</summary><p id="practiceHint">Intenta recordar el atajo antes de revelar la respuesta.</p><div class="practice-card"><span id="practiceCategory"></span><h3 id="practiceAction"></h3><div id="practiceAnswer" hidden></div><button type="button" id="revealShortcut">Mostrar atajo</button></div><div class="practice-actions"><button type="button" id="practiceAgain" disabled>Repetir después</button><button type="button" id="practiceLearned" disabled>Ya lo sé ✓</button></div><button type="button" id="nextShortcut" class="next-practice">Otra tarjeta →</button></details>
+<p class="practice-note">El laboratorio simula las acciones sin activar atajos del sistema ni sacar al alumno de la página. Progreso y tarjetas guardados en este navegador.</p>
+</aside></div>
 <section class="shortcut-sources"><h2>Referencias completas</h2><p>Este catálogo reúne una selección práctica. Para consultar todas las combinaciones disponibles y sus variantes, utiliza las guías oficiales:</p><div><a href="https://support.microsoft.com/es-es/accessibility/windows/keyboard-shortcuts-in-windows" target="_blank" rel="noopener noreferrer">Windows · Microsoft ↗</a><a href="https://support.apple.com/es-es/102650" target="_blank" rel="noopener noreferrer">Mac · Apple ↗</a><a href="https://support.google.com/chrome/answer/157179?hl=es" target="_blank" rel="noopener noreferrer">Chrome · Google ↗</a><a href="https://code.visualstudio.com/docs/reference/default-keybindings" target="_blank" rel="noopener noreferrer">VS Code · Microsoft ↗</a></div></section>
 <a class="shortcut-back" href="typing.html">← Volver a Typing Lab</a>
 </main>
 <footer><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><p>© <span id="year"></span></p><a href="#top">VOLVER ARRIBA ↑</a></footer>
-<script src="../script.js?v=20261001-7"></script><script src="../shortcuts.js"></script>
+<script src="../script.js?v=20261001-7"></script><script src="../shortcuts.js"></script><script src="../shortcuts-lab.js?v=20261003-1"></script>
 <script src="/stannet-global-nav.js?v=20261003-1" defer></script>
 </body></html>
