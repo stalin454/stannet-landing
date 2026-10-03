@@ -4,7 +4,7 @@
   if (!host) return;
   const rows = [
     [{t:'Esc',k:'escape'}, ...Array.from({length:12},(_,i)=>({t:'F'+(i+1),k:'f'+(i+1)})), {t:'Impr',k:'printscreen'}],
-    [{t:'º ª',k:'º',w:1.25},...'1234567890'.split('').map(k=>({t:k,k})),{t:"' ?",k:"'"},{t:'¡ ¿',k:'¡'},{t:'⌫',k:'backspace',w:1.7}],
+    [{t:'º ª',k:'º',a:['\\'],w:1.25},...'1234567890'.split('').map(k=>({t:k,k})),{t:"' ?",k:"'"},{t:'¡ ¿',k:'¡'},{t:'⌫',k:'backspace',w:1.7}],
     [{t:'Tab',k:'tab',w:1.5},...'qwertyuiop'.split('').map(k=>({t:k.toUpperCase(),k})),{t:'´ ¨',k:'´'},{t:'+ *',k:'+',w:1.4}],
     [{t:'Bloq',k:'capslock',w:1.7},...'asdfghjkl'.split('').map(k=>({t:k.toUpperCase(),k})),{t:'Ñ',k:'ñ'},{t:'´ {',k:'´'},{t:'Enter',k:'enter',w:1.8}],
     [{t:'Shift',k:'shift',r:'shift',w:2.2},{t:'< >',k:'<>'},...'zxcvbnm'.split('').map(k=>({t:k.toUpperCase(),k})),{t:', ;',k:','},{t:'. :',k:'.'},{t:'- _',k:'-'},{t:'Shift',k:'shift',r:'shift',w:2}],
@@ -39,7 +39,7 @@
           if(item.r) key.dataset.role=item.r;
           if(item.w) key.style.setProperty('--key-wide',String(item.w));
           if(item.r&&mods.has(item.r))key.classList.add('is-modifier');
-          else if(!item.r&&lit.has(norm(item.k)))key.classList.add('is-lit');
+          else if(!item.r&&(lit.has(norm(item.k))||(item.a||[]).some(alias=>lit.has(norm(alias)))))key.classList.add('is-lit');
           line.append(key);
         }
         section.append(line);
@@ -49,7 +49,7 @@
     host.append(layout);
     host.querySelectorAll('[data-role="meta"]').forEach(k=>k.textContent=isMac?'⌘ Cmd':'⊞ Win');
     host.querySelectorAll('[data-role="alt"]').forEach(k=>k.textContent=isMac?'⌥ Option':'Alt');
-    const label=chord ? (chords.length>1?'Paso '+(step+1)+' de '+chords.length+': '+chord:'Atajo: '+chord) : 'Inicia un reto para ver las teclas iluminadas.';
+    const label=chord ? (chords.length>1?'Paso '+(step+1)+' de '+chords.length+': '+chord:'Atajo: '+chord)+( /\\bclic\\b/i.test(chord) ? ' · Mantén Alt y haz clic izquierdo en el editor.' : '') : 'Inicia un reto para ver las teclas iluminadas.';
     const hint=document.getElementById('labKeyboardStep'); if(hint)hint.textContent=label;
     host.setAttribute('aria-label',chord?'Teclado español. Teclas iluminadas para: '+chord:'Teclado español de referencia.');
   }
