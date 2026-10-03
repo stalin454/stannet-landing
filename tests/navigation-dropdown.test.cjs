@@ -24,6 +24,6 @@ assert.ok(css.includes('.nav-group.open .nav-dropdown'));
 const sharedNav = require('node:fs').readFileSync('stannet-global-nav.js','utf8');
 assert.ok(sharedNav.includes('data-nav="/pages/radio"'));
 assert.equal((sharedNav.match(/Cybersecurity Academy/g)||[]).length,1);
-assert.ok(!sharedNav.includes('<a href="/pages/cyber-lab.html">Cyber Defense Lab</a>'));
-assert.ok(!sharedNav.includes('<a href="/sentinel/">Sentinel</a>'));
+assert.equal((sharedNav.match(/Cyber Defense Lab/g)||[]).length,1);
+assert.equal((sharedNav.match(/>Sentinel</g)||[]).length,1);
 console.log('PASS: radio link is direct and cybersecurity entries occur only in their own menu.');
