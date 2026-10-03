@@ -23,7 +23,10 @@ const modelStatus=document.querySelector('#modelStatus');
 let url=null,file=null,vocalsUrl=null,instrumentalUrl=null,processor=null,modelReady=false;
 const allowed=f=>f&&(f.type==='audio/mpeg'||f.type==='audio/wav'||/\.(mp3|wav)$/i.test(f.name));
 const size=n=>n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
-const MAX_LOCAL_SECONDS=240;
+const MAX_LOCAL_SECONDS=navigator.deviceMemory
+  ? (navigator.deviceMemory<=2?30:navigator.deviceMemory<=4?60:240)
+  : 60;
+let progressScope=null;
 
 const cpuThreads=Math.min(4,Math.max(2,navigator.hardwareConcurrency||4));
 ort.env.wasm.numThreads=globalThis.crossOriginIsolated?cpuThreads:1;
@@ -77,12 +80,15 @@ function makeProcessor(provider){
       modelStatus.textContent='Descargando modelo Demucs desde StanNet… '+Math.round((loaded/total)*100)+'% · solo la primera vez';
     },
     onProgress:info=>{
-      const pct=45+(info.progress*55);
+      const overall=progressScope
+        ? (progressScope.index+info.progress)/progressScope.total
+        : info.progress;
+      const pct=45+(overall*55);
       progressBar.style.width=pct.toFixed(1)+'%';
       const segment=Number(info.currentSegment||0);
       const total=Number(info.totalSegments||0);
-      const segmentText=total?(' · bloque '+segment+'/'+total):'';
-      modelStatus.textContent='Separando audio localmente… '+Math.round(info.progress*100)+'%'+segmentText;
+      const segmentText=total?(' · fragmento '+(progressScope?progressScope.index+1:1)+'/'+(progressScope?progressScope.total:1)+' · bloque '+segment+'/'+total):'';
+      modelStatus.textContent='Separando audio localmente… '+Math.round(overall*100)+'%'+segmentText;
     },
     onLog:()=>{}
   });
@@ -151,8 +157,8 @@ async function decodeTo44100Stereo(f){
     src.buffer=decoded; src.connect(offline.destination); src.start();
     buffer=await offline.startRendering();
   }
-  const left=new Float32Array(buffer.getChannelData(0));
-  const right=buffer.numberOfChannels>1?new Float32Array(buffer.getChannelData(1)):new Float32Array(left);
+  const left=buffer.getChannelData(0);
+  const right=buffer.numberOfChannels>1?buffer.getChannelData(1):left;
   const duration=buffer.duration;
   await ctx.close();
   return {left,right,duration};
@@ -166,6 +172,47 @@ function mixInstrumental(result){
     for(let i=0;i<n;i++){left[i]+=src.left[i];right[i]+=src.right[i];}
   }
   return {left,right};
+}
+
+async function separateInChunks(p,left,right){
+  const chunkSamples=30*44100;
+  const overlapSamples=4*44100;
+  const stride=chunkSamples-overlapSamples;
+  const starts=[0];
+  while(starts[starts.length-1]+chunkSamples<left.length){
+    starts.push(starts[starts.length-1]+stride);
+  }
+
+  const vocals={left:new Float32Array(left.length),right:new Float32Array(right.length)};
+  const instrumental={left:new Float32Array(left.length),right:new Float32Array(right.length)};
+  let previousEnd=0;
+
+  for(let index=0;index<starts.length;index++){
+    const start=starts[index];
+    const end=Math.min(start+chunkSamples,left.length);
+    progressScope={index,total:starts.length};
+    const result=await p.separate(left.subarray(start,end),right.subarray(start,end));
+    const blendLength=Math.max(0,previousEnd-start);
+
+    for(let i=0;i<end-start;i++){
+      const destination=start+i;
+      const blend=i<blendLength?(i+1)/(blendLength+1):1;
+      const keep=1-blend;
+      const voiceLeft=result.vocals.left[i];
+      const voiceRight=result.vocals.right[i];
+      const musicLeft=result.drums.left[i]+result.bass.left[i]+result.other.left[i];
+      const musicRight=result.drums.right[i]+result.bass.right[i]+result.other.right[i];
+
+      vocals.left[destination]=vocals.left[destination]*keep+voiceLeft*blend;
+      vocals.right[destination]=vocals.right[destination]*keep+voiceRight*blend;
+      instrumental.left[destination]=instrumental.left[destination]*keep+musicLeft*blend;
+      instrumental.right[destination]=instrumental.right[destination]*keep+musicRight*blend;
+    }
+    previousEnd=end;
+  }
+
+  progressScope=null;
+  return {vocals,instrumental};
 }
 
 function wavBlob(stem,sampleRate=44100){
@@ -203,12 +250,11 @@ separate.onclick=async()=>{
     modelStatus.textContent=phase+'…';
     const p=await ensureProcessor();
     phase='Separando voz e instrumental';
-    const result=await p.separate(left,right);
+    const result=await separateInChunks(p,left,right);
     phase='Generando archivos WAV';
-    const instrumental=mixInstrumental(result);
     revokeStemUrls();
     vocalsUrl=URL.createObjectURL(wavBlob(result.vocals));
-    instrumentalUrl=URL.createObjectURL(wavBlob(instrumental));
+    instrumentalUrl=URL.createObjectURL(wavBlob(result.instrumental));
     vocalsPlayer.src=vocalsUrl; instrumentalPlayer.src=instrumentalUrl;
     stems.hidden=false; progressBar.style.width='100%';
     modelStatus.textContent='Separación completada localmente.';
