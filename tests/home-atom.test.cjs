@@ -5,24 +5,26 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'atom.css'), 'utf8');
+const network = fs.readFileSync(path.join(root, 'chip-network.js'), 'utf8');
 const nodes = [...html.matchAll(/<a class="chip-node [^"]*" href="([^"]+)" aria-label="([^"]+)"/g)];
 
-assert.equal(nodes.length, 35, 'every StanNet area must have its own chip access');
+assert.equal(nodes.length, 35, 'every StanNet area must have a clickable chip');
 for (const [, href, label] of nodes) {
-  const destination = href.split('#')[0];
   assert.ok(label.trim(), `missing accessible label for ${href}`);
-  assert.ok(fs.existsSync(path.join(root, destination)), `chip destination does not exist: ${href}`);
+  assert.ok(fs.existsSync(path.join(root, href.split('#')[0])), `chip destination does not exist: ${href}`);
 }
 
-assert.match(html, /class="chip-core"[^>]*aria-label="Chip central StanNet\.Space"/);
-assert.match(html, /<strong>StanNet<\/strong><small>\.Space<\/small>/);
-assert.equal((html.match(/class="chip-node /g) || []).length, 35, 'all areas appear as individual clickable chips');
-assert.equal((html.match(/class="atom-node-position/g) || []).length, 0, 'the old orbiting atom is removed');
-assert.match(html, /class="wire-light"/);
-assert.match(css, /@keyframes\s+chip-current/);
-assert.match(css, /stroke-dasharray:\s*7\s+993/);
+assert.match(html, /Chip central StanNet\.Space/);
+assert.match(html, /chip-network\.js\?v=20261003-2/);
+const flowGroup = html.match(/<g class="wire-light">([\s\S]*?)<\/g>/)?.[1] || '';
+assert.equal((flowGroup.match(/<path\b/g) || []).length, 3, 'only three lightweight signals animate at once');
+assert.match(css, /\.chip-board\.is-running \.wire-light path\{[^}]*animation:chip-current/s);
+assert.doesNotMatch(css, /wire-light\{[^}]*filter:drop-shadow/);
 assert.match(css, /prefers-reduced-motion:\s*reduce/);
 assert.match(css, /grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
-assert.match(css, /\.chip-node\s*\{[^}]*min-height:\s*62px/s);
+assert.match(css, /chip-map-visible #stannet-ai-root \.snai-launcher/);
+assert.match(network, /IntersectionObserver/);
+assert.match(network, /document\.hidden/);
+assert.match(network, /prefers-reduced-motion/);
 
-console.log('PASS: all 35 StanNet chip links, central branding, circuit animation, mobile layout and reduced motion verified.');
+console.log('PASS: all 35 chip links, reduced SVG work, visibility-aware motion, and responsive assistant clearance verified.');
