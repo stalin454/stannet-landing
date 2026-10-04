@@ -31,7 +31,7 @@ const summaries = new Set([...network.matchAll(/^    '([^']+)': '/gm)].map(match
 assert.deepEqual(new Set(nodes.map(([, , label]) => label)), summaries, 'every chip has its own contextual summary');
 assert.match(network, /pointerover/);
 assert.match(network, /focusin/);
-assert.ok(network.includes("addEventListener('focus'"));
+assert.ok(network.includes("addEventListener('focusin'"));
 assert.match(visual, /requestAnimationFrame/);
 assert.match(visual, /edges\.push/);
 assert.match(visual, /IntersectionObserver/);
