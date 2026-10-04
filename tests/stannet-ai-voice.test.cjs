@@ -6,7 +6,7 @@ const worker = fs.readFileSync('worker.js', 'utf8');
 const loader = fs.readFileSync('script.js', 'utf8');
 
 assert.ok(widget.includes('window.SpeechRecognition||window.webkitSpeechRecognition'), 'Voice input must support standard and WebKit SpeechRecognition');
-assert.ok(loader.includes("ai.src='/stannet-ai.js?v=20261004-agent1'"), 'Voice widget URL must be cache-busted');
+assert.match(loader, /ai\.src='\/stannet-ai\.js\?v=\d{8}-[a-z0-9]+'/i, 'Voice widget URL must be cache-busted');
 assert.ok(widget.includes("recognition.lang='es-ES'"), 'Voice input must recognize Spanish');
 assert.ok(widget.includes("fetch('/api/speech'"), 'Assistant must use the protected Cloudflare TTS endpoint');
 assert.ok(widget.includes("purpose:'chat'"), 'Assistant audio must be marked as dynamic chat content');
