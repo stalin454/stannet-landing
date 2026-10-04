@@ -139,6 +139,21 @@
     outline:2px solid var(--snai-cyan);
     outline-offset:2px;
   }
+  @media(max-width:520px){
+    html.snai-mobile-open,
+    html.snai-mobile-open body{
+      overscroll-behavior:none;
+    }
+    html.snai-mobile-open body{
+      touch-action:none;
+    }
+    html.snai-mobile-open #stannet-ai-root,
+    html.snai-mobile-open #stannet-ai-root *{
+      touch-action:auto;
+    }
+    html.snai-mobile-open #stannet-ai-root .snai-messages{touch-action:pan-y}
+    html.snai-mobile-open #stannet-ai-root .snai-modes{touch-action:pan-x}
+  }
   /* StanNet AI agent avatar — replaces the legacy robot launcher. */
   #stannet-ai-root .snai-launcher{
     width:142px;
@@ -417,12 +432,86 @@
     }
   }
 
+  /* Mobile IA navigation repair: stable viewport, isolated scrolling and keyboard-safe layout. */
+  @media(max-width:520px){
+    #stannet-ai-root .snai-panel{
+      top:calc(var(--snai-vtop,0px) + max(8px,env(safe-area-inset-top)));
+      bottom:auto;
+      height:calc(var(--snai-vh,100dvh) - max(16px,env(safe-area-inset-top)) - max(16px,env(safe-area-inset-bottom)));
+      max-height:none;
+      min-height:0;
+      display:none;
+      flex-direction:column;
+      overflow:hidden;
+      overscroll-behavior:none;
+      touch-action:manipulation;
+    }
+    #stannet-ai-root .snai-panel.open{display:flex}
+    #stannet-ai-root .snai-headbar{
+      flex:0 0 auto;
+      position:relative;
+      z-index:4;
+    }
+    #stannet-ai-root .snai-memory{
+      flex:0 0 auto;
+      max-height:34vh;
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
+    }
+    #stannet-ai-root .snai-modes{
+      flex:0 0 auto;
+      width:100%;
+      min-width:0;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scroll-snap-type:x proximity;
+      scrollbar-width:none;
+      touch-action:pan-x;
+      -webkit-overflow-scrolling:touch;
+    }
+    #stannet-ai-root .snai-modes::-webkit-scrollbar{display:none}
+    #stannet-ai-root .snai-modes button{
+      flex:0 0 auto;
+      scroll-snap-align:start;
+    }
+    #stannet-ai-root .snai-messages{
+      flex:1 1 auto;
+      min-height:0;
+      overflow-x:hidden;
+      overflow-y:auto;
+      touch-action:pan-y;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior-y:contain;
+      scroll-behavior:smooth;
+    }
+    #stannet-ai-root .snai-form{
+      flex:0 0 auto;
+      position:relative;
+      z-index:5;
+      background:#071a36;
+    }
+    #stannet-ai-root .snai-form-row{
+      width:100%;
+      min-width:0;
+    }
+    #stannet-ai-root .snai-form textarea{
+      min-width:0;
+      max-width:100%;
+    }
+    #stannet-ai-root .snai-voice-note,
+    #stannet-ai-root .snai-voice-status{
+      max-height:28px;
+      overflow:hidden;
+    }
+  }
+
 `;
 
   const style=document.createElement('style'); style.textContent=css; document.head.appendChild(style);
   const root=document.createElement('div'); root.id='stannet-ai-root';
   root.innerHTML=`
-    <section class="snai-panel" aria-label="StanNet AI">
+    <section class="snai-panel" aria-label="StanNet AI" aria-hidden="true">
       <div class="snai-headbar"><img class="snai-logo" src="/assets/brand/stannet-sn-cutout-20261005.png" alt=""><div class="snai-title"><strong>StanNet AI</strong><small>Agente personal · aprende y avanza</small></div><div class="snai-head-actions"><button class="snai-memory-button" type="button">Memoria</button><button class="snai-clear-button" type="button" title="Borrar conversación">Borrar</button></div><button class="snai-close" type="button" aria-label="Cerrar">×</button></div>
       <section class="snai-memory" hidden><strong>Memoria de este navegador</strong><small>Escribe preferencias o proyectos que quieras que recuerde. Solo se enviarán a la IA si marcas la casilla.</small><textarea maxlength="1500" aria-label="Memoria personal" placeholder="Ej.: estoy aprendiendo JavaScript; prefiero explicaciones paso a paso."></textarea><label><input class="snai-memory-enabled" type="checkbox"> Incluir mi memoria en las conversaciones</label><div class="snai-memory-actions"><button class="snai-memory-save" type="button">Guardar memoria</button><button class="snai-memory-clear" type="button">Borrar memoria</button></div></section>
       <div class="snai-modes"><button class="active" data-mode="auto">Auto</button><button data-mode="general">General</button><button data-mode="programming">Programación</button><button data-mode="cyber">Ciberseguridad</button><button data-mode="travel">Viajes</button></div>
@@ -590,7 +679,30 @@
     }
     voiceEnabled=true;voiceThinking=false;updateVoiceButton();startListening();
   });
-  const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
+  const isCompactViewport=()=>window.matchMedia('(max-width:520px)').matches;
+  const syncMobileViewport=()=>{
+    if(!isCompactViewport())return;
+    const viewport=window.visualViewport;
+    const height=viewport?viewport.height:window.innerHeight;
+    const top=viewport?viewport.offsetTop:0;
+    root.style.setProperty('--snai-vh',Math.max(320,Math.round(height))+'px');
+    root.style.setProperty('--snai-vtop',Math.max(0,Math.round(top))+'px');
+  };
+  const setPageScrollLocked=(locked)=>{
+    if(!isCompactViewport())return;
+    document.documentElement.classList.toggle('snai-mobile-open',locked);
+  };
+  const setOpen=(open)=>{
+    panel.classList.toggle('open',open);
+    launcher.setAttribute('aria-expanded',String(open));
+    panel.setAttribute('aria-hidden',String(!open));
+    setPageScrollLocked(open);
+    if(open){
+      syncMobileViewport();
+      messages.scrollTop=messages.scrollHeight;
+      if(!isCompactViewport())setTimeout(()=>input.focus(),80);
+    }
+  };
   const setHidden=(hidden)=>{
     launcher.classList.toggle('is-hidden',hidden);
     dismiss.classList.toggle('is-hidden',hidden);
@@ -599,6 +711,11 @@
     try{localStorage.setItem(UI_KEY,hidden?'1':'0')}catch{}
   };
   launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
+  window.addEventListener('resize',()=>{if(panel.classList.contains('open'))syncMobileViewport()},{passive:true});
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',()=>{if(panel.classList.contains('open'))syncMobileViewport()},{passive:true});
+    window.visualViewport.addEventListener('scroll',()=>{if(panel.classList.contains('open'))syncMobileViewport()},{passive:true});
+  }
   dismiss.addEventListener('click',(event)=>{event.preventDefault();event.stopPropagation();setHidden(true)});
   root.querySelector('.snai-memory-button').addEventListener('click',()=>{memoryPanel.hidden=!memoryPanel.hidden});
   root.querySelector('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.trim().slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');voiceStatus.textContent='Memoria guardada solo en este navegador.'}catch{voiceStatus.textContent='No se pudo guardar la memoria en este navegador.'}});
@@ -741,6 +858,14 @@
       send.disabled=false;input.focus();
       if(voiceEnabled&&!voiceThinking)startListening();
     }
+  });
+  input.addEventListener('focus',()=>{
+    if(!isCompactViewport())return;
+    setTimeout(()=>{
+      syncMobileViewport();
+      form.scrollIntoView({block:'end',behavior:'smooth'});
+      messages.scrollTop=messages.scrollHeight;
+    },180);
   });
   input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
 })();
