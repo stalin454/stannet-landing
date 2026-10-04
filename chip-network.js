@@ -90,14 +90,15 @@
   }
 
   function show(node) {
+    if (current === node) return;
     const label = node.getAttribute('aria-label') || node.textContent.trim();
     heading.textContent = label;
     copy.textContent = summaries[label] || 'Explora esta área de StanNet.';
     current?.removeAttribute('aria-describedby');
     current = node;
     node.setAttribute('aria-describedby', preview.id);
-    preview.classList.add('is-visible');
     position(node);
+    preview.classList.add('is-visible');
   }
 
   function hide(node) {
@@ -107,19 +108,29 @@
     preview.classList.remove('is-visible');
   }
 
-  board.querySelectorAll('.chip-node').forEach(node => {
-    node.removeAttribute('title');
-    node.addEventListener('pointerenter', event => {
-      if (event.pointerType !== 'touch') show(node);
-    });
-    node.addEventListener('pointerleave', () => {
-      if (document.activeElement !== node) hide(node);
-    });
-    node.addEventListener('focus', () => show(node));
-    node.addEventListener('blur', () => hide(node));
-    node.addEventListener('keydown', event => {
-      if (event.key === 'Escape') { hide(node); node.blur(); }
-    });
+  const grid = board.querySelector('.chip-grid');
+  grid.querySelectorAll('.chip-node').forEach(node => node.removeAttribute('title'));
+  const chipFrom = target => target?.closest?.('.chip-node');
+  grid.addEventListener('pointerover', event => {
+    if (event.pointerType === 'touch') return;
+    const node = chipFrom(event.target);
+    if (node && grid.contains(node) && !node.contains(event.relatedTarget)) show(node);
+  });
+  grid.addEventListener('pointerout', event => {
+    const node = chipFrom(event.target);
+    if (node && !node.contains(event.relatedTarget) && document.activeElement !== node) hide(node);
+  });
+  grid.addEventListener('focusin', event => {
+    const node = chipFrom(event.target);
+    if (node) show(node);
+  });
+  grid.addEventListener('focusout', event => {
+    const node = chipFrom(event.target);
+    if (node) hide(node);
+  });
+  grid.addEventListener('keydown', event => {
+    const node = chipFrom(event.target);
+    if (node && event.key === 'Escape') { hide(node); node.blur(); }
   });
   window.addEventListener('resize', () => { if (current) position(current); }, { passive: true });
 })();

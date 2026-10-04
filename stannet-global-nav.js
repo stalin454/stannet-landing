@@ -67,7 +67,7 @@ header.id=NAV_ID;
 header.className='site-header';
 header.innerHTML=`
 <a class="brand brand-lockup" href="/" aria-label="StanNet.Space, inicio">
-  <img class="brand-mark" src="/assets/brand/stannet-shield.png?v=20261002-3" alt="">
+  <img class="brand-mark" src="/assets/brand/stannet-shield.png?v=20261002-3" width="34" height="34" alt="">
   <span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i>
 </a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -170,4 +170,46 @@ document.addEventListener('click',e=>{
   if(!header.contains(e.target)){groups.forEach(g=>g.classList.remove('open'));nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}
 });
 header.querySelectorAll('.nav-dropdown a,.site-nav>a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}));
+
+/* Warm only a small number of same-origin documents after clear menu intent. */
+const connection=navigator.connection;
+if(!connection?.saveData && !/(^|-)2g/.test(connection?.effectiveType||'')){
+  const warmed=new Set();
+  let pending=0;
+  let pendingTarget=null;
+  const navTarget=element=>element?.closest?.('.site-nav a[href],.site-nav .nav-trigger');
+  const warm=element=>{
+    const anchor=element.tagName==='A'?element:element.closest('.nav-group')?.querySelector('.nav-dropdown a[href]');
+    if(!anchor||anchor.target&&anchor.target!=='_self'||anchor.hasAttribute('download'))return;
+    const url=new URL(anchor.href,location.href);
+    if(url.origin!==location.origin||url.search||!(url.pathname==='/'||url.pathname.endsWith('.html')))return;
+    if(url.pathname===location.pathname||warmed.has(url.pathname)||warmed.size>=5)return;
+    warmed.add(url.pathname);
+    const hint=document.createElement('link');
+    hint.rel='prefetch';
+    hint.as='document';
+    hint.fetchPriority='low';
+    hint.href=url.pathname;
+    document.head.appendChild(hint);
+  };
+  header.addEventListener('pointerover',event=>{
+    if(event.pointerType==='touch')return;
+    const target=navTarget(event.target);
+    if(!target||target===pendingTarget)return;
+    clearTimeout(pending);
+    pendingTarget=target;
+    pending=window.setTimeout(()=>{warm(target);pendingTarget=null},100);
+  });
+  header.addEventListener('pointerout',event=>{
+    const target=navTarget(event.target);
+    if(!target||target!==pendingTarget||target.contains(event.relatedTarget))return;
+    clearTimeout(pending);
+    pendingTarget=null;
+  });
+  header.addEventListener('focusin',event=>{
+    const target=navTarget(event.target);
+    if(target){clearTimeout(pending);pendingTarget=null;warm(target)}
+  });
+}
+
 })();

@@ -16,7 +16,7 @@ for (const [, href, label] of nodes) {
 }
 
 assert.match(html, /Chip central StanNet\.Space/);
-assert.match(html, /chip-network\.js\?v=20261004-ai1/);
+assert.match(html, /chip-network\.js\?v=20261004-perf1/);
 const flowGroup = html.match(/<g class="wire-light">([\s\S]*?)<\/g>/)?.[1] || '';
 assert.equal((flowGroup.match(/<path\b/g) || []).length, 3, 'only three lightweight signals animate at once');
 assert.match(css, /\.chip-board\.is-running \.wire-light path\{[^}]*animation:chip-current/s);
@@ -29,9 +29,11 @@ assert.match(network, /document\.hidden/);
 assert.match(network, /prefers-reduced-motion/);
 const summaries = new Set([...network.matchAll(/^    '([^']+)': '/gm)].map(match => match[1]));
 assert.deepEqual(new Set(nodes.map(([, , label]) => label)), summaries, 'every chip has its own contextual summary');
-assert.match(network, /pointerenter/);
-assert.ok(network.includes("addEventListener('focus'"));
+assert.match(network, /pointerover/);
+assert.match(network, /focusin/);
+assert.ok(network.includes("addEventListener('focusin'"));
 assert.match(visual, /requestAnimationFrame/);
+assert.match(visual, /edges\.push/);
 assert.match(visual, /IntersectionObserver/);
 assert.match(visual, /prefers-reduced-motion/);
 assert.match(visual, /document\.hidden/);
