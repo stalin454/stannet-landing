@@ -152,6 +152,7 @@
     transform-origin:50% 100%;
   }
   #stannet-ai-root .snai-launcher:hover{transform:scale(1.035)}
+  #stannet-ai-root .snai-launcher.is-hidden{display:none!important}
   #stannet-ai-root .snai-agent-shell{
     position:relative;
     display:block;
@@ -252,8 +253,14 @@
   }
   #stannet-ai-root .snai-dismiss.is-hidden{display:none}
   #stannet-ai-root .snai-reopen{
-    position:relative;
-    z-index:7;
+    position:fixed;
+    z-index:100000;
+    right:0;
+    bottom:22px;
+    min-width:42px;
+    height:34px;
+    padding:0 10px;
+    border-radius:12px 0 0 12px;
   }
 
   @media(max-width:520px){
@@ -376,6 +383,13 @@
       height:28px;
       font-size:17px;
     }
+    #stannet-ai-root .snai-reopen{
+      right:0;
+      bottom:max(14px,env(safe-area-inset-bottom));
+      min-width:40px;
+      height:32px;
+      padding:0 9px;
+    }
     #stannet-ai-root .snai-launcher{
       width:96px;
       height:144px;
@@ -422,7 +436,7 @@
         <span class="snai-status"></span>
       </span>
     </button>
-    <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">AI</button>`;
+    <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">IA</button>`;
   document.body.appendChild(root);
 
   const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),dismiss=root.querySelector('.snai-dismiss'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status'),attachmentInput=form.querySelector('.snai-file-input'),attachmentView=form.querySelector('.snai-attachment'),memoryPanel=root.querySelector('.snai-memory'),memoryInput=root.querySelector('.snai-memory textarea'),memoryEnabledInput=root.querySelector('.snai-memory-enabled');
