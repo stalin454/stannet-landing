@@ -60,7 +60,16 @@ if(videoGallery&&videoPlayer){
         card.className='video-card';
         const button=document.createElement('button');
         button.type='button';
-        button.innerHTML=`<img src="${video.thumbnail}" alt="Miniatura de ${video.title}" loading="lazy"><h3>${video.title}</h3>`;
+        const thumbnail=document.createElement('img');
+        thumbnail.src=video.thumbnail;
+        thumbnail.alt=`Miniatura de ${video.title}`;
+        thumbnail.loading='lazy';
+        thumbnail.decoding='async';
+        thumbnail.width=480;
+        thumbnail.height=270;
+        const title=document.createElement('h3');
+        title.textContent=video.title;
+        button.append(thumbnail,title);
         button.addEventListener('click',()=>{
           videoPlayer.src=`https://www.youtube.com/embed/${video.id}`;
           videoPlayer.scrollIntoView({behavior:'smooth',block:'center'});

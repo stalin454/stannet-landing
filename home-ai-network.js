@@ -15,6 +15,7 @@
   let width = 0;
   let height = 0;
   let points = [];
+  let edges = [];
   let pointer = null;
   let visible = false;
   let active = false;
@@ -42,6 +43,19 @@
         });
       }
     }
+    edges = [];
+    const neighbors = [[1, 0], [0, 1], [1, 1], [-1, 1]];
+    for (let row = 0; row < rows; row += 1) {
+      for (let column = 0; column < columns; column += 1) {
+        for (const [dx, dy] of neighbors) {
+          const nextColumn = column + dx;
+          const nextRow = row + dy;
+          if (nextColumn >= 0 && nextColumn < columns && nextRow < rows) {
+            edges.push([row * columns + column, nextRow * columns + nextColumn]);
+          }
+        }
+      }
+    }
     draw(0);
   }
 
@@ -64,19 +78,17 @@
       return { x, y };
     });
 
-    for (let i = 0; i < positions.length; i += 1) {
-      for (let j = i + 1; j < positions.length; j += 1) {
-        const a = positions[i];
-        const b = positions[j];
-        const distance = Math.hypot(a.x - b.x, a.y - b.y);
-        if (distance > 290) continue;
-        context.strokeStyle = 'rgba(100, 225, 255, ' + ((1 - distance / 290) * .26).toFixed(3) + ')';
-        context.lineWidth = 1;
-        context.beginPath();
-        context.moveTo(a.x, a.y);
-        context.lineTo(b.x, b.y);
-        context.stroke();
-      }
+    for (const [i, j] of edges) {
+      const a = positions[i];
+      const b = positions[j];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      if (distance > 290) continue;
+      context.strokeStyle = 'rgba(100, 225, 255, ' + ((1 - distance / 290) * .26).toFixed(3) + ')';
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(a.x, a.y);
+      context.lineTo(b.x, b.y);
+      context.stroke();
     }
     positions.forEach((point, index) => {
       context.fillStyle = index % 5 === 0 ? 'rgba(181, 135, 255, .48)' : 'rgba(91, 221, 247, .38)';
