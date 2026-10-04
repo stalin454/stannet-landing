@@ -14,7 +14,7 @@ style.textContent=`
 }
 #${NAV_ID} *{box-sizing:border-box}
 #${NAV_ID} .brand{display:flex;align-items:center;gap:8px;text-decoration:none!important;white-space:nowrap}
-#${NAV_ID} .brand-mark{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(40,120,255,.16))}
+#${NAV_ID} .brand-mark{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(40,120,255,.16))}
 #${NAV_ID} .brand>span{font:700 20px/1 Orbitron,Inter,sans-serif}
 #${NAV_ID} .brand-stan{color:#0a1730!important}
 #${NAV_ID} .brand-net{color:#2878ff!important}
@@ -67,7 +67,7 @@ header.id=NAV_ID;
 header.className='site-header';
 header.innerHTML=`
 <a class="brand brand-lockup" href="/" aria-label="StanNet.Space, inicio">
-  <img class="brand-mark" src="/assets/brand/stannet-shield.png?v=20261002-3" width="34" height="34" alt="">
+  <img class="brand-mark" src="/assets/brand/stannet-sn-20261005.png" width="44" height="44" alt="">
   <span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i>
 </a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
