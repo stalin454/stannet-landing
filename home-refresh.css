@@ -318,3 +318,7 @@
   .home-journey{display:block;padding:30px 22px}
   .home-journey .home-btn{margin-top:24px}
 }
+
+/* Decorative AI network: pointer events pass through to every link. */
+.home-hero .home-ai-network{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none;opacity:.8}
+@media(max-width:720px){.home-hero .home-ai-network{opacity:.48}}

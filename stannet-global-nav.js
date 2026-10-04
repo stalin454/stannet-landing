@@ -115,7 +115,7 @@ header.innerHTML=`
     </div>
   </div>
   <div class="nav-group" data-group="/pages/academias">
-    <button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button>
+    <button class="nav-trigger" type="button" aria-expanded="false">Centro de Aprendizaje <span>⌄</span></button>
     <div class="nav-dropdown">
       <a href="/pages/programming.html">Programming Academy</a>
       <a href="/pages/typing.html">Typing Lab · Mecanografía</a>

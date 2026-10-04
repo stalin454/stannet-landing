@@ -5,7 +5,7 @@ const html = fs.readFileSync('index.html','utf8');
 const script = fs.readFileSync('script.js','utf8');
 const css = fs.readFileSync('style.css','utf8');
 
-for (const label of ['Web Development','Apps','Ciberseguridad','Academias','Laboratorios']) {
+for (const label of ['Web Development','Apps','Ciberseguridad','Centro de Aprendizaje','Laboratorios']) {
   assert.ok(html.includes('>'+label+' <span>⌄</span></button>'), label+' dropdown missing');
 }
 assert.ok((html.match(/class="nav-group"/g)||[]).length >= 5);
@@ -23,6 +23,8 @@ assert.ok(css.includes('.nav-group.open .nav-dropdown'));
 
 const sharedNav = require('node:fs').readFileSync('stannet-global-nav.js','utf8');
 assert.ok(sharedNav.includes('data-nav="/pages/radio"'));
+assert.ok(sharedNav.includes('Centro de Aprendizaje <span>⌄</span></button>'));
+assert.ok(html.includes('Centro de Aprendizaje <span>⌄</span></button>'));
 assert.equal((sharedNav.match(/Cybersecurity Academy/g)||[]).length,1);
 assert.equal((sharedNav.match(/Cyber Defense Lab/g)||[]).length,1);
 assert.equal((sharedNav.match(/>Sentinel</g)||[]).length,1);
