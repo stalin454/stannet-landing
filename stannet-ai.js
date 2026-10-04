@@ -223,6 +223,186 @@
     #stannet-ai-root .snai-panel{bottom:162px}
   }
 
+  /* Quick hide control + robust mobile viewport layout. */
+  #stannet-ai-root .snai-dismiss{
+    position:absolute;
+    z-index:6;
+    right:1px;
+    top:-8px;
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    padding:0;
+    border:1px solid rgba(126,243,255,.45);
+    border-radius:999px;
+    background:rgba(5,16,38,.94);
+    color:#fff;
+    font:700 18px/1 Inter,system-ui,sans-serif;
+    cursor:pointer;
+    box-shadow:0 8px 22px rgba(0,0,0,.38),0 0 16px rgba(40,120,255,.20);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    transition:transform .16s ease,border-color .16s ease,background .16s ease;
+  }
+  #stannet-ai-root .snai-dismiss:hover{
+    transform:scale(1.08);
+    border-color:#09cfe8;
+    background:rgba(18,44,91,.98);
+  }
+  #stannet-ai-root .snai-dismiss.is-hidden{display:none}
+  #stannet-ai-root .snai-reopen{
+    position:relative;
+    z-index:7;
+  }
+
+  @media(max-width:520px){
+    #stannet-ai-root{
+      right:max(8px,env(safe-area-inset-right));
+      bottom:max(8px,env(safe-area-inset-bottom));
+    }
+    #stannet-ai-root .snai-panel{
+      position:fixed;
+      box-sizing:border-box;
+      left:max(8px,env(safe-area-inset-left));
+      right:max(8px,env(safe-area-inset-right));
+      top:max(8px,env(safe-area-inset-top));
+      bottom:max(8px,env(safe-area-inset-bottom));
+      width:auto;
+      height:auto;
+      max-height:none;
+      border-radius:18px;
+      overflow:hidden;
+    }
+    #stannet-ai-root .snai-panel.open{
+      display:flex;
+    }
+    #stannet-ai-root .snai-headbar{
+      flex-wrap:wrap;
+      gap:7px;
+      padding:10px 10px 8px;
+    }
+    #stannet-ai-root .snai-logo{
+      width:30px;
+      height:30px;
+    }
+    #stannet-ai-root .snai-title{
+      min-width:0;
+    }
+    #stannet-ai-root .snai-title strong{
+      font-size:12px;
+      letter-spacing:.05em;
+    }
+    #stannet-ai-root .snai-title small{
+      display:block;
+      max-width:145px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      font-size:9px;
+    }
+    #stannet-ai-root .snai-head-actions{
+      order:3;
+      width:100%;
+      justify-content:flex-end;
+    }
+    #stannet-ai-root .snai-head-actions button{
+      min-height:30px;
+      padding:5px 8px;
+      font-size:9px;
+    }
+    #stannet-ai-root .snai-close{
+      margin-left:auto;
+      min-width:38px;
+      min-height:38px;
+      display:grid;
+      place-items:center;
+      padding:0;
+      border-radius:10px;
+      background:rgba(255,255,255,.06);
+    }
+    #stannet-ai-root .snai-modes{
+      padding:7px 8px;
+      gap:5px;
+      -webkit-overflow-scrolling:touch;
+    }
+    #stannet-ai-root .snai-modes button{
+      padding:6px 9px;
+      font-size:9px;
+    }
+    #stannet-ai-root .snai-messages{
+      min-height:0;
+      padding:10px;
+      gap:8px;
+      overscroll-behavior:contain;
+    }
+    #stannet-ai-root .snai-msg{
+      max-width:92%;
+      padding:9px 10px;
+      font-size:13px;
+      line-height:1.4;
+    }
+    #stannet-ai-root .snai-form{
+      padding:8px 8px max(8px,env(safe-area-inset-bottom));
+    }
+    #stannet-ai-root .snai-form-row{
+      gap:5px;
+    }
+    #stannet-ai-root .snai-form textarea{
+      height:42px;
+      min-height:42px;
+      padding:10px;
+      font-size:16px;
+    }
+    #stannet-ai-root .snai-attach,
+    #stannet-ai-root .snai-send,
+    #stannet-ai-root .snai-voice-toggle{
+      flex-basis:42px;
+      width:42px;
+      height:42px;
+      border-radius:12px;
+    }
+    #stannet-ai-root .snai-privacy-note{
+      display:none;
+    }
+    #stannet-ai-root .snai-voice-note{
+      padding-top:4px;
+      font-size:9px;
+    }
+    #stannet-ai-root .snai-dismiss{
+      right:0;
+      top:-4px;
+      width:28px;
+      height:28px;
+      font-size:17px;
+    }
+    #stannet-ai-root .snai-launcher{
+      width:96px;
+      height:144px;
+      transform:none;
+    }
+    #stannet-ai-root .snai-agent-shell{
+      width:92px;
+      height:138px;
+    }
+    #stannet-ai-root .snai-agent-avatar{
+      width:92px;
+      height:138px;
+    }
+  }
+
+  @media(max-width:360px){
+    #stannet-ai-root .snai-title small{display:none}
+    #stannet-ai-root .snai-msg{font-size:12.5px}
+    #stannet-ai-root .snai-attach,
+    #stannet-ai-root .snai-send,
+    #stannet-ai-root .snai-voice-toggle{
+      flex-basis:38px;
+      width:38px;
+      height:40px;
+    }
+  }
+
 `;
 
   const style=document.createElement('style'); style.textContent=css; document.head.appendChild(style);
@@ -235,6 +415,7 @@
       <div class="snai-messages"><div class="snai-msg bot">Hola, soy tu agente personal de StanNet. Puedo acompañarte paso a paso en Programming Academy, proponerte ejercicios y corregir lo que pruebes. También puedo ayudarte a organizar tareas y planificar viajes. La búsqueda de tarifas y la compra de vuelos todavía no están conectadas.</div></div>
       <form class="snai-form"><div class="snai-form-row"><textarea maxlength="4000" placeholder="Escribe, adjunta código o una imagen…" aria-label="Mensaje"></textarea><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código" title="Adjuntar imagen o archivo de código">📎</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false" title="Hablar con StanNet AI">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div><small class="snai-attachment" hidden></small><small class="snai-voice-note">Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</small><small class="snai-privacy-note">Los mensajes se procesan con el proveedor de IA. Los archivos que adjuntes se envían para analizarlos y no se guardan en el historial. La memoria solo se envía si activas la casilla correspondiente.</small><small class="snai-voice-status" aria-live="polite">La voz funciona en navegadores compatibles; también puedes escribir.</small></form>
     </section>
+    <button class="snai-dismiss" type="button" aria-label="Ocultar StanNet AI" title="Ocultar agente">×</button>
     <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-expanded="false">
       <span class="snai-agent-shell" aria-hidden="true">
         <img class="snai-agent-avatar" src="/assets/ai/stannet-ai-agent.svg?v=20261005-1" width="130" height="195" alt="">
@@ -244,7 +425,7 @@
     <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">AI</button>`;
   document.body.appendChild(root);
 
-  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status'),attachmentInput=form.querySelector('.snai-file-input'),attachmentView=form.querySelector('.snai-attachment'),memoryPanel=root.querySelector('.snai-memory'),memoryInput=root.querySelector('.snai-memory textarea'),memoryEnabledInput=root.querySelector('.snai-memory-enabled');
+  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),dismiss=root.querySelector('.snai-dismiss'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status'),attachmentInput=form.querySelector('.snai-file-input'),attachmentView=form.querySelector('.snai-attachment'),memoryPanel=root.querySelector('.snai-memory'),memoryInput=root.querySelector('.snai-memory textarea'),memoryEnabledInput=root.querySelector('.snai-memory-enabled');
   const UI_KEY='stannet-ai-hidden-v1';
   const HISTORY_KEY='stannet-ai-history-v1';
   const MEMORY_KEY='stannet-ai-memory-v1';
@@ -398,11 +579,13 @@
   const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
   const setHidden=(hidden)=>{
     launcher.classList.toggle('is-hidden',hidden);
+    dismiss.classList.toggle('is-hidden',hidden);
     reopen.classList.toggle('visible',hidden);
     if(hidden)setOpen(false);
     try{localStorage.setItem(UI_KEY,hidden?'1':'0')}catch{}
   };
   launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
+  dismiss.addEventListener('click',(event)=>{event.preventDefault();event.stopPropagation();setHidden(true)});
   root.querySelector('.snai-memory-button').addEventListener('click',()=>{memoryPanel.hidden=!memoryPanel.hidden});
   root.querySelector('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.trim().slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');voiceStatus.textContent='Memoria guardada solo en este navegador.'}catch{voiceStatus.textContent='No se pudo guardar la memoria en este navegador.'}});
   memoryEnabledInput.addEventListener('change',()=>{try{localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0')}catch{}});
@@ -411,7 +594,7 @@
   root.querySelector('.snai-attach').addEventListener('click',()=>attachmentInput.click());
   attachmentInput.addEventListener('change',()=>{const file=attachmentInput.files?.[0];pendingAttachment=file||null;attachmentView.hidden=!file;attachmentView.textContent=file?file.name+' ':'';if(file){const remove=document.createElement('button');remove.type='button';remove.textContent='Quitar';remove.addEventListener('click',()=>{pendingAttachment=null;attachmentInput.value='';attachmentView.hidden=true});attachmentView.appendChild(remove)}});
 
-  close.addEventListener('click',()=>setHidden(true));
+  close.addEventListener('click',()=>{if(voiceEnabled)stopVoiceMode('Conversación por voz detenida.');else stopSpeech();setHidden(true)});
   reopen.addEventListener('click',()=>{setHidden(false);setOpen(true)});
   root.querySelectorAll('.snai-modes button').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.snai-modes button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode||'auto'}));
   const routeLabels={
