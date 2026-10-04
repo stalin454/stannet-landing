@@ -1356,13 +1356,13 @@ async function handleStanNetAi(request, env) {
     : [];
   const memory = typeof body?.memory === 'string' ? body.memory.trim().slice(0, 1500) : '';
   const attachment = body?.attachment && typeof body.attachment === 'object' ? body.attachment : null;
-  let attachmentContext = '';
+    attachmentContext = '\nArchivo adjunto (' + String(attachment.name || 'archivo').slice(0, 100).replace(/[\r\n]/g, '') + '):\n' + attachment.content.slice(0, 40000);
   let imagePart = null;
   if (attachment?.kind === 'text' && typeof attachment.content === 'string') {
-    attachmentContext = '\nArchivo adjunto (' + String(attachment.name || 'archivo').slice(0, 100).replace(/[\\r\\n]/g, '') + '):\\n' + attachment.content.slice(0, 40000);
+    attachmentContext = '\nArchivo adjunto (' + String(attachment.name || 'archivo').slice(0, 100).replace(/[\r\n]/g, '') + '):\n' + attachment.content.slice(0, 40000);
   } else if (attachment?.kind === 'image') {
     const dataUrl = typeof attachment.data === 'string' ? attachment.data : '';
-    if (dataUrl.length > 5600000 || !/^data:image\\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+=*$/.test(dataUrl)) {
+    if (dataUrl.length > 5600000 || !/^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+=*$/.test(dataUrl)) {
       return json({ error: 'La imagen no es válida o supera 4 MB.' }, 413, headers);
     }
     imagePart = { type: 'image_url', image_url: { url: dataUrl } };
@@ -1373,8 +1373,8 @@ async function handleStanNetAi(request, env) {
   if (imagePart && !groqHost) return json({ error: 'El análisis de imágenes requiere el servicio de visión configurado con Groq.' }, 503, headers);
   const supportedToolModels = ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'];
   const canUseGroqTools = groqHost && !imagePart && supportedToolModels.includes(model);
-  const wantsCurrentInfo = mode === 'travel' || /\\b(hoy|ahora|actual|actualizado|último|ultimos|precio|precios|tarifa|vuelos|vuelo|noticias|esta semana|reciente|vigente)\\b/i.test(message);
-  const wantsCodeCheck = mode === 'programming' && /\\b(ejecuta|prueba|test|depura|debug|comprueba|verifica|calcula)\\b/i.test(message);
+  const wantsCurrentInfo = mode === 'travel' || /\b(hoy|ahora|actual|actualizado|último|ultimos|precio|precios|tarifa|vuelos|vuelo|noticias|esta semana|reciente|vigente|busca|buscar|investiga|fuentes|fuente|web)\b/i.test(message);
+  const wantsCodeCheck = mode === 'programming' && /\b(ejecuta|prueba|test|depura|debug|comprueba|verifica|calcula)\b/i.test(message);
   const agentTools = canUseGroqTools
     ? [...(wantsCurrentInfo ? [{ type: 'browser_search' }] : []), ...(wantsCodeCheck ? [{ type: 'code_interpreter' }] : [])]
     : [];
@@ -1392,7 +1392,7 @@ async function handleStanNetAi(request, env) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model,
+        model: requestModel,
         messages: [
           {
             role: 'system',
