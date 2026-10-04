@@ -34,6 +34,6 @@ assert.ok(network.includes("addEventListener('focus'"));
 assert.match(visual, /requestAnimationFrame/);
 assert.match(visual, /IntersectionObserver/);
 assert.match(visual, /prefers-reduced-motion/);
-assert.match(visual, /document\\.hidden/);
+assert.match(visual, /document\.hidden/);
 
 console.log('PASS: all 35 chip links, reduced SVG work, visibility-aware motion, and responsive assistant clearance verified.');
