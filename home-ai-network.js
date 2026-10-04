@@ -30,7 +30,7 @@
     canvas.height = Math.round(height * ratio);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     const columns = smallScreen.matches ? 5 : 8;
-    const rows = smallScreen.matches ? 6 : 5;
+    const rows = smallScreen.matches ? 6 : 8;
     points = [];
     for (let row = 0; row < rows; row += 1) {
       for (let column = 0; column < columns; column += 1) {
@@ -69,8 +69,8 @@
         const a = positions[i];
         const b = positions[j];
         const distance = Math.hypot(a.x - b.x, a.y - b.y);
-        if (distance > 165) continue;
-        context.strokeStyle = 'rgba(100, 225, 255, ' + ((1 - distance / 165) * .17).toFixed(3) + ')';
+        if (distance > 290) continue;
+        context.strokeStyle = 'rgba(100, 225, 255, ' + ((1 - distance / 290) * .26).toFixed(3) + ')';
         context.lineWidth = 1;
         context.beginPath();
         context.moveTo(a.x, a.y);
