@@ -67,7 +67,7 @@ header.id=NAV_ID;
 header.className='site-header';
 header.innerHTML=`
 <a class="brand brand-lockup" href="/" aria-label="StanNet.Space, inicio">
-  <img class="brand-mark" src="/assets/brand/stannet-sn-20261005.png" width="44" height="44" alt="">
+  <img class="brand-mark" src="/assets/brand/stannet-sn-cutout-20261005.png" width="44" height="44" alt="">
   <span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i>
 </a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
