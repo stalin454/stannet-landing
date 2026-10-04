@@ -32,7 +32,114 @@
   @keyframes snai-arm-a{from{transform:rotate(13deg)}to{transform:rotate(-15deg)}}@keyframes snai-arm-b{from{transform:rotate(-13deg)}to{transform:rotate(15deg)}}
   @keyframes snai-leg-a{from{transform:rotate(-8deg)}to{transform:rotate(9deg)}}@keyframes snai-leg-b{from{transform:rotate(8deg)}to{transform:rotate(-9deg)}}
   @keyframes snai-open{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-  @media(max-width:520px){#stannet-ai-root{right:12px;bottom:10px}.snai-panel{position:fixed;left:10px;right:10px;bottom:126px;width:auto;height:64vh}.snai-launcher{width:76px;height:100px;transform:scale(.92)}}`;
+  @media(max-width:520px){#stannet-ai-root{right:12px;bottom:10px}.snai-panel{position:fixed;left:10px;right:10px;bottom:126px;width:auto;height:64vh}.snai-launcher{width:76px;height:100px;transform:scale(.92)}}
+  /* Shared StanNet blue / cyan / violet identity. */
+  #stannet-ai-root{
+    --snai-cyan:#09cfe8;
+    --snai-blue:#2878ff;
+    --snai-violet:#8a39ff;
+    --snai-text:#f5fbff;
+    --snai-muted:#b8cbe2;
+    --snai-line:rgba(87,174,255,.28);
+  }
+  #stannet-ai-root .snai-panel{
+    color:var(--snai-text);
+    border-color:rgba(9,207,232,.42);
+    background:radial-gradient(circle at 92% 4%,rgba(138,57,255,.17),transparent 45%),linear-gradient(145deg,#0b2850 0%,#081c3a 48%,#06152f 100%);
+    box-shadow:0 28px 85px rgba(2,11,31,.56),0 0 34px rgba(40,120,255,.17);
+  }
+  #stannet-ai-root .snai-headbar{
+    border-bottom-color:var(--snai-line);
+    background:linear-gradient(110deg,rgba(9,207,232,.20),rgba(40,120,255,.18) 52%,rgba(138,57,255,.23));
+  }
+  #stannet-ai-root .snai-title small{color:#a7e9ff}
+  #stannet-ai-root .snai-head-actions button,
+  #stannet-ai-root .snai-memory-actions button,
+  #stannet-ai-root .snai-attach,
+  #stannet-ai-root .snai-voice-toggle{
+    color:#d7edff;
+    border-color:var(--snai-line);
+    background:rgba(8,29,64,.88);
+  }
+  #stannet-ai-root .snai-head-actions button:hover,
+  #stannet-ai-root .snai-memory-actions button:hover,
+  #stannet-ai-root .snai-attach:hover,
+  #stannet-ai-root .snai-voice-toggle:hover{
+    border-color:var(--snai-cyan);
+    background:rgba(40,120,255,.22);
+  }
+  #stannet-ai-root .snai-modes{
+    border-bottom-color:var(--snai-line);
+    background:rgba(4,18,42,.58);
+  }
+  #stannet-ai-root .snai-modes button{
+    color:#c6dbf0;
+    border-color:rgba(121,176,242,.27);
+    background:rgba(8,30,66,.84);
+  }
+  #stannet-ai-root .snai-modes button.active{
+    color:#fff;
+    border-color:var(--snai-cyan);
+    background:linear-gradient(115deg,rgba(9,207,232,.23),rgba(40,120,255,.30) 55%,rgba(138,57,255,.28));
+    box-shadow:0 0 16px rgba(40,120,255,.20);
+  }
+  #stannet-ai-root .snai-messages{
+    background:radial-gradient(circle at 8% 100%,rgba(40,120,255,.08),transparent 52%);
+    scrollbar-color:#3577b8 #071a35;
+    scrollbar-width:thin;
+  }
+  #stannet-ai-root .snai-messages::-webkit-scrollbar,
+  #stannet-ai-root .snai-modes::-webkit-scrollbar{width:7px;height:5px}
+  #stannet-ai-root .snai-messages::-webkit-scrollbar-track,
+  #stannet-ai-root .snai-modes::-webkit-scrollbar-track{background:#071a35}
+  #stannet-ai-root .snai-messages::-webkit-scrollbar-thumb,
+  #stannet-ai-root .snai-modes::-webkit-scrollbar-thumb{background:#3577b8;border-radius:999px}
+  #stannet-ai-root .snai-msg.bot{
+    color:var(--snai-text);
+    border-color:rgba(87,174,255,.30);
+    background:linear-gradient(145deg,rgba(11,38,78,.98),rgba(7,29,60,.98));
+  }
+  #stannet-ai-root .snai-msg.user{
+    color:#fff;
+    background:linear-gradient(125deg,#087fa9,#2859bd 55%,#6536a8);
+  }
+  #stannet-ai-root .snai-form{
+    border-top-color:var(--snai-line);
+    background:rgba(4,17,39,.75);
+  }
+  #stannet-ai-root .snai-form textarea,
+  #stannet-ai-root .snai-memory textarea{
+    color:var(--snai-text);
+    border-color:rgba(121,176,242,.32);
+    background:#071a36;
+  }
+  #stannet-ai-root .snai-form textarea::placeholder,
+  #stannet-ai-root .snai-memory textarea::placeholder{color:#a9bed4}
+  #stannet-ai-root .snai-form textarea:focus,
+  #stannet-ai-root .snai-memory textarea:focus{
+    border-color:var(--snai-cyan);
+    box-shadow:0 0 0 2px rgba(9,207,232,.16);
+  }
+  #stannet-ai-root .snai-send,
+  #stannet-ai-root .snai-voice-toggle.active{
+    color:#fff;
+    background:linear-gradient(135deg,var(--snai-cyan),var(--snai-blue) 52%,var(--snai-violet));
+  }
+  #stannet-ai-root .snai-memory{
+    color:var(--snai-text);
+    border-bottom-color:var(--snai-line);
+    background:#0a2347;
+  }
+  #stannet-ai-root .snai-memory small,
+  #stannet-ai-root .snai-privacy-note,
+  #stannet-ai-root .snai-voice-note{color:var(--snai-muted)}
+  #stannet-ai-root .snai-voice-status,
+  #stannet-ai-root .snai-speak{color:#91eafb}
+  #stannet-ai-root .snai-panel :focus-visible{
+    outline:2px solid var(--snai-cyan);
+    outline-offset:2px;
+  }
+`;
 
   const style=document.createElement('style'); style.textContent=css; document.head.appendChild(style);
   const root=document.createElement('div'); root.id='stannet-ai-root';
