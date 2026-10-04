@@ -304,7 +304,11 @@
     add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot',false);
     try{
       const pref=mode==='auto'?'':`Modo ${mode}. `;
-      const r=await fetch('/api/stannet-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:pref+text})});
+      const r=await fetch('/api/stannet-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        message:pref+text,
+        history:history.filter(item=>['user','bot'].includes(item.kind)).slice(-13,-1).map(item=>({role:item.kind==='user'?'user':'assistant',text:String(item.text||'').slice(0,2000)})),
+        page:{title:document.title,path:location.pathname+location.hash}
+      })});
       const data=await r.json().catch(()=>({})); pending.remove(); if(!r.ok)throw new Error(data.error||'No pude responder ahora.');
       const answer=data.answer||'No recibí respuesta.';
       add(answer,'bot');
