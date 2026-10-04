@@ -139,6 +139,90 @@
     outline:2px solid var(--snai-cyan);
     outline-offset:2px;
   }
+  /* StanNet AI agent avatar — replaces the legacy robot launcher. */
+  #stannet-ai-root .snai-launcher{
+    width:142px;
+    height:204px;
+    padding:0;
+    animation:none;
+    filter:none;
+    overflow:visible;
+    display:grid;
+    place-items:end center;
+    transform-origin:50% 100%;
+  }
+  #stannet-ai-root .snai-launcher:hover{transform:scale(1.035)}
+  #stannet-ai-root .snai-agent-shell{
+    position:relative;
+    display:block;
+    width:130px;
+    height:195px;
+    isolation:isolate;
+    animation:snai-agent-float 3.2s ease-in-out infinite;
+    transition:filter .22s ease,transform .22s ease;
+  }
+  #stannet-ai-root .snai-agent-shell:before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    left:8%;
+    right:8%;
+    bottom:4%;
+    height:58%;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 58% 36%,rgba(217,57,255,.28),transparent 56%),
+      radial-gradient(circle at 38% 56%,rgba(9,207,232,.26),transparent 62%);
+    filter:blur(18px);
+    opacity:.92;
+    pointer-events:none;
+  }
+  #stannet-ai-root .snai-agent-avatar{
+    position:relative;
+    z-index:1;
+    display:block;
+    width:130px;
+    height:195px;
+    object-fit:contain;
+    object-position:center bottom;
+    user-select:none;
+    pointer-events:none;
+    filter:
+      drop-shadow(0 12px 18px rgba(0,0,0,.38))
+      drop-shadow(0 0 12px rgba(217,57,255,.28))
+      drop-shadow(0 0 10px rgba(9,207,232,.18));
+  }
+  #stannet-ai-root .snai-launcher:hover .snai-agent-shell{
+    filter:brightness(1.08) saturate(1.08);
+  }
+  #stannet-ai-root .snai-status{
+    z-index:3;
+    right:9px;
+    top:18px;
+    width:13px;
+    height:13px;
+    border:2px solid #07152f;
+    background:#70ff9c;
+    box-shadow:0 0 14px #70ff9c,0 0 22px rgba(9,207,232,.35);
+  }
+  #stannet-ai-root .snai-panel{bottom:205px}
+  @keyframes snai-agent-float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-7px)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #stannet-ai-root .snai-agent-shell{animation:none}
+  }
+  @media(max-width:520px){
+    #stannet-ai-root{right:8px;bottom:8px}
+    #stannet-ai-root .snai-launcher{width:108px;height:160px;transform:none}
+    #stannet-ai-root .snai-launcher:hover{transform:none}
+    #stannet-ai-root .snai-agent-shell{width:102px;height:153px}
+    #stannet-ai-root .snai-agent-avatar{width:102px;height:153px}
+    #stannet-ai-root .snai-status{right:5px;top:14px;width:11px;height:11px}
+    #stannet-ai-root .snai-panel{bottom:162px}
+  }
+
 `;
 
   const style=document.createElement('style'); style.textContent=css; document.head.appendChild(style);
@@ -152,7 +236,10 @@
       <form class="snai-form"><div class="snai-form-row"><textarea maxlength="4000" placeholder="Escribe, adjunta código o una imagen…" aria-label="Mensaje"></textarea><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código" title="Adjuntar imagen o archivo de código">📎</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false" title="Hablar con StanNet AI">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div><small class="snai-attachment" hidden></small><small class="snai-voice-note">Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</small><small class="snai-privacy-note">Los mensajes se procesan con el proveedor de IA. Los archivos que adjuntes se envían para analizarlos y no se guardan en el historial. La memoria solo se envía si activas la casilla correspondiente.</small><small class="snai-voice-status" aria-live="polite">La voz funciona en navegadores compatibles; también puedes escribir.</small></form>
     </section>
     <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-expanded="false">
-      <div class="snai-bot"><div class="snai-head"></div><div class="snai-neck"></div><div class="snai-body"><img src="/assets/brand/stannet-sn-cutout-20261005.png" alt=""></div><i class="snai-arm a"></i><i class="snai-arm b"></i><i class="snai-leg a"></i><i class="snai-leg b"></i><span class="snai-status"></span></div>
+      <span class="snai-agent-shell" aria-hidden="true">
+        <img class="snai-agent-avatar" src="/assets/ai/stannet-ai-agent.svg?v=20261005-1" width="130" height="195" alt="">
+        <span class="snai-status"></span>
+      </span>
     </button>
     <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">AI</button>`;
   document.body.appendChild(root);
