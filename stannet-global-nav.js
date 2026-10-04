@@ -136,13 +136,14 @@ header.innerHTML=`
   </div>
   <a data-nav="/pages/education" href="/pages/education.html">Formación</a>
   <a data-nav="/pages/cv" href="/pages/cv.html">Sobre mí</a>
-  <a class="nav-cta" href="/pages/cv.html">Ver CV</a>
+  <a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
 
 const existing=document.querySelector('header.site-header');
 if(existing)existing.replaceWith(header);
 else document.body.prepend(header);
 
+if(is('/pages/cv'))header.querySelector('.nav-cta').setAttribute('href','#contacto');
 const nav=header.querySelector('.site-nav');
 const menu=header.querySelector('.menu-toggle');
 const groups=[...header.querySelectorAll('.nav-group')];
