@@ -23,7 +23,7 @@ assert.match(css, /\.chip-board\.is-running \.wire-light path\{[^}]*animation:ch
 assert.doesNotMatch(css, /wire-light\{[^}]*filter:drop-shadow/);
 assert.match(css, /prefers-reduced-motion:\s*reduce/);
 assert.match(css, /grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
-assert.match(css, /chip-map-visible #stannet-ai-root \.snai-launcher/);
+assert.doesNotMatch(css, /#stannet-ai-root/, 'The home chip map must not hide or animate the isolated agent');
 assert.match(network, /IntersectionObserver/);
 assert.match(network, /document\.hidden/);
 assert.match(network, /prefers-reduced-motion/);

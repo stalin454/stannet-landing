@@ -18,7 +18,7 @@ for (const page of pages) {
 assert.match(css, /@view-transition\{navigation:auto\}/);
 assert.match(css, /prefers-reduced-motion:reduce/);
 assert.match(css, /site-header:not\(#stannet-canonical-nav\)/);
-assert.match(css, /#stannet-ai-root\{position:fixed/);
+assert.doesNotMatch(css, /#stannet-ai-root/, 'Navigation performance CSS must not create a containing block for the agent');
 assert.match(nav, /hint\.rel='prefetch'/);
 assert.match(nav, /warmed\.size>=5/);
 assert.match(nav, /connection\?\.saveData/);

@@ -7,13 +7,13 @@ Recuperación: rama `recovery/stannet-ai-before-20261005`. Ningún reset ni borr
 
 El widget restaurado calculaba el panel con `64vh` y `bottom:126px`, sin escuchar cambios de VisualViewport. No bloqueaba el documento de fondo. Los mensajes flex no tenían límites mínimos explícitos y podían competir con el formulario. Había dos implementaciones CSS del agente: estilos inyectados en JS y una hoja antigua con otra familia de clases. La portada escondía `.snai-launcher` mientras el mapa era visible. `navigation-performance.css` aplica `contain:layout style` al root y cambia el bloque de referencia de elementos fixed descendientes. El rollback también quitó el envío de historial, página, memoria y adjuntos, aunque el servidor seguía soportándolos.
 
-Se eliminan el CSS inline completo, el robot CSS, las animaciones de extremidades, flotación y transformaciones de apertura, el panel absoluto anclado sobre el personaje, las antiguas clases de `stannet-ai.css`, estilos inline de enlaces y el estado dividido launcher/reopen/panel. No se cambia el átomo ni la navegación: Shadow DOM impide que sus reglas alcancen al agente, y `dialog.showModal()` lo coloca en la capa superior del navegador.
+Se eliminan el CSS inline completo, el robot CSS, las animaciones de extremidades, flotación y transformaciones de apertura, el panel absoluto anclado sobre el personaje, las antiguas clases de `stannet-ai.css`, estilos inline de enlaces y el estado dividido launcher/reopen/panel. Se retiran únicamente los selectores obsoletos del agente en `atom.css` y `navigation-performance.css`; el átomo y la navegación mantienen su comportamiento. Shadow DOM impide que sus reglas alcancen al agente, y `dialog.showModal()` lo coloca en la capa superior del navegador.
 
 ## Arquitectura
 
 - `stannet-ai-loader.js`: arranque único y versión compartida, usado desde `script.js` y desde `stannet-global-nav.js`. Los hubs Apps y Web Development no cargaban `script.js`; esta dependencia permite que el agente los acompañe sin cambiar navegación ni contenido. Se mantiene la exclusión existente del Studio.
 - `stannet-ai.js`: interfaz aislada, estados de apertura, viewport, bloqueo reversible del body, memoria optativa, adjuntos y voz existente.
-- `stannet-ai.css`: única hoja de estilos del agente. Grid con header, modos, centro de altura flexible y formulario. Los mensajes tienen `min-height:0`, hijos no comprimibles y scroll propio. Una regla móvil, sin transforms ni listeners táctiles que impidan gestos.
+- `stannet-ai.css`: única hoja de estilos del agente. Grid con header, modos, centro flex de altura flexible y formulario. Los mensajes tienen `min-height:0`, hijos no comprimibles y scroll propio. Una regla móvil, sin transforms ni listeners táctiles que impidan gestos.
 - `stannet-ai-core.mjs`: intención de descubrimiento, herramientas locales permitidas y transporte al backend; mantiene contexto, historial y exclusión de turnos simultáneos.
 - `stannet-ai-knowledge.mjs`: catálogo compartido por herramientas de navegador y prompt del Worker. Las rutas locales se comprueban en tests. Añadir un recurso aquí actualiza ambas capas.
 - `worker.js`: conserva el proveedor, visión, voz y herramientas existentes. Consume el catálogo central en lugar de duplicarlo en el prompt.
@@ -35,4 +35,4 @@ Primera matriz publicada, commit `6d4efdd`: PASS en 1920×1080, 1366×768, 390×
 
 El backend real respondió a una solicitud de ejercicio de variables JavaScript, con enlace a Programming Academy. La prueba inicial descubrió una invocación inválida de `fetch` al usarlo como método del núcleo; se corrigió con transporte por función y se añadió regresión específica.
 
-Se añade adaptación a viewport menor de 380px para teclado horizontal: la cabecera y entrada siguen visibles; controles secundarios se ocultan mientras dura esa reducción y vuelven al cerrar el teclado.
+La prueba con 180px detectó que una fila vacía del centro grid quitaba espacio a mensajes al ocultar memoria. El centro pasa a flex con altura mínima cero y mensajes flexibles, conservando el grid del panel. Se añade adaptación a viewport menor de 380px para teclado horizontal: la cabecera y entrada siguen visibles; controles secundarios se ocultan mientras dura esa reducción y vuelven al cerrar el teclado.

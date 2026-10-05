@@ -23,8 +23,8 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-modes label{display:flex;align-items:center;gap:8px;font-size:12px;color:#b6cee4}
 .snai-modes select{width:155px;height:40px;border:1px solid var(--snai-line);border-radius:10px;background:#102139;padding:0 8px;font-size:13px}
 .snai-state{color:#85e5e9;font-size:11px}
-.snai-center{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;min-width:0;overflow:hidden}
-.snai-memory{min-height:0;max-height:min(190px,calc(var(--snai-height,100dvh) * .35));overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
+.snai-center{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
+.snai-memory{flex:none;min-height:0;max-height:min(190px,calc(var(--snai-height,100dvh) * .35));overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
 .snai-memory:not([open]){max-height:none}
 .snai-memory summary{cursor:pointer;color:#b3c4e4;min-height:24px;line-height:24px}
 .snai-memory textarea{display:block;width:100%;height:60px;resize:none;border:1px solid var(--snai-line);border-radius:8px;background:#081426;padding:8px;margin:6px 0;font-size:16px}
@@ -32,7 +32,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-memory small{display:block;color:#9fb6ce;line-height:1.4}
 .snai-memory-actions{display:flex;gap:8px;margin-top:6px}
 .snai-memory-actions button{min-height:36px;background:#163249;border:1px solid var(--snai-line);border-radius:8px;font-size:12px}
-.snai-messages{min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#38527a transparent;padding:12px;display:flex;flex-direction:column;gap:12px}
+.snai-messages{flex:1;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#38527a transparent;padding:12px;display:flex;flex-direction:column;gap:12px}
 .snai-msg{flex:none;max-width:94%;padding:12px;border-radius:14px;font:14px/1.55 Inter,system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
 .snai-msg.bot{align-self:flex-start;background:#122239;border:1px solid var(--snai-line)}
 .snai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#164453,#342653)}

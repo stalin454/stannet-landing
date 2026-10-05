@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261005-agent3';
+  const VERSION='20261005-agent4';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs')]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
