@@ -1,3 +1,4 @@
+import {encodeCursor} from '../../application/cursor.mjs';
 function mapRequest(r){return r&&{id:r.id,clientId:r.client_id,category:r.category,title:r.title,description:r.description,city:r.city,postalPrefix:r.postal_prefix,status:r.status,acceptedProposalId:r.accepted_proposal_id,createdAt:r.created_at,updatedAt:r.updated_at};}
 function mapProposal(r){return r&&{id:r.id,requestId:r.request_id,professionalId:r.professional_id,message:r.message,priceCents:r.price_cents,currency:r.currency,status:r.status,createdAt:r.created_at,updatedAt:r.updated_at};}
 export function createD1Repositories(db){
@@ -52,8 +53,8 @@ export function createD1Repositories(db){
   },
   dashboard:{
    async forUser({userId,roles,limit,cursor}){
-    const owned=roles.includes('client')?await db.prepare("SELECT id,category,title,city,status,created_at FROM service_requests WHERE client_user_id=?1 AND (?2 IS NULL OR created_at<?2) ORDER BY created_at DESC,id DESC LIMIT ?3").bind(userId,cursor||null,limit+1).all():{results:[]};
-    const proposed=roles.includes('professional')?await db.prepare("SELECT sr.id,sr.category,sr.title,sr.city,sr.status,pr.status AS proposal_status,pr.created_at FROM proposals pr JOIN service_requests sr ON sr.id=pr.request_id WHERE pr.professional_user_id=?1 AND (?2 IS NULL OR pr.created_at<?2) ORDER BY pr.created_at DESC,pr.id DESC LIMIT ?3").bind(userId,cursor||null,limit+1).all():{results:[]};
+    const owned=roles.includes('client')?await db.prepare("SELECT id,category,title,city,status,created_at FROM service_requests WHERE client_user_id=?1 AND (?2 IS NULL OR created_at<?2 OR (created_at=?2 AND id<?3)) ORDER BY created_at DESC,id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
+    const proposed=roles.includes('professional')?await db.prepare("SELECT sr.id,sr.category,sr.title,sr.city,sr.status,pr.status AS proposal_status,pr.created_at FROM proposals pr JOIN service_requests sr ON sr.id=pr.request_id WHERE pr.professional_user_id=?1 AND (?2 IS NULL OR pr.created_at<?2) ORDER BY pr.created_at DESC,pr.id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
     return{ownedRequests:(owned.results||[]).slice(0,limit),professionalRequests:(proposed.results||[]).slice(0,limit)};
    }
   },
@@ -76,7 +77,7 @@ export function createD1Repositories(db){
    async rejectPendingForRequest(requestId,exceptId,now){await db.prepare("UPDATE proposals SET status='rejected',updated_at=?3 WHERE request_id=?1 AND id<>?2 AND status='pending'").bind(requestId,exceptId,now).run();}
   },
   conversations:{
-   async listMessages({conversationId,limit,cursor}){const r=await db.prepare("SELECT id,sender_user_id,body,created_at FROM messages WHERE conversation_id=?1 AND (?2 IS NULL OR created_at<?2) ORDER BY created_at DESC,id DESC LIMIT ?3").bind(conversationId,cursor||null,limit+1).all(),rows=r.results||[],more=rows.length>limit,items=rows.slice(0,limit);return{items,nextCursor:more?items.at(-1)?.created_at||null:null};},
+   async listMessages({conversationId,limit,cursor}){const r=await db.prepare("SELECT id,sender_user_id,body,created_at FROM messages WHERE conversation_id=?1 AND (?2 IS NULL OR created_at<?2 OR (created_at=?2 AND id<?3)) ORDER BY created_at DESC,id DESC LIMIT ?4").bind(conversationId,cursor?.createdAt||null,cursor?.id||null,limit+1).all(),rows=r.results||[],more=rows.length>limit,items=rows.slice(0,limit);return{items,nextCursor:more&&items.length?encodeCursor({createdAt:items.at(-1).created_at,id:items.at(-1).id}):null};},
    async findById(id){const r=await db.prepare('SELECT * FROM conversations WHERE id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async findByRequestId(id){const r=await db.prepare('SELECT * FROM conversations WHERE request_id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async create(x){const id=x.id||crypto.randomUUID();await db.prepare('INSERT INTO conversations(id,request_id,client_id,professional_id,created_at) VALUES(?1,?2,?3,?4,?5)').bind(id,x.requestId,x.clientId,x.professionalId,x.createdAt).run();return{id,...x};}
