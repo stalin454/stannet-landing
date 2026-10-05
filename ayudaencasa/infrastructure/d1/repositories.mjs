@@ -50,6 +50,13 @@ export function createD1Repositories(db){
    async create(x){const table=x.kind==='verify'?'email_verification_tokens':'password_reset_tokens';await db.prepare('INSERT INTO '+table+'(id,user_id,token_digest,expires_at,created_at) VALUES(?1,?2,?3,?4,?5)').bind(x.id,x.userId,x.digest,x.expiresAt,x.createdAt).run();},
    async consume(digest,kind,now){const table=kind==='verify'?'email_verification_tokens':'password_reset_tokens';const row=await db.prepare('SELECT id,user_id FROM '+table+' WHERE token_digest=?1 AND used_at IS NULL AND expires_at>?2').bind(digest,now).first();if(!row)return null;const result=await db.prepare('UPDATE '+table+' SET used_at=?2 WHERE id=?1 AND used_at IS NULL').bind(row.id,now).run();if((result.meta?.changes??0)!==1)return null;return{id:row.id,userId:row.user_id};}
   },
+  dashboard:{
+   async forUser({userId,roles,limit,cursor}){
+    const owned=roles.includes('client')?await db.prepare("SELECT id,category,title,city,status,created_at FROM service_requests WHERE client_user_id=?1 AND (?2 IS NULL OR created_at<?2) ORDER BY created_at DESC,id DESC LIMIT ?3").bind(userId,cursor||null,limit+1).all():{results:[]};
+    const proposed=roles.includes('professional')?await db.prepare("SELECT sr.id,sr.category,sr.title,sr.city,sr.status,pr.status AS proposal_status,pr.created_at FROM proposals pr JOIN service_requests sr ON sr.id=pr.request_id WHERE pr.professional_user_id=?1 AND (?2 IS NULL OR pr.created_at<?2) ORDER BY pr.created_at DESC,pr.id DESC LIMIT ?3").bind(userId,cursor||null,limit+1).all():{results:[]};
+    return{ownedRequests:(owned.results||[]).slice(0,limit),professionalRequests:(proposed.results||[]).slice(0,limit)};
+   }
+  },
   requests:{
    async listPublic({city,category,limit,cursor}){
     const where=["status='open'"],values=[];if(city){values.push(city);where.push('city=?'+values.length);}if(category){values.push(category);where.push('category=?'+values.length);}if(cursor){values.push(cursor);where.push('created_at<?'+values.length);}values.push(limit+1);
@@ -69,6 +76,7 @@ export function createD1Repositories(db){
    async rejectPendingForRequest(requestId,exceptId,now){await db.prepare("UPDATE proposals SET status='rejected',updated_at=?3 WHERE request_id=?1 AND id<>?2 AND status='pending'").bind(requestId,exceptId,now).run();}
   },
   conversations:{
+   async listMessages({conversationId,limit,cursor}){const r=await db.prepare("SELECT id,sender_user_id,body,created_at FROM messages WHERE conversation_id=?1 AND (?2 IS NULL OR created_at<?2) ORDER BY created_at DESC,id DESC LIMIT ?3").bind(conversationId,cursor||null,limit+1).all(),rows=r.results||[],more=rows.length>limit,items=rows.slice(0,limit);return{items,nextCursor:more?items.at(-1)?.created_at||null:null};},
    async findById(id){const r=await db.prepare('SELECT * FROM conversations WHERE id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async findByRequestId(id){const r=await db.prepare('SELECT * FROM conversations WHERE request_id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async create(x){const id=x.id||crypto.randomUUID();await db.prepare('INSERT INTO conversations(id,request_id,client_id,professional_id,created_at) VALUES(?1,?2,?3,?4,?5)').bind(id,x.requestId,x.clientId,x.professionalId,x.createdAt).run();return{id,...x};}
