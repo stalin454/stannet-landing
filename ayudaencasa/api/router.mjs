@@ -7,6 +7,8 @@ import {createAcceptProposalAtomic} from '../application/accept-proposal-atomic.
 import {validateConfig} from '../config.mjs';
 import {createLogger,routeTemplate} from '../infrastructure/observability/logger.mjs';
 import {hashPassword,verifyPassword} from '../infrastructure/security/password.mjs';
+import {createAccountRoutes} from './account-routes.mjs';
+import {json as out} from './response.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
 import acceptProposalModule from '../application/accept-proposal.cjs';
@@ -15,8 +17,6 @@ import completeRequestModule from '../application/complete-request.cjs';
 import createReviewModule from '../application/create-review.cjs';
 const {createCreateRequest}=createRequestModule,{createSubmitProposal}=submitProposalModule,{createAcceptProposal}=acceptProposalModule,{createSendMessage}=sendMessageModule,{createCompleteRequest}=completeRequestModule,{createCreateReview}=createReviewModule;
 const base='/api/ayuda-en-casa/v1';
-const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
-const out=(status,body,extra={})=>new Response(JSON.stringify(body),{status,headers:{...headers,...extra}});
 const cookie=(raw,max=604800)=>`aec_session=${raw}; Path=/; Max-Age=${max}; HttpOnly; Secure; SameSite=Lax`;
 const readCookie=h=>{for(const p of (h||'').split(';')){const [k,...v]=p.trim().split('=');if(k==='aec_session')return v.join('=');}return null;};
 async function body(req){if(!(req.headers.get('content-type')||'').toLowerCase().startsWith('application/json'))throw Object.assign(new Error('Expected JSON'),{status:415,code:'UNSUPPORTED_MEDIA_TYPE'});const t=await req.text();if(new TextEncoder().encode(t).byteLength>16384)throw Object.assign(new Error('Body too large'),{status:413,code:'PAYLOAD_TOO_LARGE'});try{return JSON.parse(t);}catch{throw Object.assign(new Error('Invalid JSON'),{status:400,code:'INVALID_JSON'});}}
@@ -27,7 +27,7 @@ export async function handleAyudaEnCasa(request,env){
  try{
   const config=validateConfig(env);
   if(!config.ok)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa service is not configured'},requestId});
-  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos,passwords:{hash:hashPassword,verify:verifyPassword}});const limit=createRateLimiter({db:env.AYUDA_DB});
+  const repos=createD1Repositories(env.AYUDA_DB);const passwords={hash:hashPassword,verify:verifyPassword};const auth=createAuthService({repos,passwords});const limit=createRateLimiter({db:env.AYUDA_DB});
   const route=url.pathname.slice(base.length)||'/';
   if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
   if(route==='/ready'&&request.method==='GET'){try{await env.AYUDA_DB.prepare('SELECT 1 AS ok').first();return out(200,{ok:true,service:'ayuda-en-casa',requestId});}catch{return out(503,{ok:false,error:{code:'DEPENDENCY_UNAVAILABLE',message:'Service dependency unavailable'},requestId});}}
@@ -41,6 +41,12 @@ export async function handleAyudaEnCasa(request,env){
   const current=await auth.authenticate(readCookie(request.headers.get('cookie')));
   if(route==='/auth/me'&&request.method==='GET')return current?out(200,{user:current.principal,requestId}):out(401,{error:{code:'UNAUTHENTICATED',message:'Authentication required'},requestId});
   const guards=createGuards({request,auth,current});const requireMutation=guards.marketplaceMutation;
+  const accounts=createAccountRoutes({repos,passwords,limit});
+  const ip=request.headers.get('cf-connecting-ip')||'unknown';
+  if(route==='/account/verification/resend'&&request.method==='POST'){if(!guards.sameOrigin())return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});return out(202,{...(await accounts.resendVerification({principal:current?.principal,ip})),requestId});}
+  if(route==='/account/verification/confirm'&&request.method==='POST'){if(!guards.sameOrigin())return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});const data=await body(request);return out(200,{...(await accounts.verify({token:data.token})),requestId});}
+  if(route==='/account/password/forgot'&&request.method==='POST'){if(!guards.sameOrigin())return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});const data=await body(request);return out(202,{...(await accounts.requestReset({email:data.email,ip})),requestId});}
+  if(route==='/account/password/reset'&&request.method==='POST'){if(!guards.sameOrigin())return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});const data=await body(request);return out(200,{...(await accounts.reset({token:data.token,password:data.password,ip})),requestId});}
   if(route==='/auth/logout'&&request.method==='POST'){
    if(!current)return out(204,{});
    if(!guards.sameOrigin()||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))return out(403,{error:{code:'CSRF_REJECTED',message:'Request rejected'},requestId});
