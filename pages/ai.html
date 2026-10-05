@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="StanNet.Space · Inteligencia artificial, automatización y creatividad aplicada.">
-<title>IA | StanNet.Space</title>
+<meta name="description" content="StanNet AI · agente inteligente de StanNet.Space para aprender, crear, explorar recursos y conversar por voz.">
+<title>StanNet AI · Agente IA | StanNet.Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
@@ -12,6 +12,18 @@
 <link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/stannet-sn-cutout-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/stannet-sn-cutout-180.png">
+<style>
+.ai-agent-hero{max-width:1180px;margin:0 auto;padding:clamp(72px,10vw,130px) 24px 44px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:42px;align-items:center}
+.ai-agent-copy h1{font-size:clamp(42px,7vw,86px);line-height:.95;margin:14px 0 22px}.ai-agent-copy h1 em{color:#65e5ff;font-style:normal}.ai-agent-copy>p{max-width:720px;font-size:clamp(17px,2vw,21px);line-height:1.65;color:#c8d7e8}
+.ai-agent-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.ai-agent-btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 20px;border:1px solid rgba(101,229,255,.42);border-radius:14px;background:linear-gradient(135deg,#0b3348,#281b49);color:#fff;font-weight:700;text-decoration:none}.ai-agent-btn.secondary{background:transparent}
+.ai-agent-orb{min-height:360px;border:1px solid rgba(101,229,255,.22);border-radius:28px;background:radial-gradient(circle at 50% 35%,rgba(101,229,255,.2),transparent 28%),radial-gradient(circle at 60% 55%,rgba(159,92,255,.2),transparent 40%),#081426;display:grid;place-items:center;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+.ai-agent-orb img{width:min(230px,70%);max-height:320px;filter:drop-shadow(0 16px 24px rgba(114,69,174,.35))}
+.ai-agent-section{max-width:1180px;margin:0 auto;padding:42px 24px}.ai-agent-section h2{font-size:clamp(28px,4vw,46px);margin:0 0 12px}.ai-agent-lead{max-width:780px;color:#b9cadc;line-height:1.7}
+.ai-agent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:28px}.ai-cap{padding:24px;border:1px solid rgba(101,229,255,.18);border-radius:20px;background:rgba(8,20,38,.72)}.ai-cap b{display:block;color:#65e5ff;margin-bottom:10px}.ai-cap p{margin:0;color:#c7d4e3;line-height:1.6}
+.ai-roadmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.ai-step{padding:18px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08)}.ai-step span{font:700 12px Orbitron,sans-serif;color:#a56bff}
+@media(max-width:820px){.ai-agent-hero{grid-template-columns:1fr;padding-top:54px}.ai-agent-orb{min-height:280px}.ai-agent-grid{grid-template-columns:1fr}.ai-roadmap{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.ai-agent-hero,.ai-agent-section{padding-left:18px;padding-right:18px}.ai-roadmap{grid-template-columns:1fr}.ai-agent-actions{display:grid}.ai-agent-btn{width:100%}}
+</style>
 </head>
 <body id="top" class="stannet-global stannet-page-ai">
 <header class="site-header">
@@ -28,20 +40,41 @@
 </nav>
 </header>
 <main>
-<section class="page-hero grid-bg" data-page-icon="AI">
-<p class="eyebrow">01 / INTELIGENCIA ARTIFICIAL</p>
-<h1>Aprender.<br><em>Automatizar.</em></h1>
-<p>Exploro cómo la IA puede mejorar procesos, potenciar la creatividad y hacer la tecnología más útil para las personas.</p>
+<section class="ai-agent-hero grid-bg">
+  <div class="ai-agent-copy">
+    <p class="eyebrow">STANNET AI · AGENTE INTELIGENTE</p>
+    <h1>Tu agente para <em>aprender y crear.</em></h1>
+    <p>StanNet AI no es un chatbot aislado. Es el asistente integrado de StanNet.Space: conoce los recursos de la plataforma, mantiene el contexto de la conversación y puede acompañarte por academias, laboratorios y proyectos.</p>
+    <div class="ai-agent-actions">
+      <button class="ai-agent-btn" id="open-stannet-ai" type="button">Hablar con StanNet AI</button>
+      <a class="ai-agent-btn secondary" href="#capacidades">Ver capacidades</a>
+    </div>
+  </div>
+  <div class="ai-agent-orb" aria-label="StanNet AI">
+    <img src="/assets/ai/stannet-ai-agent.svg" alt="Agente visual de StanNet AI">
+  </div>
 </section>
-<section class="section">
-<div class="content-grid">
-<a class="info-card" href="callan.html"><p class="tag">NUEVO · AULA PRIVADA</p><h3>Callan English Coach</h3><p>Un profesor de IA para practicar ingles desde cero hasta avanzado, con vocabulario por nivel y correcciones paso a paso.</p><span class="card-link">Entrar al aula <b>→</b></span></a>
-<a class="info-card" href="danish.html"><p class="tag">NUEVO · RUTA NORDICA</p><h3>StanNet Danish Academy</h3><p>Aprende danes desde cero con frases originales, repeticion guiada, ejercicios y una progresion clara hasta C2.</p><span class="card-link">Entrar en la academia <b>→</b></span></a>
-<a class="info-card" href="english.html"><p class="tag">NUEVO · ACADEMIA COMPLETA</p><h3>StanNet English Academy</h3><p>Aprende ingles de cero a C2 con voz nativa, frases utiles, escritura guiada y una ruta progresiva para ganar confianza.</p><span class="card-link">Entrar en la academia <b>→</b></span></a>
-<a class="info-card" href="guitar.html"><p class="tag">NUEVO · MOTOR MUSICAL</p><h3>StanNet Guitar Academy</h3><p>Escalas, modos, mastil, pentagrama, tablatura y audio generados dinamicamente para estudiar guitarra.</p><span class="card-link">Entrar en la academia <b>→</b></span></a>
-<article class="info-card"><p class="tag">EFICIENCIA</p><h3>Automatización</h3><p>Flujos de trabajo que reducen tareas repetitivas y dejan espacio para el pensamiento estratégico.</p></article>
-<article class="info-card"><p class="tag">CREATIVIDAD</p><h3>IA generativa</h3><p>Exploración responsable de texto, imagen y sonido como nuevos materiales de creación.</p></article>
-</div>
+<section class="ai-agent-section" id="capacidades">
+  <p class="eyebrow">CAPACIDADES ACTUALES</p><h2>Un agente conectado con la plataforma</h2>
+  <p class="ai-agent-lead">La misma instancia que aparece en StanNet.Space funciona aquí. No hay un segundo asistente ni una conversación separada.</p>
+  <div class="ai-agent-grid">
+    <article class="ai-cap"><b>Contexto y memoria</b><p>Conserva el historial local y, si tú lo autorizas, usa preferencias guardadas en el navegador para adaptar la ayuda.</p></article>
+    <article class="ai-cap"><b>Voz ES / EN</b><p>Puedes dictar y escuchar respuestas. El agente adapta automáticamente reconocimiento y voz entre español e inglés en navegadores compatibles.</p></article>
+    <article class="ai-cap"><b>Conoce StanNet</b><p>Localiza academias, laboratorios, proyectos y herramientas del catálogo y te ofrece enlaces seguros para abrirlos.</p></article>
+    <article class="ai-cap"><b>Modos especializados</b><p>Alterna entre modo general, programación, ciberseguridad, viajes o selección automática según tu objetivo.</p></article>
+    <article class="ai-cap"><b>Archivos y código</b><p>Acepta imágenes y archivos de texto o código dentro de límites controlados para analizarlos junto a tu consulta.</p></article>
+    <article class="ai-cap"><b>Diseñado para móvil</b><p>El panel usa el viewport visual, safe areas y aislamiento del fondo para seguir siendo utilizable con teclado móvil.</p></article>
+  </div>
+</section>
+<section class="ai-agent-section">
+  <p class="eyebrow">EVOLUCIÓN</p><h2>De asistente a agente de voz</h2>
+  <p class="ai-agent-lead">La arquitectura está preparada para evolucionar sin reemplazar el agente actual ni romper sus funciones.</p>
+  <div class="ai-roadmap">
+    <div class="ai-step"><span>01 · ACTUAL</span><p>Chat, voz, memoria opcional, catálogo y adjuntos.</p></div>
+    <div class="ai-step"><span>02 · VOZ</span><p>Conversación más natural, interrupciones y mejor detección de idioma.</p></div>
+    <div class="ai-step"><span>03 · APRENDIZAJE</span><p>Progreso, tutoría adaptativa y práctica guiada.</p></div>
+    <div class="ai-step"><span>04 · ACCIONES</span><p>Herramientas con permisos explícitos y controles de seguridad.</p></div>
+  </div>
 </section>
 </main>
 <footer>
@@ -51,6 +84,14 @@
 </footer>
 <script src="../script.js?v=20261005-aireset1"></script>
 <script src="/stannet-global-nav.js?v=20261004-perf1" defer></script>
+<script>
+document.getElementById('open-stannet-ai')?.addEventListener('click',()=>{
+  const root=document.getElementById('stannet-ai-root');
+  const button=root?.shadowRoot?.querySelector('.snai-launcher,.snai-reopen');
+  if(button) button.click();
+  else setTimeout(()=>document.getElementById('stannet-ai-root')?.shadowRoot?.querySelector('.snai-launcher,.snai-reopen')?.click(),500);
+});
+</script>
 </body>
 </html>
 
