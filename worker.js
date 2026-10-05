@@ -204,7 +204,16 @@ export default {
       const safeText = text.replace(/[&<>"']/g, char => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
       }[char]));
-      const ssml = `<speak version="1.0" xml:lang="${language}"><voice name="${voice}"><prosody rate="-8%">${safeText}</prosody></voice></speak>`;
+      const conversational = purpose === 'chat';
+      const spokenText = conversational
+        ? safeText
+            .replace(/([.!?])\\s+/g, '$1<break time="190ms"/> ')
+            .replace(/([,:;])\\s+/g, '$1<break time="90ms"/> ')
+        : safeText;
+      const prosody = conversational
+        ? 'rate="-2%" pitch="+0st" volume="+0%"'
+        : 'rate="-8%"';
+      const ssml = `<speak version="1.0" xml:lang="${language}"><voice name="${voice}"><prosody ${prosody}>${spokenText}</prosody></voice></speak>`;
 
       try {
         const azureResponse = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {

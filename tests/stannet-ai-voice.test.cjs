@@ -26,5 +26,9 @@ assert.ok(widget.includes('speechActive?120:220'), 'Voice recognition restart de
 assert.ok(worker.includes("'es-ES': {"), 'Cloudflare speech endpoint must allow Spanish (Spain)');
 assert.ok(worker.includes("'es-ES-ElviraNeural'") && worker.includes("'es-ES-AlvaroNeural'"), 'Spanish Neural voices must be allowlisted');
 assert.ok(worker.includes("purpose === 'chat' ? 'no-store'"), 'Chat audio must not be cached publicly');
+assert.ok(worker.includes("const conversational = purpose === 'chat'"), 'Chat TTS must use conversational prosody');
+assert.ok(worker.includes('rate="-2%" pitch="+0st" volume="+0%"'), 'Chat TTS must avoid the old uniformly slow robotic cadence');
+assert.ok(worker.includes('<break time="190ms"/>'), 'Chat TTS must include natural sentence pauses');
+assert.ok(worker.includes('<break time="90ms"/>'), 'Chat TTS must include light punctuation pauses');
 
 console.log('PASS: StanNet AI supports consent-based adaptive Spanish/English voice replies.');
