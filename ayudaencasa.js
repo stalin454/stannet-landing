@@ -171,9 +171,29 @@ async function openConversation(conversationId){
   const host=$('#chatBox');
   try{
     const data=await window.AyudaEnCasaAPI.listMessages(conversationId,{limit:30});
-    host.innerHTML='<div class="chat-log">'+(data.items||[]).slice().reverse().map(m=>'<div class="proposal"><b>'+escapeHtml(m.sender_id||m.senderId||'Usuario')+'</b><small>'+escapeHtml(m.body||'')+'</small></div>').join('')+'</div><form id="chatForm" class="form-stack"><textarea name="body" maxlength="4000" required placeholder="Escribe un mensaje…"></textarea><button class="primary" type="submit">Enviar</button></form>';
+    host.innerHTML='<div class="chat-log">'+(data.items||[]).slice().reverse().map(m=>'<div class="proposal"><b>'+escapeHtml(m.sender_id||m.senderId||'Usuario')+'</b><small>'+escapeHtml(m.body||'')+'</small></div>').join('')+'</div><form id="chatForm" class="form-stack"><textarea name="body" maxlength="4000" required placeholder="Escribe un mensaje…"></textarea><button class="primary" type="submit">Enviar</button></form><button class="choice" type="button" id="completeFromChat">Marcar servicio como realizado</button>';
     $('#chatForm').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');const body=new FormData(f).get('body');b.disabled=true;try{await window.AyudaEnCasaAPI.sendMessage(conversationId,{body});openConversation(conversationId)}catch(err){b.disabled=false;alert(err.message||'No se pudo enviar el mensaje.');}});
+    $('#completeFromChat').addEventListener('click',()=>completeService(conversationId));
   }catch(err){host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo cargar la conversación.')+'</div>';}
+}
+async function completeService(conversationId){
+  const ok=window.confirm('¿El servicio se ha realizado y quieres marcarlo como completado? Esta acción activa el flujo de valoración.');
+  if(!ok)return;
+  try{
+    const data=await window.AyudaEnCasaAPI.completeRequest(conversationId);
+    openModal('<h2 id="modalTitle">Servicio completado</h2><div class="form-note">El servicio se ha marcado como completado. Ya puedes dejar tu valoración.</div><button class="primary" type="button" id="reviewNow">Valorar ahora</button>');
+    $('#reviewNow').addEventListener('click',()=>reviewRequest(data.request?.id||conversationId));
+  }catch(err){
+    openModal('<h2 id="modalTitle">No se pudo completar</h2><div class="form-note" role="alert">'+escapeHtml(err.message||'El servicio no puede marcarse como completado todavía.')+'</div>');
+  }
+}
+async function reviewRequest(requestId){
+  openModal('<h2 id="modalTitle">Valorar servicio</h2><p class="lead">Tu valoración ayuda a construir una reputación fiable.</p><form id="reviewForm" class="form-stack"><fieldset><legend>Puntuación</legend><div class="rating-choices">'+[1,2,3,4,5].map(n=>'<label><input type="radio" name="rating" value="'+n+'" '+(n===5?'checked':'')+'> '+n+' ★</label>').join('')+'</div></fieldset><label>Comentario (opcional)<textarea name="comment" maxlength="2000" placeholder="Cuéntanos brevemente cómo fue el servicio."></textarea></label><div id="reviewError" class="form-note" role="alert" hidden></div><button class="primary" type="submit">Publicar valoración</button></form>');
+  $('#reviewForm').addEventListener('submit',async e=>{
+    e.preventDefault();const f=e.currentTarget,b=f.querySelector('button[type="submit"]');const fd=new FormData(f);b.disabled=true;
+    try{await window.AyudaEnCasaAPI.createReview(requestId,{rating:Number(fd.get('rating')),comment:fd.get('comment')||''});openModal('<h2 id="modalTitle">Gracias</h2><div class="form-note">Tu valoración ha sido registrada correctamente.</div>');}
+    catch(err){const box=$('#reviewError');box.textContent=err.message||'No se pudo registrar la valoración.';box.hidden=false;b.disabled=false;}
+  });
 }
 async function restoreAuth(){
   try{
