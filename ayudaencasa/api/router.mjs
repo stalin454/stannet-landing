@@ -6,6 +6,7 @@ import {createListRequests} from '../application/list-requests.mjs';
 import {createAcceptProposalAtomic} from '../application/accept-proposal-atomic.mjs';
 import {validateConfig} from '../config.mjs';
 import {createLogger,routeTemplate} from '../infrastructure/observability/logger.mjs';
+import {hashPassword,verifyPassword} from '../infrastructure/security/password.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
 import acceptProposalModule from '../application/accept-proposal.cjs';
@@ -26,7 +27,7 @@ export async function handleAyudaEnCasa(request,env){
  try{
   const config=validateConfig(env);
   if(!config.ok)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa service is not configured'},requestId});
-  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos});const limit=createRateLimiter({db:env.AYUDA_DB});
+  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos,passwords:{hash:hashPassword,verify:verifyPassword}});const limit=createRateLimiter({db:env.AYUDA_DB});
   const route=url.pathname.slice(base.length)||'/';
   if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
   if(route==='/ready'&&request.method==='GET'){try{await env.AYUDA_DB.prepare('SELECT 1 AS ok').first();return out(200,{ok:true,service:'ayuda-en-casa',requestId});}catch{return out(503,{ok:false,error:{code:'DEPENDENCY_UNAVAILABLE',message:'Service dependency unavailable'},requestId});}}
