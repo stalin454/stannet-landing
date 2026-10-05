@@ -3,6 +3,7 @@ import {createAuthService} from '../application/auth.mjs';
 import {createRateLimiter} from '../application/rate-limit.mjs';
 import {createGuards,parsePositiveInt} from './guards.mjs';
 import {createListRequests} from '../application/list-requests.mjs';
+import {createAcceptProposalAtomic} from '../application/accept-proposal-atomic.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
 import acceptProposalModule from '../application/accept-proposal.cjs';
@@ -47,7 +48,7 @@ export async function handleAyudaEnCasa(request,env){
   let m=route.match(/^\/requests\/([^/]+)\/proposals$/);
   if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const usecase=createSubmitProposal({requests:repos.requests,proposals:repos.proposals,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{proposal:item,requestId});}
   m=route.match(/^\/requests\/([^/]+)\/accept\/([^/]+)$/);
-  if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createAcceptProposal({requests:repos.requests,proposals:repos.proposals,conversations:repos.conversations,audit:repos.audit,transaction:fn=>fn()});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),proposalId:decodeURIComponent(m[2]),now:new Date().toISOString()});return out(200,{result:item,requestId});}
+  if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createAcceptProposalAtomic({db:env.AYUDA_DB,repos});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),proposalId:decodeURIComponent(m[2]),now:new Date().toISOString()});return out(200,{result:item,requestId});}
   m=route.match(/^\/conversations\/([^/]+)\/messages$/);
   if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const ip=request.headers.get('cf-connecting-ip')||'unknown',gate=await limit('chat:'+principal.userId+':'+ip,{limit:30,windowMs:60000});if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many messages'},requestId},{'retry-after':String(gate.retryAfter)});const usecase=createSendMessage({conversations:repos.conversations,messages:repos.messages,audit:repos.audit});const item=await usecase({principal,conversationId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{message:item,requestId});}
   m=route.match(/^\/requests\/([^/]+)\/complete$/);
