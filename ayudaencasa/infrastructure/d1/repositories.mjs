@@ -14,6 +14,12 @@ export function createD1Repositories(db){
    async revoke(id,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE id=?1 AND revoked_at IS NULL').bind(id,now).run();}
   },
   requests:{
+   async listPublic({city,category,limit,cursor}){
+    const where=["status='open'"],values=[];if(city){values.push(city);where.push('city=?'+values.length);}if(category){values.push(category);where.push('category=?'+values.length);}if(cursor){values.push(cursor);where.push('created_at<?'+values.length);}values.push(limit+1);
+    const sql='SELECT id,category,title,city,postal_prefix,created_at FROM service_requests WHERE '+where.join(' AND ')+' ORDER BY created_at DESC LIMIT ?'+values.length;
+    const result=await db.prepare(sql).bind(...values).all();const rows=result.results||[];const more=rows.length>limit;const items=rows.slice(0,limit).map(r=>({id:r.id,category:r.category,title:r.title,city:r.city,postalPrefix:r.postal_prefix,createdAt:r.created_at}));
+    return{items,nextCursor:more?items[items.length-1]?.createdAt||null:null};
+   },
    async findById(id){return mapRequest(await db.prepare('SELECT * FROM service_requests WHERE id=?1').bind(id).first());},
    async create(x){await db.prepare('INSERT INTO service_requests(id,client_id,category,title,description,city,postal_prefix,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?9)').bind(x.id,x.clientId,x.category,x.title,x.description,x.city,x.postalPrefix||null,x.status,x.createdAt).run();return x;},
    async update(id,p){const allowed={status:'status',acceptedProposalId:'accepted_proposal_id',updatedAt:'updated_at'};const entries=Object.entries(p).filter(([k])=>allowed[k]);if(!entries.length)return;const set=entries.map(([k],i)=>allowed[k]+'=?'+(i+2)).join(',');await db.prepare('UPDATE service_requests SET '+set+' WHERE id=?1').bind(id,...entries.map(([,v])=>v)).run();}
