@@ -36,3 +36,5 @@ Primera matriz publicada, commit `6d4efdd`: PASS en 1920×1080, 1366×768, 390×
 El backend real respondió a una solicitud de ejercicio de variables JavaScript, con enlace a Programming Academy. La prueba inicial descubrió una invocación inválida de `fetch` al usarlo como método del núcleo; se corrigió con transporte por función y se añadió regresión específica.
 
 La prueba con 180px detectó que una fila vacía del centro grid quitaba espacio a mensajes al ocultar memoria. El centro pasa a flex con altura mínima cero y mensajes flexibles, conservando el grid del panel. Se añade adaptación a viewport menor de 380px para teclado horizontal: la cabecera y entrada siguen visibles; controles secundarios se ocultan mientras dura esa reducción y vuelven al cerrar el teclado.
+
+La siguiente medición identificó además los 24px de separación vertical de escritorio: con 180px de viewport, header y entrada dejaban solo 16px para el centro. En modo compacto se usa toda la altura visual disponible, manteniendo el espacio horizontal en escritorio. El contenido flexible queda dentro del centro y no invade el formulario.

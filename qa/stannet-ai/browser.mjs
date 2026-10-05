@@ -17,7 +17,9 @@ function measure(){
   assert(bounds.top>=v.offsetTop-1 && bounds.bottom<=v.offsetTop+v.height+1,name+' fuera de la altura '+JSON.stringify(bounds.toJSON()));
  }
  assert(input.top>=header.bottom,'Input solapado con cabecera');
- assert(log.clientHeight>24,'Conversación sin espacio visible');
+ const logStyle=win.getComputedStyle(log);
+ assert(log.clientHeight-parseFloat(logStyle.paddingTop)-parseFloat(logStyle.paddingBottom)>=24,'Conversación sin espacio visible');
+ assert(log.getBoundingClientRect().bottom<=root.querySelector('.snai-form').getBoundingClientRect().top+1,'Conversación solapada con entrada');
  assert(root.querySelector('.snai-reopen').hidden,'IA visible al abrir');
  assert(win.getComputedStyle(log).overflowY==='auto','Scroll de conversación ausente');
  assert(win.getComputedStyle(frame.contentDocument.body).position==='fixed','Página de fondo sin bloqueo');
