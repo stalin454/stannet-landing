@@ -9,7 +9,10 @@ export function createAtomicMarketplace(db){
     db.prepare('INSERT INTO conversations(id,request_id,client_id,professional_id,created_at) VALUES(?1,?2,?3,?4,?5)').bind(conversationId,requestId,clientId,professionalId,now),
     db.prepare('INSERT INTO audit_events(id,actor_user_id,event_type,target_type,target_id,metadata_json,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7)').bind(auditId,clientId,'proposal.accepted','proposal',proposalId,JSON.stringify({requestId}),now)
    ];
-   const results=await db.batch(statements);
+   let results;
+   try{results=await db.batch(statements);}catch(error){
+    const e=Object.assign(new Error('Marketplace state changed; retry from fresh data'),{status:409,code:'STATE_CONFLICT'});e.cause=error;throw e;
+   }
    const accepted=results[0]?.meta?.changes??0,assigned=results[2]?.meta?.changes??0;
    if(accepted!==1||assigned!==1)throw Object.assign(new Error('Marketplace state changed; retry from fresh data'),{status:409,code:'STATE_CONFLICT'});
    return{requestId,proposalId,conversationId};
