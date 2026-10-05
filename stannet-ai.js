@@ -118,7 +118,12 @@
     voiceStatus.textContent=listenAfter?'StanNet AI está hablando… puedes interrumpirme.':'Reproduciendo respuesta…';
     speechActive=true;currentSpeechText=speech;
     setActivity('speaking');
-    if(listenAfter&&voiceEnabled)startListening();
+    if(listenAfter&&voiceEnabled&&!mobile.matches)startListening();
+    if(listenAfter&&voiceEnabled&&mobile.matches&&recognitionRunning){
+      try{recognition.abort()}catch{}
+      recognitionRunning=false;
+      voiceStatus.textContent='StanNet AI está hablando… volveré a escucharte al terminar.';
+    }
     try{
       for(const chunk of speechChunks(speech)){
         if(token!==speechToken)return;
@@ -150,7 +155,7 @@
     }
   }
   function startListening(){
-    if(!panel.open||!voiceEnabled||(voiceThinking&&!speechActive)||recognitionRunning||!Recognition)return;
+    if(!panel.open||!voiceEnabled||(voiceThinking&&!speechActive)||(mobile.matches&&speechActive)||recognitionRunning||!Recognition)return;
     if(!recognition){
       recognition=new Recognition();
       recognition.lang=lastVoiceLang;
@@ -184,7 +189,7 @@
       };
       recognition.onend=()=>{
         recognitionRunning=false;
-        if(voiceEnabled&&(!voiceThinking||speechActive))setTimeout(startListening,speechActive?120:220);
+        if(voiceEnabled&&(!voiceThinking||speechActive)&&!(mobile.matches&&speechActive))setTimeout(startListening,speechActive?120:220);
       };
     }
     try{
