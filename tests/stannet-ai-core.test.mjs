@@ -12,7 +12,10 @@ assert.equal(payload.history.length,2);assert.equal(payload.history[1].role,'ass
 await core.run('Busca noticias actuales de cybersecurity');assert.equal(payload.message,'Busca noticias actuales de cybersecurity');
 const busy=new AgentCore({transport:()=>new Promise(resolve=>{release=resolve})});
 const first=busy.run('hola');await assert.rejects(busy.run('otro mensaje'),/Espera/);release(new Response(JSON.stringify({answer:'hola'})));await first;assert.equal(busy.busy,false);
-const failing=new AgentCore({transport:async()=>{throw new Error('offline')}});await assert.rejects(failing.run('hola'),/offline/);assert.equal(failing.busy,false);
+const states=[];
+const failing=new AgentCore({onState:state=>states.push(state),transport:async()=>{throw new Error('offline')}});await assert.rejects(failing.run('hola'),/offline/);assert.equal(failing.busy,false);assert.deepEqual(states,['thinking','error']);
+failing.transport=async()=>new Response(JSON.stringify({answer:'Recuperado'}));
+await failing.run('hola');assert.deepEqual(states,['thinking','error','thinking','idle']);
 console.log('PASS: agent tools, continuity, attachments, discovery, duplicate turn protection and failure recovery.');
 
 const originalFetch=globalThis.fetch;

@@ -1,6 +1,7 @@
 // Single catalogue consumed by the browser tools and Cloudflare Agent Core.
 // Describe existing resources, not promised future capabilities.
 export const resources = [
+  ['ai','Inteligencia Artificial','/pages/ai.html','IA, automatización, creatividad y recursos del ecosistema StanNet.',['inteligencia artificial','artificial intelligence','automatizacion']],
   ['programming','Programming Academy','/pages/programming.html','Teoría, ejercicios y proyectos de JavaScript, Python y HTML/CSS.',['programacion','programming','javascript','curso de codigo']],
   ['fullstack','Full-Stack Engineer Path','/pages/programming-fullstack.html','Laboratorio y proyectos full-stack.',['fullstack','full stack']],
   ['cs','CS Foundations','/pages/programming-cs-lab.html','Fundamentos y laboratorio C++ / C#.',['c++','c#','cs foundations']],
@@ -30,7 +31,7 @@ export const resources = [
   ['nutri','Nutri IA','/nutri-ia/','Organización personal de nutrición, entrenamiento y seguimiento; sugerencias generales.',['nutri','nutricion']],
   ['marketplace','AyudaEnCasa','/pages/marketplace.html','Proyecto marketplace de servicios domésticos.',['ayuda en casa','ayudaencasa','marketplace']],
   ['client','Proyecto cliente Alfa y Omega','/sanacion/','Trabajo de portfolio para cliente externo; no es una academia StanNet.',['alfa y omega','sanacion']]
-].map(([id,title,path,description,keywords])=>Object.freeze({id,title,path,description,keywords}));
+].map(([id,title,path,description,keywords])=>Object.freeze({id,title,path,description,keywords:Object.freeze(keywords),category:['programming','fullstack','cs','python','web-lab','cyber','cyber-lab','danish','english','callan','language-music','guitar','typing','shortcuts'].includes(id)?'academy':['radio','studio','music'].includes(id)?'music':['education','cv'].includes(id)?'profile':'platform',available:true}));
 
 export const normalize = text => String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function searchResources(query) {

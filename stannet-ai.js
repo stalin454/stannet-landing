@@ -2,11 +2,11 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261005-agent5';
+  const VERSION='20261005-agent6';
   let modules;
-  try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs')]);}
+  try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
-  const [{AgentCore},{resources,safeResourceUrl}]=modules;
+  const [{AgentCore},{resources,safeResourceUrl},{AgentAvatar}]=modules;
   const root=document.createElement('div');root.id='stannet-ai-root';
   const ui=root.attachShadow({mode:'open'});
   const style=document.createElement('link');style.rel='stylesheet';style.href='/stannet-ai.css?v='+VERSION;
@@ -16,15 +16,14 @@
   if(!await styled){root.remove();window.__StanNetAIWidgetLoaded=false;return;}
   const content=document.createElement('div');
   content.innerHTML=`
-    <button class="snai-reopen" type="button" aria-label="Abrir StanNet AI" aria-haspopup="dialog" aria-expanded="false">IA</button>
     <dialog class="snai-panel" aria-labelledby="snai-title">
       <header class="snai-headbar">
         <button class="snai-persona" type="button" aria-label="Conocer a StanNet AI"><img src="/assets/ai/stannet-ai-agent.svg" alt=""></button>
-        <div class="snai-title"><strong id="snai-title">StanNet AI</strong><small>Tu agente · aprende, crea, explora</small></div>
+        <div class="snai-title"><strong id="snai-title">StanNet AI</strong><small class="snai-state" role="status">Tu agente · aprende, crea, explora</small></div>
         <button class="snai-minimize" type="button" aria-label="Minimizar StanNet AI">−</button>
         <button class="snai-close" type="button" aria-label="Cerrar StanNet AI">×</button>
       </header>
-      <div class="snai-modes"><label>Modo <select aria-label="Modo del agente"><option value="auto">Auto</option><option value="general">General</option><option value="programming">Programación</option><option value="cyber">Ciberseguridad</option><option value="travel">Viajes</option></select></label><span class="snai-state" role="status">Listo</span></div>
+      <div class="snai-modes"><label>Modo <select aria-label="Modo del agente"><option value="auto">Auto</option><option value="general">General</option><option value="programming">Programación</option><option value="cyber">Ciberseguridad</option><option value="travel">Viajes</option></select></label><button class="snai-hide" type="button">Ocultar IA</button></div>
       <div class="snai-center">
         <details class="snai-memory"><summary>Contexto y memoria</summary><small>Preferencias guardadas en este navegador. Solo se envían si activas la casilla.</small><textarea maxlength="1500" aria-label="Memoria personal" placeholder="Tu nivel, proyecto o forma de aprender…"></textarea><label><input class="snai-memory-enabled" type="checkbox">Usar esta memoria con la IA</label><div class="snai-memory-actions"><button class="snai-memory-save" type="button">Guardar</button><button class="snai-memory-clear" type="button">Borrar memoria</button><button class="snai-clear" type="button">Borrar chat</button></div></details>
         <div class="snai-messages" role="log" aria-label="Conversación" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
@@ -37,7 +36,10 @@
     </dialog>`;
   ui.append(content);
   const $=selector=>ui.querySelector(selector);
-  const panel=$('.snai-panel'),reopen=$('.snai-reopen'),messages=$('.snai-messages'),form=$('.snai-form'),input=form.querySelector('textarea'),send=$('.snai-send'),voiceToggle=$('.snai-voice-toggle'),voiceStatus=$('.snai-voice-status'),state=$('.snai-state'),memoryPanel=$('.snai-memory'),memoryInput=memoryPanel.querySelector('textarea'),memoryEnabledInput=$('.snai-memory-enabled'),attachmentInput=$('.snai-file-input'),attachmentView=$('.snai-attachment');
+  const panel=$('.snai-panel'),messages=$('.snai-messages'),form=$('.snai-form'),input=form.querySelector('textarea'),send=$('.snai-send'),voiceToggle=$('.snai-voice-toggle'),voiceStatus=$('.snai-voice-status'),state=$('.snai-state'),memoryPanel=$('.snai-memory'),memoryInput=memoryPanel.querySelector('textarea'),memoryEnabledInput=$('.snai-memory-enabled'),attachmentInput=$('.snai-file-input'),attachmentView=$('.snai-attachment');
+  const avatar=new AgentAvatar(ui,{onOpen:openAgent,onHide:closeAgent});
+  const setActivity=value=>{root.dataset.activity=value;panel.dataset.activity=value};
+  setActivity('idle');
   const HISTORY_KEY='stannet-ai-history-v1',MEMORY_KEY='stannet-ai-memory-v1',MEMORY_ENABLED_KEY='stannet-ai-memory-enabled-v1';
   let history=[],pendingAttachment=null;
   try {
@@ -48,7 +50,7 @@
   }catch{}
   const saveHistory=()=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)))}catch{}};
   let requestHistory=[];
-  const core=new AgentCore({readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>({title:document.title.slice(0,160),path:location.pathname})});
+  const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>({title:document.title.slice(0,160),path:location.pathname})});
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false;
   let currentAudio=null,activeSpeechButton=null,speechToken=0;
@@ -104,6 +106,7 @@
     const token=speechToken;
     if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
     voiceStatus.textContent=listenAfter?'StanNet AI está hablando…':'Reproduciendo respuesta…';
+    setActivity('speaking');
     try{
       for(const chunk of speechChunks(speech)){
         if(token!==speechToken)return;
@@ -126,6 +129,7 @@
       }
     }finally{
       if(token===speechToken){
+        setActivity('idle');
         if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
         if(listenAfter&&voiceEnabled)finishVoiceTurn();
         else if(!voiceEnabled)voiceStatus.textContent='La voz funciona en navegadores compatibles; también puedes escribir.';
@@ -140,7 +144,7 @@
       recognition.continuous=false;
       recognition.interimResults=false;
       recognition.maxAlternatives=1;
-      recognition.onstart=()=>{recognitionRunning=true;voiceStatus.textContent='Te escucho… habla ahora.'};
+      recognition.onstart=()=>{recognitionRunning=true;setActivity('listening');voiceStatus.textContent='Te escucho… habla ahora.'};
       recognition.onresult=(event)=>{
         const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
         if(!transcript||!voiceEnabled||!panel.open||core.busy)return;
@@ -181,6 +185,7 @@
     stopSpeech();
     updateVoiceButton();
     voiceStatus.textContent=message;
+    setActivity(core.busy?'thinking':'idle');
   }
   voiceToggle.addEventListener('click',()=>{
     if(voiceEnabled){stopVoiceMode();return}
@@ -222,19 +227,20 @@
     document.documentElement.style.scrollBehavior=behavior;
   }
   function finishClose(){
-    stopVoiceMode();input.blur();cancelAnimationFrame(viewportFrame);unlockPage();reopen.hidden=false;reopen.setAttribute('aria-expanded','false');
+    if(panel.open)return;
+    stopVoiceMode();input.blur();cancelAnimationFrame(viewportFrame);unlockPage();avatar.render(false);
   }
-  function closeAgent(){if(panel.open)panel.close();}
+  function closeAgent(){if(panel.open){panel.close();finishClose();}}
   function openAgent(){
     if(panel.open)return;
-    lockPage();reopen.hidden=true;reopen.setAttribute('aria-expanded','true');
+    lockPage();avatar.render(true);
     panel.showModal();syncViewport();
     // No forced autofocus/keyboard on touch devices; the user taps the input.
     if(mobile.matches)$('.snai-close').focus({preventScroll:true});else input.focus({preventScroll:true});
   }
-  reopen.addEventListener('click',openAgent);
   $('.snai-close').addEventListener('click',closeAgent);
   $('.snai-minimize').addEventListener('click',closeAgent);
+  $('.snai-hide').addEventListener('click',()=>{avatar.setHidden(true);closeAgent();avatar.restore.focus({preventScroll:true})});
   panel.addEventListener('close',finishClose);
   panel.addEventListener('cancel',event=>{event.preventDefault();closeAgent()});
   viewport?.addEventListener('resize',syncViewport,{passive:true});

@@ -9,7 +9,15 @@ button{cursor:pointer}
 button:disabled{opacity:.55;cursor:wait}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--snai-cyan);outline-offset:2px}
 .snai-reopen{display:grid;place-items:center;width:48px;height:44px;border:1px solid var(--snai-line);border-radius:14px;background:linear-gradient(135deg,#092640,#231b40);color:var(--snai-cyan);font:700 13px Orbitron,system-ui,sans-serif;box-shadow:0 4px 18px #00102455}
-.snai-panel{position:fixed;inset:auto;left:calc(var(--snai-x,0px) + var(--snai-width,100vw) - min(450px,var(--snai-width,100vw) - 24px) - 12px);top:calc(var(--snai-y,0px) + var(--snai-height,100dvh) - min(680px,var(--snai-height,100dvh) - 24px) - 12px);width:min(450px,calc(var(--snai-width,100vw) - 24px));height:min(680px,calc(var(--snai-height,100dvh) - 24px));max-width:none;max-height:none;margin:0;padding:0;border:1px solid var(--snai-line);border-radius:22px;background:radial-gradient(ellipse at top right,#45296650,transparent 55%),#081426;color:#eef8ff;overflow:hidden;box-shadow:0 12px 40px #01061366}
+/* Avatar controls use their own top-layer surface; they never size the panel. */
+.snai-avatar-surface{position:fixed;inset:auto;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));width:auto;height:auto;margin:0;padding:0;border:0;overflow:visible;background:transparent;color:inherit}
+.snai-avatar-surface::backdrop{background:transparent;pointer-events:none}
+.snai-avatar{position:relative;width:92px;padding-top:12px}
+.snai-launcher{display:flex;flex-direction:column;align-items:center;width:92px;height:138px;padding:0;border:0;background:transparent;color:var(--snai-cyan)}
+.snai-launcher img{display:block;width:78px;height:117px;object-fit:contain;filter:drop-shadow(0 4px 10px #7245ae66)}
+.snai-launcher span{padding:3px 5px;border:1px solid var(--snai-line);border-radius:7px;background:#0b172be6;font-size:10px}
+.snai-hide-avatar{position:absolute;right:-2px;top:0;display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--snai-line);border-radius:50%;background:#102139e6;color:#def5ff;font-size:20px}
+.snai-panel{--snai-gap:12px;--snai-panel-width:min(450px,calc(var(--snai-width,100vw) - 2 * var(--snai-gap) - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--snai-panel-height:min(600px,calc(var(--snai-height,100dvh) - 2 * var(--snai-gap) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));position:fixed;inset:auto;left:calc(var(--snai-x,0px) + var(--snai-width,100vw) - var(--snai-panel-width) - var(--snai-gap) - env(safe-area-inset-right,0px));top:calc(var(--snai-y,0px) + var(--snai-height,100dvh) - var(--snai-panel-height) - var(--snai-gap) - env(safe-area-inset-bottom,0px));width:var(--snai-panel-width);height:var(--snai-panel-height);max-width:none;max-height:none;margin:0;padding:0;border:1px solid var(--snai-line);border-radius:22px;background:radial-gradient(ellipse at top right,#45296650,transparent 55%),#081426;color:#eef8ff;overflow:hidden;box-shadow:0 12px 40px #01061366}
 .snai-panel[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
 .snai-panel::backdrop{background:#02091755}
 .snai-headbar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--snai-line);background:linear-gradient(110deg,#0b3348aa,#271947aa)}
@@ -20,9 +28,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-title small{display:block;color:#97d3e7;font-size:11px;margin-top:4px}
 .snai-close,.snai-minimize{display:grid;place-items:center;width:44px;height:44px;flex:none;border:1px solid var(--snai-line);border-radius:12px;background:#10233a;font-size:23px}
 .snai-modes{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border-bottom:1px solid var(--snai-line)}
-.snai-modes label{display:flex;align-items:center;gap:8px;font-size:12px;color:#b6cee4}
-.snai-modes select{width:155px;height:40px;border:1px solid var(--snai-line);border-radius:10px;background:#102139;padding:0 8px;font-size:13px}
+.snai-modes label{display:flex;flex:1;min-width:0;align-items:center;gap:8px;font-size:12px;color:#b6cee4}
+.snai-modes select{width:155px;min-width:0;max-width:100%;flex:1;height:40px;border:1px solid var(--snai-line);border-radius:10px;background:#102139;padding:0 8px;font-size:13px}
 .snai-state{color:#85e5e9;font-size:11px}
+.snai-hide{flex:none;min-height:44px;padding:0 10px;border:1px solid var(--snai-line);border-radius:10px;background:#14263d;color:#b9d3ed;font-size:11px}
 .snai-center{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
 .snai-memory{flex:none;min-height:0;max-height:min(190px,calc(var(--snai-height,100dvh) * .35));overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
 .snai-memory:not([open]){max-height:none}
@@ -38,7 +47,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#164453,#342653)}
 .snai-msg.error{border-color:#dc738c;color:#ffd3de}
 .snai-resource{display:inline-block;margin:8px 0 2px;padding:8px 10px;min-height:40px;border:1px solid var(--snai-line);border-radius:10px;color:#89edff;background:#143049;text-decoration:none;font-weight:600;white-space:normal}
-.snai-form{padding:10px 12px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--snai-line);background:#09182b}
+.snai-form{padding:10px 12px 8px;border-top:1px solid var(--snai-line);background:#09182b}
 .snai-form-row{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;gap:7px;align-items:end}
 .snai-form-row textarea{width:100%;height:48px;resize:none;border:1px solid var(--snai-line);border-radius:12px;background:#061221;padding:12px 10px;outline:none;font-size:16px;line-height:22px}
 .snai-form-row textarea:focus{border-color:var(--snai-cyan)}
@@ -56,12 +65,13 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-info p{position:absolute;bottom:24px;right:0;z-index:1;width:240px;max-height:180px;overflow:auto;margin:0;padding:12px;background:#122139;border:1px solid var(--snai-line);border-radius:12px;font-size:12px;line-height:1.5;box-shadow:0 4px 14px #0005}
 /* When a landscape keyboard leaves little height, keep the essential controls
    and conversation visible. Secondary controls return when it closes. */
-.snai-panel.compact{top:var(--snai-y,0px);height:var(--snai-height,100dvh);grid-template-rows:auto minmax(0,1fr) auto}
+.snai-panel.compact{--snai-gap:0px;border-radius:12px;grid-template-rows:auto minmax(0,1fr) auto}
 .snai-panel.compact .snai-messages{padding:6px 12px}
 .snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory:not([open]),.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
-@media(max-width:640px),(pointer:coarse){
- .snai-panel{left:var(--snai-x,0px);top:var(--snai-y,0px);width:var(--snai-width,100vw);height:var(--snai-height,100dvh);border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
- .snai-panel::backdrop{background:#020917dd}
- .snai-headbar{padding:6px 10px}.snai-persona{height:38px;width:32px}.snai-title strong{font-size:14px}.snai-title small{font-size:10px}
+@media(max-width:640px){
+ .snai-headbar{padding:6px 10px;gap:7px}.snai-persona{height:38px;width:28px}.snai-title strong{font-size:13px}.snai-title small{font-size:10px}
+ .snai-avatar{width:80px}.snai-launcher{width:80px;height:122px}.snai-launcher img{width:68px;height:102px}
 }
 @media(prefers-reduced-motion:no-preference){.snai-reopen{transition:border-color .18s}.snai-reopen:hover{border-color:#8feeff}}
+
+@media(prefers-reduced-motion:no-preference){.snai-launcher img{animation:snai-avatar-breathe 4s ease-in-out infinite}@keyframes snai-avatar-breathe{50%{opacity:.88}}}

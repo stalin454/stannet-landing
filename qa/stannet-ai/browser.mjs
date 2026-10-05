@@ -20,7 +20,10 @@ function measure(){
  const logStyle=win.getComputedStyle(log);
  assert(log.clientHeight-parseFloat(logStyle.paddingTop)-parseFloat(logStyle.paddingBottom)>=24,'Conversación sin espacio visible');
  assert(log.getBoundingClientRect().bottom<=root.querySelector('.snai-form').getBoundingClientRect().top+1,'Conversación solapada con entrada');
- assert(root.querySelector('.snai-reopen').hidden,'IA visible al abrir');
+ assert(root.querySelector('.snai-reopen').hidden&&root.querySelector('.snai-avatar').hidden,'Launcher visible al abrir');
+ assert(win.document.documentElement.scrollWidth<=win.innerWidth,'Scroll horizontal de página');
+ assert(log.scrollWidth<=log.clientWidth,'Scroll horizontal de conversación');
+ if(v.height>=640)assert(r.height<=600&&r.height<v.height-50,'Panel gigante');
  assert(win.getComputedStyle(log).overflowY==='auto','Scroll de conversación ausente');
  assert(win.getComputedStyle(frame.contentDocument.body).position==='fixed','Página de fondo sin bloqueo');
  assert(win.getComputedStyle(panel).backgroundColor!=='rgb(255, 255, 255)','Panel blanco');
@@ -33,19 +36,24 @@ async function matrix(){
  results.textContent='Ejecutando…';document.querySelector('#run').disabled=true;
  const report=[];
  try{
-  for(const [w,h] of [[1920,1080],[1366,768],[390,844],[393,873],[360,800]]){
-   await load(w,h);const root=ui();assert(root.querySelector('.snai-reopen').textContent==='IA','Falta pestaña IA');
+  for(const [w,h] of [[1920,1080],[1366,768],[320,568],[360,800],[390,844],[393,873],[412,915],[430,932]]){
+   await load(w,h);let root=ui();assert(root.querySelector('.snai-reopen').textContent==='IA','Falta pestaña IA');assert(root.querySelector('.snai-reopen').hidden,'IA debe estar oculta inicialmente');assert(!root.querySelector('.snai-avatar').hidden,'Falta personaje flotante');assert(frame.contentDocument.querySelectorAll('#stannet-ai-root').length===1,'Montaje duplicado');
    frame.contentWindow.scrollTo(0,300);const savedScroll=frame.contentWindow.scrollY;
-   root.querySelector('.snai-reopen').click();await tick();report.push(`${w}×${h}: ${measure()}`);
+   root.querySelector('.snai-launcher').click();await tick();report.push(`${w}×${h}: ${measure()}`);
    for(const mode of ['general','programming','cyber','travel','auto']){const select=root.querySelector('select');select.value=mode;select.dispatchEvent(new Event('change',{bubbles:true}));assert(root.querySelector('.snai-state').textContent===select.selectedOptions[0].textContent,'Modo no actualizado');}
    await send('¿Hay un curso de danés?');assert(root.querySelector('.snai-messages').textContent.includes('Danish Academy'),'Danés no encontrado');assert(root.querySelector('a[href="/pages/danish.html"]'),'Enlace danés ausente');
    for(let n=0;n<5;n++)await send('busca recursos educativos de programming');
+   await send('QA mensaje largo');measure();
    const log=root.querySelector('.snai-messages');assert(log.scrollHeight>log.clientHeight,'No se genera conversación desplazable');log.scrollTop=0;assert(log.scrollTop===0,'No se puede volver al principio');log.scrollTop=log.scrollHeight;assert(log.scrollTop>0,'No se puede ir al final');
    root.querySelector('.snai-persona').click();assert(log.textContent.includes('orientarte'),'Personaje no responde');
    if(w<640){root.querySelector('.snai-form-row textarea').focus();frame.contentWindow.qaViewport(420);await tick();report.push('  Teclado simulado: '+measure());frame.contentWindow.qaViewport(h);await tick();setSize(h,w);await pause(120);await tick();report.push('  Rotación: '+measure());frame.contentWindow.qaViewport(180);await tick();report.push('  Teclado horizontal simulado: '+measure());setSize(w,h);await pause(120);await tick();}
-   root.querySelector('.snai-minimize').click();await tick();assert(!root.querySelector('dialog').open,'Minimizar no cierra');assert(!root.querySelector('.snai-reopen').hidden,'Minimizar no deja IA');assert(Math.abs(frame.contentWindow.scrollY-savedScroll)<=1,'No se restauró scroll de página');
-   root.querySelector('.snai-reopen').click();await tick();root.querySelector('.snai-close').click();await tick();assert(!root.querySelector('dialog').open,'Cerrar falla');assert(!root.querySelector('.snai-reopen').hidden,'Cerrar no deja IA');
-   report.push('  PASS: abrir, modos, enviar, enlaces, scroll, personaje, minimizar, restaurar, cerrar.');
+   root.querySelector('.snai-minimize').click();await tick();assert(!root.querySelector('dialog').open,'Minimizar no cierra');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Minimizar no devuelve personaje');assert(Math.abs(frame.contentWindow.scrollY-savedScroll)<=1,'No se restauró scroll de página');
+   root.querySelector('.snai-launcher').click();await tick();root.querySelector('.snai-close').click();await tick();assert(!root.querySelector('dialog').open,'Cerrar falla');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Cerrar no devuelve personaje');
+   root.querySelector('.snai-hide-avatar').click();await tick();assert(root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Ocultar no deja solo IA');
+   const reloaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.contentWindow.location.reload();await reloaded;await waitFor(()=>ui()?.querySelector('.snai-reopen'),'agente tras recarga');root=ui();assert(root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Preferencia no persiste');
+   root.querySelector('.snai-reopen').click();await tick();assert(!root.querySelector('.snai-avatar').hidden&&root.querySelector('.snai-reopen').hidden&&!root.querySelector('dialog').open,'IA no restaura solo el personaje');
+   root.querySelector('.snai-launcher').click();await tick();assert(root.querySelector('.snai-messages').textContent.includes('Danish Academy'),'Historial perdido tras recarga');root.querySelector('.snai-hide').click();await tick();assert(!root.querySelector('dialog').open&&root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Ocultar desde panel falla');
+   report.push('  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.');
    results.textContent=report.join('\n');
   }
   report.push('PASS: matriz completa. Teclado y rotación simulados. No valida Safari ni móviles físicos.');
