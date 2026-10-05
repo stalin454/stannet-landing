@@ -55,7 +55,9 @@
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false,lastVoiceLang='es-ES';
   const detectVoiceLanguage=(value)=>{const text=String(value||'').toLowerCase();const english=(text.match(/\b(the|and|you|your|what|how|can|with|this|that|please|hello|thanks|learn|english)\b/g)||[]).length;const spanish=(text.match(/\b(el|la|los|las|y|que|como|cómo|puedes|puede|con|esto|esta|por|para|hola|gracias|aprender|inglés|ingles)\b/g)||[]).length;return english>spanish?'en-GB':'es-ES'};
   const voiceForLanguage=lang=>lang==='en-GB'?'en-GB-SoniaNeural':'es-ES-ElviraNeural';
-  let currentAudio=null,activeSpeechButton=null,speechToken=0;
+  let currentAudio=null,activeSpeechButton=null,speechToken=0,speechActive=false,currentSpeechText='';
+  const normalizeSpeech=value=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  const looksLikeSpeakerEcho=value=>{const heard=normalizeSpeech(value),spoken=normalizeSpeech(currentSpeechText);if(!heard||!spoken)return false;const words=heard.split(' ').filter(word=>word.length>2);if(words.length<2)return spoken.includes(heard);const overlap=words.filter(word=>spoken.includes(word)).length/words.length;return overlap>=0.8;};
   const updateVoiceButton=()=>{
     voiceToggle.classList.toggle('active',voiceEnabled);
     voiceToggle.setAttribute('aria-pressed',String(voiceEnabled));
@@ -75,7 +77,7 @@
     if(chunk)chunks.push(chunk);return chunks;
   };
   const stopSpeech=()=>{
-    speechToken++;
+    speechToken++;speechActive=false;currentSpeechText='';
     if(currentAudio){const audio=currentAudio;currentAudio=null;audio.pause();audio.onended?.()}
     if(window.speechSynthesis)window.speechSynthesis.cancel();
     if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
@@ -108,8 +110,10 @@
     stopSpeech();
     const token=speechToken;
     if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
-    voiceStatus.textContent=listenAfter?'StanNet AI está hablando…':'Reproduciendo respuesta…';
+    voiceStatus.textContent=listenAfter?'StanNet AI está hablando… puedes interrumpirme.':'Reproduciendo respuesta…';
+    speechActive=true;currentSpeechText=speech;
     setActivity('speaking');
+    if(listenAfter&&voiceEnabled)startListening();
     try{
       for(const chunk of speechChunks(speech)){
         if(token!==speechToken)return;
@@ -132,6 +136,7 @@
       }
     }finally{
       if(token===speechToken){
+        speechActive=false;currentSpeechText='';
         setActivity('idle');
         if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
         if(listenAfter&&voiceEnabled)finishVoiceTurn();
@@ -140,7 +145,7 @@
     }
   }
   function startListening(){
-    if(!panel.open||!voiceEnabled||voiceThinking||recognitionRunning||!Recognition)return;
+    if(!panel.open||!voiceEnabled||(voiceThinking&&!speechActive)||recognitionRunning||!Recognition)return;
     if(!recognition){
       recognition=new Recognition();
       recognition.lang=lastVoiceLang;
@@ -151,6 +156,8 @@
       recognition.onresult=(event)=>{
         const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
         if(!transcript||!voiceEnabled||!panel.open||core.busy)return;
+        if(speechActive&&looksLikeSpeakerEcho(transcript)){voiceStatus.textContent='StanNet AI está hablando… puedes interrumpirme.';return;}
+        if(speechActive){stopSpeech();setActivity('interrupted');voiceStatus.textContent='Interrumpido. Te escuché: '+transcript;}
         voiceThinking=true;
         lastVoiceLang=detectVoiceLanguage(transcript);
         recognition.lang=lastVoiceLang;
@@ -171,7 +178,7 @@
       };
       recognition.onend=()=>{
         recognitionRunning=false;
-        if(voiceEnabled&&!voiceThinking)setTimeout(startListening,350);
+        if(voiceEnabled&&(!voiceThinking||speechActive))setTimeout(startListening,350);
       };
     }
     try{
