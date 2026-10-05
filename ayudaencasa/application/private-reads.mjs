@@ -1,4 +1,4 @@
-import {decodeCursor} from './cursor.mjs';
+import {decodeCursor} from '../shared/cursor.mjs';
 import {requireActive,hasRole,isAdmin} from '../domain/authorization.mjs';
 const bounded=n=>Math.min(Math.max(Number(n)||20,1),50);
 export function createPrivateReads({dashboard,requests,conversations}){
