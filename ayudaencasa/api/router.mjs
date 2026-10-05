@@ -8,6 +8,8 @@ import {validateConfig} from '../config.mjs';
 import {createLogger,routeTemplate} from '../infrastructure/observability/logger.mjs';
 import {hashPassword,verifyPassword} from '../infrastructure/security/password.mjs';
 import {createAccountRoutes} from './account-routes.mjs';
+import {createProfileService} from '../application/profile-service.mjs';
+import {createProfessionalDiscovery} from '../application/professional-discovery.mjs';
 import {json as out} from './response.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
@@ -52,6 +54,9 @@ export async function handleAyudaEnCasa(request,env){
    if(!guards.sameOrigin()||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))return out(403,{error:{code:'CSRF_REJECTED',message:'Request rejected'},requestId});
    await repos.sessions.revoke(current.session.id,new Date().toISOString());return out(200,{ok:true,requestId},{'set-cookie':cookie('',0)});
   }
+  if(route==='/professionals'&&request.method==='GET'){const discover=createProfessionalDiscovery({professionals:repos.professionals});const result=await discover({city:url.searchParams.get('city'),category:url.searchParams.get('category'),limit:parsePositiveInt(url.searchParams.get('limit')),cursor:url.searchParams.get('cursor')});return out(200,{...result,requestId});}
+  if(route==='/profile'&&request.method==='PUT'){const principal=await requireMutation(),data=await body(request),svc=createProfileService({profiles:repos.profiles,professionals:repos.professionals,audit:repos.audit});return out(200,{profile:await svc.updatePublic({principal,input:data}),requestId});}
+  if(route==='/profile/professional'&&request.method==='PUT'){const principal=await requireMutation(),data=await body(request),svc=createProfileService({profiles:repos.profiles,professionals:repos.professionals,audit:repos.audit});return out(200,{profile:await svc.updateProfessional({principal,input:data}),requestId});}
   if(route==='/requests'&&request.method==='GET'){const list=createListRequests({requests:repos.requests});const result=await list({city:url.searchParams.get('city'),category:url.searchParams.get('category'),limit:parsePositiveInt(url.searchParams.get('limit')),cursor:url.searchParams.get('cursor')});return out(200,{...result,requestId});}
   if(route==='/requests'&&request.method==='POST'){
    const principal=await requireMutation(),data=await body(request);const usecase=createCreateRequest({requests:repos.requests,audit:repos.audit});const item=await usecase({principal,input:data,now:new Date().toISOString()});return out(201,{request:item,requestId});
