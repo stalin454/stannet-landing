@@ -4,9 +4,13 @@ export function createD1Repositories(db){
  if(!db||typeof db.prepare!=='function') throw new TypeError('D1 binding required');
  return {
   users:{
-   async findById(id){return db.prepare('SELECT id,email_normalized AS emailNormalized,role,status,email_verified_at AS emailVerifiedAt,created_at AS createdAt,updated_at AS updatedAt FROM users WHERE id=?1').bind(id).first();},
+   async findById(id){const u=await db.prepare('SELECT id,email_normalized AS emailNormalized,status,email_verified_at AS emailVerifiedAt,created_at AS createdAt,updated_at AS updatedAt FROM users WHERE id=?1').bind(id).first();if(!u)return null;const rr=await db.prepare('SELECT role FROM user_roles WHERE user_id=?1 ORDER BY role').bind(id).all();u.roles=(rr.results||[]).map(x=>x.role);u.role=u.roles[0]||null;return u;},
    async findByEmail(email){return db.prepare('SELECT * FROM users WHERE email_normalized=?1').bind(email).first();},
-   async create(u){await db.prepare('INSERT INTO users(id,email_normalized,password_hash,role,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?6)').bind(u.id,u.emailNormalized,u.passwordHash,u.role,u.status,u.createdAt).run();return u;}
+   async create(u){await db.batch([
+    db.prepare('INSERT INTO users(id,email_normalized,password_hash,role,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?6)').bind(u.id,u.emailNormalized,u.passwordHash,u.role,u.status,u.createdAt),
+    db.prepare('INSERT INTO user_roles(user_id,role,granted_at) VALUES(?1,?2,?3)').bind(u.id,u.role,u.createdAt)
+   ]);return {...u,roles:[u.role]};},
+   async addRole(userId,role,now){if(!['client','professional'].includes(role))throw Object.assign(new Error('Role cannot be self-assigned'),{status:403,code:'ROLE_NOT_SELF_ASSIGNABLE'});await db.prepare('INSERT OR IGNORE INTO user_roles(user_id,role,granted_at) VALUES(?1,?2,?3)').bind(userId,role,now).run();}
   },
   sessions:{
    async create(s){await db.prepare('INSERT INTO sessions(id,user_id,token_digest,csrf_digest,expires_at,created_at,last_seen_at) VALUES(?1,?2,?3,?4,?5,?6,?6)').bind(s.id,s.userId,s.tokenDigest,s.csrfDigest,s.expiresAt,s.createdAt).run();return s;},
