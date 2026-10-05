@@ -9,6 +9,6 @@
     "test:dictionary-live": "node tests/dictionary-api.test.cjs",
     "radio:import": "node radio-server/import-local-music.mjs",
     "radio:import:dry": "node radio-server/import-local-music.mjs --dry-run",
-    "test:ayudaencasa": "node --check ayudaencasa/domain/model.cjs && node tests/ayudaencasa/domain-authorization.test.cjs"
+    "test:ayudaencasa": "node --check ayudaencasa/domain/model.cjs && node --check ayudaencasa/application/errors.cjs && node --check ayudaencasa/application/ports.cjs && node --check ayudaencasa/application/accept-proposal.cjs && node --check ayudaencasa/api/http.cjs && node --check ayudaencasa/infrastructure/security/session.cjs && node tests/ayudaencasa/domain-authorization.test.cjs && node tests/ayudaencasa/accept-proposal.test.cjs"
   }
 }
