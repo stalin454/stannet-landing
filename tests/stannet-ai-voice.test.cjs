@@ -20,6 +20,9 @@ assert.ok(widget.includes("setActivity('interrupted')"), 'Voice conversation mus
 assert.ok(widget.includes('looksLikeSpeakerEcho'), 'Barge-in must filter likely speaker echo before accepting an interruption');
 assert.ok(widget.includes("if(listenAfter&&voiceEnabled)startListening()"), 'Recognition must restart while the assistant is speaking so the user can interrupt');
 assert.ok(widget.includes("voiceThinking&&!speechActive"), 'Listening must remain available during assistant speech without reopening it while the model is thinking');
+assert.ok(widget.includes('INTERRUPTION_WORDS'), 'Short explicit interruption words must bypass speaker-echo filtering');
+assert.ok(widget.includes("'para','espera','no','oye','stop','wait'"), 'Spanish and English short interruption vocabulary must be recognized');
+assert.ok(widget.includes('speechActive?120:220'), 'Voice recognition restart delay must stay short during spoken turns');
 assert.ok(worker.includes("'es-ES': {"), 'Cloudflare speech endpoint must allow Spanish (Spain)');
 assert.ok(worker.includes("'es-ES-ElviraNeural'") && worker.includes("'es-ES-AlvaroNeural'"), 'Spanish Neural voices must be allowlisted');
 assert.ok(worker.includes("purpose === 'chat' ? 'no-store'"), 'Chat audio must not be cached publicly');
