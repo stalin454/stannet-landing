@@ -1,4 +1,4 @@
-import {encodeCursor} from '../../application/cursor.mjs';
+import {encodeCursor} from '../../shared/cursor.mjs';
 function mapRequest(r){return r&&{id:r.id,clientId:r.client_id,category:r.category,title:r.title,description:r.description,city:r.city,postalPrefix:r.postal_prefix,status:r.status,acceptedProposalId:r.accepted_proposal_id,createdAt:r.created_at,updatedAt:r.updated_at};}
 function mapProposal(r){return r&&{id:r.id,requestId:r.request_id,professionalId:r.professional_id,message:r.message,priceCents:r.price_cents,currency:r.currency,status:r.status,createdAt:r.created_at,updatedAt:r.updated_at};}
 export function createD1Repositories(db){
