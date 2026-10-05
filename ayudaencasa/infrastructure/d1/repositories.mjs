@@ -10,12 +10,20 @@ export function createD1Repositories(db){
     db.prepare('INSERT INTO users(id,email_normalized,password_hash,role,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?6)').bind(u.id,u.emailNormalized,u.passwordHash,u.role,u.status,u.createdAt),
     db.prepare('INSERT INTO user_roles(user_id,role,granted_at) VALUES(?1,?2,?3)').bind(u.id,u.role,u.createdAt)
    ]);return {...u,roles:[u.role]};},
-   async addRole(userId,role,now){if(!['client','professional'].includes(role))throw Object.assign(new Error('Role cannot be self-assigned'),{status:403,code:'ROLE_NOT_SELF_ASSIGNABLE'});await db.prepare('INSERT OR IGNORE INTO user_roles(user_id,role,granted_at) VALUES(?1,?2,?3)').bind(userId,role,now).run();}
+   async addRole(userId,role,now){if(!['client','professional'].includes(role))throw Object.assign(new Error('Role cannot be self-assigned'),{status:403,code:'ROLE_NOT_SELF_ASSIGNABLE'});await db.prepare('INSERT OR IGNORE INTO user_roles(user_id,role,granted_at) VALUES(?1,?2,?3)').bind(userId,role,now).run();},
+   async activate(id,now){await db.prepare("UPDATE users SET status='active',email_verified_at=COALESCE(email_verified_at,?2),updated_at=?2 WHERE id=?1 AND status='pending'").bind(id,now).run();},
+   async setPassword(id,passwordHash,now){await db.prepare('UPDATE users SET password_hash=?2,updated_at=?3 WHERE id=?1').bind(id,passwordHash,now).run();}
   },
   sessions:{
    async create(s){await db.prepare('INSERT INTO sessions(id,user_id,token_digest,csrf_digest,expires_at,created_at,last_seen_at) VALUES(?1,?2,?3,?4,?5,?6,?6)').bind(s.id,s.userId,s.tokenDigest,s.csrfDigest,s.expiresAt,s.createdAt).run();return s;},
    async findActiveByDigest(digest,now){return db.prepare('SELECT * FROM sessions WHERE token_digest=?1 AND revoked_at IS NULL AND expires_at>?2').bind(digest,now).first();},
-   async revoke(id,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE id=?1 AND revoked_at IS NULL').bind(id,now).run();}
+   async revoke(id,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE id=?1 AND revoked_at IS NULL').bind(id,now).run();},
+   async revokeAllForUser(userId,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE user_id=?1 AND revoked_at IS NULL').bind(userId,now).run();}
+  },
+  accountTokens:{
+   async invalidate(userId,kind,now){const table=kind==='verify'?'email_verification_tokens':'password_reset_tokens';await db.prepare('UPDATE '+table+' SET used_at=?2 WHERE user_id=?1 AND used_at IS NULL').bind(userId,now).run();},
+   async create(x){const table=x.kind==='verify'?'email_verification_tokens':'password_reset_tokens';await db.prepare('INSERT INTO '+table+'(id,user_id,token_digest,expires_at,created_at) VALUES(?1,?2,?3,?4,?5)').bind(x.id,x.userId,x.digest,x.expiresAt,x.createdAt).run();},
+   async consume(digest,kind,now){const table=kind==='verify'?'email_verification_tokens':'password_reset_tokens';const row=await db.prepare('SELECT id,user_id FROM '+table+' WHERE token_digest=?1 AND used_at IS NULL AND expires_at>?2').bind(digest,now).first();if(!row)return null;const result=await db.prepare('UPDATE '+table+' SET used_at=?2 WHERE id=?1 AND used_at IS NULL').bind(row.id,now).run();if((result.meta?.changes??0)!==1)return null;return{id:row.id,userId:row.user_id};}
   },
   requests:{
    async listPublic({city,category,limit,cursor}){
