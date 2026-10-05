@@ -24,6 +24,6 @@ La voz y los adjuntos se recuperan de la lógica funcional existente; no se ha a
 ## Validación reproducible
 
 `npm run test:ci`: suite completa del proyecto y tests del nuevo núcleo.
-`/tests/stannet-ai-browser.html`: matriz en navegador con iframes de 1920×1080, 1366×768, 390×844, 393×873 y 360×800. La fixture incluye las hojas reales de StanNet y aislamiento de almacenamiento para no modificar conversaciones existentes. Verifica geometría, header/input/cierre accesibles, modos, catálogo, envío, conversación larga, scroll, minimizar/cerrar/restaurar, posición original de página, viewport reducido y orientación.
+`/qa/stannet-ai/index.html`: matriz en navegador con iframes de 1920×1080, 1366×768, 390×844, 393×873 y 360×800. La fixture incluye las hojas reales de StanNet y aislamiento de almacenamiento para no modificar conversaciones existentes. Verifica geometría, header/input/cierre accesibles, modos, catálogo, envío, conversación larga, scroll, minimizar/cerrar/restaurar, posición original de página, viewport reducido y orientación.
 
 La página permite además interacción manual con portada, Danish Academy, Programming Academy, Radio y CV reales. Las simulaciones de teclado/rotación no sustituyen pruebas en teléfonos Android/iPhone ni en Safari. El navegador disponible es Chromium; esas plataformas se deben validar en dispositivos o navegadores correspondientes antes de afirmar compatibilidad física completa.

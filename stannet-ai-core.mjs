@@ -7,7 +7,7 @@ export const tools=Object.freeze({
   openResource:id=>{const r=resources.find(item=>item.id===id);return r?{...r,url:safeResourceUrl(r.path)}:null;}
 });
 export class AgentCore {
-  constructor({readHistory=()=>[],readMemory=()=>'',getPage=()=>({}),transport=fetch}={}) {
+  constructor({readHistory=()=>[],readMemory=()=>'',getPage=()=>({}),transport=(...args)=>fetch(...args)}={}) {
     this.readHistory=readHistory;this.readMemory=readMemory;this.getPage=getPage;this.transport=transport;this.busy=false;
   }
   async run(message,{mode='auto',attachment=null,signal}={}) {
