@@ -1,6 +1,8 @@
 import {createD1Repositories} from '../infrastructure/d1/repositories.mjs';
 import {createAuthService} from '../application/auth.mjs';
 import {createRateLimiter} from '../application/rate-limit.mjs';
+import {createGuards,parsePositiveInt} from './guards.mjs';
+import {createListRequests} from '../application/list-requests.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
 import acceptProposalModule from '../application/accept-proposal.cjs';
@@ -32,12 +34,13 @@ export async function handleAyudaEnCasa(request,env){
   }
   const current=await auth.authenticate(readCookie(request.headers.get('cookie')));
   if(route==='/auth/me'&&request.method==='GET')return current?out(200,{user:current.principal,requestId}):out(401,{error:{code:'UNAUTHENTICATED',message:'Authentication required'},requestId});
-  const requireMutation=async()=>{if(!current)throw Object.assign(new Error('Authentication required'),{status:401,code:'UNAUTHENTICATED'});if(!sameOrigin(request)||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))throw Object.assign(new Error('Request rejected'),{status:403,code:'CSRF_REJECTED'});return current.principal;};
+  const guards=createGuards({request,auth,current});const requireMutation=guards.mutation;
   if(route==='/auth/logout'&&request.method==='POST'){
    if(!current)return out(204,{});
    if(!sameOrigin(request)||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))return out(403,{error:{code:'CSRF_REJECTED',message:'Request rejected'},requestId});
    await repos.sessions.revoke(current.session.id,new Date().toISOString());return out(200,{ok:true,requestId},{'set-cookie':cookie('',0)});
   }
+  if(route==='/requests'&&request.method==='GET'){const list=createListRequests({requests:repos.requests});const result=await list({city:url.searchParams.get('city'),category:url.searchParams.get('category'),limit:parsePositiveInt(url.searchParams.get('limit')),cursor:url.searchParams.get('cursor')});return out(200,{...result,requestId});}
   if(route==='/requests'&&request.method==='POST'){
    const principal=await requireMutation(),data=await body(request);const usecase=createCreateRequest({requests:repos.requests,audit:repos.audit});const item=await usecase({principal,input:data,now:new Date().toISOString()});return out(201,{request:item,requestId});
   }
