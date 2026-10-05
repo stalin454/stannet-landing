@@ -1,1 +1,53 @@
-'use strict';\n\n(() => {\n  const BASE='/api/ayuda-en-casa/v1';\n  let csrfToken=null;\n\n  async function request(path,{method='GET',body,signal}={}) {\n    const headers={accept:'application/json'};\n    if(body!==undefined) headers['content-type']='application/json';\n    if(!['GET','HEAD'].includes(method) && csrfToken) headers['x-csrf-token']=csrfToken;\n    const response=await fetch(BASE+path,{method,headers,credentials:'same-origin',body:body===undefined?undefined:JSON.stringify(body),signal});\n    const data=response.status===204?null:await response.json().catch(()=>null);\n    if(data?.csrfToken) csrfToken=data.csrfToken;\n    if(!response.ok){\n      const error=new Error(data?.error?.message||'No se pudo completar la operación.');\n      error.code=data?.error?.code||'HTTP_ERROR'; error.status=response.status; error.requestId=data?.requestId;\n      throw error;\n    }\n    return data;\n  }\n\n  const query=params => {\n    const search=new URLSearchParams();\n    for(const [key,value] of Object.entries(params||{})){\n      if(value!==undefined && value!==null && value!=='') search.set(key,String(value));\n    }\n    const value=search.toString();\n    return value ? '?' + value : '';\n  };\n\n  window.AyudaEnCasaAPI=Object.freeze({\n    register:data=>request('/auth/register',{method:'POST',body:data}),\n    login:data=>request('/auth/login',{method:'POST',body:data}),\n    me:()=>request('/auth/me'),\n    logout:()=>request('/auth/logout',{method:'POST'}),\n    updateProfile:data=>request('/profile',{method:'PUT',body:data}),\n    updateProfessionalProfile:data=>request('/profile/professional',{method:'PUT',body:data}),\n    listProfessionals:params=>request('/professionals'+query(params)),\n    listRequests:params=>request('/requests'+query(params)),\n    createRequest:data=>request('/requests',{method:'POST',body:data}),\n    listProposals:(id,params)=>request('/requests/'+encodeURIComponent(id)+'/proposals'+query(params)),\n    submitProposal:(id,data)=>request('/requests/'+encodeURIComponent(id)+'/proposals',{method:'POST',body:data}),\n    acceptProposal:(id,proposalId)=>request('/requests/'+encodeURIComponent(id)+'/accept/'+encodeURIComponent(proposalId),{method:'POST'}),\n    dashboard:params=>request('/me/dashboard'+query(params)),\n    listMessages:(id,params)=>request('/conversations/'+encodeURIComponent(id)+'/messages'+query(params)),\n    sendMessage:(id,data)=>request('/conversations/'+encodeURIComponent(id)+'/messages',{method:'POST',body:data}),\n    completeRequest:id=>request('/requests/'+encodeURIComponent(id)+'/complete',{method:'POST'}),\n    createReview:(id,data)=>request('/requests/'+encodeURIComponent(id)+'/reviews',{method:'POST',body:data}),\n    health:()=>request('/health')\n  });\n})();\n
+'use strict';
+
+(() => {
+  const BASE='/api/ayuda-en-casa/v1';
+  let csrfToken=null;
+
+  async function request(path,{method='GET',body,signal}={}) {
+    const headers={accept:'application/json'};
+    if(body!==undefined) headers['content-type']='application/json';
+    if(!['GET','HEAD'].includes(method) && csrfToken) headers['x-csrf-token']=csrfToken;
+    const response=await fetch(BASE+path,{method,headers,credentials:'same-origin',body:body===undefined?undefined:JSON.stringify(body),signal});
+    const data=response.status===204?null:await response.json().catch(()=>null);
+    if(data?.csrfToken) csrfToken=data.csrfToken;
+    if(!response.ok){
+      const error=new Error(data?.error?.message||'No se pudo completar la operación.');
+      error.code=data?.error?.code||'HTTP_ERROR';
+      error.status=response.status;
+      error.requestId=data?.requestId;
+      throw error;
+    }
+    return data;
+  }
+
+  const query=params => {
+    const search=new URLSearchParams();
+    for(const [key,value] of Object.entries(params||{})){
+      if(value!==undefined && value!==null && value!=='') search.set(key,String(value));
+    }
+    const value=search.toString();
+    return value ? '?' + value : '';
+  };
+
+  window.AyudaEnCasaAPI=Object.freeze({
+    register:data=>request('/auth/register',{method:'POST',body:data}),
+    login:data=>request('/auth/login',{method:'POST',body:data}),
+    me:()=>request('/auth/me'),
+    logout:()=>request('/auth/logout',{method:'POST'}),
+    updateProfile:data=>request('/profile',{method:'PUT',body:data}),
+    updateProfessionalProfile:data=>request('/profile/professional',{method:'PUT',body:data}),
+    listProfessionals:params=>request('/professionals'+query(params)),
+    listRequests:params=>request('/requests'+query(params)),
+    createRequest:data=>request('/requests',{method:'POST',body:data}),
+    listProposals:(id,params)=>request('/requests/'+encodeURIComponent(id)+'/proposals'+query(params)),
+    submitProposal:(id,data)=>request('/requests/'+encodeURIComponent(id)+'/proposals',{method:'POST',body:data}),
+    acceptProposal:(id,proposalId)=>request('/requests/'+encodeURIComponent(id)+'/accept/'+encodeURIComponent(proposalId),{method:'POST'}),
+    dashboard:params=>request('/me/dashboard'+query(params)),
+    listMessages:(id,params)=>request('/conversations/'+encodeURIComponent(id)+'/messages'+query(params)),
+    sendMessage:(id,data)=>request('/conversations/'+encodeURIComponent(id)+'/messages',{method:'POST',body:data}),
+    completeRequest:id=>request('/requests/'+encodeURIComponent(id)+'/complete',{method:'POST'}),
+    createReview:(id,data)=>request('/requests/'+encodeURIComponent(id)+'/reviews',{method:'POST',body:data}),
+    health:()=>request('/health')
+  });
+})();
