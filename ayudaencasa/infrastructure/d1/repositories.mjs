@@ -21,6 +21,13 @@ export function createD1Repositories(db){
    async revoke(id,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE id=?1 AND revoked_at IS NULL').bind(id,now).run();},
    async revokeAllForUser(userId,now){return db.prepare('UPDATE sessions SET revoked_at=?2 WHERE user_id=?1 AND revoked_at IS NULL').bind(userId,now).run();}
   },
+  profiles:{
+   async upsert(userId,p,now){await db.prepare('INSERT INTO profiles(user_id,display_name,bio,city,postal_prefix,is_public,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?7) ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name,bio=excluded.bio,city=excluded.city,postal_prefix=excluded.postal_prefix,is_public=excluded.is_public,updated_at=excluded.updated_at').bind(userId,p.displayName,p.bio,p.city,p.postalPrefix||null,p.public?1:0,now).run();return p;},
+   async findPublic(userId){const r=await db.prepare('SELECT user_id,display_name,bio,city,postal_prefix,avatar_key FROM profiles WHERE user_id=?1 AND is_public=1').bind(userId).first();return r&&{userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key};}
+  },
+  professionals:{
+   async upsert(userId,p,now){const statements=[db.prepare('INSERT INTO professional_profiles(user_id,headline,experience_years,available,updated_at) VALUES(?1,?2,?3,?4,?5) ON CONFLICT(user_id) DO UPDATE SET headline=excluded.headline,experience_years=excluded.experience_years,available=excluded.available,updated_at=excluded.updated_at').bind(userId,p.headline,p.experienceYears,p.available?1:0,now),db.prepare('DELETE FROM professional_services WHERE user_id=?1').bind(userId),...p.services.map(s=>db.prepare('INSERT INTO professional_services(user_id,category,created_at) VALUES(?1,?2,?3)').bind(userId,s,now))];await db.batch(statements);return p;}
+  },
   accountTokens:{
    async invalidate(userId,kind,now){const table=kind==='verify'?'email_verification_tokens':'password_reset_tokens';await db.prepare('UPDATE '+table+' SET used_at=?2 WHERE user_id=?1 AND used_at IS NULL').bind(userId,now).run();},
    async create(x){const table=x.kind==='verify'?'email_verification_tokens':'password_reset_tokens';await db.prepare('INSERT INTO '+table+'(id,user_id,token_digest,expires_at,created_at) VALUES(?1,?2,?3,?4,?5)').bind(x.id,x.userId,x.digest,x.expiresAt,x.createdAt).run();},
