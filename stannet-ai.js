@@ -57,7 +57,9 @@
   const voiceForLanguage=lang=>lang==='en-GB'?'en-GB-SoniaNeural':'es-ES-ElviraNeural';
   let currentAudio=null,activeSpeechButton=null,speechToken=0,speechActive=false,currentSpeechText='';
   const normalizeSpeech=value=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
-  const looksLikeSpeakerEcho=value=>{const heard=normalizeSpeech(value),spoken=normalizeSpeech(currentSpeechText);if(!heard||!spoken)return false;const words=heard.split(' ').filter(word=>word.length>2);if(words.length<2)return spoken.includes(heard);const overlap=words.filter(word=>spoken.includes(word)).length/words.length;return overlap>=0.8;};
+  const INTERRUPTION_WORDS=new Set(['para','espera','no','oye','stop','wait','sorry','perdon','perdona']);
+  const isExplicitInterruption=value=>{const heard=normalizeSpeech(value);return heard.split(' ').some(word=>INTERRUPTION_WORDS.has(word));};
+  const looksLikeSpeakerEcho=value=>{const heard=normalizeSpeech(value),spoken=normalizeSpeech(currentSpeechText);if(!heard||!spoken||isExplicitInterruption(heard))return false;const words=heard.split(' ').filter(word=>word.length>2);if(words.length<2)return spoken.includes(heard);const overlap=words.filter(word=>spoken.includes(word)).length/words.length;return overlap>=0.8;};
   const updateVoiceButton=()=>{
     voiceToggle.classList.toggle('active',voiceEnabled);
     voiceToggle.setAttribute('aria-pressed',String(voiceEnabled));
@@ -178,7 +180,7 @@
       };
       recognition.onend=()=>{
         recognitionRunning=false;
-        if(voiceEnabled&&(!voiceThinking||speechActive))setTimeout(startListening,350);
+        if(voiceEnabled&&(!voiceThinking||speechActive))setTimeout(startListening,speechActive?120:220);
       };
     }
     try{
