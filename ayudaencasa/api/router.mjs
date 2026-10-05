@@ -4,6 +4,8 @@ import {createRateLimiter} from '../application/rate-limit.mjs';
 import {createGuards,parsePositiveInt} from './guards.mjs';
 import {createListRequests} from '../application/list-requests.mjs';
 import {createAcceptProposalAtomic} from '../application/accept-proposal-atomic.mjs';
+import {validateConfig} from '../config.mjs';
+import {createLogger,routeTemplate} from '../infrastructure/observability/logger.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
 import acceptProposalModule from '../application/accept-proposal.cjs';
@@ -20,12 +22,14 @@ async function body(req){if(!(req.headers.get('content-type')||'').toLowerCase()
 function sameOrigin(req){const u=new URL(req.url);return req.headers.get('origin')===u.origin;}
 export async function handleAyudaEnCasa(request,env){
  const url=new URL(request.url);if(!url.pathname.startsWith(base))return null;
- const requestId=crypto.randomUUID();
+ const requestId=crypto.randomUUID(),started=Date.now(),logger=createLogger();
  try{
-  if(!env.AYUDA_DB)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa database is not configured'},requestId});
+  const config=validateConfig(env);
+  if(!config.ok)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa service is not configured'},requestId});
   const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos});const limit=createRateLimiter({db:env.AYUDA_DB});
   const route=url.pathname.slice(base.length)||'/';
   if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
+  if(route==='/ready'&&request.method==='GET'){try{await env.AYUDA_DB.prepare('SELECT 1 AS ok').first();return out(200,{ok:true,service:'ayuda-en-casa',requestId});}catch{return out(503,{ok:false,error:{code:'DEPENDENCY_UNAVAILABLE',message:'Service dependency unavailable'},requestId});}}
   if(['/auth/register','/auth/login'].includes(route)&&request.method==='POST'){
    const ip=request.headers.get('cf-connecting-ip')||'unknown';const gate=await limit('auth:'+ip,{limit:12,windowMs:60000});
    if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many attempts'},requestId},{'retry-after':String(gate.retryAfter)});
@@ -56,5 +60,5 @@ export async function handleAyudaEnCasa(request,env){
   m=route.match(/^\/requests\/([^/]+)\/reviews$/);
   if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const usecase=createCreateReview({requests:repos.requests,conversations:repos.conversations,reviews:repos.reviews,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{review:item,requestId});}
   return out(404,{error:{code:'NOT_FOUND',message:'Resource not found'},requestId});
- }catch(e){const status=Number(e.status)||500;const safe=status<500?(e.message||'Request rejected'):'Unexpected server error';return out(status,{error:{code:e.code||'INTERNAL_ERROR',message:safe},requestId});}
+ }catch(e){const status=Number(e.status)||500;const code=e.code||'INTERNAL_ERROR';logger[status>=500?'error':status>=400?'warn':'info']({requestId,event:'http.error',route:routeTemplate(url.pathname),method:request.method,status,durationMs:Date.now()-started,code});const safe=status<500?(e.message||'Request rejected'):'Unexpected server error';return out(status,{error:{code,message:safe},requestId});}
 }
