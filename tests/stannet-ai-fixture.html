@@ -1,0 +1,9 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>StanNet AI · Prueba aislada</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/navigation-performance.css"><link rel="stylesheet" href="/atom.css"><style>body{background:#070f21;color:#def3ff;margin:0}main{min-height:2400px;padding:30px}button{min-height:44px}p{max-width:50ch}</style></head><body class="home-refresh chip-map-visible"><main><h1>StanNet AI · fixture</h1><p>Esta página aplica las hojas reales de StanNet, incluida la regla de containment y la regla antigua que ocultaba el personaje.</p><button id="background">Botón detrás del agente</button><p id="background-result">Sin interacción</p></main><script>
+// Controlled viewport for keyboard/offset regression. This is a simulation,
+// not a claim that an Android or iOS hardware keyboard has been exercised.
+const testStorage=new Map();Object.defineProperty(window,'localStorage',{value:{getItem:key=>testStorage.get(key)||null,setItem:(key,value)=>testStorage.set(key,String(value)),removeItem:key=>testStorage.delete(key)}});
+const viewport=new EventTarget();Object.assign(viewport,{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0});Object.defineProperty(window,'visualViewport',{value:viewport});
+window.qaViewport=height=>{viewport.height=height;viewport.offsetTop=12;viewport.dispatchEvent(new Event('resize'));};
+window.addEventListener('resize',()=>{Object.assign(viewport,{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0});viewport.dispatchEvent(new Event('resize'));});
+document.querySelector('#background').addEventListener('click',()=>document.querySelector('#background-result').textContent='Activado');
+</script><script src="/script.js?v=20261005-agent1"></script></body></html>

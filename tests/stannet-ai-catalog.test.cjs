@@ -1,23 +1,20 @@
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-
-const worker = fs.readFileSync('worker.js', 'utf8');
-const widget = fs.readFileSync('stannet-ai.js', 'utf8');
-const page = fs.readFileSync('pages/danish.html', 'utf8');
-
-assert.ok(worker.includes('Danish Academy — /pages/danish.html'), 'Danish Academy must be in the assistant catalogue');
-assert.ok(worker.includes('20 capítulos progresivos A1–A2'), 'Danish course scope must be grounded in the actual site');
-assert.ok(worker.includes('17 capítulos de gramática'), 'Danish grammar course must be described');
-assert.ok(worker.includes('Danish Core Lab') && worker.includes('Sentence Builder') && worker.includes('Memory Lab'), 'Danish interactive resources must be discoverable');
-assert.ok(worker.includes('ruta de dominio B1–C2'), 'Advanced Danish route must be discoverable');
-assert.ok(worker.includes('Nunca respondas que no existe'), 'Danish course question must not receive a false negative');
-assert.ok(worker.includes('Ruta Dinamarca — /pages/ruta-dinamarca.html'), 'Denmark guide must be discoverable');
-assert.ok(widget.includes("'/pages/danish.html':'Entrar a Danish Academy →'"), 'Danish recommendation must render a friendly link');
-assert.ok(widget.includes("'/pages/ruta-dinamarca.html':'Abrir Ruta Dinamarca →'"), 'Denmark guide recommendation must render a friendly link');
-assert.ok(widget.includes("replace(/[),.;!?}>]+$/,'')"), 'Markdown angle bracket must be removed from generated links');
-
-for (const feature of ['course-route','grammar-route','language-core','sentence-builder','memory-lab','mastery-route']) {
-  assert.ok(page.includes('id="'+feature+'"'), 'Danish page missing live section: '+feature);
-}
-
-console.log('PASS: StanNet AI catalogue maps Danish questions to the real course and Denmark guide.');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+(async()=>{
+ const {resources,searchResources,catalogueText,safeResourceUrl}=await import('../stannet-ai-knowledge.mjs');
+ const danish=searchResources('¿Hay un curso de danés?')[0];
+ assert.equal(danish.id,'danish');assert.equal(danish.path,'/pages/danish.html');
+ for(const term of ['20 capítulos progresivos A1–A2','17 capítulos de gramática','Danish Core Lab','Sentence Builder','Memory Lab','ruta de dominio B1–C2'])assert(danish.description.includes(term));
+ for(const id of ['programming','cyber','english','danish','radio','studio','sentinel','shield','web','apps','education','cv','youtube'])assert(resources.some(r=>r.id===id));
+ for(const r of resources){
+   if(r.path.startsWith('/'))assert(fs.existsSync('.'+r.path+(r.path.endsWith('/')?'index.html':'')),r.path+' must exist');
+ }
+ assert(catalogueText().includes('Danish Academy — /pages/danish.html'));
+ assert(fs.readFileSync('worker.js','utf8').includes('${catalogueText()}'));
+ assert.equal(safeResourceUrl('javascript:alert(1)'),null);
+ assert.equal(safeResourceUrl('//evil.example/pages/danish.html'),null);
+ assert.equal(safeResourceUrl('https://evil.example/pages/danish.html'),null);
+ assert.equal(safeResourceUrl('/pages/danish.html'),'/pages/danish.html');
+ assert.equal(safeResourceUrl('https://www.youtube.com/@StanNetOfficial'),'https://www.youtube.com/@StanNetOfficial');
+ console.log('PASS: shared catalogue resolves Danish and main areas to existing resources; unsafe links rejected.');
+})().catch(e=>{console.error(e);process.exitCode=1});

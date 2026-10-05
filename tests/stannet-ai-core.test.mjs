@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {AgentCore,tools} from '../stannet-ai-core.mjs';
+let payload,release;
+const core=new AgentCore({readHistory:()=>[{kind:'user',text:'Estoy empezando JS'},{kind:'bot',text:'Veamos variables'},{kind:'error',text:'Error'}],readMemory:()=>'Prefiero pistas',getPage:()=>({title:'Programming',path:'/pages/programming.html'}),transport:async(url,init)=>{assert.equal(url,'/api/stannet-ai');payload=JSON.parse(init.body);return new Response(JSON.stringify({answer:'Prueba let'}));}});
+assert.equal((await core.run('¿Hay un curso de danés?')).source,'catalogue');
+assert.equal(payload,undefined,'Resource discovery must work without API');
+assert.match((await core.run('abre Shield')).answer,/\/shield\//);
+assert.equal(tools.openResource('danish').url,'/pages/danish.html');
+assert.equal(tools.openResource('unknown'),null);
+await core.run('Explícame las variables',{mode:'programming',attachment:{kind:'text',content:'let a=1'}});
+assert.equal(payload.history.length,2);assert.equal(payload.history[1].role,'assistant');assert.equal(payload.memory,'Prefiero pistas');assert.equal(payload.page.path,'/pages/programming.html');assert.equal(payload.mode,'programming');assert.equal(payload.attachment.kind,'text');
+await core.run('Busca noticias actuales de cybersecurity');assert.equal(payload.message,'Busca noticias actuales de cybersecurity');
+const busy=new AgentCore({transport:()=>new Promise(resolve=>{release=resolve})});
+const first=busy.run('hola');await assert.rejects(busy.run('otro mensaje'),/Espera/);release(new Response(JSON.stringify({answer:'hola'})));await first;assert.equal(busy.busy,false);
+const failing=new AgentCore({transport:async()=>{throw new Error('offline')}});await assert.rejects(failing.run('hola'),/offline/);assert.equal(failing.busy,false);
+console.log('PASS: agent tools, continuity, attachments, discovery, duplicate turn protection and failure recovery.');

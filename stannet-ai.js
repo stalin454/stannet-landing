@@ -1,61 +1,54 @@
-(()=>{
-  if (window.__StanNetAIWidgetLoaded) return;
-  window.__StanNetAIWidgetLoaded = true;
-
-  const css = `
-  #stannet-ai-root{position:fixed;right:22px;bottom:18px;z-index:99999;font-family:Orbitron,Inter,system-ui,sans-serif;color:#f5fbff}
-  .snai-launcher{width:88px;height:112px;border:0;background:transparent;cursor:pointer;padding:0;filter:drop-shadow(0 12px 28px rgba(0,230,255,.35));animation:snai-float 2.4s ease-in-out infinite;position:relative}
-  .snai-launcher:hover{transform:translateY(-4px) scale(1.04)}
-  .snai-launcher.is-hidden{display:none}
-  .snai-reopen{display:none;align-items:center;justify-content:center;min-width:48px;height:34px;padding:0 12px;border:1px solid rgba(89,232,255,.34);border-radius:12px 0 0 12px;background:rgba(5,9,17,.92);color:#7ef3ff;font:700 11px Orbitron,Inter,sans-serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 18px rgba(89,232,255,.12);backdrop-filter:blur(12px)}
-  .snai-reopen.visible{display:flex}
-  .snai-reopen:hover{border-color:#59e8ff;color:#fff}
-  .snai-bot{position:relative;width:76px;height:104px;margin:auto}
-  .snai-head{position:absolute;left:15px;top:2px;width:46px;height:34px;border:2px solid #73f1ff;border-radius:13px;background:linear-gradient(145deg,#f7fbff 0 52%,#121827 53%);box-shadow:0 0 16px rgba(89,232,255,.55)}
-  .snai-head:before,.snai-head:after{content:"";position:absolute;top:13px;width:7px;height:5px;border-radius:50%;background:#59e8ff;box-shadow:0 0 8px #59e8ff}
-  .snai-head:before{left:10px}.snai-head:after{right:10px}
-  .snai-neck{position:absolute;left:33px;top:36px;width:10px;height:7px;background:#8a7bff}
-  .snai-body{position:absolute;left:18px;top:42px;width:40px;height:42px;border-radius:12px 12px 15px 15px;background:linear-gradient(155deg,#f5f7fb 0 48%,#111827 49%);border:2px solid #9d7bff;box-shadow:0 0 14px rgba(157,123,255,.42)}
-  .snai-body img{width:19px;height:19px;object-fit:contain;position:absolute;left:9px;top:9px;border-radius:4px}
-  .snai-arm,.snai-leg{position:absolute;background:linear-gradient(#f6f8fb,#151b28);border:1px solid #59e8ff}
-  .snai-arm{top:47px;width:11px;height:38px;border-radius:8px;transform-origin:50% 4px}.snai-arm.a{left:5px;animation:snai-arm-a .9s ease-in-out infinite alternate}.snai-arm.b{right:5px;animation:snai-arm-b .9s ease-in-out infinite alternate}
-  .snai-leg{top:80px;width:12px;height:24px;border-radius:7px;transform-origin:50% 2px}.snai-leg.a{left:21px;animation:snai-leg-a .9s ease-in-out infinite alternate}.snai-leg.b{right:21px;animation:snai-leg-b .9s ease-in-out infinite alternate}
-  .snai-status{position:absolute;right:-2px;top:4px;width:12px;height:12px;border-radius:50%;background:#8cff62;box-shadow:0 0 12px #8cff62;border:2px solid #071017}
-  .snai-panel{position:absolute;right:0;bottom:118px;width:min(380px,calc(100vw - 28px));height:520px;max-height:70vh;display:none;flex-direction:column;overflow:hidden;border:1px solid rgba(89,232,255,.38);border-radius:22px;background:rgba(5,9,17,.97);box-shadow:0 28px 90px rgba(0,0,0,.55),0 0 35px rgba(89,232,255,.12);backdrop-filter:blur(16px)}
-  .snai-panel.open{display:flex;animation:snai-open .18s ease-out}
-  .snai-headbar{display:flex;align-items:center;gap:10px;padding:14px 14px 12px;border-bottom:1px solid rgba(255,255,255,.09);background:linear-gradient(90deg,rgba(89,232,255,.09),rgba(157,123,255,.08))}
-  .snai-logo{width:38px;height:38px;object-fit:contain}.snai-title{flex:1}.snai-title strong{display:block;font-size:14px;letter-spacing:.08em}.snai-title small{font-family:Inter,sans-serif;color:#86f2ff;font-size:11px}.snai-close{border:0;background:transparent;color:#fff;font-size:24px;cursor:pointer}
-  .snai-modes{display:flex;gap:7px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);overflow:auto}.snai-modes button{border:1px solid rgba(255,255,255,.12);background:#0d1420;color:#cfe7f0;border-radius:999px;padding:7px 10px;font:600 10px Inter,sans-serif;white-space:nowrap;cursor:pointer}.snai-modes button.active{border-color:#59e8ff;color:#fff;box-shadow:0 0 12px rgba(89,232,255,.2)}
-  .snai-messages{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.snai-msg{max-width:86%;padding:10px 12px;border-radius:15px;font:14px/1.45 Inter,sans-serif;white-space:pre-wrap}.snai-msg.bot{align-self:flex-start;background:#111a28;border:1px solid rgba(89,232,255,.18)}.snai-msg.user{align-self:flex-end;background:linear-gradient(135deg,#15475a,#3b286b)}.snai-msg.error{border-color:#ff6a8f;color:#ffd9e3}
-  .snai-form{display:block;padding:10px 12px 9px;border-top:1px solid rgba(255,255,255,.08)}.snai-form-row{display:flex;align-items:flex-end;gap:7px}.snai-form textarea{flex:1;min-width:0;resize:none;height:44px;max-height:100px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:#0c121c;color:#fff;padding:11px 12px;font:14px Inter,sans-serif;outline:none}.snai-form textarea:focus{border-color:#59e8ff}.snai-send,.snai-voice-toggle{flex:0 0 44px;width:44px;height:44px;border:0;border-radius:14px;cursor:pointer}.snai-send{background:linear-gradient(135deg,#59e8ff,#9d7bff);color:#071017;font-weight:900}.snai-voice-toggle{border:1px solid rgba(89,232,255,.32);background:#0d1420;color:#b9f8ff;font-size:19px}.snai-voice-toggle.active{background:linear-gradient(135deg,#ff6584,#9d7bff);color:#fff}.snai-voice-note,.snai-voice-status{display:block;padding:5px 2px 0;color:#9db4c2;font:10px/1.4 Inter,sans-serif}.snai-voice-status{color:#86f2ff;min-height:14px}.snai-speak{display:inline-grid;place-items:center;width:27px;height:27px;margin:4px 0 0 7px;border:1px solid rgba(89,232,255,.24);border-radius:9px;background:rgba(89,232,255,.08);color:#9ef5ff;font-size:13px;cursor:pointer;vertical-align:middle}.snai-speak.is-speaking{border-color:#ff6584;color:#ffb2c1}
-  @keyframes snai-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-  @keyframes snai-arm-a{from{transform:rotate(13deg)}to{transform:rotate(-15deg)}}@keyframes snai-arm-b{from{transform:rotate(-13deg)}to{transform:rotate(15deg)}}
-  @keyframes snai-leg-a{from{transform:rotate(-8deg)}to{transform:rotate(9deg)}}@keyframes snai-leg-b{from{transform:rotate(8deg)}to{transform:rotate(-9deg)}}
-  @keyframes snai-open{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-  @media(max-width:520px){#stannet-ai-root{right:12px;bottom:10px}.snai-panel{position:fixed;left:10px;right:10px;bottom:126px;width:auto;height:64vh}.snai-launcher{width:76px;height:100px;transform:scale(.92)}}`;
-
-  const style=document.createElement('style'); style.textContent=css; document.head.appendChild(style);
-  const root=document.createElement('div'); root.id='stannet-ai-root';
-  root.innerHTML=`
-    <section class="snai-panel" aria-label="StanNet AI">
-      <div class="snai-headbar"><img class="snai-logo" src="/assets/brand/stannet-sn-cutout-20261005.png" alt=""><div class="snai-title"><strong>StanNet AI</strong><small>Asistente del ecosistema StanNet</small></div><button class="snai-close" type="button" aria-label="Cerrar">×</button></div>
-      <div class="snai-modes"><button class="active" data-mode="auto">Auto</button><button data-mode="general">General</button><button data-mode="programming">Programación</button><button data-mode="cyber">Ciberseguridad</button></div>
-      <div class="snai-messages"><div class="snai-msg bot">Hola. Soy StanNet AI. Puedo ayudarte con el ecosistema StanNet, programación y ciberseguridad.</div></div>
-      <form class="snai-form"><div class="snai-form-row"><textarea maxlength="4000" placeholder="Escribe o pulsa el micrófono…" aria-label="Mensaje"></textarea><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false" title="Hablar con StanNet AI">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div><small class="snai-voice-note">Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</small><small class="snai-voice-status" aria-live="polite">La voz funciona en navegadores compatibles; también puedes escribir.</small></form>
-    </section>
-    <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-expanded="false">
-      <div class="snai-bot"><div class="snai-head"></div><div class="snai-neck"></div><div class="snai-body"><img src="/assets/brand/stannet-sn-cutout-20261005.png" alt=""></div><i class="snai-arm a"></i><i class="snai-arm b"></i><i class="snai-leg a"></i><i class="snai-leg b"></i><span class="snai-status"></span></div>
-    </button>
-    <button class="snai-reopen" type="button" aria-label="Mostrar StanNet AI" title="StanNet AI">IA</button>`;
-  document.body.appendChild(root);
-
-  const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status');
-  const UI_KEY='stannet-ai-hidden-v3';
-  const HISTORY_KEY='stannet-ai-history-v1';
-  let mode='auto';
-  let history=[];
-  try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');if(!Array.isArray(history))history=[]}catch{history=[]}
+// StanNet AI Interface. Knowledge and orchestration live in separate modules.
+(async()=>{
+  if(window.__StanNetAIWidgetLoaded)return;
+  window.__StanNetAIWidgetLoaded=true;
+  const VERSION='20261005-agent1';
+  let modules;
+  try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs')]);}
+  catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
+  const [{AgentCore},{resources,safeResourceUrl}]=modules;
+  const root=document.createElement('div');root.id='stannet-ai-root';
+  const ui=root.attachShadow({mode:'open'});
+  const style=document.createElement('link');style.rel='stylesheet';style.href='/stannet-ai.css?v='+VERSION;
+  const styled=new Promise(resolve=>{style.onload=()=>resolve(true);style.onerror=()=>resolve(false)});
+  ui.append(style);
+  document.body.append(root);
+  if(!await styled){root.remove();window.__StanNetAIWidgetLoaded=false;return;}
+  const content=document.createElement('div');
+  content.innerHTML=`
+    <button class="snai-reopen" type="button" aria-label="Abrir StanNet AI" aria-haspopup="dialog" aria-expanded="false">IA</button>
+    <dialog class="snai-panel" aria-labelledby="snai-title">
+      <header class="snai-headbar">
+        <button class="snai-persona" type="button" aria-label="Conocer a StanNet AI"><img src="/assets/ai/stannet-ai-agent.svg" alt=""></button>
+        <div class="snai-title"><strong id="snai-title">StanNet AI</strong><small>Tu agente · aprende, crea, explora</small></div>
+        <button class="snai-minimize" type="button" aria-label="Minimizar StanNet AI">−</button>
+        <button class="snai-close" type="button" aria-label="Cerrar StanNet AI">×</button>
+      </header>
+      <div class="snai-modes"><label>Modo <select aria-label="Modo del agente"><option value="auto">Auto</option><option value="general">General</option><option value="programming">Programación</option><option value="cyber">Ciberseguridad</option><option value="travel">Viajes</option></select></label><span class="snai-state" role="status">Listo</span></div>
+      <div class="snai-center">
+        <details class="snai-memory"><summary>Contexto y memoria</summary><small>Preferencias guardadas en este navegador. Solo se envían si activas la casilla.</small><textarea maxlength="1500" aria-label="Memoria personal" placeholder="Tu nivel, proyecto o forma de aprender…"></textarea><label><input class="snai-memory-enabled" type="checkbox">Usar esta memoria con la IA</label><div class="snai-memory-actions"><button class="snai-memory-save" type="button">Guardar</button><button class="snai-memory-clear" type="button">Borrar memoria</button><button class="snai-clear" type="button">Borrar chat</button></div></details>
+        <div class="snai-messages" role="log" aria-label="Conversación" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
+      </div>
+      <form class="snai-form">
+        <div class="snai-form-row"><textarea maxlength="4000" placeholder="¿Qué quieres hacer en StanNet?" aria-label="Mensaje" enterkeyhint="send"></textarea><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div>
+        <div class="snai-tools"><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código">Adjuntar</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><span class="snai-attachment" hidden></span><button class="snai-remove-attachment" type="button" aria-label="Quitar adjunto" hidden>×</button><details class="snai-info"><summary>Privacidad</summary><p>Los mensajes y adjuntos se envían al proveedor de IA. Los archivos no se guardan en el historial. Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</p></details></div>
+        <small class="snai-voice-status" aria-live="polite">Puedes escribir o activar la voz.</small>
+      </form>
+    </dialog>`;
+  ui.append(content);
+  const $=selector=>ui.querySelector(selector);
+  const panel=$('.snai-panel'),reopen=$('.snai-reopen'),messages=$('.snai-messages'),form=$('.snai-form'),input=form.querySelector('textarea'),send=$('.snai-send'),voiceToggle=$('.snai-voice-toggle'),voiceStatus=$('.snai-voice-status'),state=$('.snai-state'),memoryPanel=$('.snai-memory'),memoryInput=memoryPanel.querySelector('textarea'),memoryEnabledInput=$('.snai-memory-enabled'),attachmentInput=$('.snai-file-input'),attachmentView=$('.snai-attachment');
+  const HISTORY_KEY='stannet-ai-history-v1',MEMORY_KEY='stannet-ai-memory-v1',MEMORY_ENABLED_KEY='stannet-ai-memory-enabled-v1';
+  let history=[],pendingAttachment=null;
+  try {
+    const saved=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
+    if(Array.isArray(saved))history=saved.filter(item=>item&&typeof item.text==='string'&&['user','bot'].includes(item.kind)).slice(-40).map(item=>({text:item.text.slice(0,20000),kind:item.kind}));
+    memoryInput.value=localStorage.getItem(MEMORY_KEY)||'';
+    memoryEnabledInput.checked=localStorage.getItem(MEMORY_ENABLED_KEY)==='1';
+  }catch{}
   const saveHistory=()=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)))}catch{}};
+  let requestHistory=[];
+  const core=new AgentCore({readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>({title:document.title.slice(0,160),path:location.pathname})});
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false;
   let currentAudio=null,activeSpeechButton=null,speechToken=0;
@@ -86,7 +79,9 @@
   const playAzureChunk=async(chunk,token)=>{
     const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:'es-ES',voice:'es-ES-ElviraNeural',purpose:'chat'})});
     if(!response.ok)throw new Error('Azure TTS unavailable');
-    const audioUrl=URL.createObjectURL(await response.blob()),audio=new Audio(audioUrl);
+    const blob=await response.blob();
+    if(token!==speechToken||!panel.open)return false;
+    const audioUrl=URL.createObjectURL(blob),audio=new Audio(audioUrl);
     currentAudio=audio;
     try{
       await new Promise((resolve,reject)=>{audio.onended=resolve;audio.onerror=()=>reject(new Error('Audio playback failed'));audio.play().catch(reject)});
@@ -138,7 +133,7 @@
     }
   }
   function startListening(){
-    if(!voiceEnabled||voiceThinking||recognitionRunning||!Recognition)return;
+    if(!panel.open||!voiceEnabled||voiceThinking||recognitionRunning||!Recognition)return;
     if(!recognition){
       recognition=new Recognition();
       recognition.lang='es-ES';
@@ -148,7 +143,7 @@
       recognition.onstart=()=>{recognitionRunning=true;voiceStatus.textContent='Te escucho… habla ahora.'};
       recognition.onresult=(event)=>{
         const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
-        if(!transcript)return;
+        if(!transcript||!voiceEnabled||!panel.open||core.busy)return;
         voiceThinking=true;
         voiceStatus.textContent='He oído: '+transcript;
         input.value=transcript;
@@ -195,126 +190,122 @@
     }
     voiceEnabled=true;voiceThinking=false;updateVoiceButton();startListening();
   });
-  const setOpen=(open)=>{panel.classList.toggle('open',open);launcher.setAttribute('aria-expanded',String(open));if(open)setTimeout(()=>input.focus(),80)};
-  const setHidden=(hidden)=>{
-    launcher.classList.toggle('is-hidden',hidden);
-    reopen.classList.toggle('visible',hidden);
-    if(hidden)setOpen(false);
-    try{localStorage.setItem(UI_KEY,hidden?'1':'0')}catch{}
-  };
-  launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
-  close.addEventListener('click',()=>setHidden(true));
-  reopen.addEventListener('click',()=>{setHidden(false);setOpen(true)});
-  root.querySelectorAll('.snai-modes button').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.snai-modes button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');mode=btn.dataset.mode||'auto'}));
-  const routeLabels={
-    '/pages/programming.html':'Entrar a Programming Academy →',
-    '/pages/programming-fullstack.html':'Abrir Full-Stack Engineer Path →',
-    '/pages/programming-cs-lab.html':'Abrir CS Foundations →',
-    '/pages/programming-lab.html':'Abrir Python Code Lab →',
-    '/pages/programming-web-lab.html':'Abrir Web & Languages Lab →',
-    '/pages/cybersecurity.html':'Entrar a Cyber Defense Academy →',
-    '/pages/cyber-lab.html':'Abrir Cyber Defense Lab →',
-    '/pages/callan.html':'Entrar a Callan English Coach →',
-    '/pages/danish.html':'Entrar a Danish Academy →',
-    '/pages/ruta-dinamarca.html':'Abrir Ruta Dinamarca →',
-    '/pages/language-music.html':'Abrir Language Music Lab →',
-    '/pages/guitar.html':'Entrar a Guitar Academy →',
-    '/pages/typing.html':'Abrir Typing Lab →',
-    '/pages/shortcuts.html':'Aprender atajos de teclado →',
-    '/nutri-ia/':'Abrir Nutri IA →',
-    '/sentinel/':'Abrir StanNet Sentinel →',
-    '/pages/education.html':'Ver formación y certificados →',
-    '/pages/cv.html':'Ver perfil y CV →'
-  };
-  const normalizeRoute=(raw)=>{
-    try{
-      if(raw.startsWith('http')){
-        const u=new URL(raw);
-        return u.pathname||'/';
-      }
-    }catch{}
-    return raw;
-  };
+
+  // The dialog enters the browser top layer, bypassing transformed/contained
+  // page ancestors. Native modal inertness isolates all background gestures.
+  let pageSnapshot=null,viewportFrame=0;
+  const viewport=window.visualViewport;
+  const mobile=matchMedia('(max-width:640px), (pointer:coarse)');
+  function syncViewport(){
+    cancelAnimationFrame(viewportFrame);
+    viewportFrame=requestAnimationFrame(()=>{
+      if(!panel.open)return;
+      const bounds=viewport||{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0};
+      for(const [name,value] of Object.entries({x:bounds.offsetLeft,y:bounds.offsetTop,width:bounds.width,height:bounds.height}))panel.style.setProperty('--snai-'+name,value+'px');
+    });
+  }
+  function lockPage(){
+    if(pageSnapshot)return;
+    const body=document.body,html=document.documentElement;
+    pageSnapshot={x:scrollX,y:scrollY,bodyStyle:body.getAttribute('style'),htmlStyle:html.getAttribute('style')};
+    html.style.overflow='hidden';html.style.overscrollBehavior='none';
+    body.style.position='fixed';body.style.top=-pageSnapshot.y+'px';body.style.left=-pageSnapshot.x+'px';body.style.width='100%';body.style.overflow='hidden';
+  }
+  function unlockPage(){
+    if(!pageSnapshot)return;
+    const saved=pageSnapshot;pageSnapshot=null;
+    for(const [el,value] of [[document.body,saved.bodyStyle],[document.documentElement,saved.htmlStyle]])value===null?el.removeAttribute('style'):el.setAttribute('style',value);
+    const behavior=document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior='auto';
+    window.scrollTo(saved.x,saved.y);
+    document.documentElement.style.scrollBehavior=behavior;
+  }
+  function finishClose(){
+    stopVoiceMode();input.blur();cancelAnimationFrame(viewportFrame);unlockPage();reopen.hidden=false;reopen.setAttribute('aria-expanded','false');
+  }
+  function closeAgent(){if(panel.open)panel.close();}
+  function openAgent(){
+    if(panel.open)return;
+    lockPage();reopen.hidden=true;reopen.setAttribute('aria-expanded','true');
+    panel.showModal();syncViewport();
+    // No forced autofocus/keyboard on touch devices; the user taps the input.
+    if(mobile.matches)$('.snai-close').focus({preventScroll:true});else input.focus({preventScroll:true});
+  }
+  reopen.addEventListener('click',openAgent);
+  $('.snai-close').addEventListener('click',closeAgent);
+  $('.snai-minimize').addEventListener('click',closeAgent);
+  panel.addEventListener('close',finishClose);
+  panel.addEventListener('cancel',event=>{event.preventDefault();closeAgent()});
+  viewport?.addEventListener('resize',syncViewport,{passive:true});
+  viewport?.addEventListener('scroll',syncViewport,{passive:true});
+  window.addEventListener('resize',syncViewport,{passive:true});
+  mobile.addEventListener('change',syncViewport);
+  $('.snai-modes select').addEventListener('change',event=>{state.textContent=event.target.selectedOptions[0].textContent;});
+  const scrollEnd=()=>{messages.scrollTop=messages.scrollHeight;};
   const add=(text,kind='bot',persist=true)=>{
-    const el=document.createElement('div');
-    el.className='snai-msg '+kind;
+    const el=document.createElement('div');el.className='snai-msg '+kind;
     if(kind==='bot'){
       const safe=String(text||'');
-      const pattern=/(https?:\/\/(?:www\.)?stannet\.space[^\s<]*)|(\/(?:pages|nutri-ia|sentinel)\/[A-Za-z0-9._~!$&'()*+,;=:@%\/-]*|\/sentinel\/)/gi;
+      const pattern=/(https?:\/\/[^\s<>]+)|(\/(?:pages|nutri-ia|sentinel|shield|sanacion)\/[A-Za-z0-9._~!$&'()*+,;=:@%\/#-]*)/gi;
       let last=0,match;
       while((match=pattern.exec(safe))){
-        if(match.index>last) el.appendChild(document.createTextNode(safe.slice(last,match.index)));
+        el.append(document.createTextNode(safe.slice(last,match.index)));
         const raw=match[0].replace(/[),.;!?}>]+$/,'');
-        const trailing=match[0].slice(raw.length);
-        const route=normalizeRoute(raw);
-        const a=document.createElement('a');
-        a.href=raw;
-        a.textContent=routeLabels[route]||('Abrir '+route.replace(/^\/|\/$/g,'')+' →');
-        a.target='_self';
-        a.rel='noopener';
-        a.style.display='inline-block';
-        a.style.margin='8px 4px 2px 0';
-        a.style.padding='8px 11px';
-        a.style.border='1px solid rgba(89,232,255,.28)';
-        a.style.borderRadius='10px';
-        a.style.background='linear-gradient(135deg,rgba(89,232,255,.12),rgba(157,123,255,.12))';
-        a.style.color='#7ef3ff';
-        a.style.fontWeight='700';
-        a.style.textDecoration='none';
-        a.style.fontSize='12px';
-        el.appendChild(a);
-        if(trailing) el.appendChild(document.createTextNode(trailing));
+        const href=safeResourceUrl(raw,location.origin);
+        if(href){const link=document.createElement('a');link.className='snai-resource';link.href=href;link.textContent='Abrir '+(resources.find(r=>r.path===href)?.title||'recurso')+' →';if(href.startsWith('https:')){link.target='_blank';link.rel='noopener noreferrer';}el.append(link,document.createTextNode(match[0].slice(raw.length)));}
+        else el.append(document.createTextNode(match[0]));
         last=match.index+match[0].length;
       }
-      if(last<safe.length) el.appendChild(document.createTextNode(safe.slice(last)));
-    }else{
-      el.textContent=text;
-    }
-    if(kind==='bot'){
-      const speak=document.createElement('button');
-      speak.type='button';speak.className='snai-speak';speak.textContent='🔊';
-      speak.setAttribute('aria-label','Escuchar respuesta');speak.title='Escuchar respuesta';
-      speak.addEventListener('click',()=>activeSpeechButton===speak?(stopSpeech(),voiceStatus.textContent='Audio detenido.'):speakReply(text,{button:speak}));
-      el.appendChild(speak);
-    }
-    messages.appendChild(el);
-    messages.scrollTop=messages.scrollHeight;
-    if(persist){
-      history.push({text:String(text||''),kind});
-      history=history.slice(-40);
-      saveHistory();
-    }
-    return el
+      el.append(document.createTextNode(safe.slice(last)));
+      if(persist){const speak=document.createElement('button');speak.type='button';speak.className='snai-speak';speak.textContent='🔊';speak.setAttribute('aria-label','Escuchar respuesta');speak.addEventListener('click',()=>activeSpeechButton===speak?stopSpeech():speakReply(text,{button:speak}));el.append(speak);}
+    }else el.textContent=text;
+    messages.append(el);scrollEnd();
+    if(persist && ['user','bot'].includes(kind)){history.push({text:String(text),kind});history=history.slice(-40);saveHistory();}
+    return el;
   };
-
-  if(history.length){
-    messages.innerHTML='';
-    const restored=[...history];
-    history=[];
-    restored.forEach(item=>add(item.text,item.kind||'bot',true));
-  }
-  let initiallyHidden=false;
-  try{initiallyHidden=localStorage.getItem(UI_KEY)==='1'}catch{}
-  if(initiallyHidden)setHidden(true);
-
-  form.addEventListener('submit',async(e)=>{
-    e.preventDefault(); const text=input.value.trim(); if(!text)return;
-    if(voiceEnabled){voiceThinking=true;voiceStatus.textContent='Procesando tu mensaje…'}
-    add(text,'user'); input.value=''; send.disabled=true; const pending=add('Pensando…','bot',false);
+  const welcome=()=>add('Soy StanNet AI, tu guía para aprender y crear. Conozco las academias, proyectos y herramientas de esta web. Dime qué quieres conseguir y empezamos.', 'bot',false);
+  if(history.length)history.forEach(item=>add(item.text,item.kind,false));else welcome();
+  $('.snai-persona').addEventListener('click',()=>add('Puedo buscar recursos de StanNet, orientarte hacia una academia y ayudarte paso a paso. Uso el contexto de esta página y nuestra conversación. La voz se activa solo cuando tú la solicitas.','bot',false));
+  $('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');state.textContent='Memoria guardada';}catch{state.textContent='No se pudo guardar';}});
+  $('.snai-memory-clear').addEventListener('click',()=>{memoryInput.value='';memoryEnabledInput.checked=false;try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(MEMORY_ENABLED_KEY)}catch{}state.textContent='Memoria borrada';});
+  $('.snai-clear').addEventListener('click',()=>{if(core.busy)return;history=[];saveHistory();messages.replaceChildren();welcome();});
+  $('.snai-attach').addEventListener('click',()=>attachmentInput.click());
+  const removeAttachment=()=>{pendingAttachment=null;attachmentInput.value='';attachmentView.hidden=true;$('.snai-remove-attachment').hidden=true;};
+  $('.snai-remove-attachment').addEventListener('click',removeAttachment);
+  attachmentInput.addEventListener('change',()=>{pendingAttachment=attachmentInput.files[0]||null;attachmentView.textContent=pendingAttachment?.name||'';attachmentView.hidden=!pendingAttachment;$('.snai-remove-attachment').hidden=!pendingAttachment;});
+  const readAttachment=async(file)=>{
+    if(!file)return null;
+    if(file.size>4*1024*1024)throw new Error('La imagen o archivo supera 4 MB.');
+    if(file.type.startsWith('image/')){
+      if(!['image/png','image/jpeg','image/webp','image/gif'].includes(file.type))throw new Error('Formato de imagen no compatible.');
+      const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('No se pudo leer la imagen.'));reader.readAsDataURL(file)});
+      return {kind:'image',name:file.name.slice(0,100),data};
+    }
+    if(!/\.(txt|md|csv|json|js|ts|tsx|html|css|py|sql|java|php|c|cpp|cs)$/i.test(file.name)||file.size>200*1024)throw new Error('Adjunta un archivo de texto/código de hasta 200 KB.');
+    return {kind:'text',name:file.name.slice(0,100),content:(await file.text()).slice(0,40000)};
+  };
+  let sending=false;
+  form.addEventListener('submit',async(event)=>{
+    event.preventDefault();if(sending)return;
+    const text=input.value.trim();if(!text&&!pendingAttachment)return;
+    sending=true;send.disabled=true;voiceThinking=voiceEnabled;
+    state.textContent='Preparando…';requestHistory=history.slice();
+    add(text+(pendingAttachment?' [Adjunto: '+pendingAttachment.name+']':''),'user');input.value='';
+    const pending=add('Preparando tu siguiente paso…','bot',false);
+    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
     try{
-      const pref=mode==='auto'?'':`Modo ${mode}. `;
-      const r=await fetch('/api/stannet-ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:pref+text})});
-      const data=await r.json().catch(()=>({})); pending.remove(); if(!r.ok)throw new Error(data.error||'No pude responder ahora.');
-      const answer=data.answer||'No recibí respuesta.';
-      add(answer,'bot');
-      if(voiceEnabled)await speakReply(answer,{listenAfter:true});
-    }catch(err){
-      pending.remove();add(err.message||'Error de conexión.','bot error');
-      if(voiceEnabled){voiceThinking=false;voiceStatus.textContent='No pude obtener respuesta; sigo escuchando.'}
+      const attachment=await readAttachment(pendingAttachment);
+      const result=await core.run(text||'Analiza el archivo adjunto.',{mode:$('.snai-modes select').value,attachment,signal:controller.signal});
+      pending.remove();add(result.answer,'bot');removeAttachment();state.textContent=result.source==='catalogue'?'Recurso encontrado':'Listo';
+      if(voiceEnabled&&panel.open)await speakReply(result.answer,{listenAfter:true});
+    }catch(error){
+      pending.remove();add(error.name==='AbortError'?'La respuesta tardó demasiado. Inténtalo de nuevo.':error.message,'error',false);state.textContent='Inténtalo de nuevo';voiceThinking=false;
     }finally{
-      send.disabled=false;input.focus();
-      if(voiceEnabled&&!voiceThinking)startListening();
+      clearTimeout(timeout);sending=false;send.disabled=false;
+      // Never reopen the keyboard after sending, closing, or navigating modes.
+      if(voiceEnabled&&panel.open&&!voiceThinking)startListening();
     }
   });
-  input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+  input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing&&!mobile.matches){event.preventDefault();form.requestSubmit();}});
+  window.addEventListener('pagehide',()=>{stopVoiceMode();unlockPage();});
 })();
