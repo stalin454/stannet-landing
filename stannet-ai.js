@@ -4,7 +4,6 @@
 
   const css = `
   #stannet-ai-root{position:fixed;right:22px;bottom:18px;z-index:99999;font-family:Orbitron,Inter,system-ui,sans-serif;color:#f5fbff}
-  .snai-launcher.is-hidden{display:none}
   .snai-reopen{display:none;align-items:center;justify-content:center;min-width:48px;height:34px;padding:0 12px;border:1px solid rgba(89,232,255,.34);border-radius:12px 0 0 12px;background:rgba(5,9,17,.92);color:#7ef3ff;font:700 11px Orbitron,Inter,sans-serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 18px rgba(89,232,255,.12);backdrop-filter:blur(12px)}
   .snai-reopen.visible{display:flex}
   .snai-reopen:hover{border-color:#59e8ff;color:#fff}
@@ -127,9 +126,14 @@
   
   /* StanNet AI agent avatar — replaces the legacy robot launcher. */
   #stannet-ai-root .snai-launcher{
+    position:relative;
     width:142px;
     height:204px;
     padding:0;
+    border:0;
+    appearance:none;
+    background:transparent;
+    cursor:pointer;
     animation:none;
     filter:none;
     overflow:visible;
@@ -199,9 +203,7 @@
   @media (prefers-reduced-motion:reduce){
     #stannet-ai-root .snai-agent-shell{animation:none}
   }
-  
-
-  /* Quick hide control + robust mobile viewport layout. */
+  /* Quick hide control and side tab. */
   #stannet-ai-root .snai-dismiss{
     position:absolute;
     z-index:6;
@@ -240,16 +242,6 @@
     border-radius:12px 0 0 12px;
   }
 
-  
-
-  
-
-  
-
-  
-
-  
-
   /* One mobile layout: fixed visual viewport, independent scroll areas. */
   @media(max-width:520px){
     html.snai-mobile-open,
@@ -278,21 +270,23 @@
     #stannet-ai-root .snai-panel.open{display:flex}
     #stannet-ai-root .snai-headbar{
       flex:0 0 auto;
-      flex-wrap:nowrap;
-      gap:5px;
+      display:grid;
+      grid-template-columns:30px minmax(0,1fr) 44px;
+      grid-template-areas:"logo title close" "actions actions actions";
+      column-gap:7px;
+      row-gap:4px;
       padding:8px 9px;
-      min-height:52px;
     }
-    #stannet-ai-root .snai-logo{flex:0 0 30px;width:30px;height:30px}
-    #stannet-ai-root .snai-title{min-width:0}
+    #stannet-ai-root .snai-logo{grid-area:logo;width:30px;height:30px}
+    #stannet-ai-root .snai-title{grid-area:title;min-width:0}
     #stannet-ai-root .snai-title strong{font-size:12px;letter-spacing:.04em}
     #stannet-ai-root .snai-title small{display:none}
-    #stannet-ai-root .snai-head-actions{flex:0 0 auto;gap:4px}
-    #stannet-ai-root .snai-head-actions button{min-height:32px;padding:5px 7px;font-size:9px}
+    #stannet-ai-root .snai-head-actions{grid-area:actions;justify-content:flex-end;gap:6px}
+    #stannet-ai-root .snai-head-actions button{min-height:40px;padding:6px 10px;font-size:10px}
     #stannet-ai-root .snai-close{
-      flex:0 0 38px;
-      width:38px;
-      height:38px;
+      grid-area:close;
+      width:44px;
+      height:44px;
       display:grid;
       place-items:center;
       padding:0;
@@ -322,7 +316,7 @@
       touch-action:pan-x;
     }
     #stannet-ai-root .snai-modes::-webkit-scrollbar{display:none}
-    #stannet-ai-root .snai-modes button{flex:0 0 auto;min-height:32px;padding:6px 10px;font-size:9px}
+    #stannet-ai-root .snai-modes button{flex:0 0 auto;min-height:40px;padding:6px 10px;font-size:9px}
     #stannet-ai-root .snai-messages{
       box-sizing:border-box;
       flex:1 1 auto;
@@ -335,7 +329,7 @@
       overscroll-behavior-y:contain;
       touch-action:pan-y;
     }
-    #stannet-ai-root .snai-msg{max-width:92%;font-size:13px;line-height:1.42}
+    #stannet-ai-root .snai-msg{flex:0 0 auto;max-width:92%;font-size:13px;line-height:1.42;overflow-wrap:anywhere}
     #stannet-ai-root .snai-form{
       box-sizing:border-box;
       flex:0 0 auto;
@@ -358,9 +352,9 @@
     #stannet-ai-root .snai-attach,
     #stannet-ai-root .snai-send,
     #stannet-ai-root .snai-voice-toggle{
-      flex:0 0 40px;
-      width:40px;
-      height:42px;
+      flex:0 0 44px;
+      width:44px;
+      height:44px;
       border-radius:11px;
     }
     #stannet-ai-root .snai-privacy-note,
@@ -378,12 +372,12 @@
     #stannet-ai-root .snai-agent-shell,
     #stannet-ai-root .snai-agent-avatar{width:92px;height:138px}
     #stannet-ai-root .snai-status{right:5px;top:14px;width:11px;height:11px}
-    #stannet-ai-root .snai-dismiss{right:0;top:-4px;width:28px;height:28px}
+    #stannet-ai-root .snai-dismiss{right:0;top:-4px;width:44px;height:44px}
     #stannet-ai-root .snai-reopen{
       right:0;
       bottom:max(14px,env(safe-area-inset-bottom));
-      min-width:40px;
-      height:32px;
+      min-width:44px;
+      height:44px;
       padding:0 9px;
     }
   }
