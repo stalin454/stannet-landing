@@ -28,11 +28,15 @@ export function createD1Repositories(db){
   ,async findByUserId(userId){const r=await db.prepare('SELECT user_id,display_name,bio,city,postal_prefix,avatar_key,is_public FROM profiles WHERE user_id=?1').bind(userId).first();return r&&{userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key,public:Boolean(r.is_public)};}
   },
   professionals:{
-   async listPublic({city,category,limit,cursor}){
+   async listPublic({city,postalPrefix,category,verifiedOnly=false,minRating=0,limit,cursor}){
     const where=["p.is_public=1","pp.available=1"],values=[];
     if(city){values.push(city);where.push('p.city=?'+values.length);}
+    if(postalPrefix){values.push(postalPrefix);where.push('p.postal_prefix=?'+values.length);}
     if(category){values.push(category);where.push('EXISTS (SELECT 1 FROM professional_services ps WHERE ps.user_id=pp.user_id AND ps.category=?'+values.length+')');}
+    if(verifiedOnly){where.push("pp.verification_status='verified'");}
     if(cursor){values.push(cursor);where.push('pp.user_id>?'+values.length);}
+    const having=minRating>0?'HAVING COALESCE(AVG(r.rating),0)>=?'+(values.length+1):'';
+    if(minRating>0)values.push(minRating);
     values.push(limit+1);
     const sql=`SELECT pp.user_id,p.display_name,p.bio,p.city,p.postal_prefix,p.avatar_key,pp.headline,pp.experience_years,pp.verification_status,
       COUNT(r.id) AS review_count,COALESCE(AVG(r.rating),0) AS average_rating
@@ -40,6 +44,7 @@ export function createD1Repositories(db){
       LEFT JOIN reviews r ON r.reviewee_id=pp.user_id
       WHERE ${where.join(' AND ')}
       GROUP BY pp.user_id,p.display_name,p.bio,p.city,p.postal_prefix,p.avatar_key,pp.headline,pp.experience_years,pp.verification_status
+      ${having}
       ORDER BY pp.user_id ASC LIMIT ?${values.length}`;
     const result=await db.prepare(sql).bind(...values).all(),rows=result.results||[],more=rows.length>limit;
     const items=rows.slice(0,limit).map(r=>({userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key,headline:r.headline,experienceYears:r.experience_years,verificationStatus:r.verification_status,reviewCount:Number(r.review_count||0),averageRating:Math.round(Number(r.average_rating||0)*10)/10}));
