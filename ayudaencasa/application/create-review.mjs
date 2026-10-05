@@ -10,6 +10,6 @@ export function createReview({requests,conversations,atomic,id=()=>crypto.random
   if(principal.userId!==clientId&&principal.userId!==professionalId)throw Object.assign(new Error('Not found'),{status:404,code:'NOT_FOUND'});
   const revieweeId=principal.userId===clientId?professionalId:clientId,rating=Number(input?.rating);
   if(!Number.isInteger(rating)||rating<1||rating>5)throw Object.assign(new Error('Invalid rating'),{status:400,code:'INVALID_INPUT'});
-  return atomic.createReview({id:id(),requestId:req.id,reviewerId:principal.userId,revieweeId,rating,comment:cleanComment(input?.comment),now});
+  return atomic.createReview({id:id(),auditId:id(),requestId:req.id,reviewerId:principal.userId,revieweeId,rating,comment:cleanComment(input?.comment),now});
  };
 }
