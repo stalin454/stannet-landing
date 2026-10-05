@@ -1,0 +1,42 @@
+name: AyudaEnCasa Quality
+
+on:
+  pull_request:
+    paths:
+      - "ayudaencasa/**"
+      - "tests/ayudaencasa/**"
+      - "package.json"
+      - ".github/workflows/ayuda-en-casa.yml"
+  push:
+    branches: ["ayuda-en-casa/foundation"]
+    paths:
+      - "ayudaencasa/**"
+      - "tests/ayudaencasa/**"
+      - "package.json"
+      - ".github/workflows/ayuda-en-casa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run test:ayudaencasa
+
+  d1-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply migrations to isolated local D1
+        working-directory: ayudaencasa
+        run: npx --yes wrangler@4 d1 migrations apply AYUDA_DB --local --config wrangler.toml
