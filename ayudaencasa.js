@@ -69,3 +69,5 @@ async function restoreAuth(){
 }
 $('#login').addEventListener('click',()=>auth('login'));$('#register').addEventListener('click',()=>auth('register'));
 $('#allCategories').addEventListener('click',()=>{openModal('<h2 id="modalTitle">Todos los servicios</h2><p class="lead">Estas categorías ayudan a descubrir servicios, pero no limitan lo que puedes pedir.</p><div class="category-list">'+[...serviceGroups.map(g=>g.name),'Otro servicio'].map(n=>'<button type="button" data-service="'+escapeHtml(n)+'">'+escapeHtml(n)+'</button>').join('')+'</div>');$$('[data-service]',modal).forEach(b=>b.addEventListener('click',()=>{taskInput.value=b.dataset.service==='Otro servicio'?'': 'Necesito '+b.dataset.service.toLowerCase();closeModal();$('#searchForm').scrollIntoView({behavior:'smooth',block:'center'});taskInput.focus()}))});
+
+restoreAuth();
