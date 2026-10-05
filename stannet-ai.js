@@ -50,7 +50,7 @@
   document.body.appendChild(root);
 
   const panel=root.querySelector('.snai-panel'),launcher=root.querySelector('.snai-launcher'),reopen=root.querySelector('.snai-reopen'),close=root.querySelector('.snai-close'),messages=root.querySelector('.snai-messages'),form=root.querySelector('.snai-form'),input=form.querySelector('textarea'),send=form.querySelector('.snai-send'),voiceToggle=form.querySelector('.snai-voice-toggle'),voiceStatus=form.querySelector('.snai-voice-status');
-  const UI_KEY='stannet-ai-hidden-v2';
+  const UI_KEY='stannet-ai-hidden-v3';
   const HISTORY_KEY='stannet-ai-history-v1';
   let mode='auto';
   let history=[];
