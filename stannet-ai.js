@@ -204,6 +204,16 @@
     #stannet-ai-root .snai-agent-shell{animation:none}
   }
   /* Quick hide control and side tab. */
+  #stannet-ai-root .snai-launcher,
+  #stannet-ai-root .snai-agent-shell,
+  #stannet-ai-root .snai-agent-avatar{background:transparent!important}
+  #stannet-ai-root .snai-launcher{
+    border:0!important;
+    box-shadow:none!important;
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    -webkit-tap-highlight-color:transparent;
+  }
   #stannet-ai-root .snai-dismiss{
     position:absolute;
     z-index:6;
@@ -242,13 +252,21 @@
     border-radius:12px 0 0 12px;
   }
 
-  /* One mobile layout: fixed visual viewport, independent scroll areas. */
+  /* Rebuilt mobile modal: visual viewport owns the panel; the page remains untouched. */
   @media(max-width:520px){
-    html.snai-mobile-open,
-    html.snai-mobile-open body{overflow:hidden;overscroll-behavior:none}
     #stannet-ai-root{
       right:max(8px,env(safe-area-inset-right));
       bottom:max(8px,env(safe-area-inset-bottom));
+    }
+    #stannet-ai-root.panel-open::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:6;
+      background:transparent;
+      pointer-events:auto;
+      touch-action:none;
+      overscroll-behavior:none;
     }
     #stannet-ai-root .snai-panel{
       position:fixed;
@@ -257,9 +275,9 @@
       left:max(8px,env(safe-area-inset-left));
       right:max(8px,env(safe-area-inset-right));
       top:calc(var(--snai-vtop,0px) + max(8px,env(safe-area-inset-top)));
-      bottom:calc(var(--snai-vbottom,0px) + max(8px,env(safe-area-inset-bottom)));
+      bottom:auto;
       width:auto;
-      height:auto;
+      height:calc(var(--snai-vh,100dvh) - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)));
       max-height:none;
       min-height:0;
       flex-direction:column;
@@ -273,6 +291,7 @@
       display:grid;
       grid-template-columns:30px minmax(0,1fr) 44px;
       grid-template-areas:"logo title close" "actions actions actions";
+      align-items:center;
       column-gap:7px;
       row-gap:4px;
       padding:8px 9px;
@@ -282,7 +301,7 @@
     #stannet-ai-root .snai-title strong{font-size:12px;letter-spacing:.04em}
     #stannet-ai-root .snai-title small{display:none}
     #stannet-ai-root .snai-head-actions{grid-area:actions;justify-content:flex-end;gap:6px}
-    #stannet-ai-root .snai-head-actions button{min-height:40px;padding:6px 10px;font-size:10px}
+    #stannet-ai-root .snai-head-actions button{min-height:40px;padding:6px 10px;font-size:10px;touch-action:manipulation}
     #stannet-ai-root .snai-close{
       grid-area:close;
       width:44px;
@@ -292,14 +311,16 @@
       padding:0;
       border-radius:10px;
       background:rgba(255,255,255,.06);
+      touch-action:manipulation;
     }
     #stannet-ai-root .snai-memory{
       flex:0 0 auto;
-      max-height:30%;
+      max-height:35%;
       min-height:0;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
       overscroll-behavior:contain;
+      touch-action:pan-y;
     }
     #stannet-ai-root .snai-modes{
       box-sizing:border-box;
@@ -313,10 +334,11 @@
       white-space:nowrap;
       scrollbar-width:none;
       -webkit-overflow-scrolling:touch;
+      overscroll-behavior-x:contain;
       touch-action:pan-x;
     }
     #stannet-ai-root .snai-modes::-webkit-scrollbar{display:none}
-    #stannet-ai-root .snai-modes button{flex:0 0 auto;min-height:40px;padding:6px 10px;font-size:9px}
+    #stannet-ai-root .snai-modes button{flex:0 0 auto;min-height:40px;padding:6px 10px;font-size:9px;touch-action:manipulation}
     #stannet-ai-root .snai-messages{
       box-sizing:border-box;
       flex:1 1 auto;
@@ -328,6 +350,7 @@
       -webkit-overflow-scrolling:touch;
       overscroll-behavior-y:contain;
       touch-action:pan-y;
+      scrollbar-gutter:stable;
     }
     #stannet-ai-root .snai-msg{flex:0 0 auto;max-width:92%;font-size:13px;line-height:1.42;overflow-wrap:anywhere}
     #stannet-ai-root .snai-form{
@@ -335,7 +358,7 @@
       flex:0 0 auto;
       min-width:0;
       width:100%;
-      padding:8px 8px max(8px,env(safe-area-inset-bottom));
+      padding:8px;
       background:#071a36;
     }
     #stannet-ai-root .snai-form-row{min-width:0;gap:5px}
@@ -348,6 +371,7 @@
       padding:10px;
       font-size:16px;
       line-height:1.25;
+      touch-action:manipulation;
     }
     #stannet-ai-root .snai-attach,
     #stannet-ai-root .snai-send,
@@ -356,6 +380,7 @@
       width:44px;
       height:44px;
       border-radius:11px;
+      touch-action:manipulation;
     }
     #stannet-ai-root .snai-privacy-note,
     #stannet-ai-root .snai-voice-note{display:none}
@@ -367,18 +392,21 @@
       overflow:hidden;
       font-size:9px;
     }
-    #stannet-ai-root .snai-launcher{width:96px;height:144px;transform:none}
+    #stannet-ai-root.panel-open .snai-launcher,
+    #stannet-ai-root.panel-open .snai-dismiss{opacity:0;visibility:hidden;pointer-events:none}
+    #stannet-ai-root .snai-launcher{width:96px;height:144px;transform:none;touch-action:manipulation}
     #stannet-ai-root .snai-launcher:hover{transform:none}
     #stannet-ai-root .snai-agent-shell,
     #stannet-ai-root .snai-agent-avatar{width:92px;height:138px}
     #stannet-ai-root .snai-status{right:5px;top:14px;width:11px;height:11px}
-    #stannet-ai-root .snai-dismiss{right:0;top:-4px;width:44px;height:44px}
+    #stannet-ai-root .snai-dismiss{right:0;top:-4px;width:44px;height:44px;touch-action:manipulation}
     #stannet-ai-root .snai-reopen{
       right:0;
       bottom:max(14px,env(safe-area-inset-bottom));
       min-width:44px;
       height:44px;
       padding:0 9px;
+      touch-action:manipulation;
     }
   }
 
@@ -558,30 +586,47 @@
   const isCompactViewport=()=>window.matchMedia('(max-width:520px)').matches;
   let viewportFrame=0;
   const syncMobileViewport=()=>{
-    if(!isCompactViewport())return;
+    if(!isCompactViewport()){
+      root.style.removeProperty('--snai-vtop');
+      root.style.removeProperty('--snai-vh');
+      return;
+    }
     const viewport=window.visualViewport;
     const top=Math.max(0,Math.round(viewport?.offsetTop||0));
-    const bottom=Math.max(0,Math.round(window.innerHeight-top-(viewport?.height||window.innerHeight)));
-    if(root.style.getPropertyValue('--snai-vtop')!==top+'px')root.style.setProperty('--snai-vtop',top+'px');
-    if(root.style.getPropertyValue('--snai-vbottom')!==bottom+'px')root.style.setProperty('--snai-vbottom',bottom+'px');
+    const height=Math.max(1,Math.round(viewport?.height||window.innerHeight||document.documentElement.clientHeight||1));
+    const topValue=top+'px',heightValue=height+'px';
+    if(root.style.getPropertyValue('--snai-vtop')!==topValue)root.style.setProperty('--snai-vtop',topValue);
+    if(root.style.getPropertyValue('--snai-vh')!==heightValue)root.style.setProperty('--snai-vh',heightValue);
   };
   const scheduleViewportSync=()=>{
-    if(viewportFrame||!panel.classList.contains('open'))return;
+    if(viewportFrame||!panel.classList.contains('open')||!isCompactViewport())return;
     viewportFrame=requestAnimationFrame(()=>{viewportFrame=0;syncMobileViewport()});
   };
-  const syncPageScrollLock=()=>{
-    document.documentElement.classList.toggle('snai-mobile-open',panel.classList.contains('open')&&isCompactViewport());
+  const syncModalState=()=>{
+    const mobileOpen=panel.classList.contains('open')&&isCompactViewport();
+    root.classList.toggle('panel-open',mobileOpen);
+    if(!mobileOpen){
+      root.style.removeProperty('--snai-vtop');
+      root.style.removeProperty('--snai-vh');
+    }
   };
   const setOpen=(open)=>{
     if(!open&&document.activeElement&&panel.contains(document.activeElement))document.activeElement.blur();
     panel.classList.toggle('open',open);
     launcher.setAttribute('aria-expanded',String(open));
     panel.setAttribute('aria-hidden',String(!open));
-    syncPageScrollLock();
+    syncModalState();
     if(open){
-      syncMobileViewport();
-      messages.scrollTop=messages.scrollHeight;
-      if(!isCompactViewport())setTimeout(()=>{if(panel.classList.contains('open'))input.focus({preventScroll:true})},80);
+      if(isCompactViewport()){
+        syncMobileViewport();
+        requestAnimationFrame(()=>{syncMobileViewport();messages.scrollTop=messages.scrollHeight});
+      }else{
+        messages.scrollTop=messages.scrollHeight;
+        setTimeout(()=>{if(panel.classList.contains('open'))input.focus({preventScroll:true})},80);
+      }
+    }else{
+      if(voiceEnabled)stopVoiceMode('Conversación por voz detenida.');
+      else stopSpeech();
     }
   };
   const setHidden=(hidden)=>{
@@ -592,11 +637,26 @@
     try{localStorage.setItem(UI_KEY,hidden?'1':'0')}catch{}
   };
   launcher.addEventListener('click',()=>setOpen(!panel.classList.contains('open')));
-  window.addEventListener('resize',()=>{syncPageScrollLock();scheduleViewportSync()},{passive:true});
+  const handleViewportChange=()=>{
+    syncModalState();
+    if(panel.classList.contains('open')&&isCompactViewport())scheduleViewportSync();
+  };
+  window.addEventListener('resize',handleViewportChange,{passive:true});
+  window.addEventListener('orientationchange',()=>setTimeout(handleViewportChange,80),{passive:true});
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',scheduleViewportSync,{passive:true});
     window.visualViewport.addEventListener('scroll',scheduleViewportSync,{passive:true});
   }
+  input.addEventListener('focus',()=>{
+    if(!isCompactViewport())return;
+    syncMobileViewport();
+    setTimeout(scheduleViewportSync,80);
+    setTimeout(scheduleViewportSync,260);
+  });
+  input.addEventListener('blur',()=>{
+    if(!isCompactViewport())return;
+    setTimeout(scheduleViewportSync,80);
+  });
   dismiss.addEventListener('click',(event)=>{event.preventDefault();event.stopPropagation();setHidden(true)});
   root.querySelector('.snai-memory-button').addEventListener('click',()=>{memoryPanel.hidden=!memoryPanel.hidden});
   root.querySelector('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.trim().slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');voiceStatus.textContent='Memoria guardada solo en este navegador.'}catch{voiceStatus.textContent='No se pudo guardar la memoria en este navegador.'}});
@@ -736,7 +796,7 @@
       pending.remove();add(err.message||'Error de conexión.','bot error');
       if(voiceEnabled){voiceThinking=false;voiceStatus.textContent='No pude obtener respuesta; sigo escuchando.'}
     }finally{
-      send.disabled=false;if(panel.classList.contains('open'))input.focus({preventScroll:true});
+      send.disabled=false;if(panel.classList.contains('open')&&!isCompactViewport())input.focus({preventScroll:true});
       if(voiceEnabled&&!voiceThinking)startListening();
     }
   });
