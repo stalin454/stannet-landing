@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261005-agent7';
+  const VERSION='20261005-agent8';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -52,7 +52,9 @@
   let requestHistory=[];
   const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>({title:document.title.slice(0,160),path:location.pathname})});
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false;
+  let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false,lastVoiceLang='es-ES';
+  const detectVoiceLanguage=(value)=>{const text=String(value||'').toLowerCase();const english=(text.match(/\b(the|and|you|your|what|how|can|with|this|that|please|hello|thanks|learn|english)\b/g)||[]).length;const spanish=(text.match(/\b(el|la|los|las|y|que|como|cómo|puedes|puede|con|esto|esta|por|para|hola|gracias|aprender|inglés|ingles)\b/g)||[]).length;return english>spanish?'en-GB':'es-ES'};
+  const voiceForLanguage=lang=>lang==='en-GB'?'en-GB-SoniaNeural':'es-ES-ElviraNeural';
   let currentAudio=null,activeSpeechButton=null,speechToken=0;
   const updateVoiceButton=()=>{
     voiceToggle.classList.toggle('active',voiceEnabled);
@@ -79,7 +81,7 @@
     if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
   };
   const playAzureChunk=async(chunk,token)=>{
-    const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:'es-ES',voice:'es-ES-ElviraNeural',purpose:'chat'})});
+    const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:lastVoiceLang,voice:voiceForLanguage(lastVoiceLang),purpose:'chat'})});
     if(!response.ok)throw new Error('Azure TTS unavailable');
     const blob=await response.blob();
     if(token!==speechToken||!panel.open)return false;
@@ -102,6 +104,7 @@
   async function speakReply(value,{button=null,listenAfter=false}={}){
     const speech=cleanSpeechText(value);
     if(!speech)return;
+    lastVoiceLang=detectVoiceLanguage(speech);
     stopSpeech();
     const token=speechToken;
     if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
@@ -119,9 +122,9 @@
         try{
           window.speechSynthesis.cancel();
           const utterance=new SpeechSynthesisUtterance(speech);
-          utterance.lang='es-ES';
-          const spanishVoice=window.speechSynthesis.getVoices().find(v=>/^es[-_]/i.test(v.lang));
-          if(spanishVoice)utterance.voice=spanishVoice;
+          utterance.lang=lastVoiceLang;
+          const localVoice=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(lastVoiceLang.slice(0,2).toLowerCase()));
+          if(localVoice)utterance.voice=localVoice;
           await new Promise(resolve=>{utterance.onend=resolve;utterance.onerror=resolve;window.speechSynthesis.speak(utterance)});
         }catch{}
       }else{
@@ -140,7 +143,7 @@
     if(!panel.open||!voiceEnabled||voiceThinking||recognitionRunning||!Recognition)return;
     if(!recognition){
       recognition=new Recognition();
-      recognition.lang='es-ES';
+      recognition.lang=lastVoiceLang;
       recognition.continuous=false;
       recognition.interimResults=false;
       recognition.maxAlternatives=1;
@@ -149,6 +152,8 @@
         const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
         if(!transcript||!voiceEnabled||!panel.open||core.busy)return;
         voiceThinking=true;
+        lastVoiceLang=detectVoiceLanguage(transcript);
+        recognition.lang=lastVoiceLang;
         voiceStatus.textContent='He oído: '+transcript;
         input.value=transcript;
         form.requestSubmit();
