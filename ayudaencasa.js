@@ -63,6 +63,30 @@ function updateAuthUI(user){
   loginButton.dataset.authenticated='true';
   loginButton.onclick=()=>openAccount(user);
 }
+function professionalCard(p){
+  const verified=p.verificationStatus==='verified';
+  const rating=Number(p.averageRating||0);
+  const reviews=Number(p.reviewCount||0);
+  return '<article class="professional-result">'+
+    '<div class="professional-result-head"><div><b>'+escapeHtml(p.displayName||'Profesional')+'</b>'+
+    '<small>'+escapeHtml(p.city||'Zona no indicada')+(p.headline?' · '+escapeHtml(p.headline):'')+'</small></div>'+
+    (verified?'<span class="verified-badge">✓ Verificado</span>':'')+'</div>'+
+    '<div class="professional-meta"><span>★ '+(rating?rating.toFixed(1):'Nuevo')+'</span><span>'+reviews+' '+(reviews===1?'valoración':'valoraciones')+'</span>'+
+    (p.experienceYears!=null?'<span>'+escapeHtml(String(p.experienceYears))+' años de experiencia</span>':'')+'</div>'+
+    (p.bio?'<p>'+escapeHtml(p.bio)+'</p>':'')+
+    '<button class="choice" type="button" data-professional-id="'+escapeHtml(p.userId||'')+'">Ver profesional</button>'+
+  '</article>';
+}
+async function discoverProfessionals(host,{city,category}={}){
+  host.innerHTML='<div class="form-note">Buscando profesionales compatibles…</div>';
+  try{
+    const data=await window.AyudaEnCasaAPI.listProfessionals({city,category,limit:12});
+    const items=data.items||[];
+    host.innerHTML=items.length?items.map(professionalCard).join(''):'<div class="form-note">No encontramos profesionales públicos y disponibles en esta zona para esta categoría todavía.</div>';
+  }catch(err){
+    host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo buscar profesionales.')+'</div>';
+  }
+}
 async function openAccount(user){
   const professional=user?.role==='professional'||user?.roles?.includes('professional');
   openModal('<h2 id="modalTitle">Mi cuenta</h2><div id="accountContent" class="form-stack"><div class="form-note">Cargando información segura…</div></div>');
@@ -81,11 +105,14 @@ async function openAccount(user){
       $('[data-propose]',host).forEach(b=>b.addEventListener('click',()=>proposalForm(b.dataset.propose,b.dataset.title||'')));
     }else{
       const requests=dashboard.ownedRequests||[];
-      host.innerHTML='<div class="form-note"><b>Área de cliente</b><br>Aquí puedes revisar tus solicitudes y elegir propuestas.</div>'+
+      host.innerHTML='<div class="form-note"><b>Área de cliente</b><br>Aquí puedes revisar tus solicitudes, buscar profesionales y elegir propuestas.</div>'+
+        '<div class="account-section"><h3>Buscar profesionales</h3><form id="professionalSearchForm" class="professional-search"><label>Ciudad<input name="city" maxlength="100" value="'+escapeHtml(state.location)+'" required></label><label>Servicio<select name="category"><option value="">Todos los servicios</option><option value="limpieza">Limpieza</option><option value="cuidado">Cuidados</option><option value="jardineria">Jardinería</option><option value="reparaciones">Reparaciones</option><option value="otro">Otros</option></select></label><button class="primary" type="submit">Buscar profesionales</button></form><div id="professionalResults" class="professional-results"></div></div>'+
         '<div class="account-section"><h3>Mis solicitudes</h3><div class="account-list">'+
         (requests.map(x=>'<article class="account-card"><b>'+escapeHtml(x.title||'Solicitud')+'</b><small>'+escapeHtml(x.city||'')+' · Estado: '+escapeHtml(x.status||'')+'</small><button class="choice" type="button" data-proposals="'+escapeHtml(x.id)+'">Ver propuestas</button><div class="proposal-list" id="proposals-'+escapeHtml(x.id)+'"></div></article>').join('')||'<div class="form-note">Aún no tienes solicitudes publicadas.</div>')+
         '</div></div>';
       $('[data-proposals]',host).forEach(b=>b.addEventListener('click',()=>loadProposals(b.dataset.proposals)));
+      $('#professionalSearchForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);await discoverProfessionals($('#professionalResults'),{city:String(fd.get('city')||'').trim(),category:String(fd.get('category')||'')});});
+      discoverProfessionals($('#professionalResults'),{city:state.location});
     }
   }catch(err){
     if(err.status===401){closeModal();auth('login');return}
