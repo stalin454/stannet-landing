@@ -25,6 +25,10 @@ assert.ok(widget.includes("'para','espera','no','oye','stop','wait'"), 'Spanish 
 assert.ok(widget.includes('speechActive?120:220'), 'Voice recognition restart delay must stay short during spoken turns');
 assert.ok(widget.includes('speechActive&&!isExplicitInterruption(transcript)'), 'Speaker audio must not interrupt the agent unless the user gives an explicit interruption command');
 assert.ok(widget.includes('di «para» o «espera»'), 'Voice UI must explain the safe interruption command while the agent is speaking');
+assert.ok(widget.includes('listenAfter&&voiceEnabled&&!mobile.matches'), 'Live barge-in must stay enabled on desktop only');
+assert.ok(widget.includes('mobile.matches&&recognitionRunning'), 'Mobile must stop recognition before playing assistant audio');
+assert.ok(widget.includes('(mobile.matches&&speechActive)'), 'Mobile must not restart recognition while assistant speech is active');
+assert.ok(widget.includes('volveré a escucharte al terminar'), 'Mobile voice status must explain half-duplex listening');
 assert.ok(worker.includes("'es-ES': {"), 'Cloudflare speech endpoint must allow Spanish (Spain)');
 assert.ok(worker.includes("'es-ES-ElviraNeural'") && worker.includes("'es-ES-AlvaroNeural'"), 'Spanish Neural voices must be allowlisted');
 assert.ok(worker.includes("purpose === 'chat' ? 'no-store'"), 'Chat audio must not be cached publicly');
