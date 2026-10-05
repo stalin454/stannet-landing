@@ -220,6 +220,6 @@ if(!connection?.saveData && !/(^|-)2g/.test(connection?.effectiveType||'')){
   if(document.body.classList.contains('vocal-studio-page')||window.__StanNetAIBootstrapRequested)return;
   window.__StanNetAIBootstrapRequested=true;
   const bootstrap=document.createElement('script');
-  bootstrap.src='/stannet-ai-loader.js?v=20261005-agent6';
+  bootstrap.src='/stannet-ai-loader.js?v=20261005-agent7';
   bootstrap.defer=true;document.body.appendChild(bootstrap);
 })();

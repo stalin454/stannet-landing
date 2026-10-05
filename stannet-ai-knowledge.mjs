@@ -2,11 +2,11 @@
 // Describe existing resources, not promised future capabilities.
 export const resources = [
   ['ai','Inteligencia Artificial','/pages/ai.html','IA, automatización, creatividad y recursos del ecosistema StanNet.',['inteligencia artificial','artificial intelligence','automatizacion']],
-  ['programming','Programming Academy','/pages/programming.html','Teoría, ejercicios y proyectos de JavaScript, Python y HTML/CSS.',['programacion','programming','javascript','curso de codigo']],
+  ['programming','Programming Academy','/pages/programming.html','Teoría, ejercicios y proyectos de JavaScript, Python y HTML/CSS.',['programacion','programming','curso de codigo']],
   ['fullstack','Full-Stack Engineer Path','/pages/programming-fullstack.html','Laboratorio y proyectos full-stack.',['fullstack','full stack']],
   ['cs','CS Foundations','/pages/programming-cs-lab.html','Fundamentos y laboratorio C++ / C#.',['c++','c#','cs foundations']],
   ['python','Python Code Lab','/pages/programming-lab.html','Práctica de Python con código.',['python']],
-  ['web-lab','Web & Languages Lab','/pages/programming-web-lab.html','Práctica de HTML, CSS y lenguajes web.',['html','css','web lab']],
+  ['web-lab','Web & Languages Lab','/pages/programming-web-lab.html','HTML, CSS y JavaScript: teoría, editor, vista previa y ejercicios con autocorrección.',['html','css','javascript','web lab']],
   ['cyber','Cybersecurity / Cyber Defense Academy','/pages/cybersecurity.html','Redes, TCP/IP, Linux, seguridad digital y ruta SOC junior; no es certificación oficial.',['ciberseguridad','cybersecurity','redes','soc']],
   ['cyber-lab','Cyber Defense Lab','/pages/cyber-lab.html','Práctica defensiva con simulaciones y datos ficticios.',['cyber lab','laboratorio de seguridad']],
   ['danish','Danish Academy','/pages/danish.html','Curso propio de danés: 20 capítulos progresivos A1–A2, 17 capítulos de gramática, Danish Core Lab, Sentence Builder, Memory Lab y ruta de dominio B1–C2.',['danes','danish','dansk']],
@@ -36,8 +36,9 @@ export const resources = [
 export const normalize = text => String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 export function searchResources(query) {
   const q=normalize(query);
+  const phrase=' '+q.split(/[^a-z0-9+#]+/).filter(Boolean).join(' ')+' ';
   const words=q.split(/[^a-z0-9+#]+/).filter(w=>w.length>2 && !['hay','curso','quiero','para','tiene','tienes','aprender','abrir','abre','lleva','donde','puedes','como','buscar','busca','muestra','existe'].includes(w));
-  return resources.map(resource=>({resource,score:resource.keywords.reduce((n,k)=>n+(q.includes(normalize(k))?10:0),0)+words.filter(w=>normalize(resource.title+' '+resource.description).includes(w)).length}))
+  return resources.filter(r=>r.available).map(resource=>({resource,score:resource.keywords.reduce((n,k)=>n+(phrase.includes(' '+normalize(k).split(/[^a-z0-9+#]+/).filter(Boolean).join(' ')+' ')?10:0),0)+words.filter(w=>normalize(resource.title+' '+resource.description).includes(w)).length}))
     .filter(item=>item.score>0).sort((a,b)=>b.score-a.score).map(item=>item.resource);
 }
 export const catalogueText = () => resources.map(r=>`${r.title} — ${r.path}\n${r.description}`).join('\n\n');

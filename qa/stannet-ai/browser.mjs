@@ -1,5 +1,6 @@
 const frame=document.querySelector('#preview'),results=document.querySelector('#results'),size=document.querySelector('#size'),source=document.querySelector('#source');
 const tick=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+function measureAvatar(){const root=ui(),win=frame.contentWindow,rect=root.querySelector('.snai-avatar-surface').getBoundingClientRect();assert(rect.left>=0&&rect.right<=win.innerWidth+1&&rect.top>=0&&rect.bottom<=win.innerHeight+1,'Personaje fuera del viewport');assert(win.getComputedStyle(root.querySelector('.snai-launcher')).backgroundColor==='rgba(0, 0, 0, 0)','Fondo del personaje opaco');}
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const ui=()=>frame.contentDocument.querySelector('#stannet-ai-root')?.shadowRoot;
@@ -38,7 +39,7 @@ async function matrix(){
  try{
   for(const [w,h] of [[1920,1080],[1366,768],[320,568],[360,800],[390,844],[393,873],[412,915],[430,932]]){
    await load(w,h);let root=ui();assert(root.querySelector('.snai-reopen').textContent==='IA','Falta pestaña IA');assert(root.querySelector('.snai-reopen').hidden,'IA debe estar oculta inicialmente');assert(!root.querySelector('.snai-avatar').hidden,'Falta personaje flotante');assert(frame.contentDocument.querySelectorAll('#stannet-ai-root').length===1,'Montaje duplicado');
-   frame.contentWindow.scrollTo(0,300);const savedScroll=frame.contentWindow.scrollY;
+   frame.contentWindow.scrollTo(0,300);await tick();measureAvatar();const savedScroll=frame.contentWindow.scrollY;
    root.querySelector('.snai-launcher').click();await tick();report.push(`${w}×${h}: ${measure()}`);
    for(const mode of ['general','programming','cyber','travel','auto']){const select=root.querySelector('select');select.value=mode;select.dispatchEvent(new Event('change',{bubbles:true}));assert(root.querySelector('.snai-state').textContent===select.selectedOptions[0].textContent,'Modo no actualizado');}
    await send('¿Hay un curso de danés?');assert(root.querySelector('.snai-messages').textContent.includes('Danish Academy'),'Danés no encontrado');assert(root.querySelector('a[href="/pages/danish.html"]'),'Enlace danés ausente');
@@ -46,7 +47,7 @@ async function matrix(){
    await send('QA mensaje largo');measure();
    const log=root.querySelector('.snai-messages');assert(log.scrollHeight>log.clientHeight,'No se genera conversación desplazable');log.scrollTop=0;assert(log.scrollTop===0,'No se puede volver al principio');log.scrollTop=log.scrollHeight;assert(log.scrollTop>0,'No se puede ir al final');
    root.querySelector('.snai-persona').click();assert(log.textContent.includes('orientarte'),'Personaje no responde');
-   if(w<640){root.querySelector('.snai-form-row textarea').focus();frame.contentWindow.qaViewport(420);await tick();report.push('  Teclado simulado: '+measure());frame.contentWindow.qaViewport(h);await tick();setSize(h,w);await pause(120);await tick();report.push('  Rotación: '+measure());frame.contentWindow.qaViewport(180);await tick();report.push('  Teclado horizontal simulado: '+measure());setSize(w,h);await pause(120);await tick();}
+   if(w<640){root.querySelector('.snai-memory').open=true;root.querySelector('.snai-form-row textarea').focus();frame.contentWindow.qaViewport(420);await tick();report.push('  Teclado simulado: '+measure());frame.contentWindow.qaViewport(h);await tick();setSize(h,w);await pause(120);await tick();report.push('  Rotación: '+measure());frame.contentWindow.qaViewport(180);await tick();report.push('  Teclado horizontal simulado: '+measure());setSize(w,h);await pause(120);await tick();root.querySelector('.snai-memory').open=false;}
    root.querySelector('.snai-minimize').click();await tick();assert(!root.querySelector('dialog').open,'Minimizar no cierra');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Minimizar no devuelve personaje');assert(Math.abs(frame.contentWindow.scrollY-savedScroll)<=1,'No se restauró scroll de página');
    root.querySelector('.snai-launcher').click();await tick();root.querySelector('.snai-close').click();await tick();assert(!root.querySelector('dialog').open,'Cerrar falla');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Cerrar no devuelve personaje');
    root.querySelector('.snai-hide-avatar').click();await tick();assert(root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Ocultar no deja solo IA');
@@ -67,3 +68,17 @@ document.querySelector('#keyboard').addEventListener('click',()=>frame.contentWi
 document.querySelector('#restore').addEventListener('click',()=>frame.contentWindow.qaViewport?.(Number(frame.height)));
 document.querySelector('#measure').addEventListener('click',()=>{try{results.textContent=measure()}catch(error){results.textContent='FAIL: '+error.message}});
 await load(390,844);
+
+async function memoryRegression(){
+ results.textContent='Probando memoria…';const report=[];
+ try{
+  for(const [w,h] of [[320,568],[390,844],[844,390]]){
+   await load(w,h);const root=ui();root.querySelector('.snai-launcher').click();await tick();root.querySelector('.snai-memory').open=true;await tick();report.push(w+'×'+h+' memoria abierta: '+measure());
+   for(const height of [Math.min(420,h),180]){frame.contentWindow.qaViewport(height);await tick();report.push('  Viewport '+height+'px: '+measure());}
+   frame.contentWindow.qaViewport(h);await tick();assert(root.querySelector('.snai-memory').open,'Memoria perdió su estado');root.querySelector('.snai-close').click();await tick();measureAvatar();
+  }
+  report.push('PASS: memoria abierta, teclado y restauración.');
+ }catch(error){report.push('FAIL: '+error.message)}
+ results.textContent=report.join('\n');
+}
+document.querySelector('#memory-test').addEventListener('click',memoryRegression);

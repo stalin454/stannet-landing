@@ -33,7 +33,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-state{color:#85e5e9;font-size:11px}
 .snai-hide{flex:none;min-height:44px;padding:0 10px;border:1px solid var(--snai-line);border-radius:10px;background:#14263d;color:#b9d3ed;font-size:11px}
 .snai-center{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
-.snai-memory{flex:none;min-height:0;max-height:min(190px,calc(var(--snai-height,100dvh) * .35));overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
+.snai-memory{flex:none;min-height:0;max-height:min(190px,50%);overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
 .snai-memory:not([open]){max-height:none}
 .snai-memory summary{cursor:pointer;color:#b3c4e4;min-height:24px;line-height:24px}
 .snai-memory textarea{display:block;width:100%;height:60px;resize:none;border:1px solid var(--snai-line);border-radius:8px;background:#081426;padding:8px;margin:6px 0;font-size:16px}
@@ -67,7 +67,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
    and conversation visible. Secondary controls return when it closes. */
 .snai-panel.compact{--snai-gap:0px;border-radius:12px;grid-template-rows:auto minmax(0,1fr) auto}
 .snai-panel.compact .snai-messages{padding:6px 12px}
-.snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory:not([open]),.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
+.snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory,.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
 @media(max-width:640px){
  .snai-headbar{padding:6px 10px;gap:7px}.snai-persona{height:38px;width:28px}.snai-title strong{font-size:13px}.snai-title small{font-size:10px}
  .snai-avatar{width:80px}.snai-launcher{width:80px;height:122px}.snai-launcher img{width:68px;height:102px}

@@ -7,4 +7,4 @@ const viewport=new EventTarget();Object.assign(viewport,{width:innerWidth,height
 window.qaViewport=height=>{viewport.height=height;viewport.offsetTop=height<innerHeight?12:0;viewport.dispatchEvent(new Event('resize'));};
 window.addEventListener('resize',()=>{Object.assign(viewport,{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0});viewport.dispatchEvent(new Event('resize'));});
 document.querySelector('#background').addEventListener('click',()=>document.querySelector('#background-result').textContent='Activado');
-</script><script src="/script.js?v=20261005-agent6"></script></body></html>
+</script><script src="/script.js?v=20261005-agent7"></script></body></html>
