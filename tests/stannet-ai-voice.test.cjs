@@ -16,6 +16,10 @@ assert.ok(widget.includes('split(/[ \\t\\r\\n]+/)'), 'Speech replies must be chu
 assert.ok(widget.includes('aria-label="Activar conversación por voz"'), 'Voice controls must be accessible');
 assert.ok(widget.includes('StanNet recibe la transcripción'), 'Voice processing disclosure must be visible');
 assert.ok(widget.includes('Escuchar respuesta'), 'Text replies must be playable by browser users');
+assert.ok(widget.includes("setActivity('interrupted')"), 'Voice conversation must expose an interrupted state for barge-in');
+assert.ok(widget.includes('looksLikeSpeakerEcho'), 'Barge-in must filter likely speaker echo before accepting an interruption');
+assert.ok(widget.includes("if(listenAfter&&voiceEnabled)startListening()"), 'Recognition must restart while the assistant is speaking so the user can interrupt');
+assert.ok(widget.includes("voiceThinking&&!speechActive"), 'Listening must remain available during assistant speech without reopening it while the model is thinking');
 assert.ok(worker.includes("'es-ES': {"), 'Cloudflare speech endpoint must allow Spanish (Spain)');
 assert.ok(worker.includes("'es-ES-ElviraNeural'") && worker.includes("'es-ES-AlvaroNeural'"), 'Spanish Neural voices must be allowlisted');
 assert.ok(worker.includes("purpose === 'chat' ? 'no-store'"), 'Chat audio must not be cached publicly');
