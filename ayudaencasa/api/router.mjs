@@ -1,6 +1,6 @@
 import {createD1Repositories} from '../infrastructure/d1/repositories.mjs';
 import {createAuthService} from '../application/auth.mjs';
-import {createRateLimiter} from '../application/rate-limit.mjs';
+import {createD1RateLimiter} from '../infrastructure/d1/rate-limiter.mjs';
 import {createGuards,parsePositiveInt} from './guards.mjs';
 import {createListRequests} from '../application/list-requests.mjs';
 import {createAcceptProposalAtomic} from '../application/accept-proposal-atomic.mjs';
@@ -12,6 +12,7 @@ import {createProfileService} from '../application/profile-service.mjs';
 import {createProfessionalDiscovery} from '../application/professional-discovery.mjs';
 import {createPrivateReads} from '../application/private-reads.mjs';
 import {createAtomicMarketplace} from '../infrastructure/d1/atomic-marketplace.mjs';
+import {createAtomicChat} from '../infrastructure/d1/atomic-chat.mjs';
 import {json as out} from './response.mjs';
 import createRequestModule from '../application/create-request.cjs';
 import submitProposalModule from '../application/submit-proposal.cjs';
@@ -31,7 +32,7 @@ export async function handleAyudaEnCasa(request,env){
  try{
   const config=validateConfig(env);
   if(!config.ok)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa service is not configured'},requestId});
-  const repos=createD1Repositories(env.AYUDA_DB);const passwords={hash:hashPassword,verify:verifyPassword};const auth=createAuthService({repos,passwords});const limit=createRateLimiter({db:env.AYUDA_DB});
+  const repos=createD1Repositories(env.AYUDA_DB);const passwords={hash:hashPassword,verify:verifyPassword};const auth=createAuthService({repos,passwords});const limit=createD1RateLimiter({db:env.AYUDA_DB});
   const route=url.pathname.slice(base.length)||'/';
   if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
   if(route==='/ready'&&request.method==='GET'){try{await env.AYUDA_DB.prepare('SELECT 1 AS ok').first();return out(200,{ok:true,service:'ayuda-en-casa',requestId});}catch{return out(503,{ok:false,error:{code:'DEPENDENCY_UNAVAILABLE',message:'Service dependency unavailable'},requestId});}}
@@ -72,7 +73,7 @@ export async function handleAyudaEnCasa(request,env){
   m=route.match(/^\/requests\/([^/]+)\/accept\/([^/]+)$/);
   if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createAcceptProposalAtomic({repos,atomic:createAtomicMarketplace(env.AYUDA_DB)});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),proposalId:decodeURIComponent(m[2]),now:new Date().toISOString()});return out(200,{result:item,requestId});}
   m=route.match(/^\/conversations\/([^/]+)\/messages$/);
-  if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const ip=request.headers.get('cf-connecting-ip')||'unknown',gate=await limit('chat:'+principal.userId+':'+ip,{limit:30,windowMs:60000});if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many messages'},requestId},{'retry-after':String(gate.retryAfter)});const usecase=createSendMessage({conversations:repos.conversations,messages:repos.messages,audit:repos.audit});const item=await usecase({principal,conversationId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{message:item,requestId});}
+  if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const ip=request.headers.get('cf-connecting-ip')||'unknown',gate=await limit('chat:'+principal.userId+':'+ip,{limit:30,windowMs:60000});if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many messages'},requestId},{'retry-after':String(gate.retryAfter)});const usecase=createSendMessage({conversations:repos.conversations,atomic:createAtomicChat(env.AYUDA_DB)});const item=await usecase({principal,conversationId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{message:item,requestId});}
   m=route.match(/^\/requests\/([^/]+)\/complete$/);
   if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createCompleteRequest({requests:repos.requests,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),now:new Date().toISOString()});return out(200,{request:item,requestId});}
   m=route.match(/^\/requests\/([^/]+)\/reviews$/);
