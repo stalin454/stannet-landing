@@ -92,7 +92,7 @@ header.innerHTML=`
       <a href="/pages/marketplace.html">Marketplace</a>
     </div>
   </div>
-  <a data-nav="/pages/radio" href="/pages/radio.html">StanNet Radio</a>
+  <a data-nav="/pages/ai" href="/pages/ai.html">🤖 StanNet AI</a>\n  <a data-nav="/pages/radio" href="/pages/radio.html">StanNet Radio</a>
   <div class="nav-group" data-group="/pages/cybersecurity">
     <button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button>
     <div class="nav-dropdown">
