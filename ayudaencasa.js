@@ -127,7 +127,7 @@ async function openConversation(conversationId){
   const host=$('#chatBox');
   try{
     const data=await window.AyudaEnCasaAPI.listMessages(conversationId,{limit:30});
-    host.innerHTML='<div class="chat-log">'+(data.items||[]).slice().reverse().map(m=>'<div class="proposal"><b>'+escapeHtml(m.sender_user_id||m.senderId||'Usuario')+'</b><small>'+escapeHtml(m.body||'')+'</small></div>').join('')+'</div><form id="chatForm" class="form-stack"><textarea name="body" maxlength="4000" required placeholder="Escribe un mensaje…"></textarea><button class="primary" type="submit">Enviar</button></form>';
+    host.innerHTML='<div class="chat-log">'+(data.items||[]).slice().reverse().map(m=>'<div class="proposal"><b>'+escapeHtml(m.sender_id||m.senderId||'Usuario')+'</b><small>'+escapeHtml(m.body||'')+'</small></div>').join('')+'</div><form id="chatForm" class="form-stack"><textarea name="body" maxlength="4000" required placeholder="Escribe un mensaje…"></textarea><button class="primary" type="submit">Enviar</button></form>';
     $('#chatForm').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');const body=new FormData(f).get('body');b.disabled=true;try{await window.AyudaEnCasaAPI.sendMessage(conversationId,{body});openConversation(conversationId)}catch(err){b.disabled=false;alert(err.message||'No se pudo enviar el mensaje.');}});
   }catch(err){host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo cargar la conversación.')+'</div>';}
 }
