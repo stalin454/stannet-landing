@@ -161,7 +161,8 @@
       recognition.onresult=(event)=>{
         const transcript=Array.from(event.results||[]).filter(result=>result.isFinal).map(result=>result[0]?.transcript||'').join(' ').trim();
         if(!transcript||!voiceEnabled||!panel.open||core.busy)return;
-        if(speechActive&&looksLikeSpeakerEcho(transcript)){voiceStatus.textContent='StanNet AI está hablando… puedes interrumpirme.';return;}
+        if(speechActive&&!isExplicitInterruption(transcript)){voiceStatus.textContent='StanNet AI está hablando… di «para» o «espera» para interrumpirme.';return;}
+        if(speechActive&&looksLikeSpeakerEcho(transcript)){voiceStatus.textContent='StanNet AI está hablando… di «para» o «espera» para interrumpirme.';return;}
         if(speechActive){stopSpeech();setActivity('interrupted');voiceStatus.textContent='Interrumpido. Te escuché: '+transcript;}
         voiceThinking=true;
         lastVoiceLang=detectVoiceLanguage(transcript);
