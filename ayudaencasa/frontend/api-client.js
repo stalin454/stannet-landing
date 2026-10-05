@@ -35,6 +35,7 @@
     login:data=>request('/auth/login',{method:'POST',body:data}),
     me:()=>request('/auth/me'),
     logout:()=>request('/auth/logout',{method:'POST'}),
+    getProfile:()=>request('/profile'),
     updateProfile:data=>request('/profile',{method:'PUT',body:data}),
     updateProfessionalProfile:data=>request('/profile/professional',{method:'PUT',body:data}),
     listProfessionals:params=>request('/professionals'+query(params)),
