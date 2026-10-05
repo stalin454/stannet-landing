@@ -1,6 +1,13 @@
 import {createD1Repositories} from '../infrastructure/d1/repositories.mjs';
 import {createAuthService} from '../application/auth.mjs';
 import {createRateLimiter} from '../application/rate-limit.mjs';
+import createRequestModule from '../application/create-request.cjs';
+import submitProposalModule from '../application/submit-proposal.cjs';
+import acceptProposalModule from '../application/accept-proposal.cjs';
+import sendMessageModule from '../application/send-message.cjs';
+import completeRequestModule from '../application/complete-request.cjs';
+import createReviewModule from '../application/create-review.cjs';
+const {createCreateRequest}=createRequestModule,{createSubmitProposal}=submitProposalModule,{createAcceptProposal}=acceptProposalModule,{createSendMessage}=sendMessageModule,{createCompleteRequest}=completeRequestModule,{createCreateReview}=createReviewModule;
 const base='/api/ayuda-en-casa/v1';
 const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
 const out=(status,body,extra={})=>new Response(JSON.stringify(body),{status,headers:{...headers,...extra}});
@@ -25,11 +32,25 @@ export async function handleAyudaEnCasa(request,env){
   }
   const current=await auth.authenticate(readCookie(request.headers.get('cookie')));
   if(route==='/auth/me'&&request.method==='GET')return current?out(200,{user:current.principal,requestId}):out(401,{error:{code:'UNAUTHENTICATED',message:'Authentication required'},requestId});
+  const requireMutation=async()=>{if(!current)throw Object.assign(new Error('Authentication required'),{status:401,code:'UNAUTHENTICATED'});if(!sameOrigin(request)||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))throw Object.assign(new Error('Request rejected'),{status:403,code:'CSRF_REJECTED'});return current.principal;};
   if(route==='/auth/logout'&&request.method==='POST'){
    if(!current)return out(204,{});
    if(!sameOrigin(request)||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))return out(403,{error:{code:'CSRF_REJECTED',message:'Request rejected'},requestId});
    await repos.sessions.revoke(current.session.id,new Date().toISOString());return out(200,{ok:true,requestId},{'set-cookie':cookie('',0)});
   }
+  if(route==='/requests'&&request.method==='POST'){
+   const principal=await requireMutation(),data=await body(request);const usecase=createCreateRequest({requests:repos.requests,audit:repos.audit});const item=await usecase({principal,input:data,now:new Date().toISOString()});return out(201,{request:item,requestId});
+  }
+  let m=route.match(/^\/requests\/([^/]+)\/proposals$/);
+  if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const usecase=createSubmitProposal({requests:repos.requests,proposals:repos.proposals,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{proposal:item,requestId});}
+  m=route.match(/^\/requests\/([^/]+)\/accept\/([^/]+)$/);
+  if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createAcceptProposal({requests:repos.requests,proposals:repos.proposals,conversations:repos.conversations,audit:repos.audit,transaction:fn=>fn()});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),proposalId:decodeURIComponent(m[2]),now:new Date().toISOString()});return out(200,{result:item,requestId});}
+  m=route.match(/^\/conversations\/([^/]+)\/messages$/);
+  if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const ip=request.headers.get('cf-connecting-ip')||'unknown',gate=await limit('chat:'+principal.userId+':'+ip,{limit:30,windowMs:60000});if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many messages'},requestId},{'retry-after':String(gate.retryAfter)});const usecase=createSendMessage({conversations:repos.conversations,messages:repos.messages,audit:repos.audit});const item=await usecase({principal,conversationId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{message:item,requestId});}
+  m=route.match(/^\/requests\/([^/]+)\/complete$/);
+  if(m&&request.method==='POST'){const principal=await requireMutation();const usecase=createCompleteRequest({requests:repos.requests,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),now:new Date().toISOString()});return out(200,{request:item,requestId});}
+  m=route.match(/^\/requests\/([^/]+)\/reviews$/);
+  if(m&&request.method==='POST'){const principal=await requireMutation(),data=await body(request);const usecase=createCreateReview({requests:repos.requests,conversations:repos.conversations,reviews:repos.reviews,audit:repos.audit});const item=await usecase({principal,requestId:decodeURIComponent(m[1]),input:data,now:new Date().toISOString()});return out(201,{review:item,requestId});}
   return out(404,{error:{code:'NOT_FOUND',message:'Resource not found'},requestId});
  }catch(e){const status=Number(e.status)||500;const safe=status<500?(e.message||'Request rejected'):'Unexpected server error';return out(status,{error:{code:e.code||'INTERNAL_ERROR',message:safe},requestId});}
 }
