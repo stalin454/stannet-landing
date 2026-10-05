@@ -54,6 +54,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-info{position:relative;margin-left:auto}
 .snai-info summary{cursor:pointer;padding:5px;color:#a9c2de}
 .snai-info p{position:absolute;bottom:24px;right:0;z-index:1;width:240px;max-height:180px;overflow:auto;margin:0;padding:12px;background:#122139;border:1px solid var(--snai-line);border-radius:12px;font-size:12px;line-height:1.5;box-shadow:0 4px 14px #0005}
+/* When a landscape keyboard leaves little height, keep the essential controls
+   and conversation visible. Secondary controls return when it closes. */
+.snai-panel.compact{grid-template-rows:auto minmax(0,1fr) auto}
+.snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory:not([open]),.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
 @media(max-width:640px),(pointer:coarse){
  .snai-panel{left:var(--snai-x,0px);top:var(--snai-y,0px);width:var(--snai-width,100vw);height:var(--snai-height,100dvh);border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
  .snai-panel::backdrop{background:#020917dd}

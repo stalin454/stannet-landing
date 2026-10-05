@@ -3,7 +3,7 @@ const fs = require('node:fs');
 
 const widget = fs.readFileSync('stannet-ai.js', 'utf8');
 const worker = fs.readFileSync('worker.js', 'utf8');
-const loader = fs.readFileSync('script.js', 'utf8');
+const loader = fs.readFileSync('stannet-ai-loader.js', 'utf8');
 
 assert.ok(widget.includes('window.SpeechRecognition||window.webkitSpeechRecognition'), 'Voice input must support standard and WebKit SpeechRecognition');
 assert.match(loader, /ai\.src='\/stannet-ai\.js\?v=\d{8}-[a-z0-9]+'/i, 'Voice widget URL must be cache-busted');

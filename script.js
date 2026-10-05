@@ -112,13 +112,11 @@ document.querySelectorAll('.nav-dropdown a').forEach((link)=>{
   });
 });
 
-// StanNet AI: load the shared floating assistant on every page that uses script.js.
+// Load the agent through the shared bootstrap, also used by the navigation shell.
 (()=>{
-  if(document.body.classList.contains('vocal-studio-page'))return;
-  if(document.querySelector('script[data-stannet-ai-loader]'))return;
-  const ai=document.createElement('script');
-  ai.src='/stannet-ai.js?v=20261005-agent2';
-  ai.defer=true;
-  ai.dataset.stannetAiLoader='true';
-  document.body.appendChild(ai);
+  if(document.body.classList.contains('vocal-studio-page')||window.__StanNetAIBootstrapRequested)return;
+  window.__StanNetAIBootstrapRequested=true;
+  const bootstrap=document.createElement('script');
+  bootstrap.src='/stannet-ai-loader.js?v=20261005-agent3';
+  bootstrap.defer=true;document.body.appendChild(bootstrap);
 })();

@@ -213,3 +213,13 @@ if(!connection?.saveData && !/(^|-)2g/.test(connection?.effectiveType||'')){
 }
 
 })();
+
+// The Apps / Web Development hubs use this entry point without script.js.
+// Share agent bootstrapping without changing the navigation behavior.
+(()=>{
+  if(document.body.classList.contains('vocal-studio-page')||window.__StanNetAIBootstrapRequested)return;
+  window.__StanNetAIBootstrapRequested=true;
+  const bootstrap=document.createElement('script');
+  bootstrap.src='/stannet-ai-loader.js?v=20261005-agent3';
+  bootstrap.defer=true;document.body.appendChild(bootstrap);
+})();

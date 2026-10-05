@@ -14,3 +14,9 @@ const busy=new AgentCore({transport:()=>new Promise(resolve=>{release=resolve})}
 const first=busy.run('hola');await assert.rejects(busy.run('otro mensaje'),/Espera/);release(new Response(JSON.stringify({answer:'hola'})));await first;assert.equal(busy.busy,false);
 const failing=new AgentCore({transport:async()=>{throw new Error('offline')}});await assert.rejects(failing.run('hola'),/offline/);assert.equal(failing.busy,false);
 console.log('PASS: agent tools, continuity, attachments, discovery, duplicate turn protection and failure recovery.');
+
+const originalFetch=globalThis.fetch;
+let nativeReceiver;
+globalThis.fetch=function(){nativeReceiver=this;return Promise.resolve(new Response(JSON.stringify({answer:'native'})))};
+try{const nativeCore=new AgentCore();await nativeCore.run('hola');assert.notEqual(nativeReceiver,nativeCore,'Native fetch must not receive AgentCore as its receiver');}finally{globalThis.fetch=originalFetch;}
+console.log('PASS: default transport preserves native fetch invocation.');

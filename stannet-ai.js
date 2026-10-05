@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261005-agent2';
+  const VERSION='20261005-agent3';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs')]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -201,6 +201,7 @@
     viewportFrame=requestAnimationFrame(()=>{
       if(!panel.open)return;
       const bounds=viewport||{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0};
+      panel.classList.toggle('compact',bounds.height<380);
       for(const [name,value] of Object.entries({x:bounds.offsetLeft,y:bounds.offsetTop,width:bounds.width,height:bounds.height}))panel.style.setProperty('--snai-'+name,value+'px');
     });
   }
@@ -242,7 +243,7 @@
   mobile.addEventListener('change',syncViewport);
   $('.snai-modes select').addEventListener('change',event=>{state.textContent=event.target.selectedOptions[0].textContent;});
   const scrollEnd=()=>{messages.scrollTop=messages.scrollHeight;};
-  const add=(text,kind='bot',persist=true)=>{
+  const add=(text,kind='bot',persist=true,audible=true)=>{
     const el=document.createElement('div');el.className='snai-msg '+kind;
     if(kind==='bot'){
       const safe=String(text||'');
@@ -257,7 +258,7 @@
         last=match.index+match[0].length;
       }
       el.append(document.createTextNode(safe.slice(last)));
-      if(persist){const speak=document.createElement('button');speak.type='button';speak.className='snai-speak';speak.textContent='🔊';speak.setAttribute('aria-label','Escuchar respuesta');speak.addEventListener('click',()=>activeSpeechButton===speak?stopSpeech():speakReply(text,{button:speak}));el.append(speak);}
+      if(audible){const speak=document.createElement('button');speak.type='button';speak.className='snai-speak';speak.textContent='🔊';speak.setAttribute('aria-label','Escuchar respuesta');speak.addEventListener('click',()=>activeSpeechButton===speak?stopSpeech():speakReply(text,{button:speak}));el.append(speak);}
     }else el.textContent=text;
     messages.append(el);scrollEnd();
     if(persist && ['user','bot'].includes(kind)){history.push({text:String(text),kind});history=history.slice(-40);saveHistory();}
@@ -291,7 +292,7 @@
     sending=true;send.disabled=true;voiceThinking=voiceEnabled;
     state.textContent='Preparando…';requestHistory=history.slice();
     add(text+(pendingAttachment?' [Adjunto: '+pendingAttachment.name+']':''),'user');input.value='';
-    const pending=add('Preparando tu siguiente paso…','bot',false);
+    const pending=add('Preparando tu siguiente paso…','bot',false,false);
     const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
     try{
       const attachment=await readAttachment(pendingAttachment);
