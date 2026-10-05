@@ -23,3 +23,8 @@ BEGIN
     )
  ) THEN RAISE(ABORT,'review parties must be request participants') END;
 END;
+
+
+-- One review per participant per completed request/direction.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_review_reviewer_request
+ON reviews(request_id, reviewer_id);
