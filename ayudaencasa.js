@@ -21,6 +21,51 @@ function escapeHtml(v){const d=document.createElement('div');d.textContent=v;ret
 $$('.category[data-task]').forEach(card=>card.addEventListener('click',()=>{taskInput.value=card.dataset.task;setTimeout(()=>taskInput.focus(),0)}));
 $('#otherService').addEventListener('click',()=>{taskInput.value='';$('#searchForm').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>taskInput.focus(),350)});
 $('#locationBtn').addEventListener('click',()=>{openModal('<h2 id="modalTitle">Tu zona</h2><p class="lead">Elige una ciudad o escribe tu código postal. No necesitamos tu dirección exacta para buscar.</p><form id="locationForm" class="form-stack"><label>Ciudad o código postal<input id="locationInput" value="'+escapeHtml(state.location)+'" autocomplete="postal-code" required></label><div class="city-grid"><button class="choice" type="button" data-city="Madrid">Madrid</button><button class="choice" type="button" data-city="Barcelona">Barcelona</button><button class="choice" type="button" data-city="Valencia">Valencia</button><button class="choice" type="button" data-city="Sevilla">Sevilla</button></div><button class="primary" type="submit">Usar esta zona</button></form>');$$('[data-city]',modal).forEach(b=>b.addEventListener('click',()=>{$('#locationInput').value=b.dataset.city}));$('#locationForm').addEventListener('submit',e=>{e.preventDefault();state.location=$('#locationInput').value.trim();$('#locationLabel').textContent=state.location;placeInput.value=state.location;closeModal()})});
-function auth(kind){const login=kind==='login';openModal('<h2 id="modalTitle">'+(login?'Iniciar sesión':'Crear tu cuenta')+'</h2><p class="lead">'+(login?'Accede a tus solicitudes y conversaciones.':'Elige cómo quieres usar AyudaEnCasa.')+'</p>'+(login?'':'<div class="role-grid"><button class="choice active" type="button" data-role="client"><b>Necesito ayuda</b><br><small>Cuenta de cliente</small></button><button class="choice" type="button" data-role="professional"><b>Ofrezco servicios</b><br><small>Cuenta profesional</small></button></div>')+'<form id="authForm" class="form-stack"><label>Correo electrónico<input type="email" name="email" autocomplete="email" required></label><label>Contraseña<input type="password" name="password" autocomplete="'+(login?'current-password':'new-password')+'" minlength="8" required></label>'+(!login?'<label><input type="checkbox" required> Acepto las condiciones y la política de privacidad cuando estén publicadas.</label>':'')+'<div class="form-note">La interfaz de cuenta ya está preparada, pero el backend de autenticación aún no está conectado. No enviaremos ni guardaremos estas credenciales.</div><button class="primary" type="submit">'+(login?'Continuar':'Crear cuenta')+'</button></form>');$$('[data-role]',modal).forEach(b=>b.addEventListener('click',()=>{$$('[data-role]',modal).forEach(x=>x.classList.remove('active'));b.classList.add('active');state.role=b.dataset.role}));$('#authForm').addEventListener('submit',e=>{e.preventDefault();alert('Autenticación pendiente de conexión al backend seguro. No se ha enviado ni almacenado ningún dato.')})}
+async function authSubmit(kind,form,role){
+  const data=Object.fromEntries(new FormData(form).entries());
+  data.role=role||'client';
+  const api=window.AyudaEnCasaAPI;
+  if(!api) throw new Error('API client unavailable');
+  return kind==='login'?api.login({email:data.email,password:data.password}):api.register(data);
+}
+function auth(kind){
+  const login=kind==='login';
+  openModal('<h2 id="modalTitle">'+(login?'Iniciar sesión':'Crear tu cuenta')+'</h2><p class="lead">'+(login?'Accede a tus solicitudes y conversaciones.':'Elige cómo quieres usar AyudaEnCasa.')+'</p>'+
+    (login?'':'<div class="role-grid"><button class="choice active" type="button" data-role="client"><b>Necesito ayuda</b><br><small>Cuenta de cliente</small></button><button class="choice" type="button" data-role="professional"><b>Ofrezco servicios</b><br><small>Cuenta profesional</small></button></div>')+
+    '<form id="authForm" class="form-stack"><label>Correo electrónico<input type="email" name="email" autocomplete="email" required></label><label>Contraseña<input type="password" name="password" autocomplete="'+(login?'current-password':'new-password')+'" minlength="8" required></label>'+
+    (!login?'<label><input type="checkbox" required> Acepto las condiciones y la política de privacidad.</label>':'')+
+    '<div class="form-note">'+(login?'Las credenciales se envían únicamente al backend seguro.':'La cuenta se crea mediante el backend seguro; la contraseña nunca se guarda en el navegador.')+'</div><div id="authError" class="form-note" role="alert" hidden></div><button class="primary" type="submit">'+(login?'Continuar':'Crear cuenta')+'</button></form>');
+  let role='client';
+  $$('[data-role]',modal).forEach(b=>b.addEventListener('click',()=>{$$('[data-role]',modal).forEach(x=>x.classList.remove('active'));b.classList.add('active');role=b.dataset.role}));
+  $('#authForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const form=e.currentTarget,button=form.querySelector('button[type="submit"]'),error=$('#authError');
+    button.disabled=true; button.textContent=login?'Entrando…':'Creando…'; error.hidden=true;
+    try{
+      const result=await authSubmit(kind,form,role);
+      closeModal();
+      const user=result?.user;
+      if(user) updateAuthUI(user);
+    }catch(err){
+      error.textContent=err?.message||'No se pudo completar la operación.';
+      error.hidden=false;
+    }finally{
+      button.disabled=false; button.textContent=login?'Continuar':'Crear cuenta';
+    }
+  });
+}
+function updateAuthUI(user){
+  const loginButton=$('#login'),registerButton=$('#register');
+  if(!loginButton||!registerButton)return;
+  loginButton.textContent=user?.role==='professional'?'Mi cuenta':'Mi cuenta';
+  registerButton.hidden=true;
+  loginButton.dataset.authenticated='true';
+}
+async function restoreAuth(){
+  try{
+    const result=await window.AyudaEnCasaAPI?.me();
+    if(result?.user) updateAuthUI(result.user);
+  }catch{}
+}
 $('#login').addEventListener('click',()=>auth('login'));$('#register').addEventListener('click',()=>auth('register'));
 $('#allCategories').addEventListener('click',()=>{openModal('<h2 id="modalTitle">Todos los servicios</h2><p class="lead">Estas categorías ayudan a descubrir servicios, pero no limitan lo que puedes pedir.</p><div class="category-list">'+[...serviceGroups.map(g=>g.name),'Otro servicio'].map(n=>'<button type="button" data-service="'+escapeHtml(n)+'">'+escapeHtml(n)+'</button>').join('')+'</div>');$$('[data-service]',modal).forEach(b=>b.addEventListener('click',()=>{taskInput.value=b.dataset.service==='Otro servicio'?'': 'Necesito '+b.dataset.service.toLowerCase();closeModal();$('#searchForm').scrollIntoView({behavior:'smooth',block:'center'});taskInput.focus()}))});
