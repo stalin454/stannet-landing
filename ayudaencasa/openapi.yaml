@@ -1,0 +1,69 @@
+openapi: 3.1.0
+info:
+  title: AyudaEnCasa API
+  version: 1.0.0
+  description: Versioned API contract for the AyudaEnCasa marketplace.
+servers:
+  - url: /api/ayuda-en-casa/v1
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: Service healthy }
+  /auth/register:
+    post:
+      responses:
+        '201': { description: Account created }
+        '409': { description: Account unavailable }
+        '429': { description: Rate limited }
+  /auth/login:
+    post:
+      responses:
+        '200': { description: Authenticated }
+        '401': { description: Invalid credentials }
+        '429': { description: Rate limited }
+  /auth/me:
+    get:
+      responses:
+        '200': { description: Current principal }
+        '401': { description: Unauthenticated }
+  /auth/logout:
+    post:
+      responses:
+        '200': { description: Session revoked }
+  /requests:
+    post:
+      responses:
+        '201': { description: Service request created }
+  /requests/{requestId}/proposals:
+    post:
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201': { description: Proposal created }
+  /requests/{requestId}/accept/{proposalId}:
+    post:
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string } }
+        - { name: proposalId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Proposal accepted }
+  /conversations/{conversationId}/messages:
+    post:
+      parameters:
+        - { name: conversationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201': { description: Message created }
+        '429': { description: Rate limited }
+  /requests/{requestId}/complete:
+    post:
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Request completed }
+  /requests/{requestId}/reviews:
+    post:
+      parameters:
+        - { name: requestId, in: path, required: true, schema: { type: string } }
+      responses:
+        '201': { description: Review created }
