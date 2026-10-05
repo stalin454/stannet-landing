@@ -73,7 +73,7 @@
     .replace(/^\\s*[-•]+\\s/gm,'')
     .replace(/\\s+/g,' ').trim();
   const speechChunks=(value,max=460)=>{
-    const words=String(value||'').split(/\\s+/); const chunks=[]; let chunk='';
+    const words=String(value||'').split(/[ \t\r\n]+/); const chunks=[]; let chunk='';
     for(const word of words){const candidate=chunk?chunk+' '+word:word;if(candidate.length>max&&chunk){chunks.push(chunk);chunk=word}else chunk=candidate}
     if(chunk)chunks.push(chunk);return chunks;
   };
