@@ -1,0 +1,50 @@
+Código bec699086271f8316a6cbdb44785204490fe4b5a
+
+1920×1080: Panel 450×600, mensajes 306px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+1366×768: Panel 450×600, mensajes 306px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+320×568: Panel 296×544, mensajes 264px
+  Teclado simulado: Panel 296×396, mensajes 79px
+  Rotación: Panel 450×320, mensajes 194px
+  Teclado horizontal simulado: Panel 450×180, mensajes 54px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+360×800: Panel 336×600, mensajes 320px
+  Teclado simulado: Panel 336×396, mensajes 79px
+  Rotación: Panel 450×360, mensajes 220px
+  Teclado horizontal simulado: Panel 450×180, mensajes 40px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+390×844: Panel 366×600, mensajes 320px
+  Teclado simulado: Panel 366×396, mensajes 79px
+  Rotación: Panel 450×366, mensajes 57px
+  Teclado horizontal simulado: Panel 450×180, mensajes 40px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+393×873: Panel 369×600, mensajes 320px
+  Teclado simulado: Panel 369×396, mensajes 79px
+  Rotación: Panel 450×369, mensajes 58px
+  Teclado horizontal simulado: Panel 450×180, mensajes 40px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+412×915: Panel 388×600, mensajes 320px
+  Teclado simulado: Panel 388×396, mensajes 79px
+  Rotación: Panel 450×388, mensajes 68px
+  Teclado horizontal simulado: Panel 450×180, mensajes 40px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+430×932: Panel 406×600, mensajes 320px
+  Teclado simulado: Panel 406×396, mensajes 79px
+  Rotación: Panel 450×406, mensajes 77px
+  Teclado horizontal simulado: Panel 450×180, mensajes 40px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+PASS: matriz completa. Teclado y rotación simulados. No valida Safari ni móviles físicos.
+
+320×568 memoria abierta: Panel 296×544, mensajes 153px
+  Viewport 420px: Panel 296×396, mensajes 79px
+  Viewport 180px: Panel 320×180, mensajes 54px
+390×844 memoria abierta: Panel 366×600, mensajes 181px
+  Viewport 420px: Panel 366×396, mensajes 79px
+  Viewport 180px: Panel 390×180, mensajes 54px
+844×390 memoria abierta: Panel 450×366, mensajes 57px
+  Viewport 390px: Panel 450×366, mensajes 57px
+  Viewport 180px: Panel 450×180, mensajes 40px
+PASS: memoria abierta, teclado y restauración.
+
+Integración real: portada, Danish Academy, Apps, Web Development, Programming Academy y Radio; un widget por página, apertura/cierre e historial. Respuesta del backend real y navegación a academias verificadas.

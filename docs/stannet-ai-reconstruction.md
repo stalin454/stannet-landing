@@ -1,4 +1,6 @@
-# StanNet AI — reconstrucción del 5 de octubre de 2026
+# StanNet AI — reconstrucción inicial del 5 de octubre de 2026
+
+> Registro histórico de la implementación de madrugada. El comportamiento actual de personaje, pestaña IA y panel compacto se documenta en [la consolidación posterior](stannet-ai-consolidation-20261005.md).
 
 Base: `51a6553d299137351f43e487e214b4abae6c6706`.
 Recuperación: rama `recovery/stannet-ai-before-20261005`. Ningún reset ni borrado de historial.
