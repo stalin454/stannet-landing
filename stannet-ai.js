@@ -72,6 +72,9 @@
     .replace(/\/(?:pages|nutri-ia|sentinel)\/\S+/g,' ')
     .replace(/[*_\x60#>]/g,' ')
     .replace(/^\s*[-•]+\s/gm,'')
+    .replace(/\b(https?|www)\b/gi,' ')
+    .replace(/\s*([.!?])\s*/g,'$1 ')
+    .replace(/\s*([,:;])\s*/g,'$1 ')
     .replace(/\s+/g,' ').trim();
   const speechChunks=(value,max=460)=>{
     const words=String(value||'').split(/[ \t\r\n]+/); const chunks=[]; let chunk='';
