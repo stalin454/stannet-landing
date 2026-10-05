@@ -25,6 +25,7 @@ export function createD1Repositories(db){
   profiles:{
    async upsert(userId,p,now){await db.prepare('INSERT INTO profiles(user_id,display_name,bio,city,postal_prefix,is_public,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?7) ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name,bio=excluded.bio,city=excluded.city,postal_prefix=excluded.postal_prefix,is_public=excluded.is_public,updated_at=excluded.updated_at').bind(userId,p.displayName,p.bio,p.city,p.postalPrefix||null,p.public?1:0,now).run();return p;},
    async findPublic(userId){const r=await db.prepare('SELECT user_id,display_name,bio,city,postal_prefix,avatar_key FROM profiles WHERE user_id=?1 AND is_public=1').bind(userId).first();return r&&{userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key};}
+  ,async findByUserId(userId){const r=await db.prepare('SELECT user_id,display_name,bio,city,postal_prefix,avatar_key,is_public FROM profiles WHERE user_id=?1').bind(userId).first();return r&&{userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key,public:Boolean(r.is_public)};}
   },
   professionals:{
    async listPublic({city,category,limit,cursor}){
@@ -44,6 +45,7 @@ export function createD1Repositories(db){
     const items=rows.slice(0,limit).map(r=>({userId:r.user_id,displayName:r.display_name,bio:r.bio,city:r.city,postalPrefix:r.postal_prefix,avatarKey:r.avatar_key,headline:r.headline,experienceYears:r.experience_years,verificationStatus:r.verification_status,reviewCount:Number(r.review_count||0),averageRating:Math.round(Number(r.average_rating||0)*10)/10}));
     return{items,nextCursor:more?items.at(-1)?.userId||null:null};
    },
+   async findByUserId(userId){const r=await db.prepare('SELECT user_id,headline,experience_years,available,verification_status FROM professional_profiles WHERE user_id=?1').bind(userId).first();if(!r)return null;const s=await db.prepare('SELECT category FROM professional_services WHERE user_id=?1 ORDER BY category').bind(userId).all();return{userId:r.user_id,headline:r.headline||'',experienceYears:r.experience_years,available:Boolean(r.available),verificationStatus:r.verification_status,services:(s.results||[]).map(x=>x.category)};},
    async upsert(userId,p,now){const statements=[db.prepare('INSERT INTO professional_profiles(user_id,headline,experience_years,available,updated_at) VALUES(?1,?2,?3,?4,?5) ON CONFLICT(user_id) DO UPDATE SET headline=excluded.headline,experience_years=excluded.experience_years,available=excluded.available,updated_at=excluded.updated_at').bind(userId,p.headline,p.experienceYears,p.available?1:0,now),db.prepare('DELETE FROM professional_services WHERE user_id=?1').bind(userId),...p.services.map(s=>db.prepare('INSERT INTO professional_services(user_id,category,created_at) VALUES(?1,?2,?3)').bind(userId,s,now))];await db.batch(statements);return p;}
   },
   accountTokens:{
@@ -53,8 +55,8 @@ export function createD1Repositories(db){
   },
   dashboard:{
    async forUser({userId,roles,limit,cursor}){
-    const owned=roles.includes('client')?await db.prepare("SELECT id,category,title,city,status,created_at FROM service_requests WHERE client_user_id=?1 AND (?2 IS NULL OR created_at<?2 OR (created_at=?2 AND id<?3)) ORDER BY created_at DESC,id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
-    const proposed=roles.includes('professional')?await db.prepare("SELECT sr.id,sr.category,sr.title,sr.city,sr.status,pr.status AS proposal_status,pr.created_at FROM proposals pr JOIN service_requests sr ON sr.id=pr.request_id WHERE pr.professional_user_id=?1 AND (?2 IS NULL OR pr.created_at<?2) ORDER BY pr.created_at DESC,pr.id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
+    const owned=roles.includes('client')?await db.prepare("SELECT id,category,title,city,status,created_at FROM service_requests WHERE client_id=?1 AND (?2 IS NULL OR created_at<?2 OR (created_at=?2 AND id<?3)) ORDER BY created_at DESC,id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
+    const proposed=roles.includes('professional')?await db.prepare("SELECT sr.id,sr.category,sr.title,sr.city,sr.status,pr.status AS proposal_status,pr.created_at FROM proposals pr JOIN service_requests sr ON sr.id=pr.request_id WHERE pr.professional_id=?1 AND (?2 IS NULL OR pr.created_at<?2) ORDER BY pr.created_at DESC,pr.id DESC LIMIT ?4").bind(userId,cursor?.createdAt||null,cursor?.id||null,limit+1).all():{results:[]};
     return{ownedRequests:(owned.results||[]).slice(0,limit),professionalRequests:(proposed.results||[]).slice(0,limit)};
    }
   },
