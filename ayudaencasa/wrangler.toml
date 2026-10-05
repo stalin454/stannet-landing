@@ -1,0 +1,8 @@
+name = "ayuda-en-casa"
+compatibility_date = "2026-10-05"
+
+[[d1_databases]]
+binding = "AYUDA_DB"
+database_name = "ayuda-en-casa"
+database_id = "local-development"
+migrations_dir = "db/migrations"
