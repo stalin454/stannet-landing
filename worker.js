@@ -1,8 +1,13 @@
 import { catalogueText } from './stannet-ai-knowledge.mjs';
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
+import { handleAyudaEnCasa } from './ayudaencasa/api/router.mjs';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/ayuda-en-casa/v1')) {
+      return handleAyudaEnCasa(request, env);
+    }
 
     if (url.pathname === '/favicon.ico') {
       const target = new URL('/assets/brand/stannet-sn-cutout.ico', request.url);
