@@ -1,0 +1,32 @@
+import {createD1Repositories} from '../infrastructure/d1/repositories.mjs';
+import {createAuthService} from '../application/auth.mjs';
+const base='/api/ayuda-en-casa/v1';
+const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
+const out=(status,body,extra={})=>new Response(JSON.stringify(body),{status,headers:{...headers,...extra}});
+const cookie=(raw,max=604800)=>`aec_session=${raw}; Path=/; Max-Age=${max}; HttpOnly; Secure; SameSite=Lax`;
+const readCookie=h=>{for(const p of (h||'').split(';')){const [k,...v]=p.trim().split('=');if(k==='aec_session')return v.join('=');}return null;};
+async function body(req){if(!(req.headers.get('content-type')||'').toLowerCase().startsWith('application/json'))throw Object.assign(new Error('Expected JSON'),{status:415,code:'UNSUPPORTED_MEDIA_TYPE'});const t=await req.text();if(new TextEncoder().encode(t).byteLength>16384)throw Object.assign(new Error('Body too large'),{status:413,code:'PAYLOAD_TOO_LARGE'});try{return JSON.parse(t);}catch{throw Object.assign(new Error('Invalid JSON'),{status:400,code:'INVALID_JSON'});}}
+function sameOrigin(req){const u=new URL(req.url);return req.headers.get('origin')===u.origin;}
+export async function handleAyudaEnCasa(request,env){
+ const url=new URL(request.url);if(!url.pathname.startsWith(base))return null;
+ const requestId=crypto.randomUUID();
+ try{
+  if(!env.AYUDA_DB)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa database is not configured'},requestId});
+  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos});
+  const route=url.pathname.slice(base.length)||'/';
+  if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
+  if(['/auth/register','/auth/login'].includes(route)&&request.method==='POST'){
+   if(!sameOrigin(request))return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});
+   const data=await body(request);const result=route.endsWith('register')?await auth.register(data):await auth.login(data);
+   return out(route.endsWith('register')?201:200,{user:result.user,csrfToken:result.session.csrf,requestId},{'set-cookie':cookie(result.session.token)});
+  }
+  const current=await auth.authenticate(readCookie(request.headers.get('cookie')));
+  if(route==='/auth/me'&&request.method==='GET')return current?out(200,{user:current.principal,requestId}):out(401,{error:{code:'UNAUTHENTICATED',message:'Authentication required'},requestId});
+  if(route==='/auth/logout'&&request.method==='POST'){
+   if(!current)return out(204,{});
+   if(!sameOrigin(request)||!await auth.verifyCsrf(request.headers.get('x-csrf-token'),current.session))return out(403,{error:{code:'CSRF_REJECTED',message:'Request rejected'},requestId});
+   await repos.sessions.revoke(current.session.id,new Date().toISOString());return out(200,{ok:true,requestId},{'set-cookie':cookie('',0)});
+  }
+  return out(404,{error:{code:'NOT_FOUND',message:'Resource not found'},requestId});
+ }catch(e){const status=Number(e.status)||500;const safe=status<500?(e.message||'Request rejected'):'Unexpected server error';return out(status,{error:{code:e.code||'INTERNAL_ERROR',message:safe},requestId});}
+}
