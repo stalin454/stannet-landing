@@ -72,7 +72,7 @@ async function openAccount(user){
     if(professional){
       const available=await window.AyudaEnCasaAPI.listRequests({city:state.location,limit:20});
       const mine=dashboard.professionalRequests||[];
-      host.innerHTML='<div class="form-note"><b>Área profesional</b><br>Solicitudes abiertas en '+escapeHtml(state.location)+'.</div>'+
+      host.innerHTML='<div class="form-note"><b>Área profesional</b><br>Solicitudes abiertas en '+escapeHtml(state.location)+'.</div><button class="choice" type="button" id="editProfessionalProfile">Editar perfil profesional</button>'+
         '<div class="account-section"><h3>Solicitudes disponibles</h3><div class="account-list">'+
         ((available.items||[]).map(requestCard).join('')||'<div class="form-note">No hay solicitudes abiertas en esta zona ahora mismo.</div>')+
         '</div></div><div class="account-section"><h3>Mis propuestas</h3><div class="account-list">'+
@@ -91,6 +91,23 @@ async function openAccount(user){
     if(err.status===401){closeModal();auth('login');return}
     host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo cargar tu cuenta.')+'</div>';
   }
+}
+async function openProfessionalProfile(){
+  openModal('<h2 id="modalTitle">Perfil profesional</h2><div id="profileFormHost" class="form-stack"><div class="form-note">Cargando perfil…</div></div>');
+  const host=$('#profileFormHost');
+  try{
+    const data=await window.AyudaEnCasaAPI.getProfile(),p=data.profile||{},pp=data.professional||{},services=new Set(pp.services||[]);
+    const options=[['limpieza','Limpieza'],['cuidado','Cuidados'],['jardineria','Jardinería'],['reparaciones','Reparaciones'],['otro','Otros']];
+    host.innerHTML='<form id="professionalProfileForm" class="form-stack"><label>Nombre visible<input name="displayName" maxlength="80" value="'+escapeHtml(p.displayName||'')+'" required></label><label>Ciudad<input name="city" maxlength="100" value="'+escapeHtml(p.city||state.location)+'" required></label><label>Titular profesional<input name="headline" maxlength="120" value="'+escapeHtml(pp.headline||'')+'" placeholder="Ej. Profesional de mantenimiento del hogar"></label><label>Experiencia (años)<input name="experienceYears" type="number" min="0" max="80" value="'+escapeHtml(pp.experienceYears??0)+'"></label><label>Presentación<textarea name="bio" maxlength="1000" placeholder="Describe brevemente tu experiencia.">'+escapeHtml(p.bio||'')+'</textarea></label><fieldset><legend>Servicios</legend><div class="service-checks">'+options.map(([v,l])=>'<label><input type="checkbox" name="services" value="'+v+'" '+(services.has(v)?'checked':'')+'> '+l+'</label>').join('')+'</div></fieldset><label><input type="checkbox" name="available" '+(pp.available!==false?'checked':'')+'> Estoy disponible para nuevas solicitudes</label><label><input type="checkbox" name="public" '+(p.public!==false?'checked':'')+'> Mostrar mi perfil en el buscador</label><div id="profileError" class="form-note" role="alert" hidden></div><button class="primary" type="submit">Guardar perfil</button></form>';
+    $('#professionalProfileForm').addEventListener('submit',async e=>{
+      e.preventDefault();const f=e.currentTarget,b=f.querySelector('button[type="submit"]');const fd=new FormData(f),selected=fd.getAll('services');b.disabled=true;
+      try{
+        await window.AyudaEnCasaAPI.updateProfile({displayName:fd.get('displayName'),bio:fd.get('bio'),city:fd.get('city'),postalPrefix:'',public:fd.get('public')==='on'});
+        await window.AyudaEnCasaAPI.updateProfessionalProfile({headline:fd.get('headline'),experienceYears:Number(fd.get('experienceYears')||0),available:fd.get('available')==='on',services:selected});
+        openAccount({role:'professional'});
+      }catch(err){const box=$('#profileError');box.textContent=err.message||'No se pudo guardar el perfil.';box.hidden=false;b.disabled=false;}
+    });
+  }catch(err){host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo cargar el perfil.')+'</div>';}
 }
 function requestCard(item){
   return '<article class="account-card"><b>'+escapeHtml(item.title||'Solicitud')+'</b><small>'+escapeHtml(item.city||'')+' · '+escapeHtml(item.category||'')+'</small><p>'+escapeHtml(item.description||'')+'</p><button class="primary" type="button" data-propose="'+escapeHtml(item.id)+'" data-title="'+escapeHtml(item.title||'Solicitud')+'">Enviar propuesta</button></article>';
