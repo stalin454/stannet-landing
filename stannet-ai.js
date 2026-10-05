@@ -252,8 +252,10 @@
     border-radius:12px 0 0 12px;
   }
 
-  /* Rebuilt mobile modal: visual viewport owns the panel; the page remains untouched. */
+  /* Mobile layout: compact controls + stable visual viewport sizing. */
   @media(max-width:520px){
+    #stannet-ai-root,
+    #stannet-ai-root *{box-sizing:border-box}
     #stannet-ai-root{
       right:max(8px,env(safe-area-inset-right));
       bottom:max(8px,env(safe-area-inset-bottom));
@@ -271,64 +273,75 @@
     #stannet-ai-root .snai-panel{
       position:fixed;
       z-index:7;
-      box-sizing:border-box;
       left:max(8px,env(safe-area-inset-left));
       right:max(8px,env(safe-area-inset-right));
-      top:calc(var(--snai-vtop,0px) + max(8px,env(safe-area-inset-top)));
-      bottom:auto;
+      top:auto;
+      bottom:max(8px,env(safe-area-inset-bottom));
       width:auto;
-      height:calc(var(--snai-vh,100dvh) - max(8px,env(safe-area-inset-top)) - max(8px,env(safe-area-inset-bottom)));
-      max-height:none;
+      height:min(760px,calc(var(--snai-vh,100dvh) - max(16px,env(safe-area-inset-top)) - max(16px,env(safe-area-inset-bottom))));
+      max-height:calc(var(--snai-vh,100dvh) - max(16px,env(safe-area-inset-top)) - max(16px,env(safe-area-inset-bottom)));
       min-height:0;
       flex-direction:column;
       overflow:hidden;
-      border-radius:18px;
+      border-radius:16px;
       overscroll-behavior:contain;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
     }
     #stannet-ai-root .snai-panel.open{display:flex}
     #stannet-ai-root .snai-headbar{
       flex:0 0 auto;
       display:grid;
-      grid-template-columns:30px minmax(0,1fr) 44px;
+      grid-template-columns:28px minmax(0,1fr) 40px;
       grid-template-areas:"logo title close" "actions actions actions";
       align-items:center;
       column-gap:7px;
-      row-gap:4px;
-      padding:8px 9px;
+      row-gap:3px;
+      padding:6px 8px;
     }
-    #stannet-ai-root .snai-logo{grid-area:logo;width:30px;height:30px}
+    #stannet-ai-root .snai-logo{grid-area:logo;width:28px;height:28px}
     #stannet-ai-root .snai-title{grid-area:title;min-width:0}
-    #stannet-ai-root .snai-title strong{font-size:12px;letter-spacing:.04em}
+    #stannet-ai-root .snai-title strong{font-size:11px;letter-spacing:.035em}
     #stannet-ai-root .snai-title small{display:none}
-    #stannet-ai-root .snai-head-actions{grid-area:actions;justify-content:flex-end;gap:6px}
-    #stannet-ai-root .snai-head-actions button{min-height:40px;padding:6px 10px;font-size:10px;touch-action:manipulation}
+    #stannet-ai-root .snai-head-actions{grid-area:actions;justify-content:flex-end;gap:5px}
+    #stannet-ai-root .snai-head-actions button{
+      min-height:32px;
+      padding:4px 8px;
+      font-size:9px;
+      line-height:1;
+      touch-action:manipulation;
+    }
     #stannet-ai-root .snai-close{
       grid-area:close;
-      width:44px;
-      height:44px;
+      width:40px;
+      height:40px;
       display:grid;
       place-items:center;
       padding:0;
-      border-radius:10px;
+      border-radius:9px;
       background:rgba(255,255,255,.06);
+      font-size:22px;
       touch-action:manipulation;
     }
     #stannet-ai-root .snai-memory{
       flex:0 0 auto;
-      max-height:35%;
+      max-height:32%;
       min-height:0;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
       overscroll-behavior:contain;
       touch-action:pan-y;
     }
+    #stannet-ai-root .snai-memory textarea{
+      min-height:54px!important;
+      max-height:96px!important;
+    }
     #stannet-ai-root .snai-modes{
-      box-sizing:border-box;
       flex:0 0 auto;
       min-width:0;
       width:100%;
-      gap:6px;
-      padding:7px 8px;
+      gap:5px;
+      padding:5px 7px;
       overflow-x:auto;
       overflow-y:hidden;
       white-space:nowrap;
@@ -338,13 +351,19 @@
       touch-action:pan-x;
     }
     #stannet-ai-root .snai-modes::-webkit-scrollbar{display:none}
-    #stannet-ai-root .snai-modes button{flex:0 0 auto;min-height:40px;padding:6px 10px;font-size:9px;touch-action:manipulation}
+    #stannet-ai-root .snai-modes button{
+      flex:0 0 auto;
+      min-height:34px;
+      padding:5px 9px;
+      font-size:9px;
+      line-height:1;
+      touch-action:manipulation;
+    }
     #stannet-ai-root .snai-messages{
-      box-sizing:border-box;
       flex:1 1 auto;
       min-height:0;
       width:100%;
-      padding:10px;
+      padding:8px;
       overflow-x:hidden;
       overflow-y:auto;
       -webkit-overflow-scrolling:touch;
@@ -352,60 +371,81 @@
       touch-action:pan-y;
       scrollbar-gutter:stable;
     }
-    #stannet-ai-root .snai-msg{flex:0 0 auto;max-width:92%;font-size:13px;line-height:1.42;overflow-wrap:anywhere}
+    #stannet-ai-root .snai-msg{
+      flex:0 0 auto;
+      max-width:92%;
+      padding:9px 10px;
+      font-size:12.5px;
+      line-height:1.4;
+      overflow-wrap:anywhere;
+    }
     #stannet-ai-root .snai-form{
-      box-sizing:border-box;
       flex:0 0 auto;
       min-width:0;
       width:100%;
-      padding:8px;
+      padding:6px 7px 7px;
       background:#071a36;
     }
-    #stannet-ai-root .snai-form-row{min-width:0;gap:5px}
+    #stannet-ai-root .snai-form-row{min-width:0;gap:4px}
     #stannet-ai-root .snai-form textarea{
       flex:1 1 auto;
       min-width:0;
-      height:42px;
-      min-height:42px;
-      max-height:88px;
-      padding:10px;
-      font-size:16px;
-      line-height:1.25;
+      width:auto!important;
+      height:40px!important;
+      min-height:40px!important;
+      max-height:72px!important;
+      padding:9px 10px!important;
+      font-size:16px!important;
+      line-height:1.2!important;
+      resize:none!important;
       touch-action:manipulation;
     }
     #stannet-ai-root .snai-attach,
     #stannet-ai-root .snai-send,
     #stannet-ai-root .snai-voice-toggle{
-      flex:0 0 44px;
-      width:44px;
-      height:44px;
-      border-radius:11px;
+      flex:0 0 40px;
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      padding:0;
       touch-action:manipulation;
     }
     #stannet-ai-root .snai-privacy-note,
     #stannet-ai-root .snai-voice-note{display:none}
     #stannet-ai-root .snai-voice-status{
       display:block;
-      min-height:13px;
-      max-height:18px;
-      padding-top:3px;
+      min-height:11px;
+      max-height:14px;
+      padding-top:2px;
       overflow:hidden;
-      font-size:9px;
+      font-size:8px;
+      line-height:1.2;
     }
     #stannet-ai-root.panel-open .snai-launcher,
     #stannet-ai-root.panel-open .snai-dismiss{opacity:0;visibility:hidden;pointer-events:none}
-    #stannet-ai-root .snai-launcher{width:96px;height:144px;transform:none;touch-action:manipulation}
+    #stannet-ai-root .snai-launcher{
+      width:86px;
+      height:128px;
+      transform:none;
+      touch-action:manipulation;
+    }
     #stannet-ai-root .snai-launcher:hover{transform:none}
     #stannet-ai-root .snai-agent-shell,
-    #stannet-ai-root .snai-agent-avatar{width:92px;height:138px}
-    #stannet-ai-root .snai-status{right:5px;top:14px;width:11px;height:11px}
-    #stannet-ai-root .snai-dismiss{right:0;top:-4px;width:44px;height:44px;touch-action:manipulation}
+    #stannet-ai-root .snai-agent-avatar{width:82px;height:123px}
+    #stannet-ai-root .snai-status{right:4px;top:12px;width:10px;height:10px}
+    #stannet-ai-root .snai-dismiss{
+      right:0;
+      top:-4px;
+      width:40px;
+      height:40px;
+      touch-action:manipulation;
+    }
     #stannet-ai-root .snai-reopen{
       right:0;
-      bottom:max(14px,env(safe-area-inset-bottom));
-      min-width:44px;
-      height:44px;
-      padding:0 9px;
+      bottom:max(12px,env(safe-area-inset-bottom));
+      min-width:40px;
+      height:40px;
+      padding:0 8px;
       touch-action:manipulation;
     }
   }
@@ -587,15 +627,12 @@
   let viewportFrame=0;
   const syncMobileViewport=()=>{
     if(!isCompactViewport()){
-      root.style.removeProperty('--snai-vtop');
       root.style.removeProperty('--snai-vh');
       return;
     }
     const viewport=window.visualViewport;
-    const top=Math.max(0,Math.round(viewport?.offsetTop||0));
     const height=Math.max(1,Math.round(viewport?.height||window.innerHeight||document.documentElement.clientHeight||1));
-    const topValue=top+'px',heightValue=height+'px';
-    if(root.style.getPropertyValue('--snai-vtop')!==topValue)root.style.setProperty('--snai-vtop',topValue);
+    const heightValue=height+'px';
     if(root.style.getPropertyValue('--snai-vh')!==heightValue)root.style.setProperty('--snai-vh',heightValue);
   };
   const scheduleViewportSync=()=>{
@@ -605,10 +642,7 @@
   const syncModalState=()=>{
     const mobileOpen=panel.classList.contains('open')&&isCompactViewport();
     root.classList.toggle('panel-open',mobileOpen);
-    if(!mobileOpen){
-      root.style.removeProperty('--snai-vtop');
-      root.style.removeProperty('--snai-vh');
-    }
+    if(!mobileOpen)root.style.removeProperty('--snai-vh');
   };
   const setOpen=(open)=>{
     if(!open&&document.activeElement&&panel.contains(document.activeElement))document.activeElement.blur();
@@ -645,7 +679,6 @@
   window.addEventListener('orientationchange',()=>setTimeout(handleViewportChange,80),{passive:true});
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',scheduleViewportSync,{passive:true});
-    window.visualViewport.addEventListener('scroll',scheduleViewportSync,{passive:true});
   }
   input.addEventListener('focus',()=>{
     if(!isCompactViewport())return;
