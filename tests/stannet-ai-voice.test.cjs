@@ -18,7 +18,7 @@ assert.ok(widget.includes('StanNet recibe la transcripción'), 'Voice processing
 assert.ok(widget.includes('Escuchar respuesta'), 'Text replies must be playable by browser users');
 assert.ok(widget.includes("setActivity('interrupted')"), 'Voice conversation must expose an interrupted state for barge-in');
 assert.ok(widget.includes('looksLikeSpeakerEcho'), 'Barge-in must filter likely speaker echo before accepting an interruption');
-assert.ok(widget.includes("if(listenAfter&&voiceEnabled)startListening()"), 'Recognition must restart while the assistant is speaking so the user can interrupt');
+assert.ok(widget.includes("if(listenAfter&&voiceEnabled&&!mobile.matches)startListening()"), 'Desktop recognition must restart while the assistant is speaking so the user can interrupt');
 assert.ok(widget.includes("voiceThinking&&!speechActive"), 'Listening must remain available during assistant speech without reopening it while the model is thinking');
 assert.ok(widget.includes('INTERRUPTION_WORDS'), 'Short explicit interruption words must bypass speaker-echo filtering');
 assert.ok(widget.includes("'para','espera','no','oye','stop','wait'"), 'Spanish and English short interruption vocabulary must be recognized');
