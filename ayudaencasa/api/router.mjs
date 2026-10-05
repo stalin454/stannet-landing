@@ -1,5 +1,6 @@
 import {createD1Repositories} from '../infrastructure/d1/repositories.mjs';
 import {createAuthService} from '../application/auth.mjs';
+import {createRateLimiter} from '../application/rate-limit.mjs';
 const base='/api/ayuda-en-casa/v1';
 const headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'};
 const out=(status,body,extra={})=>new Response(JSON.stringify(body),{status,headers:{...headers,...extra}});
@@ -12,10 +13,12 @@ export async function handleAyudaEnCasa(request,env){
  const requestId=crypto.randomUUID();
  try{
   if(!env.AYUDA_DB)return out(503,{error:{code:'SERVICE_NOT_CONFIGURED',message:'AyudaEnCasa database is not configured'},requestId});
-  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos});
+  const repos=createD1Repositories(env.AYUDA_DB);const auth=createAuthService({repos});const limit=createRateLimiter({db:env.AYUDA_DB});
   const route=url.pathname.slice(base.length)||'/';
   if(route==='/health'&&request.method==='GET')return out(200,{ok:true,service:'ayuda-en-casa',version:'v1'});
   if(['/auth/register','/auth/login'].includes(route)&&request.method==='POST'){
+   const ip=request.headers.get('cf-connecting-ip')||'unknown';const gate=await limit('auth:'+ip,{limit:12,windowMs:60000});
+   if(!gate.allowed)return out(429,{error:{code:'RATE_LIMITED',message:'Too many attempts'},requestId},{'retry-after':String(gate.retryAfter)});
    if(!sameOrigin(request))return out(403,{error:{code:'BAD_ORIGIN',message:'Request origin rejected'},requestId});
    const data=await body(request);const result=route.endsWith('register')?await auth.register(data):await auth.login(data);
    return out(route.endsWith('register')?201:200,{user:result.user,csrfToken:result.session.csrf,requestId},{'set-cookie':cookie(result.session.token)});
