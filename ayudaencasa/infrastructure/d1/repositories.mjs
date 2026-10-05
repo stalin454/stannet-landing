@@ -26,9 +26,12 @@ export function createD1Repositories(db){
    async rejectPendingForRequest(requestId,exceptId,now){await db.prepare("UPDATE proposals SET status='rejected',updated_at=?3 WHERE request_id=?1 AND id<>?2 AND status='pending'").bind(requestId,exceptId,now).run();}
   },
   conversations:{
+   async findById(id){const r=await db.prepare('SELECT * FROM conversations WHERE id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async findByRequestId(id){const r=await db.prepare('SELECT * FROM conversations WHERE request_id=?1').bind(id).first();return r&&{id:r.id,requestId:r.request_id,clientId:r.client_id,professionalId:r.professional_id,createdAt:r.created_at};},
    async create(x){const id=x.id||crypto.randomUUID();await db.prepare('INSERT INTO conversations(id,request_id,client_id,professional_id,created_at) VALUES(?1,?2,?3,?4,?5)').bind(id,x.requestId,x.clientId,x.professionalId,x.createdAt).run();return{id,...x};}
   },
+  messages:{async create(x){await db.prepare('INSERT INTO messages(id,conversation_id,sender_id,body,created_at) VALUES(?1,?2,?3,?4,?5)').bind(x.id,x.conversationId,x.senderId,x.body,x.createdAt).run();return x;}},
+  reviews:{async findByParties(requestId,reviewerId,revieweeId){return db.prepare('SELECT * FROM reviews WHERE request_id=?1 AND reviewer_id=?2 AND reviewee_id=?3').bind(requestId,reviewerId,revieweeId).first();},async create(x){await db.prepare('INSERT INTO reviews(id,request_id,reviewer_id,reviewee_id,rating,comment,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7)').bind(x.id,x.requestId,x.reviewerId,x.revieweeId,x.rating,x.comment,x.createdAt).run();return x;}},
   audit:{async append(x){await db.prepare('INSERT INTO audit_events(id,actor_user_id,event_type,target_type,target_id,metadata_json,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7)').bind(crypto.randomUUID(),x.actorUserId||null,x.eventType,x.targetType||null,x.targetId||null,JSON.stringify(x.metadata||{}),x.createdAt).run();}}
  };
 }
