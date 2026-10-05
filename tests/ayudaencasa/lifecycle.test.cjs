@@ -8,7 +8,7 @@ const {createSendMessage}=require('../../ayudaencasa/application/send-message.cj
  await send({principal:pro,conversationId:conversation.id,input:{body:'Puedo ir mañana.'},now:'now'});assert.equal(message.senderId,pro.userId);
  const request={id:conversation.requestId,clientId:client.userId,status:'in_progress'};const complete=createCompleteRequest({requests:{findById:async()=>request,update:async(id,p)=>Object.assign(request,p)},audit:{append:async x=>audit.push(x)}});
  await assert.rejects(()=>complete({principal:outsider,requestId:request.id,now:'now'}),e=>e.code==='FORBIDDEN');await complete({principal:client,requestId:request.id,now:'now'});assert.equal(request.status,'completed');
- let review;const reviewUse=createCreateReview({requests:{findById:async()=>request},conversations:{findByRequestId:async()=>conversation},reviews:{findByParties:async()=>null,create:async x=>review=x},audit:{append:async x=>audit.push(x)},id:()=> 'review_123456789'});
+ const reviewUse=createCreateReview({requests:{findById:async()=>request},conversations:{findByRequestId:async()=>conversation},reviews:{findByParties:async()=>null,create:async x=>review=x},audit:{append:async x=>audit.push(x)},id:()=> 'review_123456789'});
  await assert.rejects(()=>reviewUse({principal:outsider,requestId:request.id,input:{rating:5},now:'now'}),e=>e.code==='FORBIDDEN');
  await reviewUse({principal:client,requestId:request.id,input:{rating:5,comment:'Buen servicio'},now:'now'});assert.equal(review.revieweeId,pro.userId);assert.equal(review.rating,5);
  console.log('AyudaEnCasa lifecycle authorization tests passed');
