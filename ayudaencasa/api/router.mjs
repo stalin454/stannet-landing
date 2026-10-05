@@ -9,6 +9,7 @@ import {createLogger,routeTemplate} from '../infrastructure/observability/logger
 import {hashPassword,verifyPassword} from '../infrastructure/security/password.mjs';
 import {createAccountRoutes} from './account-routes.mjs';
 import {createProfileService} from '../application/profile-service.mjs';
+import {hasRole} from '../domain/authorization.mjs';
 import {createProfessionalDiscovery} from '../application/professional-discovery.mjs';
 import {createPrivateReads} from '../application/private-reads.mjs';
 import {createAtomicMarketplace} from '../infrastructure/d1/atomic-marketplace.mjs';
@@ -62,6 +63,7 @@ export async function handleAyudaEnCasa(request,env){
   const proposalRead=route.match(/^\/requests\/([^/]+)\/proposals$/);if(proposalRead&&request.method==='GET'){if(!current)return out(401,{error:{code:'UNAUTHENTICATED'},requestId});return out(200,{...(await privateReads.requestProposals({principal:current.principal,requestId:proposalRead[1],limit:url.searchParams.get('limit'),cursor:url.searchParams.get('cursor')})),requestId});}
   const messageRead=route.match(/^\/conversations\/([^/]+)\/messages$/);if(messageRead&&request.method==='GET'){if(!current)return out(401,{error:{code:'UNAUTHENTICATED'},requestId});return out(200,{...(await privateReads.messages({principal:current.principal,conversationId:messageRead[1],limit:url.searchParams.get('limit'),cursor:url.searchParams.get('cursor')})),requestId});}
   if(route==='/professionals'&&request.method==='GET'){const discover=createProfessionalDiscovery({professionals:repos.professionals});const result=await discover({city:url.searchParams.get('city'),category:url.searchParams.get('category'),limit:parsePositiveInt(url.searchParams.get('limit')),cursor:url.searchParams.get('cursor')});return out(200,{...result,requestId});}
+  if(route==='/profile'&&request.method==='GET'){const principal=await requireMutation();return out(200,{profile:await repos.profiles.findByUserId(principal.userId),professional:hasRole(principal,'professional')?await repos.professionals.findByUserId(principal.userId):null,requestId});}
   if(route==='/profile'&&request.method==='PUT'){const principal=await requireMutation(),data=await body(request),svc=createProfileService({profiles:repos.profiles,professionals:repos.professionals,audit:repos.audit});return out(200,{profile:await svc.updatePublic({principal,input:data}),requestId});}
   if(route==='/profile/professional'&&request.method==='PUT'){const principal=await requireMutation(),data=await body(request),svc=createProfileService({profiles:repos.profiles,professionals:repos.professionals,audit:repos.audit});return out(200,{profile:await svc.updateProfessional({principal,input:data}),requestId});}
   if(route==='/requests'&&request.method==='GET'){const list=createListRequests({requests:repos.requests});const result=await list({city:url.searchParams.get('city'),category:url.searchParams.get('category'),limit:parsePositiveInt(url.searchParams.get('limit')),cursor:url.searchParams.get('cursor')});return out(200,{...result,requestId});}
