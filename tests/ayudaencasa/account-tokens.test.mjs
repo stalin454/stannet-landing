@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';import {createAccountTokens} from '../../ayudaencasa/application/account-tokens.mjs';
+const rows=[],sent=[];let active=null,revoked=null;
+const tokens={invalidate:async()=>{},create:async x=>rows.push(x),consume:async(d,k)=>{const x=rows.find(r=>r.digest===d&&r.kind===k&&!r.used);if(!x)return null;x.used=true;return x;}};
+const users={findByEmail:async e=>e==='known@example.test'?{id:'user_123456789012',email_normalized:e}:null,activate:async id=>active=id,setPassword:async()=>{}};
+const sessions={revokeAllForUser:async id=>revoked=id};const mailer={sendVerification:async x=>sent.push(x),sendPasswordReset:async x=>sent.push(x)};
+const svc=createAccountTokens({tokens,users,sessions,mailer,now:()=>new Date('2026-10-05T12:00:00Z'),id:()=>crypto.randomUUID()});
+assert.deepEqual(await svc.requestReset('missing@example.test'),{accepted:true});assert.equal(sent.length,0);
+await svc.requestReset('known@example.test');assert.equal(sent.length,1);assert.equal(rows[0].digest.includes(sent[0].token),false);
+await svc.verify(await (async()=>{const u={id:'user_123456789012',emailNormalized:'known@example.test'};await svc.requestVerification(u);return sent[1].token;})());assert.equal(active,'user_123456789012');
+console.log('AyudaEnCasa account token tests passed');
