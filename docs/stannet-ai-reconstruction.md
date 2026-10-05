@@ -38,3 +38,51 @@ El backend real respondió a una solicitud de ejercicio de variables JavaScript,
 La prueba con 180px detectó que una fila vacía del centro grid quitaba espacio a mensajes al ocultar memoria. El centro pasa a flex con altura mínima cero y mensajes flexibles, conservando el grid del panel. Se añade adaptación a viewport menor de 380px para teclado horizontal: la cabecera y entrada siguen visibles; controles secundarios se ocultan mientras dura esa reducción y vuelven al cerrar el teclado.
 
 La siguiente medición identificó además los 24px de separación vertical de escritorio: con 180px de viewport, header y entrada dejaban solo 16px para el centro. En modo compacto se usa toda la altura visual disponible, manteniendo el espacio horizontal en escritorio. El contenido flexible queda dentro del centro y no invade el formulario.
+
+## Validación final — código `167a8bb`
+
+La matriz completa vuelve a pasar tras la última corrección, con comprobaciones reforzadas de espacio útil y ausencia de solapamiento entre conversación y formulario.
+
+| Viewport | Conversación inicial | Teclado simulado 420px | Teclado horizontal 180px | Resultado |
+| --- | ---: | ---: | ---: | --- |
+| 1920×1080 | 390px | — | — | PASS |
+| 1366×768 | 390px | — | — | PASS |
+| 390×844 | 568px | 144px | 40px (28px útiles) | PASS |
+| 393×873 | 597px | 144px | 40px (28px útiles) | PASS |
+| 360×800 | 524px | 144px | 40px (28px útiles) | PASS |
+
+En cada tamaño pasan abrir, los cinco modos, enviar, enlaces, scroll completo, personaje, minimizar, restaurar y cerrar. En móvil pasan además la reducción del VisualViewport, la orientación horizontal y el caso de 180px. El cierre durante una petición real conserva el diálogo cerrado, la pestaña IA visible y el foco en BODY al terminar: no reabre el teclado.
+
+CI y despliegue Cloudflare del commit `167a8bbf968db753d4461a60722d56196938c1d9`: success. Pruebas manuales de integración: portada, navegación hacia Danish Academy, Apps, Web Development y Radio. Las demás áreas conservan código y contenido.
+
+### Límites pendientes
+
+No se dispone de iPhone/Android físicos ni Safari en este entorno. El teclado, la orientación y los gestos nativos de esas plataformas no están certificados por estas simulaciones. La voz se conserva y se verifica su contrato, pero no se ha concedido acceso al micrófono ni se ha hecho una llamada de audio real.
+
+### Archivos del cambio
+
+- `atom.css`
+- `docs/stannet-ai-reconstruction.md`
+- `navigation-performance.css`
+- `package.json`
+- `qa/stannet-ai/browser.mjs`
+- `qa/stannet-ai/fixture.html`
+- `qa/stannet-ai/index.html`
+- `script.js`
+- `stannet-ai-core.mjs`
+- `stannet-ai-knowledge.mjs`
+- `stannet-ai-loader.js`
+- `stannet-ai.css`
+- `stannet-ai.js`
+- `stannet-global-nav.js`
+- `tests/home-atom.test.cjs`
+- `tests/navigation-performance.test.cjs`
+- `tests/stannet-ai-agent.test.cjs`
+- `tests/stannet-ai-catalog.test.cjs`
+- `tests/stannet-ai-core.test.mjs`
+- `tests/stannet-ai-voice.test.cjs`
+- `worker.js`
+
+### Captura
+
+![StanNet AI integrado en la portada](stannet-ai-preview-20261005.jpg)
