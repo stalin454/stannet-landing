@@ -163,26 +163,26 @@ async function acceptProposal(requestId,proposalId){
   try{
     const result=await window.AyudaEnCasaAPI.acceptProposal(requestId,proposalId);
     openModal('<h2 id="modalTitle">Profesional seleccionado</h2><div class="form-note">La solicitud está asignada y el chat privado ya está disponible.</div><button class="primary" type="button" id="openChat">Abrir conversación</button>');
-    $('#openChat').addEventListener('click',()=>openConversation(result.result?.conversationId));
+    $('#openChat').addEventListener('click',()=>openConversation(result.result?.conversationId,result.result?.requestId));
   }catch(err){openModal('<h2 id="modalTitle">No se pudo aceptar</h2><div class="form-note" role="alert">'+escapeHtml(err.message||'La propuesta ya no está disponible.')+'</div>');}
 }
-async function openConversation(conversationId){
+async function openConversation(conversationId,requestId=null){
   openModal('<h2 id="modalTitle">Conversación</h2><div id="chatBox" class="form-stack"><div class="form-note">Cargando…</div></div>');
   const host=$('#chatBox');
   try{
     const data=await window.AyudaEnCasaAPI.listMessages(conversationId,{limit:30});
     host.innerHTML='<div class="chat-log">'+(data.items||[]).slice().reverse().map(m=>'<div class="proposal"><b>'+escapeHtml(m.sender_id||m.senderId||'Usuario')+'</b><small>'+escapeHtml(m.body||'')+'</small></div>').join('')+'</div><form id="chatForm" class="form-stack"><textarea name="body" maxlength="4000" required placeholder="Escribe un mensaje…"></textarea><button class="primary" type="submit">Enviar</button></form><button class="choice" type="button" id="completeFromChat">Marcar servicio como realizado</button>';
     $('#chatForm').addEventListener('submit',async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');const body=new FormData(f).get('body');b.disabled=true;try{await window.AyudaEnCasaAPI.sendMessage(conversationId,{body});openConversation(conversationId)}catch(err){b.disabled=false;alert(err.message||'No se pudo enviar el mensaje.');}});
-    $('#completeFromChat').addEventListener('click',()=>completeService(conversationId));
+    $('#completeFromChat').addEventListener('click',()=>completeService(requestId));
   }catch(err){host.innerHTML='<div class="form-note" role="alert">'+escapeHtml(err.message||'No se pudo cargar la conversación.')+'</div>';}
 }
-async function completeService(conversationId){
+async function completeService(requestId){
   const ok=window.confirm('¿El servicio se ha realizado y quieres marcarlo como completado? Esta acción activa el flujo de valoración.');
   if(!ok)return;
   try{
-    const data=await window.AyudaEnCasaAPI.completeRequest(conversationId);
+    const data=await window.AyudaEnCasaAPI.completeRequest(requestId);
     openModal('<h2 id="modalTitle">Servicio completado</h2><div class="form-note">El servicio se ha marcado como completado. Ya puedes dejar tu valoración.</div><button class="primary" type="button" id="reviewNow">Valorar ahora</button>');
-    $('#reviewNow').addEventListener('click',()=>reviewRequest(data.request?.id||conversationId));
+    $('#reviewNow').addEventListener('click',()=>reviewRequest(data.request?.id||requestId));
   }catch(err){
     openModal('<h2 id="modalTitle">No se pudo completar</h2><div class="form-note" role="alert">'+escapeHtml(err.message||'El servicio no puede marcarse como completado todavía.')+'</div>');
   }
