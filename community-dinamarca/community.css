@@ -1,0 +1,250 @@
+.dk-community {
+  --dkc-ink: #20334c;
+  --dkc-line: #cedce9;
+  --dkc-accent: #2866cf;
+  color: var(--dkc-ink);
+  scroll-margin-top: 24px;
+  font:
+    400 15px/1.65 Inter,
+    system-ui,
+    sans-serif;
+}
+.dk-community .dkc-heading {
+  max-width: 900px;
+  margin: 0 auto 28px;
+}
+.dk-community h2 {
+  font:
+    600 clamp(28px, 4vw, 48px)/1.2 Orbitron,
+    sans-serif;
+  margin: 12px 0;
+}
+.dk-community h3 {
+  font:
+    600 19px/1.4 Orbitron,
+    sans-serif;
+  margin: 0 0 16px;
+}
+.dk-community p {
+  color: #405570;
+}
+.dk-community [hidden] {
+  display: none !important;
+}
+.dk-community .dkc-card,
+.dk-community .dkc-post {
+  background: #fff;
+  border: 1px solid var(--dkc-line);
+  border-radius: 18px;
+  padding: 24px;
+  margin: 16px auto;
+  max-width: 1150px;
+  box-shadow: 0 8px 28px #1a47730a;
+}
+.dk-community label {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0;
+  color: #20334c;
+  font-weight: 600;
+}
+.dk-community input,
+.dk-community select,
+.dk-community textarea {
+  width: 100%;
+  min-width: 0;
+  color: #20334c;
+  background: #f7faff;
+  border: 1px solid #9aafc5;
+  border-radius: 9px;
+  padding: 12px;
+  font:
+    400 16px/1.5 Inter,
+    system-ui,
+    sans-serif;
+}
+.dk-community textarea {
+  resize: vertical;
+}
+.dk-community input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+.dk-community .dkc-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dk-community button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #9cb4ce;
+  border-radius: 10px;
+  background: #edf4ff;
+  color: #20334c;
+  font:
+    600 13px/1.5 Inter,
+    sans-serif;
+  cursor: pointer;
+}
+.dk-community button:hover {
+  background: #dfeaff;
+}
+.dk-community button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.dk-community .dkc-primary {
+  background: #2866cf;
+  color: #fff;
+  border-color: #2866cf;
+}
+.dk-community :focus-visible {
+  outline: 3px solid #7657e8;
+  outline-offset: 3px;
+}
+.dk-community .dkc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.dk-community .dkc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.dk-community .dkc-toolbar {
+  max-width: 1150px;
+  margin: 24px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.dk-community .dkc-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr auto;
+  align-items: end;
+  gap: 14px;
+}
+.dk-community .dkc-filters label {
+  margin: 0;
+}
+.dk-community .dkc-status {
+  max-width: 1150px;
+  margin: 10px auto;
+  white-space: pre-wrap;
+}
+.dk-community .dkc-status:not(:empty) {
+  background: #e8f2ff;
+  padding: 14px;
+  border-radius: 12px;
+}
+.dk-community .dkc-status[data-error="true"] {
+  background: #fff0f0;
+  color: #9a213b;
+}
+.dk-community .dkc-feed {
+  max-width: 1150px;
+  margin: auto;
+}
+.dk-community .dkc-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.dk-community .dkc-avatar {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #dce6f2;
+}
+.dk-community .dkc-byline {
+  color: #50637b;
+  font-size: 13px;
+}
+.dk-community .dkc-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.dk-community .dkc-tag {
+  display: inline-block;
+  margin: 0 8px 10px 0;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: #edf2ff;
+  font-size: 12px;
+}
+.dk-community .dkc-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #2866cf;
+  min-height: 44px;
+  text-align: left;
+}
+.dk-community details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.dk-community details {
+  margin-top: 20px;
+}
+.dk-community a {
+  color: #235bc1;
+}
+.dk-community dialog {
+  width: min(820px, calc(100vw - 28px));
+  max-height: 85dvh;
+  border: 1px solid #b5c7dd;
+  border-radius: 18px;
+  background: #fff;
+  color: #20334c;
+  padding: 24px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.dk-community dialog::backdrop {
+  background: #11253c99;
+}
+.dk-community .dkc-dialog-head {
+  display: flex;
+  gap: 20px;
+  align-items: start;
+  justify-content: space-between;
+}
+.dk-community .dkc-reply {
+  border-top: 1px solid #d7e0eb;
+  padding: 18px 0;
+}
+.dk-community #dkc-more {
+  display: block;
+  margin: 20px auto;
+}
+.dk-community #dkc-photo-preview {
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 12px 0;
+}
+@media (max-width: 768px) {
+  .dk-community .dkc-grid,
+  .dk-community .dkc-filters {
+    grid-template-columns: 1fr;
+  }
+  .dk-community .dkc-card,
+  .dk-community .dkc-post {
+    padding: 18px;
+  }
+  .dk-community .dkc-actions > * {
+    flex: 1 1 auto;
+  }
+  .dk-community dialog {
+    padding: 18px;
+  }
+  .dk-community h2 {
+    overflow-wrap: anywhere;
+  }
+}
