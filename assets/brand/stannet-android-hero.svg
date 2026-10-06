@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 920" role="img" aria-labelledby="title desc">
+<title id="title">Androide StanNet</title><desc id="desc">Figura androide futurista plateada con iluminación cian y violeta.</desc>
+<defs>
+ <linearGradient id="armor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".24" stop-color="#cbd8e8"/><stop offset=".43" stop-color="#64758c"/><stop offset=".57" stop-color="#f8fbff"/><stop offset=".78" stop-color="#8999ae"/><stop offset="1" stop-color="#e9f2ff"/></linearGradient>
+ <linearGradient id="shadow" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#111c35"/><stop offset=".42" stop-color="#66758b"/><stop offset=".7" stop-color="#f7fbff"/><stop offset="1" stop-color="#273651"/></linearGradient>
+ <linearGradient id="face" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7e7df"/><stop offset=".6" stop-color="#d5a7a4"/><stop offset="1" stop-color="#755c72"/></linearGradient>
+ <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8ffaff"/><stop offset="1" stop-color="#168fff"/></linearGradient>
+ <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e5b3ff"/><stop offset="1" stop-color="#713cff"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#00eaff" stop-opacity=".7"/><stop offset="1" stop-color="#00aaff" stop-opacity="0"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="13"/></filter>
+</defs>
+<ellipse cx="215" cy="470" rx="160" ry="350" fill="url(#glow)" opacity=".42" filter="url(#soft)"/>
+<g stroke-linecap="round" stroke-linejoin="round">
+ <!-- legs behind torso -->
+ <path d="M145 585Q124 650 132 714L120 805Q117 827 139 831L159 829Q175 826 174 803L187 718L206 646Z" fill="url(#shadow)" stroke="#78cfff" stroke-opacity=".55" stroke-width="3"/>
+ <path d="M219 604Q248 662 251 717L263 801Q266 825 286 827L307 823Q321 819 314 795L300 704Q306 644 280 589Z" fill="url(#armor)" stroke="#a6eaff" stroke-opacity=".65" stroke-width="3"/>
+ <path d="M124 798l47 1 8 39q-19 18-56 3zM261 795l52-2 13 43q-27 17-59 1z" fill="#111d37" stroke="#80dcff" stroke-width="2"/>
+ <path d="M136 814l29-1m-23 12 22-1m113-15 24-2m-19 15 25-2" stroke="#7df4ff" stroke-width="3"/>
+ <!-- left arm -->
+ <path d="M130 327Q99 349 83 404L55 493Q49 511 66 519L81 522Q95 519 101 501L139 426L171 368Z" fill="url(#armor)" stroke="#b3e7ff" stroke-width="3"/>
+ <path d="M57 492l31 12-10 36q-15 10-27-5z" fill="url(#shadow)" stroke="#7eeaff" stroke-width="2"/>
+ <path d="M63 529l-11 40 9 26 12-4 3-24 10-26" fill="url(#armor)" stroke="#b5e8ff" stroke-width="2"/>
+ <!-- right arm extended -->
+ <path d="M269 335Q303 357 321 388L360 414Q377 419 392 408L404 397Q409 389 400 384L373 389 335 355Q319 325 294 310Z" fill="url(#armor)" stroke="#b3e7ff" stroke-width="3"/>
+ <path d="M365 389l25-13 18 3 7 8-16 4-9 12-18 4-12-7z" fill="url(#face)" stroke="#e2d3e4" stroke-width="2"/>
+ <path d="M395 385l17-9m-13 16 17-3m-22 10 13 1" stroke="#82efff" stroke-width="2"/>
+ <!-- torso -->
+ <path d="M153 294Q177 273 204 278L253 285Q278 296 286 328L294 416Q288 456 269 484L260 565Q250 595 216 603L160 588Q137 574 139 544L143 473Q119 434 126 390L133 330Q135 309 153 294Z" fill="url(#armor)" stroke="#d8f1ff" stroke-width="3"/>
+ <path d="M155 310Q180 294 197 302L189 368 157 415 146 386 148 337Z" fill="#293853" stroke="#72dfff" stroke-width="2"/>
+ <path d="M208 302Q245 296 264 323L277 377 254 405 225 374Z" fill="#f4f8ff" stroke="#9baec7" stroke-width="2"/>
+ <path d="M158 421Q196 399 244 418L265 467 251 535Q213 566 164 539L153 479Z" fill="url(#shadow)" stroke="#91dfff" stroke-width="3"/>
+ <path d="M177 435Q208 420 238 438L246 468Q214 486 179 468Z" fill="#13294c" stroke="url(#cyan)" stroke-width="3"/>
+ <path d="M190 448l18-7 19 8-19 10z" fill="url(#cyan)"/>
+ <path d="M166 497Q208 518 250 493M171 512Q208 533 245 508" fill="none" stroke="#8ceeff" stroke-opacity=".7" stroke-width="2"/>
+ <!-- shoulder armor -->
+ <path d="M132 324Q130 294 157 286Q181 281 195 303L185 337 154 353Q136 348 132 324Z" fill="url(#armor)" stroke="#d5f3ff" stroke-width="3"/>
+ <path d="M251 302Q276 297 292 324L304 353Q296 373 273 366L252 344Z" fill="url(#shadow)" stroke="#8deaff" stroke-width="3"/>
+ <path d="M143 316q18-17 34 1l-11 20-20 3z" fill="url(#cyan)"/>
+ <!-- neck -->
+ <path d="M184 245L183 287Q201 306 226 292L232 253Z" fill="url(#shadow)" stroke="#b2e9ff" stroke-width="3"/>
+ <path d="M196 268l26 2-2 16-24 1z" fill="url(#cyan)" opacity=".9"/>
+ <!-- head and face -->
+ <path d="M167 164Q163 118 196 96Q238 82 267 111Q287 134 276 178L267 217Q257 244 230 256L199 248Q177 226 171 202Z" fill="url(#face)" stroke="#ffe5e7" stroke-width="3"/>
+ <path d="M166 171Q142 137 163 103Q181 66 225 66Q270 66 289 101L283 147 266 132 254 105Q223 127 185 119L178 161Z" fill="url(#armor)" stroke="#e5f4ff" stroke-width="4"/>
+ <path d="M174 119Q197 82 240 91Q267 96 279 124L266 132Q245 112 219 113Q196 127 177 145Z" fill="#182640" stroke="#7de9ff" stroke-width="3"/>
+ <path d="M183 162Q198 151 213 161" stroke="#423b55" stroke-width="4" fill="none"/>
+ <path d="M229 158Q244 149 257 159" stroke="#423b55" stroke-width="4" fill="none"/>
+ <path d="M187 174Q200 169 211 176" stroke="url(#cyan)" stroke-width="5" fill="none"/>
+ <path d="M233 174Q246 169 258 174" stroke="url(#violet)" stroke-width="5" fill="none"/>
+ <path d="M223 173l-8 29 12 3" stroke="#b78394" stroke-width="3" fill="none"/>
+ <path d="M209 221Q227 230 245 217" stroke="#8e566f" stroke-width="3" fill="none"/>
+ <!-- side headset -->
+ <circle cx="169" cy="168" r="35" fill="url(#shadow)" stroke="#d9f4ff" stroke-width="4"/>
+ <circle cx="169" cy="168" r="24" fill="#152746" stroke="url(#cyan)" stroke-width="4"/>
+ <circle cx="169" cy="168" r="12" fill="url(#cyan)" opacity=".8"/>
+ <circle cx="169" cy="168" r="5" fill="#fff"/>
+ <path d="M147 143l-14-16 11-21 18-5M145 194l-13 16 9 17 17 3" fill="none" stroke="url(#violet)" stroke-width="5"/>
+ <!-- waist and hips -->
+ <path d="M159 558Q206 580 259 552L270 600 252 635Q208 653 154 622L143 591Z" fill="url(#shadow)" stroke="#9fe8ff" stroke-width="3"/>
+ <path d="M172 580l31 9 2 30-34-8zM215 590l30-10-2 32-29 8z" fill="#c7d8eb" stroke="#7fe4ff" stroke-width="2"/>
+ <path d="M203 590l10 0 1 22-11 0z" fill="url(#cyan)"/>
+ <!-- glowing seams -->
+ <path d="M278 350l9 25-7 20M151 459l-3 30m119 44-4 26M185 623l-9 28m77-29 9 25" stroke="#56efff" stroke-width="3" fill="none"/>
+ <path d="M143 350l-10 25m133-54 10 12" stroke="#d6b1ff" stroke-width="3" fill="none"/>
+</g>
+</svg>
