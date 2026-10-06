@@ -6,7 +6,7 @@ if(document.getElementById(NAV_ID))return;
 const style=document.createElement('style');
 style.textContent=`
 #${NAV_ID}.site-header{
-  position:relative;z-index:100000;min-height:76px;width:100%;
+  position:relative;z-index:100000;min-height:76px;height:auto;width:100%;
   display:flex;align-items:center;gap:24px;padding:0 clamp(18px,4vw,54px);
   background:rgba(255,255,255,.96)!important;border-bottom:1px solid rgba(27,73,118,.12)!important;
   box-shadow:0 10px 34px rgba(42,78,116,.06);backdrop-filter:blur(18px);
@@ -20,9 +20,10 @@ style.textContent=`
 #${NAV_ID} .brand-stan{color:#0a1730!important}
 #${NAV_ID} .brand-net{color:#2878ff!important}
 #${NAV_ID} .brand>i{color:#8a39ff!important;font:600 11px Orbitron,Inter,sans-serif;font-style:normal}
-#${NAV_ID} .site-nav{margin-left:auto;display:flex;align-items:center;gap:4px}
+#${NAV_ID} .site-nav{margin-left:auto;display:flex;flex:1 1 0;flex-wrap:wrap;flex-direction:row;align-items:center;gap:4px;position:static;padding:0;border:0;background:transparent;max-height:none;overflow:visible}
+#${NAV_ID} .site-nav>a,#${NAV_ID} .site-nav>.nav-group{flex:0 0 auto;width:auto}
 #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{
-  min-height:46px;display:flex;align-items:center;gap:5px;padding:10px 9px;
+  min-height:46px;width:auto;display:flex;align-items:center;gap:5px;padding:10px 9px;
   border:0;background:transparent;color:#33445f!important;text-decoration:none!important;
   font:600 11px Orbitron,Inter,sans-serif;white-space:nowrap;cursor:pointer
 }
@@ -30,7 +31,7 @@ style.textContent=`
 #${NAV_ID} .nav-trigger span{color:#8a39ff!important}
 #${NAV_ID} .nav-group{position:relative}
 #${NAV_ID} .nav-dropdown{
-  display:none;position:absolute;top:100%;left:0;min-width:250px;padding:8px;
+  display:none;position:absolute;top:100%;left:0;min-width:250px;width:auto;margin:0;padding:8px;
   background:rgba(255,255,255,.99)!important;border:1px solid rgba(27,73,118,.12)!important;
   border-radius:14px;box-shadow:0 22px 60px rgba(29,58,93,.15)!important
 }
@@ -45,8 +46,8 @@ style.textContent=`
   display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid #d5e3ee;background:#fff;color:#17324c!important;
   border-radius:11px;font-size:20px;cursor:pointer
 }
-/* The full menu needs room for the uncompressed wordmark, including fonts. */
-@media(max-width:1640px){
+/* Only mobile uses the collapsed menu; desktop links can wrap without shrinking. */
+@media(max-width:850px){
   #${NAV_ID}{min-height:68px!important;padding:0 14px!important}
   #${NAV_ID} .menu-toggle{display:block}
   #${NAV_ID} .site-nav{
