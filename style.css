@@ -173,7 +173,7 @@ code,pre,.pa-code-editor{font-family:'Cascadia Code','SFMono-Regular',Consolas,'
 }
 body{background:var(--bg);color:var(--ink)}
 body:before{opacity:.12;background:linear-gradient(90deg,transparent 49.9%,rgba(255,255,255,.025) 50%,transparent 50.1%);background-size:96px 96px}
-.brand{font-family:var(--font-brand);letter-spacing:-1.5px}.brand b{color:var(--cyan)}.brand i{color:var(--muted)}
+.brand{font-family:var(--font-brand);letter-spacing:0}.brand b{color:var(--cyan)}.brand i{color:var(--muted)}
 .site-header{height:76px;background:rgba(11,15,20,.92);border-color:var(--line);backdrop-filter:blur(14px)}
 .site-nav a{font-family:var(--font-display);font-weight:600;letter-spacing:.015em;text-transform:none;color:var(--muted)}
 .site-nav a:hover,.site-nav a.active{color:var(--ink)}
