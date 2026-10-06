@@ -192,7 +192,7 @@
     }
   }
 
-  function createDriveCurve(amount = 0) {
+  const MUSICAL_KEY_ORDER = ['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Ñ','Z','X','C','V','B','N','M',',','.','-'];\n  const NOTE_NAMES = [['C','Do'],['C#','Do♯'],['D','Re'],['D#','Re♯'],['E','Mi'],['F','Fa'],['F#','Fa♯'],['G','Sol'],['G#','Sol♯'],['A','La'],['A#','La♯'],['B','Si']];\n  const MUSICAL_KEYMAP = Object.fromEntries(MUSICAL_KEY_ORDER.map((key, index) => [key, 60 + index]));\n  const SPECIAL_MIDI = {TAB:100,ENTER:102,BACKSPACE:104,SHIFT:106,ESPACIO:108};\n  const midiToFrequency = midi => 440 * Math.pow(2, (midi - 69) / 12);\n  const noteInfoForKey = key => { const label = String(key || '').toUpperCase(); const midi = MUSICAL_KEYMAP[label] ?? SPECIAL_MIDI[label]; if (!Number.isFinite(midi)) return null; const [cipher, solfege] = NOTE_NAMES[midi % 12]; return {midi, frequency:midiToFrequency(midi), cipher, solfege, octave:Math.floor(midi / 12) - 1}; };\n\n  function createDriveCurve(amount = 0) {
     const curve = new Float32Array(256);
     const k = Math.max(0, amount);
     for (let i = 0; i < curve.length; i++) {
