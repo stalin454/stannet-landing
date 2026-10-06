@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Comunidad Dinamarca de StanNet: foro y punto de encuentro para latinos que viven en Dinamarca o preparan su llegada.">
+<title>Comunidad Dinamarca | StanNet.Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
+<link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
+<link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">
+<link rel="stylesheet" href="/community-dinamarca/community.css?v=20261006-1">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/stannet-sn-cutout-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/stannet-sn-cutout-180.png">
+<style>
+body{margin:0;background:linear-gradient(180deg,#f7fbff 0,#eef5fb 100%);color:#20334c}
+.community-page-main{min-height:calc(100vh - 76px);padding:0 0 72px}
+.community-masthead{padding:clamp(42px,6vw,78px) clamp(18px,6vw,86px) 28px;background:linear-gradient(135deg,#081521,#102b42 58%,#5e1730);color:white;border-bottom:1px solid rgba(255,255,255,.12)}
+.community-masthead-inner{max-width:1150px;margin:auto}
+.community-kicker{margin:0 0 12px;font:600 11px Orbitron,sans-serif;letter-spacing:.16em;color:#75e7ff}
+.community-masthead h1{margin:0;font:600 clamp(38px,6vw,72px)/1 Orbitron,sans-serif;letter-spacing:-.05em}
+.community-masthead p{max-width:760px;margin:18px 0 0;color:#c8d7e1;font:400 17px/1.7 Inter,sans-serif}
+.community-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.community-shortcuts a{display:inline-flex;min-height:44px;align-items:center;padding:0 15px;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:white;text-decoration:none;font:600 11px Orbitron,sans-serif}
+.community-shortcuts a:first-child{background:#c8102e;border-color:#c8102e}
+.community-main-section{padding:clamp(34px,5vw,64px) clamp(16px,5vw,72px) 0}
+.community-main-section .route-kicker{font:600 11px Orbitron,sans-serif;letter-spacing:.15em;color:#2866cf}
+@media(max-width:850px){.community-page-main{min-height:calc(100vh - 68px)}}
+</style>
+</head>
+<body class="stannet-global community-page">
+<header class="site-header">
+<a class="brand brand-lockup" href="/" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="/assets/brand/stannet-sn-cutout-20261005.png" width="44" height="44" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
+</header>
+<main class="community-page-main">
+<section class="community-masthead" aria-labelledby="community-page-title">
+  <div class="community-masthead-inner">
+    <p class="community-kicker">DINAMARCA / COMUNIDAD</p>
+    <h1 id="community-page-title">Comunidad Dinamarca</h1>
+    <p>Entra directamente al grupo, publica, pregunta y conversa con otros miembros sin recorrer toda Ruta Dinamarca.</p>
+    <nav class="community-shortcuts" aria-label="Accesos de Dinamarca">
+      <a href="#comunidad">Entrar a la comunidad</a>
+      <a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a>
+      <a href="/pages/danish.html">Danish Academy</a>
+    </nav>
+  </div>
+</section>
+<section id="comunidad" class="dk-community community-main-section" aria-labelledby="dk-community-title">
+  <div class="dkc-heading"><p class="route-kicker">RUTA DINAMARCA / COMUNIDAD</p><h2 id="dk-community-title">Comunidad Dinamarca</h2><p>Un punto de encuentro para latinos que viven en Dinamarca o preparan su llegada. Comparte experiencias, pregunta y encuentra apoyo por tema y ciudad.</p></div>
+  <p class="dkc-status" id="dkc-status" role="status" aria-live="polite"></p>
+  <div id="dkc-auth" class="dkc-card">
+    <h3>Entra en la comunidad</h3><p>El registro y la confirmación del correo son obligatorios. Para publicar, completa tu perfil con una foto.</p>
+    <div class="dkc-actions" role="group" aria-label="Acceso a la comunidad"><button type="button" data-auth="signin">Iniciar sesión</button><button type="button" data-auth="signup">Crear cuenta</button><button type="button" data-auth="recover">Recuperar contraseña</button></div>
+    <form id="dkc-auth-form">
+      <div class="dkc-grid" id="dkc-signup-fields" hidden><label>Nombre visible<input name="display_name" minlength="2" maxlength="70" autocomplete="name"></label><label>Ciudad<select name="city" data-cities></select></label></div>
+      <label>Correo electrónico<input name="email" type="email" required maxlength="254" autocomplete="email"></label>
+      <label id="dkc-password-label">Contraseña<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="current-password"></label>
+      <label id="dkc-rules" class="dkc-check" hidden><input name="accept_rules" type="checkbox">Acepto las normas y he leído cómo se usan mis datos, más abajo.</label>
+      <button type="submit" class="dkc-primary" id="dkc-auth-submit">Iniciar sesión</button>
+      <p id="dkc-auth-help">Utiliza tu cuenta de Comunidad Dinamarca.</p>
+    </form>
+  </div>
+  <form id="dkc-password-form" class="dkc-card" hidden><h3>Nueva contraseña</h3><label>Contraseña nueva<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label><button class="dkc-primary">Guardar contraseña y cerrar sesiones</button></form>
+  <div id="dkc-member" hidden>
+    <div class="dkc-toolbar"><p id="dkc-welcome"></p><div class="dkc-actions"><button type="button" id="dkc-profile-toggle">Mi perfil</button><button type="button" id="dkc-new-toggle">Nueva publicación</button><button type="button" id="dkc-signout">Cerrar sesión</button></div></div>
+    <form id="dkc-profile-form" class="dkc-card" hidden><h3>Mi perfil</h3><div class="dkc-grid"><label>Nombre visible<input name="display_name" minlength="2" maxlength="70" required autocomplete="name"></label><label>Ciudad<select name="city" data-cities></select></label></div><label>Presentación<textarea name="bio" maxlength="500" rows="3" placeholder="Cuenta brevemente qué te trae a Dinamarca."></textarea></label><label>Foto de perfil<input id="dkc-photo" type="file" accept="image/jpeg,image/png,image/webp"></label><p>Tu foto se recorta a un cuadrado y se optimiza antes de guardarla. Usa una foto tuya; no subas documentos de identidad.</p><img id="dkc-photo-preview" width="80" height="80" alt="Vista previa de tu foto" hidden><button class="dkc-primary">Guardar perfil</button><details><summary>Eliminar mis datos de la comunidad</summary><p>Se eliminarán tu perfil, foto, publicaciones y respuestas. Tu cuenta de acceso a la comunidad se conserva.</p><label>Confirma tu contraseña<input name="delete_password" type="password" autocomplete="current-password"></label><button type="button" id="dkc-delete-profile">Eliminar mis datos de comunidad</button></details></form>
+    <form id="dkc-post-form" class="dkc-card" hidden><h3 id="dkc-post-form-title">Nueva publicación</h3><div class="dkc-grid"><label>Tema<select name="topic" data-topics></select></label><label>Ciudad<select name="city" data-cities></select></label></div><label>Título<input name="title" minlength="5" maxlength="140" required></label><label>Tu publicación<textarea name="body" minlength="10" maxlength="5000" rows="5" required></textarea></label><div class="dkc-actions"><button class="dkc-primary">Guardar publicación</button><button type="button" id="dkc-post-cancel">Cancelar</button></div></form>
+    <form id="dkc-filters" class="dkc-card dkc-filters"><label>Tema<select name="topic" data-topics data-all="Todos los temas"></select></label><label>Ciudad<select name="city" data-cities data-all="Todas las ciudades"></select></label><label>Buscar en títulos<input name="search" maxlength="80" type="search"></label><button>Buscar</button></form>
+    <div id="dkc-feed" class="dkc-feed" aria-label="Publicaciones de la comunidad"></div><button type="button" id="dkc-more" hidden>Ver más publicaciones</button>
+    <section id="dkc-moderation" class="dkc-card" hidden><h3>Moderación</h3><button type="button" id="dkc-reports-load">Ver publicaciones denunciadas</button><div id="dkc-reports"></div></section>
+  </div>
+  <details class="dkc-card"><summary>Normas y privacidad de la comunidad</summary><p>Respeta a los demás. No publiques spam, ofertas engañosas, datos de terceros, documentos personales ni contenido discriminatorio. Las experiencias de los miembros no sustituyen la información oficial sobre trámites.</p><p>Tu nombre, foto, ciudad, presentación, publicaciones y respuestas son visibles para los miembros registrados con correo confirmado. El correo se utiliza para acceso y recuperación y no se muestra en tu perfil público. Las contraseñas las gestiona el servicio de autenticación.</p><p>Puedes editar tu perfil, eliminar tus publicaciones y respuestas y retirar tus datos de la comunidad desde «Mi perfil». Para consultas sobre tus datos o moderación: <a href="mailto:contacto@stannet.space">contacto@stannet.space</a>. Las denuncias son visibles para moderación y para quien las presenta.</p></details>
+  <dialog id="dkc-dialog" aria-labelledby="dkc-dialog-title"><div class="dkc-dialog-head"><h3 id="dkc-dialog-title"></h3><button type="button" id="dkc-dialog-close" aria-label="Cerrar ventana">×</button></div><p id="dkc-dialog-status" class="dkc-status" role="status" aria-live="polite"></p><div id="dkc-dialog-body"></div></dialog>
+</section>
+</main>
+<script src="/stannet-global-nav.js?v=20261004-perf1"></script>
+<script type="module" src="/community-dinamarca/community.js?v=20261006-1"></script>
+</body>
+</html>

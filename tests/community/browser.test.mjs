@@ -103,7 +103,7 @@ async function photo(p) {
     .waitFor();
 }
 try {
-  await page.goto(origin + "/pages/ruta-dinamarca.html#comunidad");
+  await page.goto(origin + "/pages/comunidad-dinamarca.html#comunidad");
   await root.getByRole("button", { name: "Crear cuenta", exact: true }).click();
   const form = page.locator("#dkc-auth-form");
   await form.getByLabel("Nombre visible").fill("Persona nueva");
@@ -122,7 +122,7 @@ try {
   );
   await page.goto(
     origin +
-      "/pages/ruta-dinamarca.html?code=signup-code-" +
+      "/pages/comunidad-dinamarca.html?code=signup-code-" +
       created.id +
       "#comunidad",
   );
@@ -205,7 +205,7 @@ try {
     }),
     p2 = await second.newPage();
   await prepare(p2);
-  await p2.goto(origin + "/pages/ruta-dinamarca.html#comunidad");
+  await p2.goto(origin + "/pages/comunidad-dinamarca.html#comunidad");
   await p2.locator("#dkc-auth-form [name=email]").fill("luis@example.test");
   await p2.locator("#dkc-auth-form [name=password]").fill("old-pass10");
   await p2.locator("#dkc-auth-submit").click();

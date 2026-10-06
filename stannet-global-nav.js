@@ -106,10 +106,10 @@ header.innerHTML=`
     </div>
   </div>
   <div class="nav-group" data-group="/pages/ruta-dinamarca">
-    <button class="nav-trigger" type="button" aria-expanded="false">Ruta Dinamarca <span>⌄</span></button>
+    <button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button>
     <div class="nav-dropdown">
-      <a href="/pages/ruta-dinamarca.html">Blog · Ruta Dinamarca</a>
-      <a href="/pages/ruta-dinamarca.html#comunidad">Comunidad Dinamarca</a>
+      <a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a>
+      <a href="/pages/comunidad-dinamarca.html">Comunidad / Blog</a>
       <a href="/pages/danish.html">Danish Academy</a>
       <a href="/pages/ruta-dinamarca.html#plan">Plan de preparación</a>
       <a href="/pages/ruta-dinamarca.html#ciudades">Ciudades</a>
