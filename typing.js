@@ -297,7 +297,8 @@
       };
       const preset = presets[timbre] || presets.keys;
 
-      const mappedNote = noteInfoForKey(key || (isSpace ? 'ESPACIO' : ''));\n      const base = deleting ? 170 : mappedNote?.frequency ?? (ok ? 261.63 : 135);
+      const mappedNote = noteInfoForKey(key || (isSpace ? 'ESPACIO' : ''));
+      const base = deleting ? 170 : mappedNote?.frequency ?? (ok ? 261.63 : 135);
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
