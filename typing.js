@@ -4,7 +4,6 @@
   const $ = id => document.getElementById(id);
   const STORAGE = 'stannet-typing-progress-v1';
   const SOUND_KEY = 'stannet-typing-sound-v1';
-  const TIMBRE_KEY = 'stannet-typing-timbre-v1';
 
   const lessons = {
     es: [
@@ -119,9 +118,7 @@
   let completedTyped = 0;
   let records = [];
   let soundOn = true;
-  let timbre = 'keys';
   let audioCtx = null;
-  try { timbre = localStorage.getItem(TIMBRE_KEY) || 'keys'; } catch {}
 
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE) || '[]');
@@ -192,135 +189,23 @@
     }
   }
 
-  const MUSICAL_KEY_ORDER = ['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Ñ','Z','X','C','V','B','N','M',',','.','-'];\n  const NOTE_NAMES = [['C','Do'],['C#','Do♯'],['D','Re'],['D#','Re♯'],['E','Mi'],['F','Fa'],['F#','Fa♯'],['G','Sol'],['G#','Sol♯'],['A','La'],['A#','La♯'],['B','Si']];\n  const MUSICAL_KEYMAP = Object.fromEntries(MUSICAL_KEY_ORDER.map((key, index) => [key, 60 + index]));\n  const SPECIAL_MIDI = {TAB:100,ENTER:102,BACKSPACE:104,SHIFT:106,ESPACIO:108};\n  const midiToFrequency = midi => 440 * Math.pow(2, (midi - 69) / 12);\n  const noteInfoForKey = key => { const label = String(key || '').toUpperCase(); const midi = MUSICAL_KEYMAP[label] ?? SPECIAL_MIDI[label]; if (!Number.isFinite(midi)) return null; const [cipher, solfege] = NOTE_NAMES[midi % 12]; return {midi, frequency:midiToFrequency(midi), cipher, solfege, octave:Math.floor(midi / 12) - 1}; };\n\n  const MUSICAL_KEY_ORDER = ['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Ñ','Z','X','C','V','B','N','M',',','.','-'];
-  const NOTE_NAMES = [['C','Do'],['C#','Do♯'],['D','Re'],['D#','Re♯'],['E','Mi'],['F','Fa'],['F#','Fa♯'],['G','Sol'],['G#','Sol♯'],['A','La'],['A#','La♯'],['B','Si']];
-  const MUSICAL_KEYMAP = Object.fromEntries(MUSICAL_KEY_ORDER.map((key, index) => [key, 60 + index]));
-  const SPECIAL_MIDI = { TAB:100, ENTER:102, BACKSPACE:104, SHIFT:106, ESPACIO:108 };
-  const midiToFrequency = midi => 440 * Math.pow(2, (midi - 69) / 12);
-  const noteInfoForKey = key => {
-    const label = String(key || '').toUpperCase();
-    const midi = MUSICAL_KEYMAP[label] ?? SPECIAL_MIDI[label];
-    if (!Number.isFinite(midi)) return null;
-    const [cipher, solfege] = NOTE_NAMES[midi % 12];
-    return { midi, frequency:midiToFrequency(midi), cipher, solfege, octave:Math.floor(midi / 12) - 1 };
-  };
-
-  function pitchToMidi(step, alter, octave) {
-    const semitones = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
-    return 12 * (Number(octave) + 1) + (semitones[String(step).toUpperCase()] || 0) + Number(alter || 0);
-  }
-
-  function midiToKeyboardKey(midi) {
-    let candidate = Number(midi);
-    while (candidate < 60) candidate += 12;
-    while (candidate > 99) candidate -= 12;
-    return MUSICAL_KEY_ORDER[candidate - 60] || null;
-  }
-
-  function parseMusicXML(text) {
-    const xml = new DOMParser().parseFromString(text, 'application/xml');
-    if (xml.querySelector('parsererror')) throw new Error('MusicXML no válido');
-    const notes = [...xml.querySelectorAll('note')];
-    return notes.flatMap(note => {
-      if (note.querySelector('rest')) return [];
-      const pitch = note.querySelector('pitch');
-      if (!pitch) return [];
-      const step = pitch.querySelector('step')?.textContent;
-      const alter = pitch.querySelector('alter')?.textContent || '0';
-      const octave = pitch.querySelector('octave')?.textContent;
-      if (!step || !octave) return [];
-      const midi = pitchToMidi(step, alter, octave);
-      const key = midiToKeyboardKey(midi);
-      return key ? [{key,midi,note:noteInfoForKey(key)}] : [];
-    });
-  }
-
-  async function importScoreFile(file) {
-    const result = $('scoreImportResult');
-    const sequence = $('scoreSequence');
-    const status = $('scoreFileStatus');
-    $('scoreFileName').textContent = file.name;
-    result.hidden = false;
-    sequence.replaceChildren();
-
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (ext === 'musicxml' || ext === 'xml') {
-      const notes = parseMusicXML(await file.text());
-      if (!notes.length) throw new Error('No se encontraron notas interpretables.');
-      const fragment = document.createDocumentFragment();
-      notes.slice(0, 240).forEach(({key}) => {
-        const chip = document.createElement('span');
-        chip.className = 'score-key-chip';
-        chip.textContent = key;
-        fragment.append(chip);
-      });
-      sequence.append(fragment);
-      status.textContent = notes.length > 240 ? notes.length + ' notas · mostrando las primeras 240' : notes.length + ' notas';
-      $('scoreImportHint').textContent = 'MusicXML leído correctamente. Cada nota se ha convertido a una tecla del mapa musical.';
-      return;
-    }
-
-    if (['pdf','png','jpg','jpeg','mid','midi'].includes(ext)) {
-      status.textContent = 'Formato recibido';
-      $('scoreImportHint').textContent = ext === 'pdf' || ['png','jpg','jpeg'].includes(ext)
-        ? 'PDF/imagen queda preparado como entrada. La lectura óptica de partituras se incorporará en la siguiente capa.'
-        : 'MIDI queda preparado como entrada. El intérprete MIDI se incorporará en la siguiente capa para conservar ritmo y duración.';
-      return;
-    }
-
-    throw new Error('Formato no compatible.');
-  }
-
-  function createDriveCurve(amount = 0) {
-    const curve = new Float32Array(256);
-    const k = Math.max(0, amount);
-    for (let i = 0; i < curve.length; i++) {
-      const x = i * 2 / (curve.length - 1) - 1;
-      curve[i] = k ? ((1 + k) * x) / (1 + k * Math.abs(x)) : x;
-    }
-    return curve;
-  }
-
-  function playClick(ok = true, isSpace = false, deleting = false, key = '') {
+  function playClick(ok = true, isSpace = false, deleting = false) {
     if (!soundOn) return;
     try {
       audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const now = audioCtx.currentTime;
-
-      const presets = {
-        keys: { type:'triangle', drive:0, tone:3200, attack:.002, decay:.11, level:.035 },
-        clean: { type:'triangle', drive:0, tone:2600, attack:.002, decay:.18, level:.035 },
-        crunch: { type:'sawtooth', drive:2.2, tone:2100, attack:.002, decay:.16, level:.028 },
-        overdrive: { type:'sawtooth', drive:5.5, tone:1800, attack:.002, decay:.15, level:.027 },
-        distortion: { type:'square', drive:13, tone:1450, attack:.001, decay:.13, level:.024 }
-      };
-      const preset = presets[timbre] || presets.keys;
-
-      const mappedNote = noteInfoForKey(key || (isSpace ? 'ESPACIO' : ''));
-      const base = deleting ? 170 : mappedNote?.frequency ?? (ok ? 261.63 : 135);
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      const filter = audioCtx.createBiquadFilter();
-      const shaper = audioCtx.createWaveShaper();
-
-      osc.type = deleting ? 'triangle' : preset.type;
-      osc.frequency.setValueAtTime(base, now);
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(deleting ? 900 : preset.tone, now);
-      filter.Q.setValueAtTime(.65, now);
-      shaper.curve = createDriveCurve(deleting ? 0 : preset.drive);
-      shaper.oversample = '2x';
-
-      const peak = deleting ? .022 : (!ok ? .02 : preset.level);
-      const decay = deleting ? .025 : (!ok ? .055 : preset.decay);
+      osc.type = deleting ? 'triangle' : 'square';
+      osc.frequency.setValueAtTime(deleting ? 170 : isSpace ? 260 : ok ? 520 : 135, now);
+      if (!ok && !deleting) osc.frequency.exponentialRampToValueAtTime(95, now + .045);
       gain.gain.setValueAtTime(.0001, now);
-      gain.gain.exponentialRampToValueAtTime(peak, now + preset.attack);
-      gain.gain.exponentialRampToValueAtTime(.0001, now + decay);
-
-      osc.connect(shaper).connect(filter).connect(gain).connect(audioCtx.destination);
+      gain.gain.exponentialRampToValueAtTime(deleting ? .028 : .045, now + .002);
+      gain.gain.exponentialRampToValueAtTime(.0001, now + (deleting ? .025 : ok ? .018 : .055));
+      osc.connect(gain).connect(audioCtx.destination);
       osc.start(now);
-      osc.stop(now + Math.max(.07, decay + .02));
+      osc.stop(now + .065);
     } catch {}
   }
 
@@ -337,10 +222,6 @@
         const special = ['BACKSPACE','TAB','ENTER','SHIFT'].includes(label);
         key.className = 'finger-key ' + (finger ? 'finger-' + finger : '') + (label === 'ESPACIO' ? ' space-key' : '') + (special ? ' special-key' : '');
         key.dataset.char = label;
-        const mappedNote = noteInfoForKey(label);
-        key.dataset.note = mappedNote ? mappedNote.cipher + mappedNote.octave : '';
-        key.title = mappedNote ? label + ' → ' + mappedNote.cipher + mappedNote.octave + ' (' + mappedNote.solfege + ')' : label;
-        key.setAttribute('aria-label', mappedNote ? label + ', nota ' + mappedNote.cipher + mappedNote.octave + ', ' + mappedNote.solfege : label);
         key.textContent = label;
         if (['F','J'].includes(label)) key.classList.add('home-marker');
         line.append(key);
@@ -618,11 +499,6 @@
     btn.classList.toggle('off', !soundOn);
   }
 
-  function updateTimbreSelect() {
-    const select = $('typingTimbre');
-    if (select) select.value = timbre;
-  }
-
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => selectMode(button.dataset.mode)));
 
   $('drillGrid').addEventListener('click', e => {
@@ -635,12 +511,6 @@
   });
 
   for (const id of ['textLanguage', 'codeLanguage', 'duration']) $(id).addEventListener('change', reset);
-
-  $('typingTimbre')?.addEventListener('change', e => {
-    timbre = e.currentTarget.value || 'keys';
-    try { localStorage.setItem(TIMBRE_KEY, timbre); } catch {}
-    if (soundOn) playClick(true);
-  });
 
   $('typingSound').addEventListener('click', () => {
     soundOn = !soundOn;
@@ -671,13 +541,6 @@
   });
 
   $('typingInput').addEventListener('keydown', e => {
-    if (e.repeat) return;
-    const typedKey = normalizePhysicalKey(e);
-    const expected = target[e.currentTarget.value.length] || '';
-    const isModifier = ['SHIFT','TAB','BACKSPACE'].includes(typedKey);
-    const ok = isModifier || typedKey === normalizeKey(expected);
-    playClick(ok, typedKey === 'ESPACIO', typedKey === 'BACKSPACE', typedKey);
-
     if (mode === 'code' && e.key === 'Tab') {
       e.preventDefault();
       const input = e.currentTarget;
@@ -691,6 +554,16 @@
     if (finished) return;
 
     const value = $('typingInput').value;
+    const deleting = String(e.inputType || '').startsWith('delete');
+    if (deleting) {
+      playClick(true, false, true);
+    } else if (value.length) {
+      const index = value.length - 1;
+      const expected = target[index];
+      const typed = value[index];
+      playClick(typed === expected, typed === ' ');
+    }
+
     if (!start && value) {
       start = Date.now();
       timer = setInterval(stats, 250);
@@ -698,33 +571,8 @@
     stats(true);
   });
 
-  const scoreDropzone = $('scoreDropzone');
-  const scoreFile = $('scoreFile');
-  const handleScoreFile = async file => {
-    if (!file) return;
-    try {
-      await importScoreFile(file);
-    } catch (error) {
-      $('scoreImportResult').hidden = false;
-      $('scoreFileStatus').textContent = 'No se pudo interpretar';
-      $('scoreImportHint').textContent = error?.message || 'Archivo no compatible.';
-    }
-  };
-  scoreFile?.addEventListener('change', e => handleScoreFile(e.target.files?.[0]));
-  scoreDropzone?.addEventListener('dragover', e => { e.preventDefault(); scoreDropzone.classList.add('is-dragging'); });
-  scoreDropzone?.addEventListener('dragleave', () => scoreDropzone.classList.remove('is-dragging'));
-  scoreDropzone?.addEventListener('drop', e => {
-    e.preventDefault();
-    scoreDropzone.classList.remove('is-dragging');
-    handleScoreFile(e.dataTransfer.files?.[0]);
-  });
-  scoreDropzone?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scoreFile?.click(); }
-  });
-
   renderKeyboard();
   renderDrills();
   updateSoundButton();
-  updateTimbreSelect();
   reset();
 })();
