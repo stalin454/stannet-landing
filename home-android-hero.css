@@ -24,3 +24,14 @@
 @media(max-width:640px){.home-refresh .home-hero-inner{padding-top:44px;padding-bottom:86px;gap:22px}.home-refresh .home-hero h1{font-size:clamp(45px,12.7vw,62px);line-height:1.01}.home-refresh .home-hero-copy>p{font-size:15px;line-height:1.55;margin-top:19px}.home-refresh .home-hero-actions{flex-direction:column;align-items:stretch;margin-top:22px}.home-refresh .home-btn{width:100%}.home-refresh .home-android{right:-20px;top:0;width:170px;height:330px;opacity:.18}.home-refresh .chip-board{padding:12px 9px;border-radius:18px}.home-refresh .chip-head{min-height:68px;gap:8px;padding:0 1px 12px}.home-refresh .chip-core{min-width:122px;min-height:55px;padding:7px 8px}.home-refresh .chip-core strong{font-size:12px}.home-refresh .chip-head>p{font-size:8px}.home-refresh .chip-head>p b{font-size:8px}.home-refresh .chip-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 5px}.home-refresh .chip-node{min-height:54px;padding:4px 2px}.home-refresh .chip-glyph{width:27px;height:26px}.home-refresh .chip-glyph svg{width:17px;height:17px}.home-refresh .chip-label{font-size:7.8px}}
 @media(max-width:380px){.home-refresh .home-hero h1{font-size:43px}.home-refresh .home-android{right:-32px;width:150px;opacity:.14}.home-refresh .chip-label{font-size:7px}.home-refresh .chip-grid{gap:5px 4px}}
 @media(prefers-reduced-motion:reduce){.home-refresh .home-android img{animation:none}}
+
+/* Compact header rhythm and high-contrast expanded mobile navigation. */
+.home-refresh .site-nav{gap:clamp(9px,1.15vw,16px)}
+.home-refresh .site-nav>a,.home-refresh .nav-trigger{font-size:clamp(10px,.83vw,12px)}
+@media(max-width:1180px){
+ .home-refresh .site-nav,.home-refresh .home-nav{background:rgba(5,17,43,.99)!important;border-bottom-color:rgba(85,199,255,.28)!important}
+ .home-refresh .site-nav> a,.home-refresh .nav-trigger{color:#e3edff!important}
+ .home-refresh .site-nav .nav-dropdown{background:#081832!important;border-color:rgba(85,199,255,.25)!important}
+ .home-refresh .site-nav .nav-dropdown a{color:#d3e3fb!important}
+ .home-refresh .site-nav .nav-dropdown a:hover{background:#10274b!important;color:#5cecff!important}
+}
