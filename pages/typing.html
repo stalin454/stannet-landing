@@ -112,6 +112,28 @@
 <textarea id="typingInput" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="typingHint" placeholder="Haz clic aquí y empieza a escribir…"></textarea>
 <div class="typing-live-guide"><div><span>DEDO ACTIVO</span><strong id="activeFinger">—</strong></div><div><span>TECLA SIGUIENTE</span><strong id="nextKey">—</strong></div><div><span>CONSEJO</span><strong id="movementHint">Mantén los dedos sobre ASDF · JKLÑ</strong></div></div><p class="typing-hint" id="typingHint">Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.</p>
 <div class="typing-result" id="result" hidden role="status"></div>
+
+<div class="score-importer" id="scoreImporter">
+  <div class="score-importer-head">
+    <div>
+      <p class="eyebrow">PARTITURA → TECLADO</p>
+      <h3>Convierte música en teclas</h3>
+      <p>Arrastra una partitura estructurada y StanNet la transforma en una secuencia de teclas para practicarla con el teclado.</p>
+    </div>
+    <span class="score-importer-badge">MUSICXML</span>
+  </div>
+  <label class="score-dropzone" id="scoreDropzone" for="scoreFile" tabindex="0">
+    <input id="scoreFile" type="file" accept=".musicxml,.xml,.mid,.midi,.pdf,.png,.jpg,.jpeg" hidden>
+    <strong>Arrastra aquí tu partitura</strong>
+    <span>MusicXML recomendado · MIDI preparado · PDF / imagen como entrada futura</span>
+    <em>o pulsa para seleccionar un archivo</em>
+  </label>
+  <div class="score-import-result" id="scoreImportResult" hidden>
+    <div class="score-import-meta"><strong id="scoreFileName">—</strong><span id="scoreFileStatus">—</span></div>
+    <div class="score-sequence" id="scoreSequence" aria-label="Secuencia de teclas generada"></div>
+    <p id="scoreImportHint">La secuencia se podrá practicar directamente en el teclado.</p>
+  </div>
+</div>
 </section>
 <section class="typing-progress" aria-labelledby="progressTitle"><div><p class="eyebrow">TU PROGRESO</p><h2 id="progressTitle">Cada práctica cuenta.</h2><p>Resultados guardados solo en este navegador. La velocidad se calcula con caracteres correctos ÷ 5 por minuto.</p></div><div class="typing-progress-data"><div class="typing-summary" id="summary"></div><div class="typing-history" id="history"></div></div></section>
 <a class="typing-return" href="programming.html">← Volver a Programming Academy</a>
