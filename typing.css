@@ -544,6 +544,8 @@ body.typing-page{
   font:500 13px Inter,sans-serif;
 }
 .typing-sound{margin-left:auto}
+.typing-timbre{min-width:180px!important}
+.typing-timbre select{cursor:pointer}
 .typing-restart{margin-left:0}
 
 .typing-status{
