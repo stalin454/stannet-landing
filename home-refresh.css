@@ -338,3 +338,20 @@
 /* Decorative AI network: pointer events pass through to every link. */
 .home-hero .home-ai-network{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;pointer-events:none;opacity:.8}
 @media(max-width:720px){.home-hero .home-ai-network{opacity:.48}}
+
+/* Home canonical header brand contrast: override late-loaded global theme safely. */
+body.home-refresh.stannet-global #stannet-canonical-nav.site-header .brand-stan,
+body.home-refresh #stannet-canonical-nav.site-header .brand-stan{
+  color:#F5F8FF!important;
+  text-shadow:0 0 10px rgba(120,190,255,.16)!important;
+}
+body.home-refresh.stannet-global #stannet-canonical-nav.site-header .brand-net,
+body.home-refresh #stannet-canonical-nav.site-header .brand-net{
+  color:#18DFFF!important;
+  text-shadow:0 0 14px rgba(24,223,255,.25)!important;
+}
+body.home-refresh.stannet-global #stannet-canonical-nav.site-header .brand>i,
+body.home-refresh #stannet-canonical-nav.site-header .brand>i{
+  color:#C76CFF!important;
+  text-shadow:0 0 12px rgba(199,108,255,.18)!important;
+}
