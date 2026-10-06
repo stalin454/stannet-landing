@@ -37,7 +37,7 @@ async function matrix(){
  results.textContent='Ejecutando…';document.querySelector('#run').disabled=true;
  const report=[];
  try{
-  for(const [w,h] of [[1920,1080],[1366,768],[320,568],[360,800],[390,844],[393,873],[412,915],[430,932]]){
+  for(const [w,h] of [[1920,1080],[1366,768],[320,568],[360,800],[375,812],[390,844],[393,873],[412,915],[430,932]]){
    await load(w,h);let root=ui();assert(root.querySelector('.snai-reopen').textContent==='IA','Falta pestaña IA');assert(root.querySelector('.snai-reopen').hidden,'IA debe estar oculta inicialmente');assert(!root.querySelector('.snai-avatar').hidden,'Falta personaje flotante');assert(frame.contentDocument.querySelectorAll('#stannet-ai-root').length===1,'Montaje duplicado');
    frame.contentWindow.scrollTo(0,300);await tick();measureAvatar();const savedScroll=frame.contentWindow.scrollY;
    root.querySelector('.snai-launcher').click();await tick();report.push(`${w}×${h}: ${measure()}`);
@@ -49,7 +49,7 @@ async function matrix(){
    root.querySelector('.snai-persona').click();assert(log.textContent.includes('orientarte'),'Personaje no responde');
    if(w<640){root.querySelector('.snai-memory').open=true;root.querySelector('.snai-form-row textarea').focus();frame.contentWindow.qaViewport(420);await tick();report.push('  Teclado simulado: '+measure());frame.contentWindow.qaViewport(h);await tick();setSize(h,w);await pause(120);await tick();report.push('  Rotación: '+measure());frame.contentWindow.qaViewport(180);await tick();report.push('  Teclado horizontal simulado: '+measure());setSize(w,h);await pause(120);await tick();root.querySelector('.snai-memory').open=false;}
    root.querySelector('.snai-minimize').click();await tick();assert(!root.querySelector('dialog').open,'Minimizar no cierra');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Minimizar no devuelve personaje');assert(Math.abs(frame.contentWindow.scrollY-savedScroll)<=1,'No se restauró scroll de página');
-   root.querySelector('.snai-launcher').click();await tick();root.querySelector('.snai-close').click();await tick();assert(!root.querySelector('dialog').open,'Cerrar falla');assert(root.querySelector('.snai-reopen').hidden&&!root.querySelector('.snai-avatar').hidden,'Cerrar no devuelve personaje');
+   root.querySelector('.snai-launcher').click();await tick();root.querySelector('.snai-close').click();await tick();assert(!root.querySelector('dialog').open,'Cerrar falla');assert(!root.querySelector('.snai-reopen').hidden&&root.querySelector('.snai-avatar').hidden,'Cerrar no deja la pestaña IA');root.querySelector('.snai-reopen').click();await tick();
    root.querySelector('.snai-hide-avatar').click();await tick();assert(root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Ocultar no deja solo IA');
    const reloaded=new Promise(resolve=>frame.addEventListener('load',resolve,{once:true}));frame.contentWindow.location.reload();await reloaded;await waitFor(()=>ui()?.querySelector('.snai-reopen'),'agente tras recarga');root=ui();assert(root.querySelector('.snai-avatar').hidden&&!root.querySelector('.snai-reopen').hidden,'Preferencia no persiste');
    root.querySelector('.snai-reopen').click();await tick();assert(!root.querySelector('.snai-avatar').hidden&&root.querySelector('.snai-reopen').hidden&&!root.querySelector('dialog').open,'IA no restaura solo el personaje');

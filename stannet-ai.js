@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261005-agent8';
+  const VERSION='20261006-android1';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -18,7 +18,7 @@
   content.innerHTML=`
     <dialog class="snai-panel" aria-labelledby="snai-title">
       <header class="snai-headbar">
-        <button class="snai-persona" type="button" aria-label="Conocer a StanNet AI"><img src="/assets/ai/stannet-ai-agent.svg" alt=""></button>
+        <button class="snai-persona" type="button" aria-label="Conocer a StanNet AI"><img src="/assets/ai/stannet-ai-android-20261006.png" width="1024" height="1536" alt=""></button>
         <div class="snai-title"><strong id="snai-title">StanNet AI</strong><small class="snai-state" role="status">Tu agente · aprende, crea, explora</small></div>
         <button class="snai-minimize" type="button" aria-label="Minimizar StanNet AI">−</button>
         <button class="snai-close" type="button" aria-label="Cerrar StanNet AI">×</button>
@@ -261,11 +261,12 @@
     // No forced autofocus/keyboard on touch devices; the user taps the input.
     if(mobile.matches)$('.snai-close').focus({preventScroll:true});else input.focus({preventScroll:true});
   }
-  $('.snai-close').addEventListener('click',closeAgent);
+  // Closing dismisses the character as well; minimizing retains the launcher.
+  $('.snai-close').addEventListener('click',()=>{avatar.setHidden(true);closeAgent();avatar.restore.focus({preventScroll:true})});
   $('.snai-minimize').addEventListener('click',closeAgent);
   $('.snai-hide').addEventListener('click',()=>{avatar.setHidden(true);closeAgent();avatar.restore.focus({preventScroll:true})});
   panel.addEventListener('close',finishClose);
-  panel.addEventListener('cancel',event=>{event.preventDefault();closeAgent()});
+  panel.addEventListener('cancel',event=>{event.preventDefault();avatar.setHidden(true);closeAgent();avatar.restore.focus({preventScroll:true})});
   viewport?.addEventListener('resize',syncViewport,{passive:true});
   viewport?.addEventListener('scroll',syncViewport,{passive:true});
   window.addEventListener('resize',syncViewport,{passive:true});

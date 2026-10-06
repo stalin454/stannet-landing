@@ -8,7 +8,7 @@ export class AgentAvatar {
     this.surface.className='snai-avatar-surface';
     this.surface.setAttribute('popover','manual');
     this.surface.innerHTML=`<div class="snai-avatar">
-      <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-haspopup="dialog" aria-expanded="false"><img src="/assets/ai/stannet-ai-agent.svg" alt="Agente StanNet AI" draggable="false"><span>StanNet AI</span></button>
+      <button class="snai-launcher" type="button" aria-label="Abrir StanNet AI" aria-haspopup="dialog" aria-expanded="false"><img src="/assets/ai/stannet-ai-android-20261006.png" width="1024" height="1536" alt="Androide de StanNet AI" draggable="false"><span>StanNet AI</span></button>
       <button class="snai-hide-avatar" type="button" aria-label="Ocultar agente">×</button>
     </div><button class="snai-reopen" type="button" aria-label="Restaurar agente StanNet AI" hidden>IA</button>`;
     ui.append(this.surface);

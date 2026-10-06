@@ -12,11 +12,11 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 /* Avatar controls use their own top-layer surface; they never size the panel. */
 .snai-avatar-surface{position:fixed;inset:auto;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));width:auto;height:auto;margin:0;padding:0;border:0;overflow:visible;background:transparent;color:inherit}
 .snai-avatar-surface::backdrop{background:transparent;pointer-events:none}
-.snai-avatar{position:relative;width:92px;padding-top:12px}
-.snai-launcher{display:flex;flex-direction:column;align-items:center;width:92px;height:138px;padding:0;border:0;background:transparent;color:var(--snai-cyan)}
-.snai-launcher img{display:block;width:78px;height:117px;object-fit:contain;filter:drop-shadow(0 4px 10px #7245ae66)}
+.snai-avatar{--snai-avatar-width:clamp(108px,9vw,140px);position:relative;width:var(--snai-avatar-width);padding-top:16px}
+.snai-launcher{display:flex;flex-direction:column;align-items:center;width:100%;height:auto;padding:0;border:0;background:transparent;color:var(--snai-cyan)}
+.snai-launcher img{display:block;width:100%;height:auto;aspect-ratio:2/3;max-height:30dvh;object-fit:contain;filter:drop-shadow(0 4px 8px #1c9dcc33)}
 .snai-launcher span{padding:3px 5px;border:1px solid var(--snai-line);border-radius:7px;background:#0b172be6;font-size:10px}
-.snai-hide-avatar{position:absolute;right:-2px;top:0;display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--snai-line);border-radius:50%;background:#102139e6;color:#def5ff;font-size:20px}
+.snai-hide-avatar{position:absolute;right:0;top:0;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--snai-line);border-radius:50%;background:#102139e6;color:#def5ff;font-size:20px}
 .snai-panel{--snai-gap:12px;--snai-panel-width:min(450px,calc(var(--snai-width,100vw) - 2 * var(--snai-gap) - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--snai-panel-height:min(600px,calc(var(--snai-height,100dvh) - 2 * var(--snai-gap) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));position:fixed;inset:auto;left:calc(var(--snai-x,0px) + var(--snai-width,100vw) - var(--snai-panel-width) - var(--snai-gap) - env(safe-area-inset-right,0px));top:calc(var(--snai-y,0px) + var(--snai-height,100dvh) - var(--snai-panel-height) - var(--snai-gap) - env(safe-area-inset-bottom,0px));width:var(--snai-panel-width);height:var(--snai-panel-height);max-width:none;max-height:none;margin:0;padding:0;border:1px solid var(--snai-line);border-radius:22px;background:radial-gradient(ellipse at top right,#45296650,transparent 55%),#081426;color:#eef8ff;overflow:hidden;box-shadow:0 12px 40px #01061366}
 .snai-panel[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
 .snai-panel::backdrop{background:#02091755}
@@ -70,8 +70,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory,.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
 @media(max-width:640px){
  .snai-headbar{padding:6px 10px;gap:7px}.snai-persona{height:38px;width:28px}.snai-title strong{font-size:13px}.snai-title small{font-size:10px}
- .snai-avatar{width:80px}.snai-launcher{width:80px;height:122px}.snai-launcher img{width:68px;height:102px}
+ .snai-avatar{--snai-avatar-width:clamp(88px,22vw,104px)}.snai-launcher img{max-height:24dvh}
 }
 @media(prefers-reduced-motion:no-preference){.snai-reopen{transition:border-color .18s}.snai-reopen:hover{border-color:#8feeff}}
-
-@media(prefers-reduced-motion:no-preference){.snai-launcher img{animation:snai-avatar-breathe 4s ease-in-out infinite}@keyframes snai-avatar-breathe{50%{opacity:.88}}}

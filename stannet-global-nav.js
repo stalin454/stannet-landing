@@ -13,9 +13,10 @@ style.textContent=`
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 #${NAV_ID} *{box-sizing:border-box}
-#${NAV_ID} .brand{display:flex;align-items:center;gap:8px;text-decoration:none!important;white-space:nowrap}
+#${NAV_ID} .brand{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:max-content;max-width:none;letter-spacing:0;text-decoration:none!important;white-space:nowrap}
 #${NAV_ID} .brand-mark{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(40,120,255,.16))}
-#${NAV_ID} .brand>span{font:700 20px/1 Orbitron,Inter,sans-serif}
+#${NAV_ID} .brand>span{display:inline-flex;flex:0 0 auto;min-width:max-content;font:700 20px/1 Orbitron,Inter,sans-serif}
+#${NAV_ID} .brand>span>b,#${NAV_ID} .brand>i{flex:0 0 auto;min-width:max-content}
 #${NAV_ID} .brand-stan{color:#0a1730!important}
 #${NAV_ID} .brand-net{color:#2878ff!important}
 #${NAV_ID} .brand>i{color:#8a39ff!important;font:600 11px Orbitron,Inter,sans-serif;font-style:normal}
@@ -44,7 +45,8 @@ style.textContent=`
   display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid #d5e3ee;background:#fff;color:#17324c!important;
   border-radius:11px;font-size:20px;cursor:pointer
 }
-@media(max-width:1180px){
+/* The full menu needs room for the uncompressed wordmark, including fonts. */
+@media(max-width:1640px){
   #${NAV_ID}{min-height:68px!important;padding:0 14px!important}
   #${NAV_ID} .menu-toggle{display:block}
   #${NAV_ID} .site-nav{
@@ -220,6 +222,6 @@ if(!connection?.saveData && !/(^|-)2g/.test(connection?.effectiveType||'')){
   if(document.body.classList.contains('vocal-studio-page')||window.__StanNetAIBootstrapRequested)return;
   window.__StanNetAIBootstrapRequested=true;
   const bootstrap=document.createElement('script');
-  bootstrap.src='/stannet-ai-loader.js?v=20261005-agent7';
+  bootstrap.src='/stannet-ai-loader.js?v=20261006-android1';
   bootstrap.defer=true;document.body.appendChild(bootstrap);
 })();
