@@ -119,9 +119,9 @@
   let completedTyped = 0;
   let records = [];
   let soundOn = true;
-  let timbre = 'clean';
+  let timbre = 'keys';
   let audioCtx = null;
-  try { timbre = localStorage.getItem(TIMBRE_KEY) || 'clean'; } catch {}
+  try { timbre = localStorage.getItem(TIMBRE_KEY) || 'keys'; } catch {}
 
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE) || '[]');
@@ -289,12 +289,13 @@
       const now = audioCtx.currentTime;
 
       const presets = {
+        keys: { type:'triangle', drive:0, tone:3200, attack:.002, decay:.11, level:.035 },
         clean: { type:'triangle', drive:0, tone:2600, attack:.002, decay:.18, level:.035 },
         crunch: { type:'sawtooth', drive:2.2, tone:2100, attack:.002, decay:.16, level:.028 },
         overdrive: { type:'sawtooth', drive:5.5, tone:1800, attack:.002, decay:.15, level:.027 },
         distortion: { type:'square', drive:13, tone:1450, attack:.001, decay:.13, level:.024 }
       };
-      const preset = presets[timbre] || presets.clean;
+      const preset = presets[timbre] || presets.keys;
 
       const mappedNote = noteInfoForKey(key || (isSpace ? 'ESPACIO' : ''));\n      const base = deleting ? 170 : mappedNote?.frequency ?? (ok ? 261.63 : 135);
       const osc = audioCtx.createOscillator();
@@ -635,7 +636,7 @@
   for (const id of ['textLanguage', 'codeLanguage', 'duration']) $(id).addEventListener('change', reset);
 
   $('typingTimbre')?.addEventListener('change', e => {
-    timbre = e.currentTarget.value || 'clean';
+    timbre = e.currentTarget.value || 'keys';
     try { localStorage.setItem(TIMBRE_KEY, timbre); } catch {}
     if (soundOn) playClick(true);
   });
