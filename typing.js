@@ -4,6 +4,7 @@
   const $ = id => document.getElementById(id);
   const STORAGE = 'stannet-typing-progress-v1';
   const SOUND_KEY = 'stannet-typing-sound-v1';
+  const TIMBRE_KEY = 'stannet-typing-timbre-v1';
 
   const lessons = {
     es: [
@@ -118,7 +119,9 @@
   let completedTyped = 0;
   let records = [];
   let soundOn = true;
+  let timbre = 'clean';
   let audioCtx = null;
+  try { timbre = localStorage.getItem(TIMBRE_KEY) || 'clean'; } catch {}
 
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE) || '[]');
@@ -189,23 +192,54 @@
     }
   }
 
+  function createDriveCurve(amount = 0) {
+    const curve = new Float32Array(256);
+    const k = Math.max(0, amount);
+    for (let i = 0; i < curve.length; i++) {
+      const x = i * 2 / (curve.length - 1) - 1;
+      curve[i] = k ? ((1 + k) * x) / (1 + k * Math.abs(x)) : x;
+    }
+    return curve;
+  }
+
   function playClick(ok = true, isSpace = false, deleting = false) {
     if (!soundOn) return;
     try {
       audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const now = audioCtx.currentTime;
+
+      const presets = {
+        clean: { type:'triangle', drive:0, tone:2600, attack:.002, decay:.18, level:.035 },
+        crunch: { type:'sawtooth', drive:2.2, tone:2100, attack:.002, decay:.16, level:.028 },
+        overdrive: { type:'sawtooth', drive:5.5, tone:1800, attack:.002, decay:.15, level:.027 },
+        distortion: { type:'square', drive:13, tone:1450, attack:.001, decay:.13, level:.024 }
+      };
+      const preset = presets[timbre] || presets.clean;
+
+      const base = deleting ? 170 : isSpace ? 260 : ok ? 261.63 : 135;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = deleting ? 'triangle' : 'square';
-      osc.frequency.setValueAtTime(deleting ? 170 : isSpace ? 260 : ok ? 520 : 135, now);
-      if (!ok && !deleting) osc.frequency.exponentialRampToValueAtTime(95, now + .045);
+      const filter = audioCtx.createBiquadFilter();
+      const shaper = audioCtx.createWaveShaper();
+
+      osc.type = deleting ? 'triangle' : preset.type;
+      osc.frequency.setValueAtTime(base, now);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(deleting ? 900 : preset.tone, now);
+      filter.Q.setValueAtTime(.65, now);
+      shaper.curve = createDriveCurve(deleting ? 0 : preset.drive);
+      shaper.oversample = '2x';
+
+      const peak = deleting ? .022 : (!ok ? .02 : preset.level);
+      const decay = deleting ? .025 : (!ok ? .055 : preset.decay);
       gain.gain.setValueAtTime(.0001, now);
-      gain.gain.exponentialRampToValueAtTime(deleting ? .028 : .045, now + .002);
-      gain.gain.exponentialRampToValueAtTime(.0001, now + (deleting ? .025 : ok ? .018 : .055));
-      osc.connect(gain).connect(audioCtx.destination);
+      gain.gain.exponentialRampToValueAtTime(peak, now + preset.attack);
+      gain.gain.exponentialRampToValueAtTime(.0001, now + decay);
+
+      osc.connect(shaper).connect(filter).connect(gain).connect(audioCtx.destination);
       osc.start(now);
-      osc.stop(now + .065);
+      osc.stop(now + Math.max(.07, decay + .02));
     } catch {}
   }
 
@@ -499,6 +533,11 @@
     btn.classList.toggle('off', !soundOn);
   }
 
+  function updateTimbreSelect() {
+    const select = $('typingTimbre');
+    if (select) select.value = timbre;
+  }
+
   document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => selectMode(button.dataset.mode)));
 
   $('drillGrid').addEventListener('click', e => {
@@ -511,6 +550,12 @@
   });
 
   for (const id of ['textLanguage', 'codeLanguage', 'duration']) $(id).addEventListener('change', reset);
+
+  $('typingTimbre')?.addEventListener('change', e => {
+    timbre = e.currentTarget.value || 'clean';
+    try { localStorage.setItem(TIMBRE_KEY, timbre); } catch {}
+    if (soundOn) playClick(true);
+  });
 
   $('typingSound').addEventListener('click', () => {
     soundOn = !soundOn;
@@ -574,5 +619,6 @@
   renderKeyboard();
   renderDrills();
   updateSoundButton();
+  updateTimbreSelect();
   reset();
 })();
