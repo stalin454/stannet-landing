@@ -29,5 +29,14 @@
     }
   ],
   "workers_dev": true,
-  "keep_vars": true
+  "keep_vars": true,
+  "previews": {
+    "vars": {
+      "AI_API_URL": "https://api.groq.com/openai/v1/chat/completions",
+      "AI_MODEL": "openai/gpt-oss-20b",
+      "AZURE_SPEECH_REGION": "northeurope",
+      "COMMUNITY_SUPABASE_URL": "https://tmldtlsrrgvyzuwljtur.supabase.co",
+      "COMMUNITY_SUPABASE_KEY": "sb_publishable_GGYWVnox5he2lp3sy0aidw_p28CkC8M"
+    }
+  }
 }
