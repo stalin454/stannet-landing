@@ -1,22 +1,22 @@
 /* Circuit-chip directory replaces the rotating atom on the home hero. */
 .home-hero .home-hero-inner{align-items:start}
 .home-hero .chip-stage{position:relative;z-index:2;min-width:0;display:grid;place-items:center}
-.home-hero .chip-board{position:relative;isolation:isolate;width:min(100%,600px);padding:16px 14px 12px;overflow:hidden;border:1px solid transparent;border-radius:24px;background:linear-gradient(150deg,rgba(3,13,31,.985),rgba(6,13,37,.985) 56%,rgba(20,10,50,.98)) padding-box,linear-gradient(135deg,rgba(34,231,255,.72),rgba(64,124,255,.32) 48%,rgba(180,73,255,.78)) border-box;box-shadow:0 28px 76px rgba(0,0,0,.44),inset 0 0 46px rgba(55,133,222,.10),0 0 34px rgba(0,215,255,.12),0 0 48px rgba(152,68,255,.10)}
-.home-hero .chip-board:before{content:"";position:absolute;z-index:-1;inset:0;opacity:.42;background:radial-gradient(circle at 50% 10%,rgba(27,223,255,.24),transparent 24%),radial-gradient(circle at 88% 76%,rgba(176,77,255,.16),transparent 26%),linear-gradient(rgba(82,179,239,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(82,179,239,.07) 1px,transparent 1px);background-size:auto,auto,24px 24px,24px 24px}
+.home-hero .chip-board{position:relative;isolation:isolate;width:min(100%,600px);padding:16px 14px 12px;overflow:hidden;border:1px solid rgba(105,206,245,.42);border-radius:24px;background:linear-gradient(150deg,rgba(6,22,42,.97),rgba(8,16,42,.97) 58%,rgba(22,15,56,.96));box-shadow:0 26px 70px rgba(0,0,0,.34),inset 0 0 42px rgba(79,146,211,.1),0 0 48px rgba(37,166,226,.14)}
+.home-hero .chip-board:before{content:"";position:absolute;z-index:-1;inset:0;opacity:.32;background:radial-gradient(circle at 50% 12%,rgba(69,218,241,.2),transparent 23%),linear-gradient(rgba(110,189,238,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(110,189,238,.08) 1px,transparent 1px);background-size:auto,24px 24px,24px 24px}
 .home-hero .chip-wires{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}.home-hero .wire-base,.home-hero .wire-light{fill:none;stroke-linecap:round;stroke-linejoin:round}.home-hero .wire-base{stroke:rgba(78,196,232,.3);stroke-width:1}.home-hero .wire-light{stroke:#9bf6ff;stroke-width:1.35}.home-hero .wire-light path{stroke-dasharray:none;opacity:.55}.home-hero .chip-board.is-running .wire-light path{stroke-dasharray:6 994;opacity:1;animation:chip-current 11s linear infinite}.home-hero .chip-board.is-running .wire-light path:nth-child(2){animation-delay:-4s}.home-hero .chip-board.is-running .wire-light path:nth-child(3){animation-delay:-7s}
 .home-hero .chip-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:14px;min-height:92px;margin:0 0 12px;padding:2px 0 16px;border-bottom:1px solid rgba(107,210,242,.25)}
-.home-hero .chip-core{position:relative;display:flex;align-items:center;gap:8px;min-width:136px;min-height:68px;padding:10px 12px;border:1px solid rgba(96,229,255,.84);border-radius:10px;background:linear-gradient(135deg,#12365f,#0c1737 58%,#2c1458);box-shadow:inset 0 0 18px rgba(70,217,255,.20),0 0 22px rgba(32,213,255,.24),0 0 30px rgba(164,74,255,.12)}
+.home-hero .chip-core{position:relative;display:flex;align-items:center;gap:8px;min-width:136px;min-height:68px;padding:10px 12px;border:1px solid rgba(141,227,250,.74);border-radius:10px;background:linear-gradient(135deg,#173a61,#101d3d 62%,#25194a);box-shadow:inset 0 0 14px rgba(115,221,249,.2),0 0 20px rgba(63,205,235,.2)}
 .home-hero .chip-core:before,.home-hero .chip-core:after{content:"";position:absolute;left:10px;right:10px;height:5px;background:repeating-linear-gradient(90deg,rgba(152,227,245,.72) 0 2px,transparent 2px 11px)}.home-hero .chip-core:before{top:-5px}.home-hero .chip-core:after{bottom:-5px}
 .home-hero .chip-core img{width:28px;height:32px;object-fit:contain;filter:drop-shadow(0 0 7px rgba(85,224,244,.5))}.home-hero .chip-core span{display:flex;align-items:baseline;white-space:nowrap}.home-hero .chip-core strong{color:white;font:700 14px/1 var(--font-brand,Orbitron,sans-serif);letter-spacing:-.06em}.home-hero .chip-core small{color:#c4a5ff;font:700 8px/1 var(--font-brand,Orbitron,sans-serif);letter-spacing:.08em}
-.home-hero .chip-head>p{display:grid;gap:6px;margin:0;color:#eaf7ff;font:600 9px/1.35 var(--font-body,Inter,sans-serif);letter-spacing:.06em}.home-hero .chip-head>p b{color:#41ecff;font:700 8px/1.2 var(--font-brand,Orbitron,sans-serif);letter-spacing:.12em;text-shadow:0 0 10px rgba(65,236,255,.18)}
+.home-hero .chip-head>p{display:grid;gap:6px;margin:0;color:#eaf7ff;font:600 9px/1.35 var(--font-body,Inter,sans-serif);letter-spacing:.06em}.home-hero .chip-head>p b{color:#75e9f3;font:700 8px/1.2 var(--font-brand,Orbitron,sans-serif);letter-spacing:.12em}
 .home-hero .chip-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px 6px}
-.home-hero .chip-node{position:relative;display:flex;min-width:0;min-height:62px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 3px;border:1px solid color-mix(in srgb,var(--node-accent) 35%,#23436f);border-radius:10px;background:linear-gradient(155deg,rgba(9,29,57,.94),rgba(5,14,36,.96));color:#effaff;text-decoration:none;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:inset 0 0 12px color-mix(in srgb,var(--node-accent) 7%,transparent);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.home-hero .chip-node{position:relative;display:flex;min-width:0;min-height:62px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 3px;border:1px solid rgba(120,192,232,.24);border-radius:9px;background:rgba(7,21,43,.9);color:#effaff;text-decoration:none;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s ease}
 .home-hero .chip-node:before,.home-hero .chip-node:after{content:"";position:absolute;left:50%;width:12px;height:1px;background:linear-gradient(90deg,transparent,var(--node-accent),transparent);opacity:.75;transform:translateX(-50%)}.home-hero .chip-node:before{top:-4px}.home-hero .chip-node:after{bottom:-4px}
 .home-hero .chip-glyph{position:relative;display:grid;place-items:center;width:31px;height:29px;border:1px solid color-mix(in srgb,var(--node-accent) 70%,#fff 5%);border-radius:6px;background:linear-gradient(145deg,color-mix(in srgb,var(--node-accent) 24%,#112341),#0a1730 75%);color:var(--node-accent);box-shadow:inset 0 0 8px color-mix(in srgb,var(--node-accent) 16%,transparent),0 0 9px color-mix(in srgb,var(--node-accent) 16%,transparent)}
 .home-hero .chip-glyph:before,.home-hero .chip-glyph:after{content:"";position:absolute;top:5px;bottom:5px;width:3px;background:repeating-linear-gradient(180deg,var(--node-accent) 0 1px,transparent 1px 5px);opacity:.8}.home-hero .chip-glyph:before{left:-4px}.home-hero .chip-glyph:after{right:-4px}
 .home-hero .chip-glyph svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.home-hero .chip-label{display:-webkit-box;width:100%;overflow:hidden;color:#e7f3ff;font:600 8px/1.15 var(--font-body,Inter,sans-serif);text-wrap:balance;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-.home-hero .chip-node:hover,.home-hero .chip-node:focus-visible{z-index:2;transform:translateY(-2px);border-color:color-mix(in srgb,var(--node-accent) 86%,white);background:linear-gradient(155deg,rgba(13,40,74,.99),rgba(7,18,43,.99));box-shadow:inset 0 0 14px color-mix(in srgb,var(--node-accent) 10%,transparent),0 0 18px color-mix(in srgb,var(--node-accent) 34%,transparent)}.home-hero .chip-node:focus-visible{outline:2px solid var(--node-accent);outline-offset:2px}.home-hero .chip-node:active{transform:scale(.97)}
-.home-hero .tone-c{--node-accent:#27eaff}.home-hero .tone-b{--node-accent:#6d96ff}.home-hero .tone-v{--node-accent:#c06cff}.home-hero .tone-m{--node-accent:#f26bdd}
+.home-hero .chip-node:hover,.home-hero .chip-node:focus-visible{z-index:2;transform:translateY(-2px);border-color:color-mix(in srgb,var(--node-accent) 76%,white);background:rgba(11,34,60,.98);box-shadow:0 0 16px color-mix(in srgb,var(--node-accent) 28%,transparent)}.home-hero .chip-node:focus-visible{outline:2px solid var(--node-accent);outline-offset:2px}.home-hero .chip-node:active{transform:scale(.97)}
+.home-hero .tone-c{--node-accent:#61e5f1}.home-hero .tone-b{--node-accent:#91b2ff}.home-hero .tone-v{--node-accent:#c59aff}.home-hero .tone-m{--node-accent:#71e6c1}
 .home-hero .chip-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:7px;margin:13px 0 0;padding-top:10px;border-top:1px solid rgba(112,195,229,.2);color:#9bbbd0;font:600 7px/1.3 var(--font-brand,Orbitron,sans-serif);letter-spacing:.11em}.home-hero .chip-foot i{width:6px;height:6px;border-radius:50%;background:#7cf1cd;box-shadow:0 0 8px #59edc6}
 @keyframes chip-current{to{stroke-dashoffset:-1000}}
 @media(max-width:1180px){.home-hero .chip-board{padding:13px 11px 10px}.home-hero .chip-grid{gap:6px 5px}.home-hero .chip-node{min-height:59px}}
@@ -40,23 +40,3 @@
 .home-hero .chip-preview span{display:block;font:500 11px/1.45 var(--font-body,Inter,sans-serif)}
 .home-hero .chip-preview small{display:block;margin-top:7px;color:#c2a4ff;font:700 9px/1.2 var(--font-body,Inter,sans-serif)}
 @media(prefers-reduced-motion:reduce){.home-hero .chip-preview{transition:none;transform:none}}
-
-/* Reference-inspired priority nodes: only three warm highlights to avoid visual overload. */
-.home-hero .chip-node[href="pages/apps.html"],
-.home-hero .chip-node[href="pages/web-development.html"],
-.home-hero .chip-node[href="pages/programming.html"]{
-  --node-accent:#ffc86b;
-  border-color:rgba(255,200,107,.64);
-  background:linear-gradient(155deg,rgba(102,70,25,.72),rgba(38,25,25,.94));
-  box-shadow:inset 0 0 16px rgba(255,190,75,.10),0 0 14px rgba(255,178,66,.08);
-}
-.home-hero .chip-node[href="pages/apps.html"]:hover,
-.home-hero .chip-node[href="pages/apps.html"]:focus-visible,
-.home-hero .chip-node[href="pages/web-development.html"]:hover,
-.home-hero .chip-node[href="pages/web-development.html"]:focus-visible,
-.home-hero .chip-node[href="pages/programming.html"]:hover,
-.home-hero .chip-node[href="pages/programming.html"]:focus-visible{
-  border-color:#ffd58a;
-  background:linear-gradient(155deg,rgba(122,82,28,.80),rgba(47,29,28,.98));
-  box-shadow:inset 0 0 18px rgba(255,199,105,.12),0 0 18px rgba(255,183,70,.20);
-}
