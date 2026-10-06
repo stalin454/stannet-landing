@@ -146,7 +146,7 @@ if (root) {
       ? "Confirma el correo en este mismo navegador. Después añade tu foto al perfil."
       : recover
         ? "Abre el enlace en este mismo navegador para establecer una contraseña nueva."
-        : "Si ya tienes una cuenta StanNet con este correo, puedes utilizarla.";
+        : "Utiliza tu cuenta de Comunidad Dinamarca.";
     root
       .querySelectorAll("[data-auth]")
       .forEach((b) =>

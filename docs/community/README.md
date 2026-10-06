@@ -2,7 +2,7 @@
 
 Desarrollo aislado en `feature/ruta-dinamarca-comunidad`. Integración preparada en
 `/pages/ruta-dinamarca.html#comunidad` y en el desplegable Ruta Dinamarca.
-No debe fusionarse en producción antes de activar y comprobar el almacenamiento.
+Tablas activadas en Supabase `tmldtlsrrgvyzuwljtur`. Auditoría de seguridad sin avisos. Pendientes: configuración de Auth y comprobación de correo y despliegue.
 
 ## Alcance implementado
 
@@ -28,7 +28,7 @@ no constituyen una verificación de identidad.
 
 ## Activación pendiente antes de integrar
 
-1. Conectar Supabase al proyecto `beaiuamtvijimwislzeo` (el configurado en `worker.js`),
+1. Conectar Supabase al proyecto `tmldtlsrrgvyzuwljtur` (el configurado en `worker.js`),
    o configurar un proyecto independiente mediante las variables
    `COMMUNITY_SUPABASE_URL` y `COMMUNITY_SUPABASE_KEY` del Worker.
 2. Aplicar una vez `supabase/community/001_community.sql` como migración administrativa.
