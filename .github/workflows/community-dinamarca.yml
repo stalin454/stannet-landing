@@ -1,0 +1,36 @@
+name: Comunidad Dinamarca
+on:
+  push:
+    branches: [main, feature/ruta-dinamarca-comunidad]
+    paths:
+      - "community-dinamarca/**"
+      - "supabase/community/**"
+      - "tests/community/**"
+      - "pages/ruta-dinamarca.html"
+      - "worker.js"
+      - ".github/workflows/community-dinamarca.yml"
+  pull_request:
+    paths:
+      - "community-dinamarca/**"
+      - "supabase/community/**"
+      - "tests/community/**"
+      - "pages/ruta-dinamarca.html"
+      - "worker.js"
+      - ".github/workflows/community-dinamarca.yml"
+permissions:
+  contents: read
+jobs:
+  community:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: npm ci
+        working-directory: tests/community
+      - run: npx playwright install --with-deps chromium
+        working-directory: tests/community
+      - run: npm test
+        working-directory: tests/community

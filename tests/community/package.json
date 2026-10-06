@@ -1,0 +1,12 @@
+{
+  "name": "stannet-community-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node database.mjs && node api.test.mjs && node browser.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "playwright": "1.62.1"
+  }
+}

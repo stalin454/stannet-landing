@@ -1,8 +1,12 @@
+import { handleCommunity } from './community-dinamarca/api.mjs';
 import { catalogueText } from './stannet-ai-knowledge.mjs';
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/community' || url.pathname.startsWith('/api/community/')) {
+      return handleCommunity(request, env, { url: SUPABASE_URL, key: SUPABASE_KEY });
+    }
 
     if (url.pathname === '/favicon.ico') {
       const target = new URL('/assets/brand/stannet-sn-cutout.ico', request.url);

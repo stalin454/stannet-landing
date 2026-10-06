@@ -109,6 +109,7 @@ header.innerHTML=`
     <button class="nav-trigger" type="button" aria-expanded="false">Ruta Dinamarca <span>⌄</span></button>
     <div class="nav-dropdown">
       <a href="/pages/ruta-dinamarca.html">Blog · Ruta Dinamarca</a>
+      <a href="/pages/ruta-dinamarca.html#comunidad">Comunidad Dinamarca</a>
       <a href="/pages/danish.html">Danish Academy</a>
       <a href="/pages/ruta-dinamarca.html#plan">Plan de preparación</a>
       <a href="/pages/ruta-dinamarca.html#ciudades">Ciudades</a>
