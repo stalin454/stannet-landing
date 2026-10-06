@@ -1146,3 +1146,31 @@ body.typing-page{
   .typing-status>span{min-height:94px;padding:12px!important}
   .typing-status strong{font-size:29px!important}
 }
+
+/* Score / tablature importer */
+.score-importer{
+  margin-top:24px;
+  padding:22px;
+  border:1px solid #d8e5ee;
+  border-radius:20px;
+  background:linear-gradient(145deg,#fbfdff,#f4f8fc);
+  box-shadow:0 10px 28px rgba(38,75,110,.055);
+}
+.score-importer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:15px}
+.score-importer-head .eyebrow{margin:0 0 7px;color:#2878ff;font:800 9px Orbitron,sans-serif;letter-spacing:.13em}
+.score-importer-head h3{margin:0;color:#17344f;font-size:clamp(20px,2.3vw,28px)}
+.score-importer-head p:not(.eyebrow){margin:7px 0 0;max-width:760px;color:#687f92;font-size:12px;line-height:1.6}
+.score-importer-badge{flex:0 0 auto;padding:7px 10px;border:1px solid #cbdde9;border-radius:999px;background:#fff;color:#39708f;font:800 8px Orbitron,sans-serif;letter-spacing:.08em}
+.score-dropzone{display:grid;place-items:center;gap:6px;min-height:132px;padding:24px;border:1.5px dashed #79b9d2;border-radius:16px;background:linear-gradient(145deg,#f1fbfe,#f5f2ff);color:#2b5873;text-align:center;cursor:pointer;transition:border-color .18s ease,transform .18s ease,background .18s ease}
+.score-dropzone:hover,.score-dropzone.is-dragging{border-color:#7c55e8;background:linear-gradient(145deg,#ecfbff,#f2edff);transform:translateY(-1px)}
+.score-dropzone strong{font-size:16px;color:#173d5b}
+.score-dropzone span{font-size:11px;color:#668197}
+.score-dropzone em{font-style:normal;font-size:10px;color:#2878ff;font-weight:750}
+.score-import-result{margin-top:14px;padding:15px;border:1px solid #d7e3ec;border-radius:14px;background:#fff}
+.score-import-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;font-size:11px}
+.score-import-meta strong{color:#234761;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-import-meta span{color:#2878ff;font-weight:750;white-space:nowrap}
+.score-sequence{display:flex;flex-wrap:wrap;gap:5px;max-height:180px;overflow:auto;padding:12px;border-radius:11px;background:#081522}
+.score-key-chip{display:inline-grid;place-items:center;min-width:29px;height:29px;padding:0 7px;border:1px solid rgba(117,230,241,.2);border-radius:7px;background:#10283a;color:#d8f9ff;font:800 11px "Cascadia Code","SFMono-Regular",Consolas,monospace}
+.score-import-result p{margin:10px 0 0;color:#71879a;font-size:10px;line-height:1.5}
+@media(max-width:620px){.score-importer{padding:15px}.score-importer-head{display:block}.score-importer-badge{display:inline-block;margin-top:12px}.score-dropzone{min-height:118px;padding:18px}.score-import-meta{display:block}.score-import-meta span{display:block;margin-top:5px}}
