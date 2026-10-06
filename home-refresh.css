@@ -116,12 +116,19 @@
   letter-spacing:-.065em;
   font-weight:750;
 }
-.home-hero h1 .hero-tech{color:#72e8f4}
-.home-hero h1 .hero-knowledge{color:#8eb7ff}
+.home-hero h1 .hero-tech{color:#fbfbfb}
+.home-hero h1 .hero-knowledge{
+  background:linear-gradient(90deg,#28ddfb 0%,#4ac4f9 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
 .home-hero h1 .gradient-word{
   display:block;
-  background:linear-gradient(90deg,#11e4ef 0%,#2f86ff 47%,#a843ff 92%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+  background:linear-gradient(90deg,#d99cf8 0%,#d07df4 48%,#b86cff 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
 }
 .home-hero-copy>p{
   max-width:660px;
