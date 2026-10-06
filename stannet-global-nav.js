@@ -20,7 +20,7 @@ style.textContent=`
 #${NAV_ID} .brand-stan{color:#0a1730!important}
 #${NAV_ID} .brand-net{color:#2878ff!important}
 #${NAV_ID} .brand>i{color:#8a39ff!important;font:600 11px Orbitron,Inter,sans-serif;font-style:normal}
-#${NAV_ID} .site-nav{margin-left:auto;display:flex;flex:1 1 0;flex-wrap:wrap;flex-direction:row;align-items:center;gap:4px;position:static;padding:0;border:0;background:transparent;max-height:none;overflow:visible}
+#${NAV_ID} .site-nav{margin-left:auto;display:flex;flex:1 1 0;flex-wrap:nowrap;flex-direction:row;align-items:center;gap:4px;position:static;padding:0;border:0;background:transparent;max-height:none;overflow:visible}
 #${NAV_ID} .site-nav>a,#${NAV_ID} .site-nav>.nav-group{flex:0 0 auto;width:auto}
 #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{
   min-height:46px;width:auto;display:flex;align-items:center;gap:5px;padding:10px 9px;
@@ -46,7 +46,13 @@ style.textContent=`
   display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid #d5e3ee;background:#fff;color:#17324c!important;
   border-radius:11px;font-size:20px;cursor:pointer
 }
-/* Only mobile uses the collapsed menu; desktop links can wrap without shrinking. */
+/* Keep desktop navigation on one row, with compact spacing on smaller screens. */
+@media(min-width:851px) and (max-width:1500px){
+  #${NAV_ID}.site-header{gap:8px;padding:0 14px}
+  #${NAV_ID} .site-nav{gap:0}
+  #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:clamp(8px,calc(0.63vw + 1.55px),11px)!important;padding:10px clamp(2px,calc(1.47vw - 13px),9px);gap:3px}
+  #${NAV_ID} .nav-cta{padding:11px 8px!important}
+}
 @media(max-width:850px){
   #${NAV_ID}{min-height:68px!important;padding:0 14px!important}
   #${NAV_ID} .menu-toggle{display:block}
@@ -83,16 +89,8 @@ header.innerHTML=`
       <a href="/sanacion/">Proyecto 01 · Alfa y Omega</a>
       <a href="/pages/programming.html">Programming Academy</a>
       <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
-    </div>
-  </div>
-  <div class="nav-group" data-group="/pages/apps">
-    <button class="nav-trigger" type="button" aria-expanded="false">Apps <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/apps.html">Apps & productos</a>
-      <a href="/pages/marketplace.html">AyudaEnCasa</a>
       <a href="/nutri-ia/">Nutri IA</a>
-      <a href="/pages/vocal-studio.html">Vocal Studio</a>
-      <a href="/pages/marketplace.html">Marketplace</a>
+      <a href="/pages/marketplace.html">AyudaEnCasa</a>
     </div>
   </div>
   <a data-nav="/pages/ai" href="/pages/ai.html">🤖 StanNet AI</a>\n  <a data-nav="/pages/radio" href="/pages/radio.html">StanNet Radio</a>
