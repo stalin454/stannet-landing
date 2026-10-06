@@ -135,8 +135,13 @@ header.innerHTML=`
       <a href="/pages/vocal-studio.html">Vocal Studio</a>
     </div>
   </div>
-  <a data-nav="/pages/education" href="/pages/education.html">Formación</a>
-  <a data-nav="/pages/cv" href="/pages/cv.html">Sobre mí</a>
+  <div class="nav-group" data-group="/pages/cv">
+    <button class="nav-trigger" type="button" aria-expanded="false">Sobre mí <span>⌄</span></button>
+    <div class="nav-dropdown">
+      <a href="/pages/cv.html">Sobre mí</a>
+      <a href="/pages/education.html">Formación</a>
+    </div>
+  </div>
   <a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
 
