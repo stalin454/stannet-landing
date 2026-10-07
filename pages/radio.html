@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="../radio.css?v=20261003-1">
+<link rel="stylesheet" href="../radio.css?v=20261007-admin1">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 <link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">
@@ -52,6 +52,37 @@
 </div>
 <audio id="radioAudio" preload="none"></audio>
 <p id="radioMessage" class="radio-message" role="status">Conectando con el stream de StanNet Radio…</p>
+</div>
+</section>
+
+<section class="section radio-section radio-admin-section" id="radioAdmin">
+<div class="section-heading">
+  <div><p class="eyebrow">ADMIN / MEDIA</p><h2>Panel de<br><em>StanNet Radio.</em></h2></div>
+  <p>Sube música directamente a AzuraCast desde StanNet.Space. La clave de AzuraCast permanece en el backend de Cloudflare y nunca se expone en el navegador.</p>
+</div>
+<div class="radio-admin-shell">
+  <div class="radio-admin-login" id="radioAdminLogin">
+    <h3>Acceso administrador</h3>
+    <p>Usa tu cuenta administradora de StanNet para abrir las herramientas privadas de la radio.</p>
+    <form id="radioAdminLoginForm">
+      <label>Email<input id="radioAdminEmail" type="email" autocomplete="username" required></label>
+      <label>Contraseña<input id="radioAdminPassword" type="password" autocomplete="current-password" required></label>
+      <button type="submit">ENTRAR AL PANEL</button>
+    </form>
+    <p id="radioAdminLoginStatus" class="radio-admin-status" role="status"></p>
+  </div>
+  <div class="radio-admin-panel" id="radioAdminPanel" hidden>
+    <div class="radio-admin-head"><div><span>AZURACAST · STATION 1</span><strong id="radioAdminIdentity">Administrador</strong></div><button id="radioAdminLogout" type="button">CERRAR SESIÓN</button></div>
+    <form id="radioUploadForm" class="radio-upload-form">
+      <label class="radio-dropzone" for="radioUploadFile"><span>＋</span><strong>Seleccionar música</strong><small>MP3, M4A, AAC, OGG/OPUS, FLAC o WAV · máximo 20 MB</small><input id="radioUploadFile" name="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.flac,.wav" required></label>
+      <div class="radio-upload-meta">
+        <label>Lista de reproducción<select id="radioUploadPlaylist"><option value="">Cargando listas…</option></select></label>
+        <button id="radioUploadButton" type="submit">SUBIR A STANNET RADIO</button>
+      </div>
+      <div class="radio-upload-progress" aria-hidden="true"><i id="radioUploadProgress"></i></div>
+      <p id="radioUploadStatus" class="radio-admin-status" role="status">Selecciona una canción para comenzar.</p>
+    </form>
+  </div>
 </div>
 </section>
 
@@ -110,7 +141,7 @@
 </main>
 <footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
 <script src="../script.js?v=20261005-aireset1"></script>
-<script src="../radio.js?v=20261003-1"></script>
+<script src="../radio.js?v=20261007-admin1"></script>
 <script src="/stannet-global-nav.js?v=20261004-perf1" defer></script>
 </body>
 </html>
