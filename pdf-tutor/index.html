@@ -34,7 +34,7 @@
 <script type="module">
 import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
-const $=id=>document.getElementById(id),state={file:null,fileKey:'',pdf:null,pages:[],chunks:[],mode:'chat',scope:'pdf',history:[],artifacts:{},currentPage:1,renderToken:0,semanticReady:false,semanticBusy:false,embedder:null,vectors:[],voice:{lang:'es-ES',name:'es-ES-ElviraNeural',auto:false,audio:null,listening:false},progress:{questions:0,cards:0,quiz:0}};
+const $=id=>document.getElementById(id),state={file:null,fileKey:'',pdf:null,pages:[],chunks:[],mode:'chat',scope:'pdf',history:[],artifacts:{},currentPage:1,renderToken:0,semanticReady:false,semanticBusy:false,embedder:null,vectors:[],voice:{lang:'es-ES',name:'es-ES-ElviraNeural',auto:false,audio:null,listening:false,runId:0,currentUrl:null},progress:{questions:0,cards:0,quiz:0}};
 const copy={chat:['CHAT CON PDF','Pregunta cualquier cosa sobre el documento'],summary:['RESUMEN','Obtén una síntesis clara basada en el PDF'],flashcards:['FLASHCARDS','Genera tarjetas de memoria para repasar'],quiz:['MODO TEST','Crea preguntas para comprobar lo aprendido'],exam:['EXAMEN INTERACTIVO','Responde, corrige y mide tu puntuación'],glossary:['GLOSARIO','Extrae términos clave y definiciones del PDF'],notes:['APUNTES INTELIGENTES','Convierte el PDF en apuntes de repaso'],concept:['MAPA CONCEPTUAL','Organiza visualmente ideas y relaciones'],studyplan:['PLAN DE ESTUDIO','Divide el documento en sesiones de estudio'],eli5:['EXPLICACIÓN FÁCIL','Convierte conceptos difíciles en explicaciones sencillas']};
 const stop=new Set('que como para por con una uno unos unas del las los el la de en y o a es son se su sus al un sobre este esta esto estos estas cual cuales donde cuando quien quienes muy mas menos pdf documento'.split(' '));
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9áéíóúüñ\s]/gi,' ')}
@@ -114,8 +114,67 @@ const voiceOptions={
   'da-DK':[['da-DK-ChristelNeural','Christel']]
 };
 function syncVoiceOptions(){const lang=$('voiceLang').value,list=voiceOptions[lang]||voiceOptions['es-ES'];$('voiceName').innerHTML='';list.forEach(([value,label])=>{const o=document.createElement('option');o.value=value;o.textContent=label;$('voiceName').appendChild(o)});state.voice.lang=lang;state.voice.name=list[0][0]}
-function stopVoice(){if(state.voice.audio){try{state.voice.audio.pause();state.voice.audio.currentTime=0}catch{}state.voice.audio=null}}
-async function speakText(text){const clean=String(text||'').replace(/[\*#_>]/g,'').replace(/\s+/g,' ').trim().slice(0,500);if(!clean)return;stopVoice();try{$('voiceHelp').textContent='Generando voz…';const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean,lang:state.voice.lang,voice:state.voice.name,purpose:'chat'})});if(!r.ok)throw new Error('speech');const blob=await r.blob(),url=URL.createObjectURL(blob),audio=new Audio(url);state.voice.audio=audio;audio.onended=()=>{URL.revokeObjectURL(url);if(state.voice.audio===audio)state.voice.audio=null;$('voiceHelp').textContent='Voz lista.'};audio.onerror=()=>{URL.revokeObjectURL(url);if(state.voice.audio===audio)state.voice.audio=null;$('voiceHelp').textContent='No se pudo reproducir la voz.'};await audio.play();$('voiceHelp').textContent='Reproduciendo respuesta…'}catch{$('voiceHelp').textContent='No se pudo generar la voz ahora.'}}
+function stopVoice(){
+  state.voice.runId++;
+  if(state.voice.audio){
+    try{state.voice.audio.pause();state.voice.audio.currentTime=0;state.voice.audio.dispatchEvent(new Event('ended'))}catch{}
+    state.voice.audio=null;
+  }
+  if(state.voice.currentUrl){try{URL.revokeObjectURL(state.voice.currentUrl)}catch{}state.voice.currentUrl=null}
+}
+function splitSpeechChunks(text,max=430){
+  const clean=String(text||'').replace(/[\*#_>]/g,'').replace(/\s+/g,' ').trim();
+  if(!clean)return[];
+  const sentences=clean.match(/[^.!?;:]+[.!?;:]?|[^.!?;:]+$/g)||[clean],chunks=[];let current='';
+  const push=()=>{const x=current.trim();if(x)chunks.push(x);current=''};
+  for(const sentenceRaw of sentences){
+    let sentence=sentenceRaw.trim();if(!sentence)continue;
+    if(sentence.length>max){
+      push();
+      const words=sentence.split(/\s+/);let part='';
+      for(const word of words){
+        if((part+' '+word).trim().length>max){if(part)chunks.push(part.trim());part=word}else part=(part+' '+word).trim();
+      }
+      if(part)chunks.push(part.trim());
+      continue;
+    }
+    if((current+' '+sentence).trim().length>max)push();
+    current=(current+' '+sentence).trim();
+  }
+  push();return chunks;
+}
+async function playSpeechChunk(chunk,runId,index,total){
+  if(runId!==state.voice.runId)return false;
+  $('voiceHelp').textContent='Generando voz '+(index+1)+'/'+total+'…';
+  const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:state.voice.lang,voice:state.voice.name,purpose:'chat'})});
+  if(!r.ok)throw new Error('speech');
+  if(runId!==state.voice.runId)return false;
+  const blob=await r.blob(),url=URL.createObjectURL(blob),audio=new Audio(url);
+  state.voice.currentUrl=url;state.voice.audio=audio;
+  $('voiceHelp').textContent='Leyendo '+(index+1)+'/'+total+'…';
+  await new Promise((resolve,reject)=>{
+    let done=false;
+    const finish=()=>{if(done)return;done=true;try{URL.revokeObjectURL(url)}catch{}if(state.voice.currentUrl===url)state.voice.currentUrl=null;if(state.voice.audio===audio)state.voice.audio=null;resolve()};
+    audio.onended=finish;
+    audio.onerror=()=>{finish();reject(new Error('playback'))};
+    audio.play().catch(error=>{finish();reject(error)});
+  });
+  return runId===state.voice.runId;
+}
+async function speakText(text){
+  const chunks=splitSpeechChunks(text);if(!chunks.length)return;
+  stopVoice();const runId=state.voice.runId;
+  try{
+    for(let i=0;i<chunks.length;i++){
+      if(runId!==state.voice.runId)return;
+      const keepGoing=await playSpeechChunk(chunks[i],runId,i,chunks.length);
+      if(!keepGoing)return;
+    }
+    if(runId===state.voice.runId)$('voiceHelp').textContent='Lectura completa.';
+  }catch(error){
+    if(runId===state.voice.runId)$('voiceHelp').textContent='La lectura se interrumpió. Puedes pulsar Escuchar para reintentar.';
+  }
+}
 function startDictation(){stopVoice();const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('voiceHelp').textContent='Este navegador no admite dictado por voz.';return}const rec=new SR();rec.lang=state.voice.lang;rec.interimResults=true;rec.continuous=false;state.voice.listening=true;$('micBtn').classList.add('listening');$('voiceHelp').textContent='Escuchando… habla ahora.';rec.onresult=e=>{let final='',interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)final+=t;else interim+=t}$('q').value=(final||interim).trim()};rec.onerror=()=>{$('voiceHelp').textContent='No pude entender el audio. Inténtalo otra vez.'};rec.onend=()=>{state.voice.listening=false;$('micBtn').classList.remove('listening');if($('q').value.trim())$('voiceHelp').textContent='Pregunta dictada. Puedes editarla o enviarla.'};try{rec.start()}catch{}}
 function renderExam(exam){
   $('msgs').innerHTML='';
