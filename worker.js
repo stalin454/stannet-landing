@@ -223,14 +223,21 @@ export default {
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
       }[char]));
       const conversational = purpose === 'chat';
+      const audiobook = purpose === 'audiobook';
       const spokenText = conversational
         ? safeText
             .replace(/([.!?])\\s+/g, '$1<break time="190ms"/> ')
             .replace(/([,:;])\\s+/g, '$1<break time="90ms"/> ')
-        : safeText;
+        : audiobook
+          ? safeText
+              .replace(/([.!?])\\s+/g, '$1<break time="320ms"/> ')
+              .replace(/([,:;])\\s+/g, '$1<break time="140ms"/> ')
+          : safeText;
       const prosody = conversational
         ? 'rate="-2%" pitch="+0st" volume="+0%"'
-        : 'rate="-8%"';
+        : audiobook
+          ? 'rate="-6%" pitch="-1st" volume="-2%"'
+          : 'rate="-8%"';
       const ssml = `<speak version="1.0" xml:lang="${language}"><voice name="${voice}"><prosody ${prosody}>${spokenText}</prosody></voice></speak>`;
 
       try {
@@ -247,7 +254,7 @@ export default {
         if (!azureResponse.ok) return json({ error: 'Azure no pudo generar el audio.' }, 502);
         const headers = new Headers();
         headers.set('Content-Type', 'audio/mpeg');
-        headers.set('Cache-Control', purpose === 'chat' ? 'no-store' : 'public, max-age=86400, s-maxage=604800');
+        headers.set('Cache-Control', (purpose === 'chat' || purpose === 'audiobook') ? 'no-store' : 'public, max-age=86400, s-maxage=604800');
         headers.set('X-Content-Type-Options', 'nosniff');
         return new Response(azureResponse.body, { status: 200, headers });
       } catch {
