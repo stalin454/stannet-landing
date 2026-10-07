@@ -89,4 +89,59 @@ const loadLibrary=async()=>{
 };
 if(autoNow){loadProgram();loadPlayout();loadLibrary();setInterval(()=>{loadProgram();loadPlayout();loadLibrary()},60000);}
 
+
+
+/* StanNet Radio admin · private upload panel */
+const adminLogin=document.querySelector("#radioAdminLogin"),adminPanel=document.querySelector("#radioAdminPanel"),adminLoginForm=document.querySelector("#radioAdminLoginForm"),adminEmail=document.querySelector("#radioAdminEmail"),adminPassword=document.querySelector("#radioAdminPassword"),adminLoginStatus=document.querySelector("#radioAdminLoginStatus"),adminIdentity=document.querySelector("#radioAdminIdentity"),adminLogout=document.querySelector("#radioAdminLogout"),uploadForm=document.querySelector("#radioUploadForm"),uploadFile=document.querySelector("#radioUploadFile"),uploadPlaylist=document.querySelector("#radioUploadPlaylist"),uploadButton=document.querySelector("#radioUploadButton"),uploadStatus=document.querySelector("#radioUploadStatus"),uploadProgress=document.querySelector("#radioUploadProgress");
+const SB_URL="https://tmldtlsrrgvyzuwljtur.supabase.co",SB_KEY="sb_publishable_GGYWVnox5he2lp3sy0aidw_p28CkC8M";
+const tokenKey="stannet_radio_admin_token";
+const setAdminStatus=(el,text)=>{if(el)el.textContent=text};
+const getToken=()=>sessionStorage.getItem(tokenKey)||"";
+const authFetch=(url,opts={})=>fetch(url,{...opts,headers:{...(opts.headers||{}),Authorization:"Bearer "+getToken()}});
+async function loadPlaylists(){
+  if(!uploadPlaylist)return;
+  uploadPlaylist.innerHTML='<option value="">Sin asignar a lista</option>';
+  try{
+    const r=await authFetch("/api/radio/admin/playlists",{headers:{accept:"application/json"}});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||"No se pudieron cargar las listas.");
+    (data.items||[]).forEach(p=>{const o=document.createElement("option");o.value=String(p.id);o.textContent=p.name;uploadPlaylist.append(o)});
+    const preferred=[...uploadPlaylist.options].find(o=>/24\/7|stannet radio/i.test(o.textContent));
+    if(preferred)uploadPlaylist.value=preferred.value;
+  }catch(e){setAdminStatus(uploadStatus,e.message)}
+}
+async function openAdmin(){
+  const token=getToken(); if(!token)return;
+  try{
+    const r=await authFetch("/api/admin/session",{headers:{accept:"application/json"}});
+    const data=await r.json(); if(!r.ok)throw new Error(data.error||"Sesión no válida.");
+    if(adminIdentity)adminIdentity.textContent=data.email||"Administrador";
+    if(adminLogin)adminLogin.hidden=true;if(adminPanel)adminPanel.hidden=false;
+    await loadPlaylists();
+  }catch{sessionStorage.removeItem(tokenKey);if(adminLogin)adminLogin.hidden=false;if(adminPanel)adminPanel.hidden=true}
+}
+adminLoginForm?.addEventListener("submit",async e=>{
+  e.preventDefault();setAdminStatus(adminLoginStatus,"Verificando acceso…");
+  try{
+    const r=await fetch(SB_URL+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({email:adminEmail.value.trim(),password:adminPassword.value})});
+    const data=await r.json();if(!r.ok||!data.access_token)throw new Error(data.error_description||data.msg||"Credenciales no válidas.");
+    sessionStorage.setItem(tokenKey,data.access_token);adminPassword.value="";setAdminStatus(adminLoginStatus,"");await openAdmin();
+  }catch(e){setAdminStatus(adminLoginStatus,e.message)}
+});
+adminLogout?.addEventListener("click",()=>{sessionStorage.removeItem(tokenKey);if(adminPanel)adminPanel.hidden=true;if(adminLogin)adminLogin.hidden=false});
+uploadFile?.addEventListener("change",()=>{if(uploadFile.files?.[0])setAdminStatus(uploadStatus,uploadFile.files[0].name+" · "+Math.round(uploadFile.files[0].size/1024/1024*10)/10+" MB")});
+uploadForm?.addEventListener("submit",async e=>{
+  e.preventDefault();const file=uploadFile?.files?.[0];if(!file)return;
+  if(uploadButton)uploadButton.disabled=true;if(uploadProgress)uploadProgress.style.width="35%";setAdminStatus(uploadStatus,"Subiendo a AzuraCast…");
+  const fd=new FormData();fd.append("file",file);if(uploadPlaylist?.value)fd.append("playlists",JSON.stringify([Number(uploadPlaylist.value)]));
+  try{
+    const r=await authFetch("/api/radio/admin/upload",{method:"POST",body:fd});
+    if(uploadProgress)uploadProgress.style.width="75%";
+    const data=await r.json();if(!r.ok)throw new Error(data.error||"No se pudo subir el archivo.");
+    if(uploadProgress)uploadProgress.style.width="100%";setAdminStatus(uploadStatus,"✓ "+data.file.name+" subida correctamente a StanNet Radio.");uploadForm.reset();await loadPlaylists();
+  }catch(e){if(uploadProgress)uploadProgress.style.width="0%";setAdminStatus(uploadStatus,"Error: "+e.message)}
+  finally{if(uploadButton)uploadButton.disabled=false;setTimeout(()=>{if(uploadProgress)uploadProgress.style.width="0%"},1800)}
+});
+openAdmin();
+
 })();
