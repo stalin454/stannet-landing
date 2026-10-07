@@ -13,6 +13,20 @@ export default {
       return env.ASSETS.fetch(new Request(target, request));
     }
 
+    if (url.pathname === '/api/radio/admin/playlists') {
+      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      const admin = await requireAdmin(request, env);
+      if (!admin.ok) return json({ error: admin.error }, admin.status);
+      return handleRadioAdminPlaylists(env);
+    }
+
+    if (url.pathname === '/api/radio/admin/upload') {
+      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+      const admin = await requireAdmin(request, env);
+      if (!admin.ok) return json({ error: admin.error }, admin.status);
+      return handleRadioAdminUpload(request, env);
+    }
+
     if (url.pathname === '/api/radio/catalog') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       return handleRadioCatalog(request, env);
@@ -1489,6 +1503,77 @@ function stannetAiCorsHeaders(request, env) {
 
 const SUPABASE_URL = 'https://beaiuamtvijimwislzeo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_70O5MsxRonx5rDCPq4-3fw_zGGUIrvg';
+
+
+function azuraConfig(env) {
+  return {
+    base: String(env.AZURACAST_BASE_URL || 'https://radio.stannet.space').replace(/\/+$/, ''),
+    stationId: String(env.AZURACAST_STATION_ID || '1'),
+    apiKey: String(env.AZURACAST_API_KEY || '').trim()
+  };
+}
+function azuraHeaders(apiKey, extra = {}) {
+  return { Authorization: 'Bearer ' + apiKey, Accept: 'application/json', ...extra };
+}
+async function handleRadioAdminPlaylists(env) {
+  const cfg = azuraConfig(env);
+  if (!cfg.apiKey) return json({ error:'Falta configurar AZURACAST_API_KEY en Cloudflare.' }, 503);
+  try {
+    const upstream = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/playlists', {
+      headers: azuraHeaders(cfg.apiKey)
+    });
+    const data = await upstream.json().catch(() => ([]));
+    if (!upstream.ok) return json({ error:'AzuraCast no pudo devolver las listas.', providerStatus:upstream.status }, 502);
+    const items = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
+    return json({ ok:true, items:items.map(p => ({ id:p.id, name:p.name || p.playlist_name || ('Playlist '+p.id), type:p.type || null })) }, 200, { 'Cache-Control':'no-store' });
+  } catch {
+    return json({ error:'No se pudo conectar con AzuraCast.' }, 502);
+  }
+}
+async function handleRadioAdminUpload(request, env) {
+  const cfg = azuraConfig(env);
+  if (!cfg.apiKey) return json({ error:'Falta configurar AZURACAST_API_KEY en Cloudflare.' }, 503);
+  let form;
+  try { form = await request.formData(); }
+  catch { return json({ error:'Formulario de subida no válido.' }, 400); }
+  const file = form.get('file');
+  if (!(file instanceof File)) return json({ error:'Selecciona un archivo de audio.' }, 400);
+  const safeName = String(file.name || 'track.mp3').replace(/[^A-Za-z0-9._()\- áéíóúÁÉÍÓÚñÑ]/g, '_').slice(0,180);
+  if (!/\.(mp3|m4a|aac|ogg|opus|flac|wav)$/i.test(safeName)) return json({ error:'Formato no permitido. Usa MP3, M4A, AAC, OGG/OPUS, FLAC o WAV.' }, 400);
+  const maxBytes = 20 * 1024 * 1024;
+  if (!file.size || file.size > maxBytes) return json({ error:'El archivo debe pesar menos de 20 MB.' }, 413);
+  let playlists = [];
+  const rawPlaylists = form.get('playlists');
+  if (typeof rawPlaylists === 'string' && rawPlaylists.trim()) {
+    try { playlists = JSON.parse(rawPlaylists); } catch {}
+  }
+  playlists = Array.isArray(playlists) ? playlists.map(Number).filter(Number.isFinite) : [];
+  try {
+    const buffer = await file.arrayBuffer();
+    const payload = {
+      path: safeName,
+      file: arrayBufferToBase64(buffer)
+    };
+    if (playlists.length) payload.playlists = playlists;
+    const upstream = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/files', {
+      method:'POST',
+      headers: azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) return json({ error:data?.message || data?.error || 'AzuraCast rechazó la subida.', providerStatus:upstream.status }, 502);
+    return json({ ok:true, file:{ name:safeName, size:file.size }, azuracast:data }, 200, { 'Cache-Control':'no-store' });
+  } catch {
+    return json({ error:'No se pudo completar la subida a AzuraCast.' }, 502);
+  }
+}
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunk = 0x8000;
+  let binary = '';
+  for (let i=0; i<bytes.length; i+=chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i+chunk, bytes.length)));
+  return btoa(binary);
+}
 
 async function requireAdmin(request, env) {
   const auth = request.headers.get('authorization') || '';
