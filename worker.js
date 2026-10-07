@@ -254,7 +254,7 @@ export default {
         if (!azureResponse.ok) return json({ error: 'Azure no pudo generar el audio.' }, 502);
         const headers = new Headers();
         headers.set('Content-Type', 'audio/mpeg');
-        headers.set('Cache-Control', (purpose === 'chat' || purpose === 'audiobook') ? 'no-store' : 'public, max-age=86400, s-maxage=604800');
+        headers.set('Cache-Control', purpose === 'chat' ? 'no-store' : purpose === 'audiobook' ? 'no-store' : 'public, max-age=86400, s-maxage=604800');
         headers.set('X-Content-Type-Options', 'nosniff');
         return new Response(azureResponse.body, { status: 200, headers });
       } catch {
