@@ -117,8 +117,14 @@ async function openAdmin(){
     const data=await r.json(); if(!r.ok)throw new Error(data.error||"Sesión no válida.");
     if(adminIdentity)adminIdentity.textContent=data.email||"Administrador";
     if(adminLogin)adminLogin.hidden=true;if(adminPanel)adminPanel.hidden=false;
+    setAdminStatus(adminLoginStatus,"");
     await loadPlaylists();
-  }catch{sessionStorage.removeItem(tokenKey);if(adminLogin)adminLogin.hidden=false;if(adminPanel)adminPanel.hidden=true}
+  }catch(e){
+    sessionStorage.removeItem(tokenKey);
+    if(adminLogin)adminLogin.hidden=false;
+    if(adminPanel)adminPanel.hidden=true;
+    setAdminStatus(adminLoginStatus,e?.message||"No se pudo validar el acceso de administrador.");
+  }
 }
 adminLoginForm?.addEventListener("submit",async e=>{
   e.preventDefault();setAdminStatus(adminLoginStatus,"Verificando acceso…");
