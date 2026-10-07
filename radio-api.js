@@ -22,7 +22,9 @@ export const radioProgramClock = Object.freeze([
 export const radioSchedule = radioProgramClock;
 
 export function radioStatus(env = {}, date = new Date()) {
-  const streamUrl = typeof env.RADIO_STREAM_URL === "string" ? env.RADIO_STREAM_URL.trim() : "";
+  const streamUrl = typeof env.RADIO_STREAM_URL === "string" && env.RADIO_STREAM_URL.trim()
+    ? env.RADIO_STREAM_URL.trim()
+    : "https://radio.stannet.space/listen/stannet-radio/radio.mp3";
   const safeStream = /^https:\/\//i.test(streamUrl) ? streamUrl : "";
   const program = resolveRadioProgram(date);
   return {
