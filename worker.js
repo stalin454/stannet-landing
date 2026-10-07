@@ -1550,11 +1550,12 @@ async function handleRadioAdminUpload(request, env) {
   playlists = Array.isArray(playlists) ? playlists.map(Number).filter(Number.isFinite) : [];
   try {
     const buffer = await file.arrayBuffer();
+    const playlistObjects = playlists.map(id => ({ id }));
     const payload = {
       path: safeName,
       file: arrayBufferToBase64(buffer)
     };
-    if (playlists.length) payload.playlists = playlists;
+    if (playlistObjects.length) payload.playlists = playlistObjects;
     const upstream = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/files', {
       method:'POST',
       headers: azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' }),
@@ -1562,7 +1563,28 @@ async function handleRadioAdminUpload(request, env) {
     });
     const data = await upstream.json().catch(() => ({}));
     if (!upstream.ok) return json({ error:data?.message || data?.error || 'AzuraCast rechazó la subida.', providerStatus:upstream.status }, 502);
-    return json({ ok:true, file:{ name:safeName, size:file.size }, azuracast:data }, 200, { 'Cache-Control':'no-store' });
+
+    let playlistAssigned = playlistObjects.length === 0;
+    let assignmentStatus = null;
+    const mediaId = Number(data?.song_id ?? data?.id);
+    if (playlistObjects.length && Number.isFinite(mediaId)) {
+      const assign = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/file/' + encodeURIComponent(String(mediaId)), {
+        method:'PUT',
+        headers: azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' }),
+        body: JSON.stringify({ playlists: playlistObjects })
+      });
+      assignmentStatus = assign.status;
+      playlistAssigned = assign.ok;
+    }
+
+    return json({
+      ok:true,
+      file:{ name:safeName, size:file.size, id:Number.isFinite(mediaId) ? mediaId : null },
+      playlistAssigned,
+      assignmentStatus,
+      selectedPlaylists:playlists,
+      azuracast:data
+    }, 200, { 'Cache-Control':'no-store' });
   } catch {
     return json({ error:'No se pudo completar la subida a AzuraCast.' }, 502);
   }
