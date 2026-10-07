@@ -93,7 +93,7 @@ if(autoNow){loadProgram();loadPlayout();loadLibrary();setInterval(()=>{loadProgr
 
 /* StanNet Radio admin · private upload panel */
 const adminLogin=document.querySelector("#radioAdminLogin"),adminPanel=document.querySelector("#radioAdminPanel"),adminLoginForm=document.querySelector("#radioAdminLoginForm"),adminEmail=document.querySelector("#radioAdminEmail"),adminPassword=document.querySelector("#radioAdminPassword"),adminLoginStatus=document.querySelector("#radioAdminLoginStatus"),adminIdentity=document.querySelector("#radioAdminIdentity"),adminLogout=document.querySelector("#radioAdminLogout"),uploadForm=document.querySelector("#radioUploadForm"),uploadFile=document.querySelector("#radioUploadFile"),uploadPlaylist=document.querySelector("#radioUploadPlaylist"),uploadButton=document.querySelector("#radioUploadButton"),uploadStatus=document.querySelector("#radioUploadStatus"),uploadProgress=document.querySelector("#radioUploadProgress");
-const SB_URL="https://tmldtlsrrgvyzuwljtur.supabase.co",SB_KEY="sb_publishable_GGYWVnox5he2lp3sy0aidw_p28CkC8M";
+const SB_URL="https://beaiuamtvijimwislzeo.supabase.co",SB_KEY="sb_publishable_70O5MsxRonx5rDCPq4-3fw_zGGUIrvg";
 const tokenKey="stannet_radio_admin_token";
 const setAdminStatus=(el,text)=>{if(el)el.textContent=text};
 const getToken=()=>sessionStorage.getItem(tokenKey)||"";
