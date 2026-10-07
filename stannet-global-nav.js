@@ -89,7 +89,7 @@ header.innerHTML=`
       <a href="/sanacion/">Proyecto 01 · Alfa y Omega</a>
       <a href="/pages/programming.html">Programming Academy</a>
       <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
-      <a href="/nutri-ia/">Nutri IA</a>
+      <a href="/nutri-ia/">Nutri IA</a>\n      <a href="/pdf-tutor/">PDF Tutor · Study AI</a>
       <a href="/pages/marketplace.html">AyudaEnCasa</a>
     </div>
   </div>
