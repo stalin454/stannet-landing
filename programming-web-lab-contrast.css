@@ -1,0 +1,171 @@
+/* StanNet Web & Languages Lab — readable, page-scoped light classroom.
+   The shared light theme and the legacy dark lab CSS previously mixed
+   dark foregrounds with dark controls and light foregrounds with white cards.
+   The dynamic syllabus, theory, console and autograder are left intact. */
+body.stannet-global.stannet-page-programming-web-lab {
+  --bg:#f1f6fc;
+  --panel:#ffffff;
+  --ink:#10243b;
+  --muted:#334b63;
+  --line:#bfd1e2;
+  --cyan:#075985;
+  --accent:#075985;
+  --lime:#166534;
+  --violet:#6434ad;
+  background:#f1f6fc !important;
+  color:#10243b !important;
+  color-scheme:light;
+}
+.stannet-page-programming-web-lab .pa-header,
+.stannet-page-programming-web-lab .pa-container,
+.stannet-page-programming-web-lab .pa-lab {
+  color:var(--ink);
+}
+.stannet-page-programming-web-lab .pa-main-title,
+.stannet-page-programming-web-lab .pa-lab-main > #web-title,
+.stannet-page-programming-web-lab .pa-section-title,
+.stannet-page-programming-web-lab .pa-theory-book h3,
+.stannet-page-programming-web-lab .pa-deep-section h3,
+.stannet-page-programming-web-lab .pa-theory-intro h3 {
+  color:#10243b !important;
+}
+.stannet-page-programming-web-lab .pa-back-link,
+.stannet-page-programming-web-lab .pa-section-title {
+  color:#075985 !important;
+}
+.stannet-page-programming-web-lab .pa-card,
+.stannet-page-programming-web-lab .pa-lab-sidebar,
+.stannet-page-programming-web-lab .pa-lab-main {
+  background:#fff !important;
+  color:var(--ink) !important;
+  border-color:var(--line) !important;
+}
+.stannet-page-programming-web-lab :is(.pa-card-desc,.pa-theory,.pa-theory-book p,.pa-theory-book li,.pa-deep-section p,.pa-deep-section li,.pa-outline li,.pa-outline summary span,.pa-web-navigation p,.pa-grade-hint,.pa-grade-summary) {
+  color:var(--muted) !important;
+}
+.stannet-page-programming-web-lab .pa-theory,
+.stannet-page-programming-web-lab .pa-theory-book {
+  font-size:1rem;
+  line-height:1.75;
+}
+.stannet-page-programming-web-lab :is(.pa-theory-intro,.pa-deep-section,.pa-outline details,.pa-grade-panel) {
+  background:#f6faff !important;
+  border-color:#b9cfdf !important;
+  color:var(--ink);
+}
+.stannet-page-programming-web-lab .pa-theory-book :is(strong,b) {
+  color:#10243b;
+}
+.stannet-page-programming-web-lab .pa-theory-book .case-kicker {
+  color:#075985 !important;
+  font-weight:700;
+}
+.stannet-page-programming-web-lab .pa-outline summary {
+  color:#10243b !important;
+}
+.stannet-page-programming-web-lab :is(.pa-outline-link,.pa-lesson-btn) {
+  background:#fff !important;
+  color:#243b55 !important;
+  border-color:#b9cfdf !important;
+  font-size:.93rem;
+  line-height:1.55;
+}
+.stannet-page-programming-web-lab :is(.pa-outline-link,.pa-lesson-btn):is(:hover,:focus-visible) {
+  background:#e5f2ff !important;
+  color:#06466c !important;
+}
+.stannet-page-programming-web-lab :is(.pa-outline-link,.pa-lesson-btn).active {
+  background:#d9edff !important;
+  color:#073e65 !important;
+  font-weight:700;
+}
+.stannet-page-programming-web-lab .pa-badge-live {
+  color:#166534 !important;
+  background:#e6f8ee !important;
+  border-color:#90cfa8 !important;
+}
+.stannet-page-programming-web-lab .pa-web-navigation {
+  border-color:#b9cfdf;
+}
+.stannet-page-programming-web-lab .pa-web-navigation button:disabled {
+  opacity:.65;
+}
+.stannet-page-programming-web-lab .pa-btn-primary {
+  color:#fff !important;
+  background:#075985 !important;
+  border:1px solid #075985 !important;
+}
+.stannet-page-programming-web-lab .pa-btn-primary:hover {
+  background:#064568 !important;
+}
+.stannet-page-programming-web-lab .pa-btn-secondary {
+  color:#123b5d !important;
+  background:#e9f2fb !important;
+  border:1px solid #a8c2d8 !important;
+}
+.stannet-page-programming-web-lab .pa-btn-secondary:hover {
+  background:#dcecf9 !important;
+}
+.stannet-page-programming-web-lab .pa-btn-check {
+  color:#fff !important;
+  background:#166534 !important;
+  border-color:#166534 !important;
+}
+.stannet-page-programming-web-lab :is(.pa-btn,.pa-outline-link,.pa-outline summary,.pa-lesson-btn,#web-editor):focus-visible {
+  outline:3px solid #0b6c9e;
+  outline-offset:3px;
+}
+/* The editor and example code retain an explicitly dark coding surface. */
+body.stannet-global.stannet-page-programming-web-lab #web-editor {
+  background:#101827 !important;
+  color:#f1f5fb !important;
+  caret-color:#7fe3ff;
+  border:1px solid #46607c !important;
+  line-height:1.6;
+}
+.stannet-page-programming-web-lab #web-editor::placeholder {
+  color:#c6d5e6;
+  opacity:1;
+}
+.stannet-page-programming-web-lab .pa-lab-main pre,
+.stannet-page-programming-web-lab .pa-theory-book pre {
+  background:#101827 !important;
+  color:#edf5ff !important;
+  border-color:#46607c !important;
+  line-height:1.6;
+}
+.stannet-page-programming-web-lab :is(.pa-lab-main pre,.pa-theory-book pre) code {
+  color:#d5f4ff !important;
+  background:transparent !important;
+}
+.stannet-page-programming-web-lab .pa-theory-book :not(pre) > code,
+.stannet-page-programming-web-lab .pa-deep-section :not(pre) > code {
+  color:#084e75 !important;
+  background:#e3effb;
+  padding:.1em .28em;
+  border-radius:4px;
+}
+.stannet-page-programming-web-lab .pa-grade-panel,
+.stannet-page-programming-web-lab .pa-grade-item {
+  color:#10243b;
+  border-color:#b9cfdf;
+}
+.stannet-page-programming-web-lab .pa-grade-item.pa-grade-pass {
+  background:#ecfdf3;
+  border-color:#6dab87;
+}
+.stannet-page-programming-web-lab .pa-grade-item.pa-grade-fail {
+  background:#fff6e8;
+  border-color:#b7791f;
+}
+@media(max-width:850px) {
+  .stannet-page-programming-web-lab .pa-lab-sidebar {
+    position:static;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .stannet-page-programming-web-lab .pa-btn,
+  .stannet-page-programming-web-lab .pa-card {
+    transition:none !important;
+  }
+}
