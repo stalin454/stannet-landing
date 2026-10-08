@@ -1,0 +1,58 @@
+/*
+ * Callan English Coach — high-contrast reading surface.
+ * The shared StanNet theme changes the body to a light theme, but Callan's
+ * private classroom, reader, exercises and dictionary still use dark cards.
+ * Keep this override page-scoped: other academies and the global nav are untouched.
+ */
+body.stannet-global.stannet-page-callan {
+  --bg:#071320;
+  --panel:#101126;
+  --ink:#f4faff;
+  --muted:#c5d1e2;
+  --line:rgba(186,217,247,.30);
+  --lesson-line:rgba(186,217,247,.32);
+  --lesson-accent:#88eaff;
+  --lime:#7df2d0;
+  background:#071320 !important;
+  color:#f4faff !important;
+  color-scheme:dark;
+}
+
+/* Legible headings and explanatory copy against the original dark surfaces. */
+.stannet-page-callan main,
+.stannet-page-callan .coach-hero,
+.stannet-page-callan .auth-card,
+.stannet-page-callan .callan-memory,
+.stannet-page-callan .lesson-panel,
+.stannet-page-callan .coach-side,
+.stannet-page-callan .dictionary-panel {
+  color:var(--ink);
+}
+.stannet-page-callan :is(.coach-hero h1,.auth-card h2,.lesson-top h2,.callan-memory h3,.side-title,.audio-panel h3,.book-panel h3,.dictionary-panel h3,.question,.callan-memory-prompt strong) {
+  color:var(--ink);
+}
+.stannet-page-callan :is(.coach-copy,.auth-status,.callan-memory-copy,.callan-memory-result,.audio-status,.book-status,.aux-note,.voice-status,.dictionary-copy,.dictionary-status,.dictionary-block p,.private-note,.feedback,.progress-copy,.word span,.teacher,.coach-footer,.user-bar) {
+  color:var(--muted);
+}
+.stannet-page-callan :is(.auth-card,.callan-memory,.lesson-panel,.coach-side,.dictionary-panel,.dictionary-block,.audio-panel,.book-panel) {
+  border-color:var(--lesson-line);
+}
+.stannet-page-callan :is(.level-pill,.book-open,.book-load,.callan-memory-prompt small,.callan-memory-prompt strong:not([id])) {
+  border-color:var(--lesson-accent);
+}
+.stannet-page-callan :is(input,textarea)::placeholder {
+  color:#50617a;
+  opacity:1;
+}
+
+/* Keep button text discernible on the contrasting secondary/action backgrounds. */
+.stannet-page-callan :is(.auth-actions button.secondary,.voice-actions button,.callan-memory-actions button:not(.memory-check)) {
+  color:var(--ink);
+}
+.stannet-page-callan :is(.answer-row button,.memory-check,.audio-load,.dictionary-search button,.dictionary-save,.dictionary-audio,.auth-actions button:not(.secondary)) {
+  color:#071b21;
+}
+.stannet-page-callan :is(.auth-actions button,.voice-actions button,.callan-memory-actions button,.audio-load,.book-load,.dictionary-search button,.dictionary-save,.dictionary-audio):focus-visible {
+  outline:3px solid #88eaff;
+  outline-offset:3px;
+}
