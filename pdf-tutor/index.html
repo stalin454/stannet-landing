@@ -165,81 +165,48 @@ function splitSpeechChunks(text,max=430){
 function clearSleepTimer(){if(state.voice.sleepTimer){clearTimeout(state.voice.sleepTimer);state.voice.sleepTimer=null}}
 function pauseNightReader(){
   if(!state.voice.night)return;
-  if(nightAudioContext){if(nightAudioContext.state==='running'){state.voice.paused=true;nightAudioContext.suspend().catch(()=>{});$('nightPause').textContent='▶ Reanudar';$('nightStatus').textContent='Lectura pausada en la página '+state.voice.nightPage+'.'}else{state.voice.paused=false;nightAudioContext.resume().catch(()=>{});$('nightPause').textContent='⏸ Pausar';$('nightStatus').textContent='Leyendo página '+state.voice.nightPage+'…'}return}
-  if(state.voice.audio&&!state.voice.audio.paused){state.voice.paused=true;state.voice.audio.pause();$('nightPause').textContent='▶ Reanudar'}else if(state.voice.audio){state.voice.paused=false;state.voice.audio.play().catch(()=>{});$('nightPause').textContent='⏸ Pausar'}
+  if(state.voice.audio && !state.voice.audio.paused){state.voice.audio.pause();$('nightPause').textContent='▶ Reanudar';$('nightStatus').textContent='Lectura pausada en la página '+state.voice.nightPage+'.'}
+  else if(state.voice.audio){state.voice.audio.play().catch(()=>{});$('nightPause').textContent='⏸ Pausar';$('nightStatus').textContent='Leyendo página '+state.voice.nightPage+'…'}
 }
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
-let nightAudioContext=null,nightSource=null;
-function getNightAudioContext(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!nightAudioContext)nightAudioContext=new AC();if(nightAudioContext.state==='suspended')nightAudioContext.resume().catch(()=>{});return nightAudioContext}
-function stopNightSource(){if(nightSource){try{nightSource.stop(0)}catch{}try{nightSource.disconnect()}catch{}nightSource=null}}
-async function fetchNightAudio(chunk,runId){
-  let last;
-  for(let attempt=0;attempt<4;attempt++){
-    if(runId!==state.voice.runId||!state.voice.night)return null;
-    try{
-      const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),30000);
-      const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json','Accept':'audio/mpeg'},body:JSON.stringify({text:chunk,lang:state.voice.lang,voice:state.voice.name,purpose:'audiobook'}),cache:'no-store',signal:ctl.signal});
-      clearTimeout(timer);if(!r.ok){let msg='HTTP '+r.status;try{const p=await r.json();if(p?.error)msg+=' · '+p.error}catch{}throw new Error(msg)}
-      const ct=r.headers.get('content-type')||'sin content-type';const bytes=await r.arrayBuffer();if(!bytes||bytes.byteLength<1000)throw new Error('MP3 inválido · '+bytes.byteLength+' bytes · '+ct);
-      window.__pdfAudioDiag={stage:'fetch-ok',status:r.status,contentType:ct,bytes:bytes.byteLength,at:new Date().toISOString()};return bytes;
-    }catch(e){last=e;if(attempt<3){$('nightStatus').textContent='Reconectando voz… intento '+(attempt+2)+'/4';await wait(700*Math.pow(2,attempt));}}
-  }
-  throw last||new Error('speech');
-}
-async function playNightBlob(bytes,runId,page,index,total){
-  if(!bytes||runId!==state.voice.runId||!state.voice.night)return false;
-  const ctx=getNightAudioContext();
-  state.voice.nightPage=page;state.voice.nightChunk=index;state.voice.paused=false;state.currentPage=page;$('nightPage').value=String(page);saveProgress();
+async function readNightChunk(chunk,runId,page,index,total){
+  if(runId!==state.voice.runId||!state.voice.night)return false;
   $('nightStatus').textContent='Página '+page+' · fragmento '+(index+1)+'/'+total;
-  if(ctx){
-    let decoded;try{decoded=await ctx.decodeAudioData(bytes.slice(0));window.__pdfAudioDiag={...(window.__pdfAudioDiag||{}),stage:'decode-ok',duration:decoded.duration,contextState:ctx.state}}catch(e){window.__pdfAudioDiag={...(window.__pdfAudioDiag||{}),stage:'decode-failed',contextState:ctx.state,error:e?.message||String(e)};throw new Error('DECODE · '+(e?.message||e?.name||'falló decodeAudioData'))}
-    await new Promise((resolve,reject)=>{
-      if(runId!==state.voice.runId||!state.voice.night)return resolve();
-      const node=ctx.createBufferSource();node.buffer=decoded;node.connect(ctx.destination);nightSource=node;
-      node.onended=()=>{if(nightSource===node)nightSource=null;resolve()};
-      try{node.start(0)}catch(e){if(nightSource===node)nightSource=null;reject(e)}
-    });
-    return runId===state.voice.runId&&state.voice.night;
-  }
-  const blob=new Blob([bytes],{type:'audio/mpeg'}),url=URL.createObjectURL(blob),audio=new Audio(url);audio.setAttribute('playsinline','');audio.preload='auto';state.voice.currentUrl=url;state.voice.audio=audio;
-  await new Promise((resolve,reject)=>{let done=false;const finish=()=>{if(done)return;done=true;URL.revokeObjectURL(url);if(state.voice.audio===audio)state.voice.audio=null;resolve()};audio.onended=finish;audio.onerror=()=>{finish();reject(new Error('playback'))};audio.play().catch(e=>{finish();reject(e)})});
+  const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:state.voice.lang,voice:state.voice.name,purpose:'audiobook'})});
+  if(!r.ok)throw new Error('speech');
+  if(runId!==state.voice.runId||!state.voice.night)return false;
+  const blob=await r.blob(),url=URL.createObjectURL(blob),audio=new Audio(url);
+  state.voice.currentUrl=url;state.voice.audio=audio;
+  await new Promise((resolve,reject)=>{
+    let done=false;
+    const finish=()=>{if(done)return;done=true;try{URL.revokeObjectURL(url)}catch{}if(state.voice.currentUrl===url)state.voice.currentUrl=null;if(state.voice.audio===audio)state.voice.audio=null;resolve()};
+    audio.onended=finish;audio.onerror=()=>{finish();reject(new Error('playback'))};audio.play().catch(error=>{finish();reject(error)});
+  });
   return runId===state.voice.runId&&state.voice.night;
 }
 async function startNightReader(){
   if(!state.pdf||!state.pages.length){alert('Primero sube un PDF.');return}
-  stopVoice();clearSleepTimer();state.voice.night=true;state.voice.paused=false;
-  const requested=Math.max(1,Math.min(state.pages.length,Number($('nightPage').value)||state.currentPage||1));
-  state.voice.nightPage=requested;state.voice.nightChunk=0;$('nightPause').textContent='⏸ Pausar';
+  stopVoice();clearSleepTimer();state.voice.night=true;
+  const requested=Math.max(1,Math.min(state.pages.length,Number($('nightPage').value)||1));
+  state.voice.nightPage=requested;$('nightPause').textContent='⏸ Pausar';
   const mins=Number($('sleepTimer').value)||0;
   if(mins>0)state.voice.sleepTimer=setTimeout(()=>{state.voice.night=false;stopVoice();$('nightStatus').textContent='Temporizador finalizado. Buenas noches 🌙';$('nightPause').textContent='⏸ Pausar'},mins*60*1000);
   const runId=state.voice.runId;
   try{
     for(let p=requested;p<=state.pages.length;p++){
       if(runId!==state.voice.runId||!state.voice.night)return;
-      const parts=splitSpeechChunks(state.pages[p-1]?.text||'',440);if(!parts.length)continue;
-      let nextPromise=fetchNightAudio(parts[0],runId);
-      for(let i=0;i<parts.length;i++){
-        if(runId!==state.voice.runId||!state.voice.night)return;
-        let blob;
-        try{blob=await nextPromise}catch(e){blob=await fetchNightAudio(parts[i],runId)}
-        if(i+1<parts.length)nextPromise=fetchNightAudio(parts[i+1],runId);
-        else if(p<state.pages.length){const nxt=splitSpeechChunks(state.pages[p]?.text||'',440);nextPromise=nxt.length?fetchNightAudio(nxt[0],runId):Promise.resolve(null)}
-        let played=false;
-        for(let attempt=0;attempt<2&&!played;attempt++){
-          try{played=await playNightBlob(blob,runId,p,i,parts.length)}
-          catch(e){if(attempt===0){$('nightStatus').textContent='Recuperando reproducción…';blob=await fetchNightAudio(parts[i],runId)}else throw e}
-        }
-        if(!played)return;
+      state.voice.nightPage=p;$('nightPage').value=String(p);
+      const chunks=splitSpeechChunks(state.pages[p-1]?.text||'',430);
+      if(!chunks.length)continue;
+      for(let i=0;i<chunks.length;i++){
+        const ok=await readNightChunk(chunks[i],runId,p,i,chunks.length);
+        if(!ok)return;
       }
     }
     if(runId===state.voice.runId&&state.voice.night){state.voice.night=false;clearSleepTimer();$('nightStatus').textContent='Lectura completa del documento. 🌙'}
-  }catch(e){
-    console.warn('Audiobook recovery stopped',e,window.__pdfAudioDiag);
-    if(runId===state.voice.runId){state.voice.night=false;$('nightPage').value=String(state.voice.nightPage||state.currentPage||1);saveProgress();const d=window.__pdfAudioDiag||{};const detail=e?.message||'Error desconocido';$('nightStatus').textContent='DIAGNÓSTICO: '+detail+(d.bytes?' · '+d.bytes+' bytes':'')+(d.contentType?' · '+d.contentType:'')+(d.contextState?' · AudioContext '+d.contextState:'')+'. Página '+(state.voice.nightPage||state.currentPage||1)+' guardada.'}
-  }
+  }catch{if(runId===state.voice.runId)$('nightStatus').textContent='La lectura se interrumpió. Pulsa Leer PDF para continuar.'}
 }
 function stopNightReader(){
-  state.voice.night=false;clearSleepTimer();stopNightSource();if(nightAudioContext?.state==='running')nightAudioContext.suspend().catch(()=>{});stopVoice();$('nightPause').textContent='⏸ Pausar';$('nightStatus').textContent='Lectura nocturna detenida.';
+  state.voice.night=false;clearSleepTimer();stopVoice();$('nightPause').textContent='⏸ Pausar';$('nightStatus').textContent='Lectura nocturna detenida.';
 }
 
 async function playSpeechChunk(chunk,runId,index,total){
