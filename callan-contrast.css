@@ -37,9 +37,6 @@ body.stannet-global.stannet-page-callan {
 .stannet-page-callan :is(.auth-card,.callan-memory,.lesson-panel,.coach-side,.dictionary-panel,.dictionary-block,.audio-panel,.book-panel) {
   border-color:var(--lesson-line);
 }
-.stannet-page-callan :is(.level-pill,.book-open,.book-load,.callan-memory-prompt small,.callan-memory-prompt strong:not([id])) {
-  border-color:var(--lesson-accent);
-}
 .stannet-page-callan :is(input,textarea)::placeholder {
   color:#50617a;
   opacity:1;
