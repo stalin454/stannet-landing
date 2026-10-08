@@ -10,3 +10,6 @@ wrangler.jsonc
 worker.js
 package.json
 package-lock.json
+docs/
+migrations/
+ayudaencasa-api.js

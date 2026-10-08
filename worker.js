@@ -1,9 +1,15 @@
+import { handleAyudaEnCasaApi } from './ayudaencasa-api.js';
 import { handleCommunity } from './community-dinamarca/api.mjs';
 import { catalogueText } from './stannet-ai-knowledge.mjs';
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Isolated AyudaEnCasa namespace: existing StanNet routes stay untouched.
+    if (url.pathname === '/api/ayudaencasa/v1' || url.pathname.startsWith('/api/ayudaencasa/v1/')) {
+      return handleAyudaEnCasaApi(request, env, url);
+    }
+
     if (url.pathname === '/api/community' || url.pathname.startsWith('/api/community/')) {
       return handleCommunity(request, env, { url: SUPABASE_URL, key: SUPABASE_KEY });
     }
