@@ -26,7 +26,7 @@ const issues=[];
     const interactive=[...document.querySelectorAll('.home-hero-actions a,.home-rail-controls button,.directory-filters button')].map(e=>({name:e.textContent.trim().slice(0,40),w:Math.round(e.getBoundingClientRect().width),h:Math.round(e.getBoundingClientRect().height)}));
     return {viewport:innerWidth,overflow,docW:document.documentElement.scrollWidth,objects,heading,heroBox,headerBox,image:{naturalWidth:image?.naturalWidth,loaded:image?.complete},interactive:interactive.slice(0,17),heroInViewport:heroBox?.h,navCount:document.querySelectorAll('#stannet-canonical-nav .nav-group').length};
    });
-   if(response.status()!==200)issues.push('HTTP '+response.status()+' at '+width);
+   if(![200,304].includes(response.status()))issues.push('HTTP '+response.status()+' at '+width);
    if(result.overflow>2)issues.push('Horizontal page overflow '+result.overflow+'px at '+width);
    const q=result.objects;
    if(width<=430){
