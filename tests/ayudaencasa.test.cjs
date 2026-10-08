@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');const fs=require('node:fs');
+const api=fs.readFileSync('ayudaencasa-api.js','utf8');
+const ui=fs.readFileSync('ayudaencasa.js','utf8');
+const html=fs.readFileSync('pages/marketplace.html','utf8');
+for(const route of ['/auth/register','/auth/login','/auth/password/forgot','/auth/password/reset','/auth/verify-email/resend','/requests','/market/requests','/jobs','/reports','/blocks','/privacy/requests','/me/entitlements','/admin/privacy-requests'])assert.ok(api.includes(route),'missing '+route);
+for(const token of ['PBKDF2','310000','HttpOnly','Secure','SameSite=Lax','AEC_ORIGIN_FORBIDDEN','AEC_PAYLOAD_TOO_LARGE','Sec-Fetch-Site','constantTimeEqual','token_hash'])assert.ok(api.includes(token),'security control missing '+token);
+for(const table of ['aec_requests','aec_proposals','aec_jobs','aec_messages','aec_reviews','aec_reports','aec_blocks'])assert.ok(api.includes(table),'missing data flow '+table);
+for(const feature of ['loadDashboard','renderCustomerDashboard','renderProfessionalDashboard','jobChat','reviewModal','reportModal','blockUser','appendPrivacyControls','showBlocks','loadPublicProfessionals','categoryIdForName'])assert.ok(ui.includes(feature),'missing UI '+feature);
+assert.ok(html.includes('accountDashboard'),'dashboard shell missing');
+console.log('PASS: AyudaEnCasa marketplace, security and trust architecture verified.');

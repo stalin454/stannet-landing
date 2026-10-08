@@ -1,0 +1,585 @@
+const PREFIX='/api/ayudaencasa/v1';
+
+const fallbackCategories=[
+ {id:'cleaning',slug:'limpieza-organizacion',name:'Limpieza y organización'},
+ {id:'care',slug:'cuidados-acompanamiento',name:'Cuidados y acompañamiento'},
+ {id:'garden',slug:'jardin-exterior',name:'Jardín y exterior'},
+ {id:'repairs',slug:'hogar-reparaciones',name:'Hogar y reparaciones'},
+ {id:'trades',slug:'profesionales-hogar',name:'Profesionales del hogar'},
+ {id:'physical',slug:'ayuda-fisica',name:'Ayuda física'},
+ {id:'wellbeing',slug:'bienestar-cuidado-personal',name:'Bienestar y cuidado personal'}
+];
+
+export async function handleAyudaEnCasaApi(request,env,url){
+ if(!url.pathname.startsWith(PREFIX)) return null;
+ const path=url.pathname.slice(PREFIX.length)||'/';
+ if(!['GET','HEAD','OPTIONS'].includes(request.method)){
+  const originError=validateMutationRequest(request,env,url);if(originError)return originError;
+ }
+ if(path==='/auth/register'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const limited=await rateLimit(request,env,'register',5,900);
+  if(!limited.ok) return response({error:'Demasiados intentos. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429,{'Retry-After':String(limited.retryAfter)});
+  const body=await readJson(request);
+  if(!body) return response({error:'Solicitud no válida.',code:'AEC_BAD_JSON'},400);
+  const email=String(body.email||'').trim().toLowerCase();
+  const password=String(body.password||'');
+  const role=String(body.role||'').toUpperCase();
+  if(!validEmail(email)) return response({error:'Correo no válido.',code:'AEC_INVALID_EMAIL'},400);
+  if(!validPassword(password)) return response({error:'La contraseña debe tener al menos 12 caracteres.',code:'AEC_WEAK_PASSWORD'},400);
+  if(!['CUSTOMER','PROFESSIONAL'].includes(role)) return response({error:'Tipo de cuenta no válido.',code:'AEC_INVALID_ROLE'},400);
+  const exists=await env.AYUDA_DB.prepare('SELECT id FROM aec_users WHERE email=? LIMIT 1').bind(email).first();
+  if(exists) return response({error:'No se pudo crear la cuenta con esos datos.',code:'AEC_REGISTER_FAILED'},409);
+  const userId=crypto.randomUUID();
+  const salt=randomToken(16);
+  const iterations=310000;
+  const passwordHash=await derivePassword(password,salt,iterations);
+  const verificationEnabled=Boolean(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("INSERT INTO aec_users(id,email,role,status) VALUES(?,?,?,?)").bind(userId,email,role,verificationEnabled?'PENDING':'ACTIVE'),
+   env.AYUDA_DB.prepare('INSERT INTO aec_password_credentials(user_id,password_hash,algorithm,iterations,salt) VALUES(?,?,?,?,?)').bind(userId,passwordHash,'PBKDF2-SHA256',iterations,salt)
+  ]);
+  if(verificationEnabled){
+   const raw=randomToken(32),hash=await sha256(raw);
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'VERIFY_EMAIL',?,datetime('now','+24 hours'))").bind(crypto.randomUUID(),userId,hash).run();
+   await sendAuthEmail(env,{type:'verify_email',email,token:raw,url:new URL('/pages/marketplace.html?verify='+encodeURIComponent(raw),url.origin).toString()});
+   return response({ok:true,verificationRequired:true},201);
+  }
+  const session=await createSession(env,userId);
+  return response({ok:true,user:{id:userId,email,role},verificationRequired:false},201,{'Set-Cookie':session.cookie});
+ }
+ if(path==='/auth/login'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Base de datos no configurada.',code:'AEC_DB_REQUIRED'},503);
+  const limited=await rateLimit(request,env,'login',10,900);
+  if(!limited.ok) return response({error:'Demasiados intentos. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429,{'Retry-After':String(limited.retryAfter)});
+  const body=await readJson(request);
+  const email=String(body?.email||'').trim().toLowerCase();
+  const password=String(body?.password||'');
+  if(!validEmail(email)||!password) return response({error:'Credenciales no válidas.',code:'AEC_INVALID_CREDENTIALS'},401);
+  const row=await env.AYUDA_DB.prepare(`SELECT u.id,u.email,u.role,u.status,c.password_hash,c.iterations,c.salt
+   FROM aec_users u JOIN aec_password_credentials c ON c.user_id=u.id WHERE u.email=? LIMIT 1`).bind(email).first();
+  const candidate=row?await derivePassword(password,row.salt,row.iterations):await derivePassword(password,'00000000000000000000000000000000',310000);
+  if(!row||row.status!=='ACTIVE'||!constantTimeEqual(candidate,row.password_hash||candidate)){
+   return response({error:'Credenciales no válidas.',code:'AEC_INVALID_CREDENTIALS'},401);
+  }
+  const session=await createSession(env,row.id);
+  return response({ok:true,user:{id:row.id,email:row.email,role:row.role}},200,{'Set-Cookie':session.cookie});
+ }
+ if(path==='/health'&&request.method==='GET'){
+  return response({ok:true,service:'AyudaEnCasa',version:'v1',databaseConfigured:Boolean(env.AYUDA_DB)});
+ }
+ if(path==='/auth/verify-email'&&request.method==='POST'){
+  if(!env.AYUDA_DB)return response({error:'Servicio no disponible.',code:'AEC_DB_REQUIRED'},503);
+  const token=String((await readJson(request))?.token||'');if(!token)return response({error:'Token no válido.',code:'AEC_VERIFY_INVALID'},400);
+  const hash=await sha256(token),row=await env.AYUDA_DB.prepare("SELECT id,user_id FROM aec_auth_tokens WHERE purpose='VERIFY_EMAIL' AND token_hash=? AND consumed_at IS NULL AND expires_at>CURRENT_TIMESTAMP LIMIT 1").bind(hash).first();
+  if(!row)return response({error:'El enlace no es válido o ha caducado.',code:'AEC_VERIFY_EXPIRED'},400);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_users SET status='ACTIVE',email_verified_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(row.user_id),
+   env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE id=?").bind(row.id)
+  ]);
+  await audit(env,row.user_id,'EMAIL_VERIFIED','user',row.user_id);return response({ok:true});
+ }
+ if(path==='/auth/verify-email/resend'&&request.method==='POST'){
+  if(!env.AYUDA_DB)return response({ok:true});
+  const limited=await rateLimit(request,env,'verify-resend',4,900);if(!limited.ok)return response({ok:true});
+  const body=await readJson(request),email=String(body?.email||'').trim().toLowerCase();
+  const user=validEmail(email)?await env.AYUDA_DB.prepare("SELECT id FROM aec_users WHERE email=? AND status='PENDING' LIMIT 1").bind(email).first():null;
+  if(user&&env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){
+   const raw=randomToken(32),hash=await sha256(raw);
+   await env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE user_id=? AND purpose='VERIFY_EMAIL' AND consumed_at IS NULL").bind(user.id).run();
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'VERIFY_EMAIL',?,datetime('now','+24 hours'))").bind(crypto.randomUUID(),user.id,hash).run();
+   await sendAuthEmail(env,{type:'verify_email',email,token:raw,url:new URL('/pages/marketplace.html?verify='+encodeURIComponent(raw),url.origin).toString()});
+  }
+  return response({ok:true,message:'Si la cuenta está pendiente, recibirás un nuevo enlace de verificación.'});
+ }
+ if(path==='/auth/password/forgot'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({ok:true});
+  const limited=await rateLimit(request,env,'forgot',5,900);
+  if(!limited.ok) return response({ok:true});
+  const body=await readJson(request),email=String(body?.email||'').trim().toLowerCase();
+  const user=validEmail(email)?await env.AYUDA_DB.prepare("SELECT id FROM aec_users WHERE email=? AND status='ACTIVE' LIMIT 1").bind(email).first():null;
+  if(user){
+   const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
+   await env.AYUDA_DB.prepare("INSERT INTO aec_auth_tokens(id,user_id,purpose,token_hash,expires_at) VALUES(?,?,'RESET_PASSWORD',?,datetime('now','+30 minutes'))").bind(id,user.id,hash).run();
+   // Delivery is intentionally delegated to a configured email provider.
+   await sendAuthEmail(env,{type:'password_reset',email,token:raw,url:new URL('/pages/marketplace.html?reset='+encodeURIComponent(raw),url.origin).toString()});
+  }
+  return response({ok:true,message:'Si la cuenta existe, recibirás instrucciones para recuperar el acceso.'});
+ }
+ if(path==='/auth/password/reset'&&request.method==='POST'){
+  if(!env.AYUDA_DB) return response({error:'Servicio no disponible.',code:'AEC_DB_REQUIRED'},503);
+  const body=await readJson(request),token=String(body?.token||''),password=String(body?.password||'');
+  if(!token||!validPassword(password)) return response({error:'Solicitud no válida.',code:'AEC_RESET_INVALID'},400);
+  const tokenHash=await sha256(token);
+  const row=await env.AYUDA_DB.prepare("SELECT id,user_id FROM aec_auth_tokens WHERE purpose='RESET_PASSWORD' AND token_hash=? AND consumed_at IS NULL AND expires_at>CURRENT_TIMESTAMP LIMIT 1").bind(tokenHash).first();
+  if(!row) return response({error:'El enlace no es válido o ha caducado.',code:'AEC_RESET_EXPIRED'},400);
+  const salt=randomToken(16),iterations=310000,passwordHash=await derivePassword(password,salt,iterations);
+  await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_password_credentials SET password_hash=?,iterations=?,salt=?,changed_at=CURRENT_TIMESTAMP WHERE user_id=?").bind(passwordHash,iterations,salt,row.user_id),
+   env.AYUDA_DB.prepare("UPDATE aec_auth_tokens SET consumed_at=CURRENT_TIMESTAMP WHERE id=?").bind(row.id),
+   env.AYUDA_DB.prepare("UPDATE aec_sessions SET revoked_at=CURRENT_TIMESTAMP WHERE user_id=? AND revoked_at IS NULL").bind(row.user_id)
+  ]);
+  return response({ok:true});
+ }
+ if(path==='/me'&&request.method==='GET'){
+  const session=await readSession(request,env);
+  if(!session) return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  return response({user:{id:session.id,email:session.email,role:session.role,status:session.status}});
+ }
+ if(path==='/auth/logout'&&request.method==='POST'){
+  const raw=readCookie(request,'aec_session');
+  if(raw&&env.AYUDA_DB){
+   const hash=await sha256(raw);
+   await env.AYUDA_DB.prepare('UPDATE aec_sessions SET revoked_at=CURRENT_TIMESTAMP WHERE token_hash=? AND revoked_at IS NULL').bind(hash).run();
+  }
+  return response({ok:true},200,{'Set-Cookie':expiredCookie()});
+ }
+ if(path==='/requests'&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');
+  if(session instanceof Response)return session;
+  const limited=await rateLimit(request,env,'request-create:'+session.id,12,3600);if(!limited.ok)return response({error:'Has creado demasiadas solicitudes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
+  const body=await readJson(request),title=clean(body?.title,120),description=clean(body?.description,3000),location=clean(body?.location,120),postal=clean(body?.postalPrefix,12),category=clean(body?.categoryId,64);
+  if(title.length<4||description.length<10||location.length<2)return response({error:'Solicitud incompleta.',code:'AEC_REQUEST_INVALID'},400);
+  if(category){const exists=await env.AYUDA_DB.prepare("SELECT id FROM aec_categories WHERE id=? AND status='ACTIVE'").bind(category).first();if(!exists)return response({error:'Categoría no válida.',code:'AEC_CATEGORY_INVALID'},400);}
+  const id=crypto.randomUUID();
+  await env.AYUDA_DB.prepare("INSERT INTO aec_requests(id,customer_id,category_id,title,description,location_label,postal_prefix,status) VALUES(?,?,?,?,?,?,?,'DRAFT')").bind(id,session.id,category||null,title,description,location,postal||null).run();
+  await audit(env,session.id,'REQUEST_CREATED','request',id);
+  return response({ok:true,request:{id,status:'DRAFT'}},201);
+ }
+ if(path==='/requests'&&request.method==='GET'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare('SELECT id,category_id,title,description,location_label,postal_prefix,status,created_at FROM aec_requests WHERE customer_id=? ORDER BY created_at DESC LIMIT 50').bind(session.id).all();
+  return response({requests:rows.results||[]});
+ }
+ const requestMatch=path.match(/^\/requests\/([^/]+)$/);
+ if(requestMatch&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const item=await env.AYUDA_DB.prepare('SELECT id,customer_id,category_id,title,description,location_label,postal_prefix,status,created_at,updated_at FROM aec_requests WHERE id=?').bind(requestMatch[1]).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(session.role==='CUSTOMER'&&item.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(session.role==='PROFESSIONAL'&&!['PUBLISHED','MATCHING','PROPOSALS','ASSIGNED','IN_PROGRESS','COMPLETED'].includes(item.status))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(session.role==='PROFESSIONAL'){const {customer_id,...safe}=item;return response({request:safe});}
+  return response({request:item});
+ }
+ const publishMatch=path.match(/^\/requests\/([^/]+)\/publish$/);
+ if(publishMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_requests WHERE id=? AND customer_id=?').bind(publishMatch[1],session.id).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(item.status!=='DRAFT')return response({error:'La solicitud no está en borrador.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.prepare("UPDATE aec_requests SET status='PUBLISHED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(item.id).run();
+  await audit(env,session.id,'REQUEST_PUBLISHED','request',item.id);return response({ok:true,status:'PUBLISHED'});
+ }
+ if(path==='/market/requests'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT id,category_id,title,description,location_label,postal_prefix,status,created_at FROM aec_requests WHERE status IN ('PUBLISHED','MATCHING','PROPOSALS') ORDER BY created_at DESC LIMIT 50").all();
+  return response({requests:rows.results||[]});
+ }
+ const proposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
+ if(proposalMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const limited=await rateLimit(request,env,'proposal-create:'+session.id,30,3600);if(!limited.ok)return response({error:'Has enviado demasiadas propuestas. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
+  const req=await env.AYUDA_DB.prepare("SELECT id,status FROM aec_requests WHERE id=? AND status IN ('PUBLISHED','MATCHING','PROPOSALS')").bind(proposalMatch[1]).first();
+  if(!req)return response({error:'Solicitud no disponible.',code:'AEC_BAD_STATE'},409);
+  const body=await readJson(request),message=clean(body?.message,2000),amount=body?.amountMinor==null?null:Number(body.amountMinor);
+  if(message.length<5||(amount!==null&&(!Number.isInteger(amount)||amount<0||amount>10000000)))return response({error:'Propuesta no válida.',code:'AEC_PROPOSAL_INVALID'},400);
+  const id=crypto.randomUUID();
+  try{await env.AYUDA_DB.prepare("INSERT INTO aec_proposals(id,request_id,professional_id,message,amount_minor,status) VALUES(?,?,?,?,?,'PENDING')").bind(id,req.id,session.id,message,amount).run();}
+  catch{return response({error:'Ya existe una propuesta para esta solicitud.',code:'AEC_PROPOSAL_EXISTS'},409);}
+  await env.AYUDA_DB.prepare("UPDATE aec_requests SET status='PROPOSALS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(req.id).run();
+  await enqueueNotification(env,req.id,'CUSTOMER','PROPOSAL_RECEIVED',{requestId:req.id,proposalId:id});
+  await audit(env,session.id,'PROPOSAL_CREATED','proposal',id);return response({ok:true,proposal:{id,status:'PENDING'}},201);
+ }
+ const listProposalMatch=path.match(/^\/requests\/([^/]+)\/proposals$/);
+ if(listProposalMatch&&request.method==='GET'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const owned=await env.AYUDA_DB.prepare('SELECT id FROM aec_requests WHERE id=? AND customer_id=?').bind(listProposalMatch[1],session.id).first();
+  if(!owned)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.professional_id,p.message,p.amount_minor,p.currency,p.status,p.created_at,pp.display_name FROM aec_proposals p LEFT JOIN aec_professional_profiles pp ON pp.user_id=p.professional_id WHERE p.request_id=? ORDER BY p.created_at").bind(owned.id).all();
+  return response({proposals:rows.results||[]});
+ }
+ const cancelMatch=path.match(/^\/requests\/([^/]+)\/cancel$/);
+ if(cancelMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_requests WHERE id=? AND customer_id=?').bind(cancelMatch[1],session.id).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(!['DRAFT','PUBLISHED','MATCHING','PROPOSALS'].includes(item.status))return response({error:'La solicitud ya no puede cancelarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_requests SET status='CANCELLED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status IN ('DRAFT','PUBLISHED','MATCHING','PROPOSALS')").bind(item.id),env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='REJECTED',updated_at=CURRENT_TIMESTAMP WHERE request_id=? AND status='PENDING'").bind(item.id)]);
+  await audit(env,session.id,'REQUEST_CANCELLED','request',item.id);return response({ok:true,status:'CANCELLED'});
+ }
+ const withdrawMatch=path.match(/^\/proposals\/([^/]+)\/withdraw$/);
+ if(withdrawMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const p=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_proposals WHERE id=? AND professional_id=?').bind(withdrawMatch[1],session.id).first();
+  if(!p)return response({error:'Propuesta no encontrada.',code:'AEC_NOT_FOUND'},404);
+  if(p.status!=='PENDING')return response({error:'La propuesta ya no puede retirarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='WITHDRAWN',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(p.id).run();
+  await audit(env,session.id,'PROPOSAL_WITHDRAWN','proposal',p.id);return response({ok:true,status:'WITHDRAWN'});
+ }
+ const acceptMatch=path.match(/^\/proposals\/([^/]+)\/accept$/);
+ if(acceptMatch&&request.method==='POST'){
+  const session=await requireRole(request,env,'CUSTOMER');if(session instanceof Response)return session;
+  const p=await env.AYUDA_DB.prepare("SELECT p.id,p.request_id,p.professional_id,p.status,r.customer_id,r.status request_status FROM aec_proposals p JOIN aec_requests r ON r.id=p.request_id WHERE p.id=?").bind(acceptMatch[1]).first();
+  if(!p||p.customer_id!==session.id)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  if(p.status!=='PENDING'||!['PUBLISHED','MATCHING','PROPOSALS'].includes(p.request_status))return response({error:'La propuesta ya no puede aceptarse.',code:'AEC_BAD_STATE'},409);
+  const jobId=crypto.randomUUID();
+  try{await env.AYUDA_DB.batch([
+   env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='ACCEPTED',updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='PENDING'").bind(p.id),
+   env.AYUDA_DB.prepare("UPDATE aec_proposals SET status='REJECTED',updated_at=CURRENT_TIMESTAMP WHERE request_id=? AND id<>? AND status='PENDING'").bind(p.request_id,p.id),
+   env.AYUDA_DB.prepare("UPDATE aec_requests SET status='ASSIGNED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(p.request_id),
+   env.AYUDA_DB.prepare("INSERT INTO aec_jobs(id,request_id,accepted_proposal_id,customer_id,professional_id,status) VALUES(?,?,?,?,?,'AGREED')").bind(jobId,p.request_id,p.id,session.id,p.professional_id)
+  ]);}catch{return response({error:'La propuesta ya fue procesada.',code:'AEC_ACCEPT_CONFLICT'},409);}
+  await enqueueNotification(env,p.professional_id,'USER','PROPOSAL_ACCEPTED',{requestId:p.request_id,jobId});
+  await audit(env,session.id,'PROPOSAL_ACCEPTED','job',jobId);return response({ok:true,job:{id:jobId,status:'AGREED'}},201);
+ }
+ if(path==='/admin/privacy-requests'&&request.method==='GET'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT p.id,p.user_id,u.email,p.kind,p.status,p.created_at,p.completed_at FROM aec_privacy_requests p JOIN aec_users u ON u.id=p.user_id WHERE p.status IN ('REQUESTED','PROCESSING') ORDER BY p.created_at ASC LIMIT 100").all();
+  return response({requests:rows.results||[]});
+ }
+ const adminPrivacyMatch=path.match(/^\/admin\/privacy-requests\/([^/]+)$/);
+ if(adminPrivacyMatch&&request.method==='PATCH'){
+  const session=await requireAnyRole(request,env,['ADMIN']);if(session instanceof Response)return session;
+  const body=await readJson(request),status=String(body?.status||'').toUpperCase();
+  if(!['PROCESSING','COMPLETED','REJECTED'].includes(status))return response({error:'Estado no válido.',code:'AEC_PRIVACY_STATE_INVALID'},400);
+  const item=await env.AYUDA_DB.prepare('SELECT id,status FROM aec_privacy_requests WHERE id=?').bind(adminPrivacyMatch[1]).first();
+  if(!item)return response({error:'Solicitud no encontrada.',code:'AEC_NOT_FOUND'},404);
+  await env.AYUDA_DB.prepare("UPDATE aec_privacy_requests SET status=?,completed_at=CASE WHEN ? IN ('COMPLETED','REJECTED') THEN CURRENT_TIMESTAMP ELSE completed_at END WHERE id=?").bind(status,status,item.id).run();
+  await audit(env,session.id,'PRIVACY_REQUEST_UPDATED','privacy_request',item.id);return response({ok:true,status});
+ }
+ if(path==='/admin/reports'&&request.method==='GET'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare("SELECT id,reporter_id,subject_user_id,job_id,reason,details,status,created_at,updated_at FROM aec_reports WHERE status IN ('OPEN','REVIEWING') ORDER BY created_at ASC LIMIT 100").all();return response({reports:rows.results||[]});
+ }
+ const adminReportMatch=path.match(/^\/admin\/reports\/([^/]+)$/);
+ if(adminReportMatch&&request.method==='PATCH'){
+  const session=await requireAnyRole(request,env,['MODERATOR','ADMIN']);if(session instanceof Response)return session;
+  const status=String((await readJson(request))?.status||'').toUpperCase();if(!['REVIEWING','RESOLVED','DISMISSED'].includes(status))return response({error:'Estado no válido.',code:'AEC_REPORT_STATE_INVALID'},400);
+  const existing=await env.AYUDA_DB.prepare('SELECT id FROM aec_reports WHERE id=?').bind(adminReportMatch[1]).first();if(!existing)return response({error:'Reporte no encontrado.',code:'AEC_NOT_FOUND'},404);
+  await env.AYUDA_DB.prepare('UPDATE aec_reports SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?').bind(status,existing.id).run();await audit(env,session.id,'REPORT_'+status,'report',existing.id);return response({ok:true,status});
+ }
+ if(path==='/reports'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'report:'+session.id,10,3600);if(!limited.ok)return response({error:'Has enviado demasiados reportes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
+  const data=await readJson(request),reason=clean(data?.reason,80),details=clean(data?.details,2000),subject=clean(data?.subjectUserId,80),jobId=clean(data?.jobId,80);
+  if(reason.length<3)return response({error:'Indica el motivo del reporte.',code:'AEC_REPORT_INVALID'},400);
+  if(subject===session.id)return response({error:'Reporte no válido.',code:'AEC_REPORT_INVALID'},400);
+  if(jobId){const job=await env.AYUDA_DB.prepare('SELECT customer_id,professional_id FROM aec_jobs WHERE id=?').bind(jobId).first();if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);}
+  const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_reports(id,reporter_id,subject_user_id,job_id,reason,details,status) VALUES(?,?,?,?,?,?,'OPEN')").bind(id,session.id,subject||null,jobId||null,reason,details).run();
+  await audit(env,session.id,'REPORT_CREATED','report',id);return response({ok:true,report:{id,status:'OPEN'}},201);
+ }
+ if(path==='/blocks'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'block:'+session.id,30,3600);if(!limited.ok)return response({error:'Demasiadas operaciones de bloqueo. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
+  const target=clean((await readJson(request))?.userId,80);if(!target||target===session.id)return response({error:'Bloqueo no válido.',code:'AEC_BLOCK_INVALID'},400);
+  const related=await env.AYUDA_DB.prepare('SELECT id FROM aec_jobs WHERE (customer_id=? AND professional_id=?) OR (customer_id=? AND professional_id=?) LIMIT 1').bind(session.id,target,target,session.id).first();
+  if(!related)return response({error:'No se puede bloquear a este usuario.',code:'AEC_BLOCK_INVALID'},400);
+  await env.AYUDA_DB.prepare('INSERT OR IGNORE INTO aec_blocks(blocker_id,blocked_id) VALUES(?,?)').bind(session.id,target).run();
+  await audit(env,session.id,'USER_BLOCKED','user',target);return response({ok:true});
+ }
+ if(path==='/conversations'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare(`SELECT c.id,c.job_id,j.status job_status,r.title,
+   (SELECT COUNT(*) FROM aec_messages m WHERE m.conversation_id=c.id AND m.sender_id<>? AND m.created_at>COALESCE((SELECT mr.last_read_at FROM aec_message_reads mr WHERE mr.conversation_id=c.id AND mr.user_id=?),'1970-01-01')) unread_count,
+   (SELECT body FROM aec_messages lm WHERE lm.conversation_id=c.id ORDER BY lm.created_at DESC LIMIT 1) last_message
+   FROM aec_conversations c JOIN aec_jobs j ON j.id=c.job_id JOIN aec_requests r ON r.id=j.request_id
+   WHERE (j.customer_id=? OR j.professional_id=?)
+   AND NOT EXISTS(SELECT 1 FROM aec_blocks b WHERE (b.blocker_id=j.customer_id AND b.blocked_id=j.professional_id) OR (b.blocker_id=j.professional_id AND b.blocked_id=j.customer_id))
+   ORDER BY c.created_at DESC LIMIT 50`).bind(session.id,session.id,session.id,session.id).all();
+  return response({conversations:rows.results||[]});
+ }
+ if(path==='/me/entitlements'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT code,starts_at,expires_at,source FROM aec_entitlements WHERE user_id=? AND (expires_at IS NULL OR expires_at>CURRENT_TIMESTAMP) ORDER BY code").bind(session.id).all();
+  return response({entitlements:rows.results||[]});
+ }
+ if(path==='/blocks'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT b.blocked_id,u.email,b.created_at FROM aec_blocks b JOIN aec_users u ON u.id=b.blocked_id WHERE b.blocker_id=? ORDER BY b.created_at DESC LIMIT 100").bind(session.id).all();
+  return response({blocks:rows.results||[]});
+ }
+ const unblockMatch=path.match(/^\/blocks\/([^/]+)$/);
+ if(unblockMatch&&request.method==='DELETE'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  await env.AYUDA_DB.prepare('DELETE FROM aec_blocks WHERE blocker_id=? AND blocked_id=?').bind(session.id,unblockMatch[1]).run();
+  await audit(env,session.id,'USER_UNBLOCKED','user',unblockMatch[1]);return response({ok:true});
+ }
+ if(path==='/notifications'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare("SELECT id,kind,payload_json,status,created_at,sent_at FROM aec_notification_outbox WHERE user_id=? ORDER BY created_at DESC LIMIT 50").bind(session.id).all();
+  return response({notifications:(rows.results||[]).map(n=>({...n,payload:safeJson(n.payload_json)}))});
+ }
+ if(path==='/privacy/requests'&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const privacyBody=await readJson(request),kind=String(privacyBody?.kind||privacyBody?.type||'').toUpperCase();if(!['EXPORT','DELETE'].includes(kind))return response({error:'Solicitud no válida.',code:'AEC_PRIVACY_INVALID'},400);
+  const pending=await env.AYUDA_DB.prepare("SELECT id FROM aec_privacy_requests WHERE user_id=? AND kind=? AND status IN ('REQUESTED','PROCESSING')").bind(session.id,kind).first();
+  if(pending)return response({ok:true,request:{id:pending.id,status:'REQUESTED'}});
+  const id=crypto.randomUUID();await env.AYUDA_DB.prepare("INSERT INTO aec_privacy_requests(id,user_id,kind,status) VALUES(?,?,?,'REQUESTED')").bind(id,session.id,kind).run();
+  await audit(env,session.id,'PRIVACY_'+kind+'_REQUESTED','privacy_request',id);return response({ok:true,request:{id,status:'REQUESTED'}},201);
+ }
+ if(path==='/proposals'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare(`SELECT p.id,p.request_id,p.message,p.amount_minor,p.currency,p.status,p.created_at,r.title,r.location_label,r.status request_status
+   FROM aec_proposals p JOIN aec_requests r ON r.id=p.request_id WHERE p.professional_id=? ORDER BY p.created_at DESC LIMIT 50`).bind(session.id).all();
+  return response({proposals:rows.results||[]});
+ }
+ if(path==='/jobs'&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const rows=await env.AYUDA_DB.prepare(`SELECT j.id,j.status,j.customer_id,j.professional_id,j.created_at,r.title,r.location_label,p.amount_minor,p.currency
+   FROM aec_jobs j JOIN aec_requests r ON r.id=j.request_id JOIN aec_proposals p ON p.id=j.accepted_proposal_id
+   WHERE j.customer_id=? OR j.professional_id=? ORDER BY j.created_at DESC LIMIT 50`).bind(session.id,session.id).all();
+  return response({jobs:rows.results||[]});
+ }
+ const jobStateMatch=path.match(/^\/jobs\/([^/]+)\/(start|complete)$/);
+ if(jobStateMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare('SELECT id,request_id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(jobStateMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const action=jobStateMatch[2];
+  if(action==='start'){
+   if(session.id!==job.professional_id||!['AGREED','SCHEDULED'].includes(job.status))return response({error:'El trabajo no puede iniciarse.',code:'AEC_BAD_STATE'},409);
+   await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_jobs SET status='IN_PROGRESS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.id),env.AYUDA_DB.prepare("UPDATE aec_requests SET status='IN_PROGRESS',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.request_id)]);
+   await audit(env,session.id,'JOB_STARTED','job',job.id);return response({ok:true,status:'IN_PROGRESS'});
+  }
+  if(session.id!==job.customer_id||job.status!=='IN_PROGRESS')return response({error:'El trabajo no puede completarse.',code:'AEC_BAD_STATE'},409);
+  await env.AYUDA_DB.batch([env.AYUDA_DB.prepare("UPDATE aec_jobs SET status='COMPLETED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.id),env.AYUDA_DB.prepare("UPDATE aec_requests SET status='COMPLETED',updated_at=CURRENT_TIMESTAMP WHERE id=?").bind(job.request_id)]);
+  await audit(env,session.id,'JOB_COMPLETED','job',job.id);return response({ok:true,status:'COMPLETED'});
+ }
+ const messagesMatch=path.match(/^\/jobs\/([^/]+)\/messages$/);
+ if(messagesMatch&&request.method==='GET'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const other=session.id===job.customer_id?job.professional_id:job.customer_id;
+  const blocked=await env.AYUDA_DB.prepare('SELECT 1 AS yes FROM aec_blocks WHERE (blocker_id=? AND blocked_id=?) OR (blocker_id=? AND blocked_id=?) LIMIT 1').bind(session.id,other,other,session.id).first();
+  if(blocked)return response({error:'La conversación no está disponible.',code:'AEC_CHAT_BLOCKED'},403);
+  const conv=await ensureConversation(env,job);
+  const rows=await env.AYUDA_DB.prepare('SELECT id,sender_id,body,created_at FROM aec_messages WHERE conversation_id=? ORDER BY created_at ASC LIMIT 200').bind(conv).all();
+  await env.AYUDA_DB.prepare("INSERT INTO aec_message_reads(conversation_id,user_id,last_read_at) VALUES(?,?,CURRENT_TIMESTAMP) ON CONFLICT(conversation_id,user_id) DO UPDATE SET last_read_at=CURRENT_TIMESTAMP").bind(conv,session.id).run();
+  return response({conversationId:conv,messages:rows.results||[]});
+ }
+ if(messagesMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const limited=await rateLimit(request,env,'message:'+session.id,60,3600);if(!limited.ok)return response({error:'Has enviado demasiados mensajes. Prueba más tarde.',code:'AEC_RATE_LIMITED'},429);
+  const job=await env.AYUDA_DB.prepare('SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?').bind(messagesMatch[1]).first();
+  if(!job||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const other=session.id===job.customer_id?job.professional_id:job.customer_id;
+  const blocked=await env.AYUDA_DB.prepare('SELECT 1 AS yes FROM aec_blocks WHERE (blocker_id=? AND blocked_id=?) OR (blocker_id=? AND blocked_id=?) LIMIT 1').bind(session.id,other,other,session.id).first();
+  if(blocked)return response({error:'La conversación no está disponible.',code:'AEC_CHAT_BLOCKED'},403);
+  if(['COMPLETED','CANCELLED'].includes(job.status))return response({error:'La conversación está cerrada.',code:'AEC_CHAT_CLOSED'},409);
+  const body=clean((await readJson(request))?.body,3000);if(!body)return response({error:'Mensaje vacío.',code:'AEC_MESSAGE_INVALID'},400);
+  const conv=await ensureConversation(env,job),id=crypto.randomUUID();
+  await env.AYUDA_DB.prepare('INSERT INTO aec_messages(id,conversation_id,sender_id,body) VALUES(?,?,?,?)').bind(id,conv,session.id,body).run();
+  await enqueueNotification(env,other,'USER','NEW_MESSAGE',{jobId:job.id});
+  return response({ok:true,message:{id,body}},201);
+ }
+ const reviewMatch=path.match(/^\/jobs\/([^/]+)\/review$/);
+ if(reviewMatch&&request.method==='POST'){
+  const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  const job=await env.AYUDA_DB.prepare("SELECT id,customer_id,professional_id,status FROM aec_jobs WHERE id=?").bind(reviewMatch[1]).first();
+  if(!job||job.status!=='COMPLETED'||![job.customer_id,job.professional_id].includes(session.id))return response({error:'No se puede valorar este trabajo.',code:'AEC_REVIEW_FORBIDDEN'},403);
+  const data=await readJson(request),rating=Number(data?.rating),body=clean(data?.body,2000);
+  if(!Number.isInteger(rating)||rating<1||rating>5)return response({error:'Valoración no válida.',code:'AEC_REVIEW_INVALID'},400);
+  const subject=session.id===job.customer_id?job.professional_id:job.customer_id;
+  try{await env.AYUDA_DB.prepare('INSERT INTO aec_reviews(id,job_id,author_id,subject_id,rating,body) VALUES(?,?,?,?,?,?)').bind(crypto.randomUUID(),job.id,session.id,subject,rating,body).run();}catch{return response({error:'Ya has valorado este trabajo.',code:'AEC_REVIEW_EXISTS'},409);}
+  return response({ok:true},201);
+ }
+ if(path==='/professionals'&&request.method==='GET'){
+  if(!env.AYUDA_DB)return response({professionals:[]});
+  const category=clean(url.searchParams.get('category'),64),postal=clean(url.searchParams.get('postal'),12);
+  let sql=`SELECT pp.user_id,pp.display_name,pp.bio,pp.location_label,pp.postal_prefix,pp.service_radius_km,pp.hourly_rate_minor,pp.currency,
+   COALESCE((SELECT AVG(r.rating) FROM aec_reviews r WHERE r.subject_id=pp.user_id),0) rating,
+   (SELECT COUNT(*) FROM aec_reviews r WHERE r.subject_id=pp.user_id) review_count
+   FROM aec_professional_profiles pp JOIN aec_users u ON u.id=pp.user_id WHERE pp.published=1 AND u.status='ACTIVE'`;
+  const binds=[];if(postal){sql+=' AND pp.postal_prefix=?';binds.push(postal);}if(category){sql+=' AND EXISTS(SELECT 1 FROM aec_professional_services ps WHERE ps.professional_id=pp.user_id AND ps.category_id=?)';binds.push(category);}sql+=' ORDER BY rating DESC,review_count DESC LIMIT 50';
+  const stmt=env.AYUDA_DB.prepare(sql),rows=await (binds.length?stmt.bind(...binds):stmt).all();return response({professionals:rows.results||[]});
+ }
+ if(path==='/professional/services'&&request.method==='GET'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const rows=await env.AYUDA_DB.prepare('SELECT category_id FROM aec_professional_services WHERE professional_id=?').bind(session.id).all();return response({categoryIds:(rows.results||[]).map(x=>x.category_id)});
+ }
+ if(path==='/professional/services'&&request.method==='PUT'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const serviceBody=await readJson(request),ids=Array.isArray(serviceBody?.categoryIds)?[...new Set(serviceBody.categoryIds)]:[];
+  if(ids.length>20||ids.some(x=>typeof x!=='string'||x.length>64))return response({error:'Servicios no válidos.',code:'AEC_SERVICES_INVALID'},400);
+  const valid=ids.length?await env.AYUDA_DB.prepare(`SELECT id FROM aec_categories WHERE status='ACTIVE' AND id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all():{results:[]};
+  if((valid.results||[]).length!==ids.length)return response({error:'Alguna categoría no es válida.',code:'AEC_SERVICES_INVALID'},400);
+  const ops=[env.AYUDA_DB.prepare('DELETE FROM aec_professional_services WHERE professional_id=?').bind(session.id),...ids.map(id=>env.AYUDA_DB.prepare('INSERT INTO aec_professional_services(professional_id,category_id) VALUES(?,?)').bind(session.id,id))];await env.AYUDA_DB.batch(ops);return response({ok:true});
+ }
+ if(path==='/professional/profile/publish'&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  const profile=await env.AYUDA_DB.prepare('SELECT display_name,location_label,bio FROM aec_professional_profiles WHERE user_id=?').bind(session.id).first();
+  if(!profile||profile.display_name.length<2||profile.location_label.length<2||profile.bio.length<20)return response({error:'Completa el perfil antes de publicarlo.',code:'AEC_PROFILE_INCOMPLETE'},409);
+  const svc=await env.AYUDA_DB.prepare('SELECT COUNT(*) n FROM aec_professional_services WHERE professional_id=?').bind(session.id).first();if(Number(svc?.n||0)<1)return response({error:'Selecciona al menos un servicio.',code:'AEC_PROFILE_INCOMPLETE'},409);
+  if(env.AEC_EMAIL_ENDPOINT&&env.AEC_EMAIL_TOKEN){const u=await env.AYUDA_DB.prepare('SELECT email_verified_at FROM aec_users WHERE id=?').bind(session.id).first();if(!u?.email_verified_at)return response({error:'Verifica tu correo antes de publicar.',code:'AEC_EMAIL_UNVERIFIED'},409);}
+  await env.AYUDA_DB.prepare('UPDATE aec_professional_profiles SET published=1,updated_at=CURRENT_TIMESTAMP WHERE user_id=?').bind(session.id).run();await audit(env,session.id,'PROFILE_PUBLISHED','user',session.id);return response({ok:true,published:true});
+ }
+ if(path==='/professional/profile/unpublish'&&request.method==='POST'){
+  const session=await requireRole(request,env,'PROFESSIONAL');if(session instanceof Response)return session;
+  await env.AYUDA_DB.prepare('UPDATE aec_professional_profiles SET published=0,updated_at=CURRENT_TIMESTAMP WHERE user_id=?').bind(session.id).run();
+  await audit(env,session.id,'PROFILE_UNPUBLISHED','user',session.id);return response({ok:true,published:false});
+ }
+ if(path==='/professional/profile'&&request.method==='GET'){
+  const session=await readSession(request,env);
+  if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const profile=await env.AYUDA_DB.prepare('SELECT display_name,bio,location_label,postal_prefix,service_radius_km,hourly_rate_minor,currency,published FROM aec_professional_profiles WHERE user_id=?').bind(session.id).first();
+  return response({profile:profile||null});
+ }
+ if(path==='/professional/profile'&&request.method==='PUT'){
+  const session=await readSession(request,env);
+  if(!session||session.role!=='PROFESSIONAL') return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+  const body=await readJson(request);
+  const name=String(body?.displayName||'').trim(),bio=String(body?.bio||'').trim(),location=String(body?.location||'').trim(),postal=String(body?.postalPrefix||'').trim(),radius=Number(body?.serviceRadiusKm||15),rate=body?.hourlyRateMinor==null?null:Number(body.hourlyRateMinor);
+  if(name.length<2||name.length>80||bio.length>1500||location.length<2||location.length>120||!Number.isInteger(radius)||radius<1||radius>100||(rate!==null&&(!Number.isInteger(rate)||rate<0||rate>100000))) return response({error:'Perfil no válido.',code:'AEC_PROFILE_INVALID'},400);
+  await env.AYUDA_DB.prepare(`INSERT INTO aec_professional_profiles(user_id,display_name,bio,location_label,postal_prefix,service_radius_km,hourly_rate_minor,currency,published)
+   VALUES(?,?,?,?,?,?,?,'EUR',0)
+   ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name,bio=excluded.bio,location_label=excluded.location_label,postal_prefix=excluded.postal_prefix,service_radius_km=excluded.service_radius_km,hourly_rate_minor=excluded.hourly_rate_minor,updated_at=CURRENT_TIMESTAMP`).bind(session.id,name,bio,location,postal||null,radius,rate).run();
+  return response({ok:true});
+ }
+ if(path==='/categories'&&request.method==='GET'){
+  if(env.AYUDA_DB){
+   try{
+    const data=await env.AYUDA_DB.prepare("SELECT id,slug,name FROM aec_categories WHERE status='ACTIVE' ORDER BY name").all();
+    return response({categories:data.results||[]},200,{'Cache-Control':'public, max-age=300'});
+   }catch{}
+  }
+  return response({categories:fallbackCategories},200,{'Cache-Control':'public, max-age=300'});
+ }
+ if(path.startsWith('/admin/')){
+  const session=await readSession(request,env);
+  if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+  if(!['MODERATOR','ADMIN'].includes(session.role))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+ }
+ if(request.method!=='GET'&&request.method!=='HEAD'){
+  return response({error:'Función todavía no activada.',code:'AEC_NOT_READY'},503);
+ }
+ return response({error:'Ruta no encontrada.',code:'AEC_NOT_FOUND'},404);
+}
+
+function safeJson(value){try{return JSON.parse(value||'{}')}catch{return {}}}
+async function enqueueNotification(env,target,targetType,kind,payload){
+ try{
+  let userId=target;
+  if(targetType==='CUSTOMER'){const r=await env.AYUDA_DB.prepare('SELECT customer_id FROM aec_requests WHERE id=?').bind(target).first();userId=r?.customer_id;}
+  if(!userId)return;
+  await env.AYUDA_DB.prepare("INSERT INTO aec_notification_outbox(id,user_id,kind,payload_json,status) VALUES(?,?,?,?,'PENDING')").bind(crypto.randomUUID(),userId,kind,JSON.stringify(payload||{})).run();
+ }catch{}
+}
+async function sendAuthEmail(env,payload){
+ if(!env.AEC_EMAIL_ENDPOINT||!env.AEC_EMAIL_TOKEN)return false;
+ try{const r=await fetch(env.AEC_EMAIL_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+env.AEC_EMAIL_TOKEN},body:JSON.stringify(payload)});return r.ok;}catch{return false;}
+}
+async function ensureConversation(env,job){
+ let row=await env.AYUDA_DB.prepare('SELECT id FROM aec_conversations WHERE job_id=?').bind(job.id).first();
+ if(row)return row.id;
+ const id=crypto.randomUUID();
+ try{await env.AYUDA_DB.batch([env.AYUDA_DB.prepare('INSERT INTO aec_conversations(id,job_id) VALUES(?,?)').bind(id,job.id),env.AYUDA_DB.prepare('INSERT INTO aec_conversation_participants(conversation_id,user_id) VALUES(?,?)').bind(id,job.customer_id),env.AYUDA_DB.prepare('INSERT INTO aec_conversation_participants(conversation_id,user_id) VALUES(?,?)').bind(id,job.professional_id)]);return id;}
+ catch{row=await env.AYUDA_DB.prepare('SELECT id FROM aec_conversations WHERE job_id=?').bind(job.id).first();if(row)return row.id;throw new Error('conversation_creation_failed');}
+}
+function clean(value,max){return String(value??'').trim().slice(0,max);}
+async function requireRole(request,env,role){
+ const session=await readSession(request,env);
+ if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+ if(session.role!==role)return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);
+ return session;
+}
+async function requireAnyRole(request,env,roles){
+ const session=await readSession(request,env);if(!session)return response({error:'No autenticado.',code:'AEC_UNAUTHENTICATED'},401);
+ if(!roles.includes(session.role))return response({error:'No autorizado.',code:'AEC_FORBIDDEN'},403);return session;
+}
+async function audit(env,actor,eventType,resourceType,resourceId){
+ try{await env.AYUDA_DB.prepare('INSERT INTO aec_audit_events(id,actor_user_id,event_type,resource_type,resource_id) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor,eventType,resourceType,resourceId).run();}catch{}
+}
+
+async function rateLimit(request,env,bucket,limit,windowSeconds){
+ if(!env.AYUDA_DB) return {ok:true,retryAfter:0};
+ const ip=request.headers.get('CF-Connecting-IP')||'unknown';
+ const key=await sha256(bucket+':'+ip);
+ const cutoff=new Date(Date.now()-windowSeconds*1000).toISOString();
+ const row=await env.AYUDA_DB.prepare('SELECT COUNT(*) AS n FROM aec_rate_limits WHERE bucket=? AND key_hash=? AND created_at>?').bind(bucket,key,cutoff).first();
+ const count=Number(row?.n||0);
+ if(count>=limit)return {ok:false,retryAfter:windowSeconds};
+ await env.AYUDA_DB.prepare('INSERT INTO aec_rate_limits(id,bucket,key_hash,created_at) VALUES(?,?,?,CURRENT_TIMESTAMP)').bind(crypto.randomUUID(),bucket,key).run();
+ return {ok:true,retryAfter:0};
+}
+
+function validateMutationRequest(request,env,url){
+ const type=(request.headers.get('Content-Type')||'').toLowerCase();
+ const mayBeEmpty=['/auth/logout'].includes(url.pathname.slice(PREFIX.length))||/\/(publish|start|complete|accept|cancel|withdraw)$/.test(url.pathname);
+ if(!mayBeEmpty&&!type.startsWith('application/json'))return response({error:'Content-Type no permitido.',code:'AEC_CONTENT_TYPE'},415);
+ const len=Number(request.headers.get('Content-Length')||0);if(len>16384)return response({error:'Solicitud demasiado grande.',code:'AEC_PAYLOAD_TOO_LARGE'},413);
+ const fetchSite=(request.headers.get('Sec-Fetch-Site')||'').toLowerCase();if(fetchSite==='cross-site')return response({error:'Origen no permitido.',code:'AEC_ORIGIN_FORBIDDEN'},403);
+ const origin=request.headers.get('Origin');if(!origin)return null;
+ const allowed=new Set([url.origin,env.ALLOWED_ORIGIN,'https://stannet.space','https://www.stannet.space'].filter(Boolean));
+ if(!allowed.has(origin))return response({error:'Origen no permitido.',code:'AEC_ORIGIN_FORBIDDEN'},403);
+ return null;
+}
+async function readJson(request){
+ try{const text=await request.text();if(text.length>16384)return null;return JSON.parse(text);}catch{return null;}
+}
+function validEmail(v){return v.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+function validPassword(v){return v.length>=12&&v.length<=128;}
+function randomToken(bytes=32){
+ const data=crypto.getRandomValues(new Uint8Array(bytes));
+ return [...data].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function derivePassword(password,saltHex,iterations){
+ const salt=new Uint8Array((saltHex.match(/.{2}/g)||[]).map(x=>parseInt(x,16)));
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations},key,256);
+ return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function constantTimeEqual(a,b){
+ if(a.length!==b.length)return false;
+ let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;
+}
+async function createSession(env,userId){
+ const raw=randomToken(32),hash=await sha256(raw),id=crypto.randomUUID();
+ await env.AYUDA_DB.prepare("INSERT INTO aec_sessions(id,user_id,token_hash,expires_at) VALUES(?,?,?,datetime('now','+7 days'))").bind(id,userId,hash).run();
+ return {cookie:`aec_session=${encodeURIComponent(raw)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`};
+}
+
+async function readSession(request,env){
+ if(!env.AYUDA_DB) return null;
+ const raw=readCookie(request,'aec_session');
+ if(!raw) return null;
+ const hash=await sha256(raw);
+ const row=await env.AYUDA_DB.prepare(`SELECT u.id,u.email,u.role,u.status
+ FROM aec_sessions s JOIN aec_users u ON u.id=s.user_id
+ WHERE s.token_hash=? AND s.revoked_at IS NULL AND s.expires_at>CURRENT_TIMESTAMP
+ AND u.status='ACTIVE' LIMIT 1`).bind(hash).first();
+ return row||null;
+}
+
+function readCookie(request,name){
+ const header=request.headers.get('Cookie')||'';
+ for(const part of header.split(';')){
+  const i=part.indexOf('=');
+  if(i<0) continue;
+  if(part.slice(0,i).trim()===name){try{return decodeURIComponent(part.slice(i+1).trim());}catch{return '';}}
+ }
+ return '';
+}
+
+async function sha256(value){
+ const bytes=new TextEncoder().encode(value);
+ const digest=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function expiredCookie(){
+ return 'aec_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0';
+}
+
+function response(body,status=200,extra={}){
+ return new Response(JSON.stringify(body),{status,headers:{
+  'Content-Type':'application/json; charset=utf-8',
+  'Cache-Control':'no-store',
+  'X-Content-Type-Options':'nosniff',
+  'X-Frame-Options':'DENY',
+  'Referrer-Policy':'no-referrer',
+  'Permissions-Policy':'camera=(), microphone=(), geolocation=()',
+  'Cross-Origin-Resource-Policy':'same-origin',
+  ...extra
+ }});
+}

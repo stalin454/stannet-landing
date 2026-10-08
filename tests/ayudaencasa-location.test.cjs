@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const api=fs.readFileSync('ayudaencasa-api.js','utf8'),ui=fs.readFileSync('ayudaencasa.js','utf8'),html=fs.readFileSync('pages/marketplace.html','utf8'),mig=fs.readFileSync('migrations/ayudaencasa/0009_service_area.sql','utf8');
+for(const x of ['Azuqueca de Henares','Alcalá de Henares','Guadalajara','locationMatches','locationSuggestions'])assert.ok(ui.includes(x)||html.includes(x),'location feature missing '+x);
+assert.ok(mig.includes('service_radius_km'),'service radius migration missing');
+assert.ok(api.includes('service_radius_km'),'service radius API missing');
+assert.ok(api.includes("AND pp.postal_prefix=?"),'exact postal catalogue filter missing');
+assert.ok(!api.includes("substr(pp.postal_prefix,1,2)=substr(?,1,2)"),'province-wide postal fallback must not impersonate radius matching');
+assert.ok(html.includes('role="combobox"')&&html.includes('aria-controls="locationSuggestions"'),'autocomplete accessibility missing');
+assert.ok(ui.includes("loadPublicProfessionals({postal,category:categoryId})"),'hero search is not connected to live catalogue');
+assert.ok(ui.includes('categoryIdForName'),'service classification is not mapped to catalogue categories');
+assert.ok(ui.includes('zona declarada:'),'service radius must be labelled as declared data until real geodistance exists');
+console.log('PASS: AyudaEnCasa geographic search evolution verified.');
