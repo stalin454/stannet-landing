@@ -1,6 +1,7 @@
 'use strict';
 const puppeteer=require('puppeteer-core');
 const widths=[320,360,375,390,430,768,820,1024];
+const base=process.env.STANNET_AUDIT_URL||'https://stannet.space/';
 const issues=[];
 (async()=>{
  const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-setuid-sandbox','--disable-gpu','--disable-dev-shm-usage']});
@@ -10,11 +11,11 @@ const issues=[];
    await page.setViewport({width,height:width<=430?780:1024,deviceScaleFactor:2,isMobile:width<=430,hasTouch:width<=430});
    const errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
-   const response=await page.goto('https://stannet.space/',{waitUntil:'domcontentloaded',timeout:45000});
+   const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:45000});
    await new Promise(resolve=>setTimeout(resolve,1900));
    const result=await page.evaluate(()=>{
     const rect=s=>{const e=document.querySelector(s);if(!e)return null;const b=e.getBoundingClientRect();const c=getComputedStyle(e);return {x:Math.round(b.left),y:Math.round(b.top),w:Math.round(b.width),h:Math.round(b.height),color:c.color,font:c.fontSize,display:c.display,visible:c.display!=='none'&&c.visibility!=='hidden'&&b.width>0&&b.height>0,scrollW:e.scrollWidth,clientW:e.clientWidth}};
-    const sels=['#stannet-canonical-nav','.brand-mark','#stannet-canonical-nav .brand','#stannet-canonical-nav .menu-toggle','#stannet-canonical-nav .site-nav','.home-hero-portrait','.home-hero-copy','.home-hero-split h1','.hero-tech','.hero-knowledge','.gradient-word','.home-hero-actions','.home-project-directory','.directory-filters','.directory-group:not([hidden])','.home-contact-panel','footer'];
+    const sels=['#stannet-canonical-nav','.brand-mark','#stannet-canonical-nav .brand','#stannet-canonical-nav .menu-toggle','#stannet-canonical-nav .site-nav','.home-hero-portrait','.home-hero-copy','.home-hero-split h1','.hero-tech','.hero-knowledge','.gradient-word','.home-hero-actions','.home-hero-actions .home-btn.primary','.home-project-directory','.directory-filters','.directory-group:not([hidden])','.home-contact-panel','footer'];
     const objects=Object.fromEntries(sels.map(s=>[s,rect(s)]));
     const heading=[...document.querySelectorAll('.home-hero-split h1 span')].map(e=>({text:e.textContent,rect:(()=>{let b=e.getBoundingClientRect();return{left:Math.round(b.left),right:Math.round(b.right),width:Math.round(b.width)}})()}));
     const main=document.querySelector('main');
@@ -36,9 +37,12 @@ const issues=[];
     const hero=q['.home-hero-split h1'];
     if(hero&&hero.x<0)issues.push('Hero text left clipped at '+width);
     for(const row of result.heading){if(row.rect.right>width+2||row.rect.left<0)issues.push('Heading span '+JSON.stringify(row.text)+' clipped at '+width+' x='+row.rect.left+'..'+row.rect.right)}
+    const cta=q['.home-hero-actions .home-btn.primary'];if(cta&&cta.y>800)issues.push('Primary CTA too far below fold at '+width+': y='+cta.y);
+    if(result.heroHeight>855)issues.push('Mobile hero excessively tall at '+width+': '+result.heroHeight+'px');
     for(const o of result.interactive){if(o.h>0&&o.h<42)issues.push('Small tap target '+o.name+' '+o.h+'px at '+width)}
     if(!result.image.loaded||result.image.naturalWidth<100)issues.push('Hero image not loaded at '+width);
    }
+   if(width>430){for(const row of result.heading){if(row.rect.right>width+2||row.rect.left<0)issues.push('Tablet heading span '+JSON.stringify(row.text)+' clipped at '+width+' x='+row.rect.left+'..'+row.rect.right)}}
    if(errors.length)issues.push('Page errors at '+width+': '+errors.slice(0,3).join(' || '));
    console.log('VIEWPORT '+width+' '+JSON.stringify(result));
    if(width<=430){
