@@ -1,0 +1,27 @@
+name: Home mobile responsive browser audit
+on:
+  pull_request:
+    paths:
+      - tests/home-mobile-live.cjs
+      - .github/workflows/home-mobile-browser-audit.yml
+      - home-refresh.css
+      - index.html
+      - stannet-global-nav.js
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Add browser driver
+        run: npm install --prefix /tmp/stannet-mobile-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Audit real StanNet homepage in emulated phones
+        env:
+          NODE_PATH: /tmp/stannet-mobile-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node tests/home-mobile-live.cjs
