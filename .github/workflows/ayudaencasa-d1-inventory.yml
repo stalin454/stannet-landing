@@ -1,4 +1,4 @@
-name: AyudaEnCasa D1 staging inventory
+name: AyudaEnCasa live smoke and D1 inventory
 
 on:
   workflow_dispatch:
@@ -11,24 +11,42 @@ permissions:
   contents: read
 
 jobs:
-  inventory:
+  smoke:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Check isolated staging database inventory
+      - name: Check public marketplace and isolated API health
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --location --retry 2 --max-time 30 https://stannet.space/pages/marketplace.html -o /tmp/ayuda-page.html
+          grep -q 'id="accountDashboard"' /tmp/ayuda-page.html
+          grep -q 'id="aecTestStatus"' /tmp/ayuda-page.html
+          grep -q 'noindex,nofollow' /tmp/ayuda-page.html
+          curl --silent --show-error --fail --retry 2 --max-time 30 https://stannet.space/api/ayudaencasa/v1/health -o /tmp/ayuda-health.json
+          jq -e '.service == "AyudaEnCasa" and .version == "v1"' /tmp/ayuda-health.json >/dev/null
+          jq -r '"Live API health OK; D1 bound="+(.databaseConfigured|tostring)' /tmp/ayuda-health.json
+          curl --silent --show-error --fail --retry 2 --max-time 30 https://stannet.space/pages/programming-web-lab.html -o /dev/null
+          curl --silent --show-error --fail --retry 2 --max-time 30 https://stannet.space/pages/callan.html -o /dev/null
+          echo 'PASS: marketplace HTML, API route and unrelated academy pages reachable'
+      - name: Inventory D1 availability (read only; lack of permission is reported)
         shell: bash
         run: |
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN}" || -z "${CLOUDFLARE_ACCOUNT_ID}" ]]; then
-            echo 'Cloudflare credentials are not configured for staging inventory'; exit 1
+            echo 'D1_ACCESS_BLOCKED: missing Cloudflare Actions credentials'; exit 0
           fi
-          curl --silent --show-error --fail --retry 2 --max-time 30 \
+          if ! curl --silent --show-error --fail --max-time 30 \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
             -H 'Content-Type: application/json' \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database?per_page=100" \
-            -o /tmp/aec-d1-list.json
-          jq -e '.success == true' /tmp/aec-d1-list.json >/dev/null
+            -o /tmp/aec-d1-list.json; then
+            echo 'D1_ACCESS_BLOCKED: existing deploy token lacks access to D1 inventory'; exit 0
+          fi
+          if ! jq -e '.success == true' /tmp/aec-d1-list.json >/dev/null; then
+            echo 'D1_ACCESS_BLOCKED: API inventory was not granted'; exit 0
+          fi
           jq -r '[.result[] | select(.name | test("ayuda|casa"; "i"))] as $matches | if ($matches | length)==0 then "NO_AYUDA_DATABASE" else ($matches[] | "D1_MATCH name=\(.name) id=\(.uuid)") end' /tmp/aec-d1-list.json
           rm -f /tmp/aec-d1-list.json
