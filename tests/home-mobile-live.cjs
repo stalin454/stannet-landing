@@ -11,7 +11,7 @@ const issues=[];
    const errors=[];
    page.on('pageerror',e=>errors.push(String(e)));
    const response=await page.goto('https://stannet.space/',{waitUntil:'domcontentloaded',timeout:45000});
-   await page.waitForTimeout(1900);
+   await new Promise(resolve=>setTimeout(resolve,1900));
    const result=await page.evaluate(()=>{
     const rect=s=>{const e=document.querySelector(s);if(!e)return null;const b=e.getBoundingClientRect();const c=getComputedStyle(e);return {x:Math.round(b.left),y:Math.round(b.top),w:Math.round(b.width),h:Math.round(b.height),color:c.color,font:c.fontSize,display:c.display,visible:c.display!=='none'&&c.visibility!=='hidden'&&b.width>0&&b.height>0,scrollW:e.scrollWidth,clientW:e.clientWidth}};
     const sels=['#stannet-canonical-nav','.brand-mark','#stannet-canonical-nav .brand','#stannet-canonical-nav .menu-toggle','#stannet-canonical-nav .site-nav','.home-hero-portrait','.home-hero-copy','.home-hero-split h1','.hero-tech','.hero-knowledge','.gradient-word','.home-hero-actions','.home-project-directory','.directory-filters','.directory-group:not([hidden])','.home-contact-panel','footer'];
@@ -44,14 +44,14 @@ const issues=[];
    if(width<=430){
     const toggle=await page.$('#stannet-canonical-nav .menu-toggle');
     if(toggle){
-      await toggle.click();await page.waitForTimeout(150);
+      await toggle.click();await new Promise(resolve=>setTimeout(resolve,150));
       const state=await page.evaluate(()=>({expanded:document.querySelector('#stannet-canonical-nav .menu-toggle')?.getAttribute('aria-expanded'),navVisible:getComputedStyle(document.querySelector('#stannet-canonical-nav .site-nav')).display,navBox:(()=>{let e=document.querySelector('#stannet-canonical-nav .site-nav');let r=e.getBoundingClientRect();return{left:r.left,right:r.right,bottom:r.bottom}})()}));
       console.log('MOBILE_MENU '+width+' '+JSON.stringify(state));
       if(state.expanded!=='true'||state.navVisible==='none')issues.push('Menu fails to open at '+width);
       if(state.navBox.right>width+2||state.navBox.left<-1)issues.push('Open menu off-screen at '+width);
       const trigger=await page.$('#stannet-canonical-nav .nav-group .nav-trigger');
       if(trigger){
-        await trigger.click();await page.waitForTimeout(100);
+        await trigger.click();await new Promise(resolve=>setTimeout(resolve,100));
         const drop=await page.evaluate(()=>({expanded:document.querySelector('#stannet-canonical-nav .nav-trigger')?.getAttribute('aria-expanded'),display:getComputedStyle(document.querySelector('#stannet-canonical-nav .nav-group .nav-dropdown')).display}));
         console.log('MOBILE_SUBMENU '+width+' '+JSON.stringify(drop));
         if(drop.expanded!=='true'||drop.display==='none')issues.push('Submenu fails to expand at '+width);
