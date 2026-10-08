@@ -81,69 +81,15 @@ header.innerHTML=`
 </a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
 <nav class="site-nav home-nav" aria-label="Navegación principal">
-  <a data-nav="/" href="/">Inicio</a>
-  <div class="nav-group" data-group="/pages/web-development">
-    <button class="nav-trigger" type="button" aria-expanded="false">Web Development <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/web-development.html">Portfolio web</a>
-      <a href="/sanacion/">Proyecto 01 · Alfa y Omega</a>
-      <a href="/pages/programming.html">Programming Academy</a>
-      <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
-      <a href="/nutri-ia/">Nutri IA</a>\n      <a href="/pdf-tutor/">PDF Tutor · Study AI</a>
-      <a href="/pages/marketplace.html">AyudaEnCasa</a>
-    </div>
-  </div>
-  <a data-nav="/pages/ai" href="/pages/ai.html">🤖 StanNet AI</a>\n  <a data-nav="/pages/radio" href="/pages/radio.html">StanNet Radio</a>
-  <div class="nav-group" data-group="/pages/cybersecurity">
-    <button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/cybersecurity.html">Cybersecurity Hub</a>
-      <a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a>
-      <a href="/sentinel/">Sentinel</a>
-      <a href="/shield/">Shield</a>
-      <a href="/pages/password-security.html">Password Security</a>
-      <a href="/pages/cyber-lab.html">Cyber Defense Lab</a>
-    </div>
-  </div>
-  <div class="nav-group" data-group="/pages/ruta-dinamarca">
-    <button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a>
-      <a href="/pages/comunidad-dinamarca.html">Comunidad / Blog</a>
-      <a href="/pages/danish.html">Danish Academy</a>
-      <a href="/pages/ruta-dinamarca.html#plan">Plan de preparación</a>
-      <a href="/pages/ruta-dinamarca.html#ciudades">Ciudades</a>
-      <a href="/pages/ruta-dinamarca.html#areas">Estudios · Trabajo · Vivienda</a>
-    </div>
-  </div>
-  <div class="nav-group" data-group="/pages/academias">
-    <button class="nav-trigger" type="button" aria-expanded="false">Centro de Aprendizaje <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/programming.html">Programming Academy</a>
-      <a href="/pages/typing.html">Typing Lab · Mecanografía</a>
-      <a href="/pages/shortcuts.html">Atajos de teclado</a>
-      <a href="/pages/english.html">StanNet English Academy</a>
-      <a href="/pages/callan.html">Callan English Coach</a>
-      <a href="/pages/language-music.html">Language Music Lab</a>
-      <a href="/pages/guitar.html">Guitar Academy</a>
-      <a href="/pages/danish.html">Danish Academy</a>
-    </div>
-  </div>
-  <div class="nav-group" data-group="/pages/labs">
-    <button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/programming-fullstack.html">Full-Stack Lab</a>
-      <a href="/pages/vocal-studio.html">Vocal Studio</a>
-    </div>
-  </div>
-  <div class="nav-group" data-group="/pages/cv">
-    <button class="nav-trigger" type="button" aria-expanded="false">Sobre mí <span>⌄</span></button>
-    <div class="nav-dropdown">
-      <a href="/pages/cv.html">Sobre mí</a>
-      <a href="/pages/education.html">Formación</a>
-    </div>
-  </div>
-  <a class="nav-cta" href="/#contacto">Contacto</a>
+<a data-nav="/" href="/">Inicio</a>
+<div class="nav-group" data-group="/pages/web-development"><button class="nav-trigger" type="button" aria-expanded="false">Desarrollo <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/web-development.html">Web Development</a><a href="/pages/programming.html">Programming Academy</a><a href="/pages/programming-fullstack-course.html">Full-Stack Course</a><a href="/pages/programming-fullstack.html">Full-Stack Lab</a><a href="/pages/programming-web-lab.html">Web Programming Lab</a><a href="/pages/programming-lab.html">Programming Lab</a><a href="/pages/programming-cs-lab.html">C++ / C# Lab</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/shortcuts.html">Atajos de teclado</a><a href="/pages/fp-study.html">FP · DAW</a><a href="/sanacion/">Alfa y Omega</a></div></div>
+<div class="nav-group" data-group="/pages/english"><button class="nav-trigger" type="button" aria-expanded="false">Idiomas <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/english.html">English Academy</a><a href="/pages/callan.html">Callan English Coach</a><a href="/pages/danish.html">Danish Academy</a><a href="/pages/language-music.html">Language Music Lab</a></div></div>
+<div class="nav-group" data-group="/pages/guitar"><button class="nav-trigger" type="button" aria-expanded="false">Música <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/guitar.html">Guitar Academy</a><a href="/pages/music.html">Music Lab</a><a href="/pages/vocal-studio.html">Vocal Studio</a><a href="/pages/radio.html">StanNet Radio</a></div></div>
+<div class="nav-group" data-group="/pages/cybersecurity"><button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cybersecurity.html">Cybersecurity Hub</a><a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a><a href="/pages/cyber-lab.html">Cyber Defense Lab</a><a href="/sentinel/">Sentinel</a><a href="/shield/">Shield</a><a href="/pages/password-security.html">Password Security</a></div></div>
+<div class="nav-group" data-group="/pages/ai"><button class="nav-trigger" type="button" aria-expanded="false">Apps e IA <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ai.html">StanNet AI</a><a href="/pdf-tutor/">PDF Tutor · Study AI</a><a href="/nutri-ia/">Nutri IA</a><a href="/pages/nutri-ia.html">Nutri IA Academy</a><a href="/pages/marketplace.html">AyudaEnCasa</a></div></div>
+<div class="nav-group" data-group="/pages/ruta-dinamarca"><button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a><a href="/pages/denmark-cv.html">CV Dinamarca</a><a href="/pages/comunidad-dinamarca.html">Comunidad Dinamarca</a></div></div>
+<div class="nav-group" data-group="/pages/cv"><button class="nav-trigger" type="button" aria-expanded="false">StanNet <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cv.html">Sobre mí · CV</a><a href="/pages/education.html">Formación y certificados</a><a href="/pages/blog.html">Blog StanNet</a></div></div>
+<a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
 
 const existing=document.querySelector('header.site-header');
