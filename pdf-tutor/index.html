@@ -179,9 +179,9 @@ async function fetchNightAudio(chunk,runId){
     try{
       const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),30000);
       const r=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json','Accept':'audio/mpeg'},body:JSON.stringify({text:chunk,lang:state.voice.lang,voice:state.voice.name,purpose:'audiobook'}),cache:'no-store',signal:ctl.signal});
-      clearTimeout(timer);if(!r.ok){let msg='speech '+r.status;try{const p=await r.json();if(p?.error)msg=p.error}catch{}throw new Error(msg)}
-      const bytes=await r.arrayBuffer();if(!bytes||bytes.byteLength<1000)throw new Error('Audio vacío o incompleto');
-      return bytes;
+      clearTimeout(timer);if(!r.ok){let msg='HTTP '+r.status;try{const p=await r.json();if(p?.error)msg+=' · '+p.error}catch{}throw new Error(msg)}
+      const ct=r.headers.get('content-type')||'sin content-type';const bytes=await r.arrayBuffer();if(!bytes||bytes.byteLength<1000)throw new Error('MP3 inválido · '+bytes.byteLength+' bytes · '+ct);
+      window.__pdfAudioDiag={stage:'fetch-ok',status:r.status,contentType:ct,bytes:bytes.byteLength,at:new Date().toISOString()};return bytes;
     }catch(e){last=e;if(attempt<3){$('nightStatus').textContent='Reconectando voz… intento '+(attempt+2)+'/4';await wait(700*Math.pow(2,attempt));}}
   }
   throw last||new Error('speech');
@@ -192,7 +192,7 @@ async function playNightBlob(bytes,runId,page,index,total){
   state.voice.nightPage=page;state.voice.nightChunk=index;state.voice.paused=false;state.currentPage=page;$('nightPage').value=String(page);saveProgress();
   $('nightStatus').textContent='Página '+page+' · fragmento '+(index+1)+'/'+total;
   if(ctx){
-    const decoded=await ctx.decodeAudioData(bytes.slice(0));
+    let decoded;try{decoded=await ctx.decodeAudioData(bytes.slice(0));window.__pdfAudioDiag={...(window.__pdfAudioDiag||{}),stage:'decode-ok',duration:decoded.duration,contextState:ctx.state}}catch(e){window.__pdfAudioDiag={...(window.__pdfAudioDiag||{}),stage:'decode-failed',contextState:ctx.state,error:e?.message||String(e)};throw new Error('DECODE · '+(e?.message||e?.name||'falló decodeAudioData'))}
     await new Promise((resolve,reject)=>{
       if(runId!==state.voice.runId||!state.voice.night)return resolve();
       const node=ctx.createBufferSource();node.buffer=decoded;node.connect(ctx.destination);nightSource=node;
@@ -234,8 +234,8 @@ async function startNightReader(){
     }
     if(runId===state.voice.runId&&state.voice.night){state.voice.night=false;clearSleepTimer();$('nightStatus').textContent='Lectura completa del documento. 🌙'}
   }catch(e){
-    console.warn('Audiobook recovery stopped',e);
-    if(runId===state.voice.runId){state.voice.night=false;$('nightPage').value=String(state.voice.nightPage||state.currentPage||1);saveProgress();$('nightStatus').textContent='Guardé el punto de lectura en la página '+(state.voice.nightPage||state.currentPage||1)+'. Pulsa Leer PDF para reanudar.'}
+    console.warn('Audiobook recovery stopped',e,window.__pdfAudioDiag);
+    if(runId===state.voice.runId){state.voice.night=false;$('nightPage').value=String(state.voice.nightPage||state.currentPage||1);saveProgress();const d=window.__pdfAudioDiag||{};const detail=e?.message||'Error desconocido';$('nightStatus').textContent='DIAGNÓSTICO: '+detail+(d.bytes?' · '+d.bytes+' bytes':'')+(d.contentType?' · '+d.contentType:'')+(d.contextState?' · AudioContext '+d.contextState:'')+'. Página '+(state.voice.nightPage||state.currentPage||1)+' guardada.'}
   }
 }
 function stopNightReader(){
