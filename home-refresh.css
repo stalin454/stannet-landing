@@ -458,3 +458,29 @@ body.home-refresh .home-academy-card:focus-visible,body.home-refresh .home-categ
  body.home-refresh .home-hero h1 .gradient-word,
  body.home-refresh .home-heading h2 span{background:none;color:CanvasText;-webkit-text-fill-color:CanvasText}
 }
+
+/* Android hero artwork: decorative layer, never intercepts navigation. */
+body.home-refresh .home-hero .home-android-glow{
+ position:absolute;z-index:1;left:50%;top:0;transform:translateX(-50%);
+ width:min(68vw,960px);height:100%;object-fit:contain;object-position:center bottom;
+ pointer-events:none;user-select:none;opacity:.88;
+}
+body.home-refresh .home-hero-copy{position:relative;z-index:3}
+body.home-refresh .home-hero-copy::before{
+ content:"";position:absolute;z-index:-1;inset:-28px -18px;
+ background:linear-gradient(90deg,rgba(0,0,0,.84),rgba(0,0,0,.58) 78%,transparent);
+ border-radius:24px;pointer-events:none;
+}
+body.home-refresh .home-hero-copy h1{text-shadow:0 2px 22px rgba(0,0,0,.2)}
+body.home-refresh .home-hero .chip-stage{z-index:3}
+body.home-refresh .home-hero .chip-board{background:rgba(17,18,24,.88)}
+@media(max-width:900px){
+ body.home-refresh .home-hero .home-android-glow{
+  left:65%;top:0;width:min(100vw,760px);height:700px;object-position:center top;opacity:.6;
+ }
+ body.home-refresh .home-hero-copy::before{background:linear-gradient(90deg,rgba(0,0,0,.88),rgba(0,0,0,.58),rgba(0,0,0,.12))}
+}
+@media(max-width:640px){
+ body.home-refresh .home-hero .home-android-glow{left:68%;width:125vw;height:620px;opacity:.48}
+ body.home-refresh .home-hero-copy::before{inset:-20px -10px;background:linear-gradient(90deg,rgba(0,0,0,.9),rgba(0,0,0,.5))}
+}
