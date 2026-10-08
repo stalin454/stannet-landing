@@ -586,3 +586,27 @@ body.home-refresh .home-project-directory .home-heading{margin-bottom:26px}
  body.home-refresh .directory-group .home-rail-card{min-width:250px;flex-basis:250px}
  body.home-refresh .directory-group .home-rail-heading{gap:12px}
 }
+
+/* Ice-blue and lavender hero trial, inspired by the StanNet AI page. */
+body.home-refresh .home-hero-split{
+ background:radial-gradient(circle at 12% 18%,rgba(25,207,232,.20),transparent 30%),
+ radial-gradient(circle at 88% 42%,rgba(138,57,255,.18),transparent 34%),
+ linear-gradient(145deg,#f9fdff 0%,#eaf7ff 48%,#f4edff 100%);
+ border-bottom:1px solid rgba(40,120,255,.14);color:#0b1b35;
+}
+body.home-refresh .home-hero-split:before{opacity:.35;background-image:linear-gradient(rgba(40,120,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(40,120,255,.06) 1px,transparent 1px);background-size:34px 34px}
+body.home-refresh .home-hero-split .home-ai-network{opacity:.12}
+body.home-refresh .home-hero-portrait{
+ border-radius:30px;border:1px solid rgba(74,211,255,.32);overflow:hidden;
+ background:radial-gradient(circle at 36% 32%,rgba(71,221,255,.20),transparent 36%),
+ radial-gradient(circle at 68% 64%,rgba(170,80,255,.25),transparent 45%),
+ linear-gradient(145deg,#061729,#0b2039 52%,#201442);
+ box-shadow:0 24px 60px rgba(31,68,125,.20);
+}
+body.home-refresh .home-hero-split .home-kicker{color:#087e9b!important}
+body.home-refresh .home-hero-split h1 .hero-tech{color:#081a35;text-shadow:none}
+body.home-refresh .home-hero-split h1 .hero-knowledge{background-image:linear-gradient(100deg,#087eaa,#225fcc);text-shadow:none}
+body.home-refresh .home-hero-split h1 .gradient-word{background-image:linear-gradient(100deg,#7134c8,#ad238b);text-shadow:none}
+body.home-refresh .home-hero-split .home-hero-copy>p{color:#40546d}
+body.home-refresh .home-hero-split .home-btn.secondary{background:rgba(255,255,255,.82);color:#123d68;border-color:rgba(25,155,190,.45)}
+@media(max-width:640px){body.home-refresh .home-hero-portrait{border-radius:24px}}
