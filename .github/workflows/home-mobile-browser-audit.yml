@@ -24,4 +24,7 @@ jobs:
         env:
           NODE_PATH: /tmp/stannet-mobile-browser/node_modules
           CHROME_PATH: /usr/bin/google-chrome
-        run: node tests/home-mobile-live.cjs
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-home-preview.log 2>&1 &
+          sleep 2
+          STANNET_AUDIT_URL=http://127.0.0.1:8765/ node tests/home-mobile-live.cjs
