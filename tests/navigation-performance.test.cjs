@@ -4,7 +4,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const pages = ['index.html', ...fs.readdirSync(path.join(root, 'pages'))
-  .filter(name => name.endsWith('.html')).map(name => 'pages/' + name)];
+  .filter(name => name.endsWith('.html') && !name.startsWith('ayudaencasa-')).map(name => 'pages/' + name)];
 const css = fs.readFileSync(path.join(root, 'navigation-performance.css'), 'utf8');
 const nav = fs.readFileSync(path.join(root, 'stannet-global-nav.js'), 'utf8');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
