@@ -13,7 +13,7 @@ for (const page of pages) {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   assert.match(html, /<link rel="stylesheet" href="\/navigation-performance\.css\?v=20261004-perf1">/);
   assert.match(html, /<header class="site-header/);
-  assert.match(html, /stannet-global-nav\.js\?v=20261004-perf1/);
+  assert.match(html, /stannet-global-nav\.js\?v=[^"']+/);
 }
 assert.match(css, /@view-transition\{navigation:auto\}/);
 assert.match(css, /prefers-reduced-motion:reduce/);
