@@ -211,14 +211,14 @@ async function startNightReader(){
   try{
     for(let p=requested;p<=state.pages.length;p++){
       if(runId!==state.voice.runId||!state.voice.night)return;
-      const parts=splitSpeechChunks(state.pages[p-1]?.text||'',700);if(!parts.length)continue;
+      const parts=splitSpeechChunks(state.pages[p-1]?.text||'',440);if(!parts.length)continue;
       let nextPromise=fetchNightAudio(parts[0],runId);
       for(let i=0;i<parts.length;i++){
         if(runId!==state.voice.runId||!state.voice.night)return;
         let blob;
         try{blob=await nextPromise}catch(e){blob=await fetchNightAudio(parts[i],runId)}
         if(i+1<parts.length)nextPromise=fetchNightAudio(parts[i+1],runId);
-        else if(p<state.pages.length){const nxt=splitSpeechChunks(state.pages[p]?.text||'',700);nextPromise=nxt.length?fetchNightAudio(nxt[0],runId):Promise.resolve(null)}
+        else if(p<state.pages.length){const nxt=splitSpeechChunks(state.pages[p]?.text||'',440);nextPromise=nxt.length?fetchNightAudio(nxt[0],runId):Promise.resolve(null)}
         let played=false;
         for(let attempt=0;attempt<2&&!played;attempt++){
           try{played=await playNightBlob(blob,runId,p,i,parts.length)}
