@@ -484,3 +484,10 @@ body.home-refresh .home-hero .chip-board{background:rgba(17,18,24,.88)}
  body.home-refresh .home-hero .home-android-glow{left:68%;width:125vw;height:620px;opacity:.48}
  body.home-refresh .home-hero-copy::before{inset:-20px -10px;background:linear-gradient(90deg,rgba(0,0,0,.9),rgba(0,0,0,.5))}
 }
+
+/* Keep the face above the copy and clear of the access panel on desktop. */
+@media(min-width:901px){
+ body.home-refresh .home-hero .home-android-glow{
+  left:43%;top:60px;width:min(64vw,900px);height:calc(100% - 60px);object-position:center top;
+ }
+}
