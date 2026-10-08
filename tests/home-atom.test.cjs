@@ -4,38 +4,42 @@ const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'atom.css'), 'utf8');
-const network = fs.readFileSync(path.join(root, 'chip-network.js'), 'utf8');
-const visual = fs.readFileSync(path.join(root, 'home-ai-network.js'), 'utf8');
-const nodes = [...html.matchAll(/<a class="chip-node [^"]*" href="([^"]+)" aria-label="([^"]+)"/g)];
+const css = fs.readFileSync(path.join(root, 'home-refresh.css'), 'utf8');
+const rails = fs.readFileSync(path.join(root, 'home-access-rail.js'), 'utf8');
+const groupNames = ['desarrollo', 'idiomas', 'musica', 'seguridad', 'apps', 'dinamarca', 'stannet'];
 
-assert.equal(nodes.length, 35, 'every StanNet area must have a clickable chip');
-for (const [, href, label] of nodes) {
-  assert.ok(label.trim(), `missing accessible label for ${href}`);
-  assert.ok(fs.existsSync(path.join(root, href.split('#')[0])), `chip destination does not exist: ${href}`);
+// The 35 old animated chip links were retired in favor of accessible project rails.
+const cards = [...html.matchAll(/<a class="home-rail-card[^"]*" href="([^"]+)"[^>]*>[\s\S]*?<strong>([^<]+)<\/strong>/g)];
+assert.equal(cards.length, 35, 'all 35 StanNet projects must have accessible links');
+for (const [, href, label] of cards) {
+  assert.ok(label.trim(), `missing project label for ${href}`);
+  let destination = href.split('#')[0].replace(/^\//, '');
+  if (destination.endsWith('/')) destination += 'index.html';
+  assert.ok(fs.existsSync(path.join(root, destination)), `project destination does not exist: ${href}`);
 }
 
-assert.match(html, /Chip central StanNet\.Space/);
-assert.match(html, /chip-network\.js\?v=20261004-perf1/);
-const flowGroup = html.match(/<g class="wire-light">([\s\S]*?)<\/g>/)?.[1] || '';
-assert.equal((flowGroup.match(/<path\b/g) || []).length, 3, 'only three lightweight signals animate at once');
-assert.match(css, /\.chip-board\.is-running \.wire-light path\{[^}]*animation:chip-current/s);
-assert.doesNotMatch(css, /wire-light\{[^}]*filter:drop-shadow/);
-assert.match(css, /prefers-reduced-motion:\s*reduce/);
-assert.match(css, /grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)/);
-assert.doesNotMatch(css, /#stannet-ai-root/, 'The home chip map must not hide or animate the isolated agent');
-assert.match(network, /IntersectionObserver/);
-assert.match(network, /document\.hidden/);
-assert.match(network, /prefers-reduced-motion/);
-const summaries = new Set([...network.matchAll(/^    '([^']+)': '/gm)].map(match => match[1]));
-assert.deepEqual(new Set(nodes.map(([, , label]) => label)), summaries, 'every chip has its own contextual summary');
-assert.match(network, /pointerover/);
-assert.match(network, /focusin/);
-assert.ok(network.includes("addEventListener('focusin'"));
-assert.match(visual, /requestAnimationFrame/);
-assert.match(visual, /edges\.push/);
-assert.match(visual, /IntersectionObserver/);
-assert.match(visual, /prefers-reduced-motion/);
-assert.match(visual, /document\.hidden/);
+assert.equal((html.match(/data-project-group="/g) || []).length, 7, 'seven project groups must be present');
+for (const name of groupNames) {
+  assert.ok(html.includes(`data-project-group="${name}"`), `missing project category ${name}`);
+  assert.ok(html.includes(`data-project-filter="${name}"`), `missing category filter ${name}`);
+  assert.ok(html.includes(`id="rail-${name}"`), `missing accessible rail ${name}`);
+}
+assert.match(html, /data-project-filter="solutions"/);
+assert.match(html, /data-project-filter="all"/);
+assert.match(html, /class="directory-status" role="status" aria-live="polite"/);
+assert.match(html, /home-access-rail\.js\?v=/);
 
-console.log('PASS: all 35 chip links, reduced SVG work, visibility-aware motion, and responsive assistant clearance verified.');
+assert.match(css, /\.directory-group\[hidden\]\{display:none!important\}/);
+assert.match(css, /\.home-rail-card:focus-visible/);
+assert.match(css, /prefers-reduced-motion:reduce/);
+assert.doesNotMatch(css, /#stannet-ai-root/, 'The project directory must not constrain the isolated agent');
+assert.match(rails, /ResizeObserver/);
+assert.match(rails, /ArrowRight/);
+assert.match(rails, /data-project-filter/);
+assert.match(rails, /aria-pressed/);
+assert.match(rails, /prefers-reduced-motion/);
+assert.match(rails, /pointermove/);
+assert.match(rails, /hashchange/);
+assert.match(rails, /applyFilter\('solutions'\)/);
+
+console.log('PASS: 35 project rail links, 7 categories, accessible filters and reduced-motion handling verified.');
