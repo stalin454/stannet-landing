@@ -1,0 +1,34 @@
+name: DJ Studio audio and recording QA
+on:
+  pull_request:
+    paths:
+      - apps/dj-studio/**
+      - dj-studio/**
+      - .github/workflows/dj-studio-recording.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recording:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated DJ dependencies
+        working-directory: apps/dj-studio
+        run: npm ci --no-audit --no-fund
+      - name: Build and run signal/storage tests
+        working-directory: apps/dj-studio
+        run: npm run build && npm test
+      - name: Add browser driver
+        run: npm install --prefix /tmp/stannet-dj-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Test native WAV recorder and project workflows in Chrome
+        env:
+          NODE_PATH: /tmp/stannet-dj-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-dj-preview.log 2>&1 &
+          sleep 2
+          node apps/dj-studio/tests/browser.cjs
