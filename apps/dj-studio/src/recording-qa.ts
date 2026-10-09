@@ -19,6 +19,8 @@ async function runSuite(){
     }
     engine.mixer.master.gain.value=.5;
     async function capture(name:string){
+      // Measure steady state after filters/compressor look-ahead have drained, using the audio clock.
+      const settledAt=ctx.currentTime+.2;await waitFor(()=>ctx.currentTime>=settledAt);
       let error:unknown;recorder=new WavRecorder(engine,()=>{},()=>{},e=>{error=e;});
       await recorder.start(`QA ${name}`,frequencies.map(String));if(recorder.record)created.push(recorder.record.id);
       await waitFor(()=>!!recorder!.record&&recorder!.record.frames>=22050);const record=await recorder.stop();
@@ -34,7 +36,7 @@ async function runSuite(){
     const crossed=await capture('crossfader');check(amplitude(crossed,220,ctx.sampleRate)<.001,'Crossfader no mutea L');check(amplitude(crossed,880,ctx.sampleRate)>.017,'Crossfader mutea THRU');results.push('PASS: WAV refleja crossfader y THRU');
     engine.assign('A','THRU');engine.mixer.channels.A.eq.low.gain.value=-24;
     const eq=await capture('eq');check(amplitude(eq,220,ctx.sampleRate)<amplitude(baseline,220,ctx.sampleRate)*.5,'EQ no afecta al WAV');results.push('PASS: EQ modifica el audio grabado');
-    engine.mixer.master.gain.value=0;const muted=await capture('master');check(muted.every(x=>Math.abs(x)<1e-5),'MASTER no silencia la grabación');results.push('PASS: MASTER controla el WAV');
+    engine.mixer.master.gain.value=0;const muted=await capture('master');check(muted.every(x=>Math.abs(x)<1e-5),`MASTER no silencia la grabación (pico ${muted.reduce((peak,x)=>Math.max(peak,Math.abs(x)),0)})`);results.push('PASS: MASTER controla el WAV');
     return results;
   }finally{(recorder as WavRecorder|null)?.dispose();for(const id of created)await deleteRecording(id);await engine.dispose();}
 }
