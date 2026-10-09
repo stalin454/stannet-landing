@@ -1,10 +1,20 @@
 import { handleAyudaEnCasaApi } from './ayudaencasa-api.js';
+import { pollySelected, pollyConfigured, requestPolly, requestPollyRadio } from './aws-polly.js';
 import { handleCommunity } from './community-dinamarca/api.mjs';
 import { catalogueText } from './stannet-ai-knowledge.mjs';
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Prevent workers.dev/preview traffic from bypassing stannet.space WAF
+    // and triggering billable Polly synthesis on public preview URLs.
+    if (pollySelected(env) &&
+        /^\/api\/(?:speech(?:\/test)?|radio\/(?:voice|jingle|program-audio))$/.test(url.pathname) &&
+        !['stannet.space','www.stannet.space'].includes(url.hostname)) {
+      return new Response(JSON.stringify({error:'Voz disponible solo desde stannet.space.'}), {
+        status:403, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}
+      });
+    }
     // Isolated AyudaEnCasa namespace: existing StanNet routes stay untouched.
     if (url.pathname === '/api/ayudaencasa/v1' || url.pathname.startsWith('/api/ayudaencasa/v1/')) {
       return handleAyudaEnCasaApi(request, env, url);
@@ -89,7 +99,7 @@ export default {
         automation:{
           editorialFeed:true,
           aiEditor:true,
-          neuralVoice:Boolean(env.AZURE_SPEECH_REGION && env.AZURE_SPEECH_KEY),
+          neuralVoice:pollySelected(env) ? pollyConfigured(env) : Boolean(env.AZURE_SPEECH_REGION && env.AZURE_SPEECH_KEY),
           scheduler:true,
           continuousStream:Boolean(streamUrl)
         }
@@ -103,6 +113,14 @@ export default {
 
     if (url.pathname === '/api/speech/test') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      if (pollySelected(env)) {
+        const result = await requestPolly('Hej', env, {lang:'da-DK'});
+        if (!result.ok) return json({ok:false,provider:'amazon-polly',reason:result.error,
+          providerStatus:result.providerStatus || null},200,{'Cache-Control':'no-store'});
+        const bytes = await result.response.arrayBuffer();
+        return json({ok:bytes.byteLength>0,provider:'amazon-polly',region:env.AWS_POLLY_REGION||'eu-south-2',
+          language:result.language,voice:result.voice,byteLength:bytes.byteLength},200,{'Cache-Control':'no-store'});
+      }
       const region = env.AZURE_SPEECH_REGION;
       const key = env.AZURE_SPEECH_KEY;
       if (!region || !key) {
@@ -150,6 +168,10 @@ export default {
 
     if (url.pathname === '/api/speech/status') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
+      if (pollySelected(env)) return json({
+        provider:'amazon-polly',region:env.AWS_POLLY_REGION||'eu-south-2',
+        configured:pollyConfigured(env),connectionTest:'/api/speech/test'
+      },200,{'Cache-Control':'no-store'});
       const regionConfigured = Boolean(env.AZURE_SPEECH_REGION);
       const keyConfigured = Boolean(env.AZURE_SPEECH_KEY);
       let azureReachable = false;
@@ -196,6 +218,17 @@ export default {
         requestedLang = typeof body?.lang === 'string' ? body.lang : 'da-DK';
         requestedVoice = typeof body?.voice === 'string' ? body.voice.trim() : '';
         purpose = typeof body?.purpose === 'string' ? body.purpose : '';
+      }
+
+      if (pollySelected(env)) {
+        if (!text || text.length > 500) return json({error:'Texto no válido.'},400);
+        const result = await requestPolly(text,env,{lang:requestedLang,voice:requestedVoice,purpose});
+        if (!result.ok) return json({error:result.error,providerStatus:result.providerStatus||null},result.status);
+        return new Response(result.response.body,{status:200,headers:{
+          'Content-Type':'audio/mpeg',
+          'Cache-Control':purpose === 'chat' || purpose === 'audiobook' ? 'no-store' : 'public, max-age=86400, s-maxage=604800',
+          'X-Content-Type-Options':'nosniff','X-StanNet-Speech-Provider':'amazon-polly'
+        }});
       }
 
       const voiceMap = {
@@ -1247,6 +1280,15 @@ async function handleRadioVoice(request,env) {
 
 async function synthesizeRadioSpeech(raw,env,stage='6',extraHeaders={}) {
   if(!raw||String(raw).length>8500) return json({ error:'El guion de radio no es válido.' },400);
+  if (pollySelected(env)) {
+    const result=await requestPollyRadio(prepareRadioSpeech(raw),env);
+    if(!result.ok) return json({error:result.error,providerStatus:result.providerStatus||null},result.status);
+    return new Response(result.blob,{status:200,headers:{
+      'Content-Type':'audio/mpeg','Cache-Control':'public, max-age=300, s-maxage=600',
+      'X-StanNet-Voice':result.voice,'X-StanNet-Audio-Stage':String(stage),
+      'X-StanNet-Speech-Provider':'amazon-polly',...extraHeaders
+    }});
+  }
   if(!env.AZURE_SPEECH_REGION||!env.AZURE_SPEECH_KEY) return json({ error:'La voz de radio no está configurada en Cloudflare.' },503);
 
   const clean=prepareRadioSpeech(raw);

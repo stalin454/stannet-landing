@@ -121,7 +121,7 @@
     const host=document.querySelector('#englishVoiceControls');
     if (!host) return;
     host.innerHTML =
-      '<div class="english-voice-copy"><span>AZURE SPEECH</span><strong>Elige tu acento y voz.</strong><small>La elección se aplica a toda la English Academy.</small></div>'+
+      '<div class="english-voice-copy"><span>STANNET VOICE</span><strong>Elige tu acento y voz.</strong><small>La elección se aplica a toda la English Academy.</small></div>'+
       '<div class="english-voice-options">'+
         '<label><span>ACENTO</span><select id="englishAccent"><option value="en-GB">British English</option><option value="en-US">American English</option></select></label>'+
         '<label><span>VOZ</span><select id="englishGender"><option value="female">Femenina</option><option value="male">Masculina</option></select></label>'+
