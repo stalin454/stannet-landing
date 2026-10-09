@@ -6,6 +6,15 @@ import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Prevent workers.dev/preview traffic from bypassing stannet.space WAF
+    // and triggering billable Polly synthesis on public preview URLs.
+    if (pollySelected(env) &&
+        /^\/api\/(?:speech(?:\/test)?|radio\/(?:voice|jingle|program-audio))$/.test(url.pathname) &&
+        !['stannet.space','www.stannet.space'].includes(url.hostname)) {
+      return new Response(JSON.stringify({error:'Voz disponible solo desde stannet.space.'}), {
+        status:403, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}
+      });
+    }
     // Isolated AyudaEnCasa namespace: existing StanNet routes stay untouched.
     if (url.pathname === '/api/ayudaencasa/v1' || url.pathname.startsWith('/api/ayudaencasa/v1/')) {
       return handleAyudaEnCasaApi(request, env, url);
