@@ -2,7 +2,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { parseID3, waveform } from '../src/metadata.ts';
-import { inspect, MAX_FILE } from '../src/library.ts';
+import { inspect, MAX_FILE, MAX_PCM, MAX_PCM_MB, pcmBudgetMB } from '../src/library.ts';
+test('four decks permit 512 MB only on desktop with >=8 GB; mobile and low RAM stay at 256 MB', () => {
+  assert.equal(pcmBudgetMB(8,true),512);
+  assert.equal(pcmBudgetMB(16,true),512);
+  assert.equal(pcmBudgetMB(4,true),256);
+  assert.equal(pcmBudgetMB(8,false),256);
+  assert.equal(pcmBudgetMB(0,true),256);
+  assert.equal(MAX_PCM,MAX_PCM_MB*1024*1024);
+});
 const require=createRequire(import.meta.url);const WAE=require('web-audio-engine');
 test('ID3v2 title, artist and BPM are read; invalid tags fail safely',()=>{
   const frames=[['TIT2','Test tune'],['TPE1','StanNet'],['TBPM','128']].map(([id,text])=>{
