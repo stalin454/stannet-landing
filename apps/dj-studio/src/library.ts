@@ -6,7 +6,8 @@ export const MAX_FILE = 100 * 1024 * 1024;
  // only on wide-screen desktops reporting >=8 GB device memory.
  const deviceMemoryGB = typeof navigator === 'undefined' ? 0 : ((navigator as Navigator & {deviceMemory?: number}).deviceMemory ?? 0);
  const isWideScreen = typeof window !== 'undefined' && window.matchMedia('(min-width: 761px)').matches;
- export const MAX_PCM_MB = isWideScreen && deviceMemoryGB >= 8 ? 512 : 256;
+ export const pcmBudgetMB = (memoryGB: number, wideScreen: boolean) => wideScreen && memoryGB >= 8 ? 512 : 256;
+export const MAX_PCM_MB = pcmBudgetMB(deviceMemoryGB, isWideScreen);
  export const MAX_PCM = MAX_PCM_MB * 1024 * 1024;
 export const decodedBytes = (b: AudioBuffer) => b.length * b.numberOfChannels * 4;
 export async function inspect(file: File, ctx: AudioContext): Promise<Track> {
