@@ -24,11 +24,16 @@ assert.equal(data.accuracy('Bonjour !','bonjour',{strict:false}).exact,true);
 assert.equal(data.accuracy('Hej','Hi').exact,false);
 const html=fs.readFileSync('pages/language-typing.html','utf8');
 const app=fs.readFileSync('language-typing.js','utf8');
-for(const id of ['ltLanguage','ltLevel','ltTopic','ltAnswer','ltPhrase','ltTranslation','ltHear','ltStop','ltMic','ltRecord','ltVoicePreview','ltOralDone','ltSpecialKeys','ltShadowMode']){
+for(const id of ['ltProvider','ltPollyVoice','ltAmazonPreview','ltVoiceProviderNote','ltLanguage','ltLevel','ltTopic','ltAnswer','ltPhrase','ltTranslation','ltHear','ltStop','ltMic','ltRecord','ltVoicePreview','ltOralDone','ltSpecialKeys','ltShadowMode']){
  assert.ok(html.includes('id="'+id+'"'),'Missing element '+id);
 }
 assert.ok(html.indexOf('language-typing-data.js')<html.indexOf('language-typing.js'));
-assert.ok(!app.includes('fetch('),'Audio and learning progress must not be sent to the backend');
+assert.ok(app.includes("fetch('/api/speech/status'"),'Polly availability must be checked before opt-in');
+assert.ok(app.includes("fetch('/api/speech'"),'Polly synthesis must use same-origin Worker only');
+assert.ok(app.includes("text:l.target"),'Only public curriculum phrases are synthesized');
+assert.ok(!app.includes('text:$(\'ltAnswer\').value'),'Learner answers must never be sent to Polly');
+assert.ok(app.includes('pollyCache'),'Repeat audio should be cached in this session');
+assert.ok(app.includes("$('ltAuto').checked=false"),'Opting into paid Polly must disable automatic replays');
 assert.ok(app.includes('speech.speak(ut)'),'Speech synthesis must be real');
 assert.ok(app.includes('new MediaRecorder'),'Media recording must be real');
 assert.ok(app.includes('r.start()'),'Speech recognition must be real');

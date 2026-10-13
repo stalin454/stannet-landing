@@ -21,6 +21,14 @@ test('Existing Azure voice names remain compatible with Polly mapping',()=>{
   assert.equal(selectPollyVoice('es-ES','es-ES-ElviraNeural').voice,'Lucia');
   assert.equal(selectPollyVoice('es-ES','es-ES-AlvaroNeural').voice,'Sergio');
   assert.equal(selectPollyVoice('es-ES','untrusted').voice,'Lucia');
+  assert.deepEqual(selectPollyVoice('de-DE'),{language:'de-DE',voice:'Vicki',engine:'neural'});
+  assert.equal(selectPollyVoice('de-DE','Daniel').voice,'Daniel');
+  assert.equal(selectPollyVoice('fr-FR','Lea').voice,'Lea');
+  assert.equal(selectPollyVoice('fr-FR','Remi').voice,'Remi');
+  assert.equal(selectPollyVoice('sv-SE','Elin').voice,'Elin');
+  assert.equal(selectPollyVoice('sv-SE','unexpected').voice,'Elin');
+  assert.equal(selectPollyVoice('da-DK','Sofie').voice,'Sofie');
+  assert.equal(selectPollyVoice('en-GB','Amy').voice,'Amy');
 });
 
 test('Radio text splits within Polly limits without dropping spoken words',()=>{
