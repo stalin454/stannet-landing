@@ -97,4 +97,4 @@ jobs:
           command: deploy --config wrangler.academy-preview.jsonc
 
       - name: Print staging location
-        run: echo "Staging target: https://academy.stannet.dev/pages/programming-coach.html"
+        run: 'echo "Staging target: https://academy.stannet.dev/pages/programming-coach.html"'
