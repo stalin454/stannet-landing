@@ -284,7 +284,7 @@
   mobile.addEventListener('change',syncViewport);
   $('.snai-modes select').addEventListener('change',event=>{state.textContent=event.target.selectedOptions[0].textContent;});
   const scrollEnd=()=>{messages.scrollTop=messages.scrollHeight;};
-  const add=(text,kind='bot',persist=true,audible=true)=>{
+  const add=(text,kind='bot',persist=true,audible=true,showPaths=false)=>{
     const el=document.createElement('div');el.className='snai-msg '+kind;
     if(kind==='bot'){
       const safe=String(text||'');
@@ -294,7 +294,7 @@
         el.append(document.createTextNode(safe.slice(last,match.index)));
         const raw=match[0].replace(/[),.;!?}>]+$/,'');
         const href=safeResourceUrl(raw,location.origin);
-        if(href){const link=document.createElement('a');link.className='snai-resource';link.href=href;link.textContent='Abrir '+(resources.find(r=>r.path===href)?.title||'recurso')+' →';if(href.startsWith('https:')){link.target='_blank';link.rel='noopener noreferrer';}el.append(link,document.createTextNode(match[0].slice(raw.length)));}
+        if(href){const link=document.createElement('a');link.className='snai-resource';link.href=href;link.textContent=showPaths?raw:'Abrir '+(resources.find(r=>r.path===href)?.title||'recurso')+' →';if(href.startsWith('https:')){link.target='_blank';link.rel='noopener noreferrer';}el.append(link,document.createTextNode(match[0].slice(raw.length)));}
         else el.append(document.createTextNode(match[0]));
         last=match.index+match[0].length;
       }
@@ -344,7 +344,7 @@
     try{
       const attachment=await readAttachment(file);
       const result=await core.run(text||'Analiza el material autorizado.',{mode:$('.snai-modes select').value,attachment,editorCode,consent:{attachment:!!file,editor:sharing},signal:controller.signal});
-      pending.remove();add(result.answer,'bot',!file&&!sharing);removeAttachment();state.textContent=result.source==='context'?'Contexto reconocido':result.source==='catalogue'?'Recurso encontrado':'Listo';
+      pending.remove();add(result.answer,'bot',!file&&!sharing,true,result.source==='context');removeAttachment();state.textContent=result.source==='context'?'Contexto reconocido':result.source==='catalogue'?'Recurso encontrado':'Listo';
       if(voiceEnabled&&panel.open)await speakReply(result.answer,{listenAfter:true});
     }catch(error){
       pending.remove();add(error.name==='AbortError'?'La respuesta tardó demasiado. Inténtalo de nuevo.':error.message,'error',false);state.textContent='Inténtalo de nuevo';voiceThinking=false;
