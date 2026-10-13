@@ -206,6 +206,7 @@ async function record(){
   destroyRecord();
   try{
     const media=await navigator.mediaDevices.getUserMedia({audio:true});
+    const recordingLesson=sessionToken;
     stream=media;
     const chunks=[];
     const recorder=new MediaRecorder(media);mediaRecorder=recorder;
@@ -214,7 +215,7 @@ async function record(){
       media.getTracks().forEach(track=>track.stop());
       if(stream===media)stream=null;
       if(mediaRecorder===recorder)mediaRecorder=null;
-      if(!chunks.length)return;
+      if(recordingLesson!==sessionToken||!chunks.length)return; // Never attach an old recording to a new lesson.
       const blob=new Blob(chunks,{type:recorder.mimeType||'audio/webm'});
       recordUrl=URL.createObjectURL(blob);
       $('ltVoicePreview').src=recordUrl;$('ltVoicePreview').hidden=false;$('ltPlayRecord').disabled=false;
