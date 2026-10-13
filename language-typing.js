@@ -139,7 +139,8 @@ function display(){
   $('ltAnswer').placeholder=mode==='translation'?'Escribe tu traducción aquí…':mode==='dictation'?'Escucha el audio y transcribe…':'Empieza a escribir aquí…';
   $('ltAnswer').disabled=mode==='shadowing'&&!['type'].includes(shadowMode);
   $('ltCheck').disabled=$('ltAnswer').disabled;
-  $('ltMic').disabled=!Recognition||shadowMode==='simultaneous'&&mode==='shadowing';
+  $('ltMic').disabled=!Recognition||(shadowMode==='simultaneous'&&mode==='shadowing');
+  $('ltOralDone').hidden=mode!=='shadowing';
   $('ltVoiceFeedback').textContent=Recognition?'Pulsa el micrófono para comprobar qué palabras reconoce el navegador; no se analiza la calidad exacta de tu acento.':'Este navegador no admite reconocimiento de voz. Puedes grabarte y escucharte si permite micrófono.';
   $('ltVoiceStatus').textContent='Pulsa «Escuchar frase» para practicar con la voz '+locale().name+'.';
   $('ltAccuracy').textContent='—';updateMetrics();publishContext();
@@ -170,6 +171,16 @@ function checkAnswer(){
   $('ltUnderstand').hidden=false;
   $('ltGrammar').textContent=l.note;
   if(ok&&$('ltAuto').checked)speak();
+}
+function markOralPractice(){
+  const l=lesson();if(!l||mode!=='shadowing')return;
+  const prev=progress[l.id]||{attempts:0,best:0,interval:0};
+  progress[l.id]={...prev,attempts:Math.min(9999,prev.attempts+1),last:Date.now(),next:Date.now()+86400000};
+  try{localStorage.setItem(STORE,JSON.stringify(progress));}catch{}
+  readProgress();
+  $('ltFeedback').className='lt-feedback lt-success';
+  $('ltFeedback').textContent='Práctica oral anotada, sin nota de pronunciación. Repite el audio y escúchate para mejorar el ritmo.';
+  $('ltUnderstand').hidden=false;$('ltGrammar').textContent=l.note;
 }
 function startRecognition(){
   if(!Recognition){$('ltVoiceFeedback').textContent='Tu navegador no admite reconocimiento de voz. Usa la grabación para escucharte.';return;}
@@ -242,6 +253,7 @@ $('ltHear').addEventListener('click',()=>speak({after:()=>{
 $('ltStop').addEventListener('click',()=>{stopVoice();$('ltVoiceStatus').textContent='Reproducción y micrófono detenidos.';});
 $('ltMic').addEventListener('click',startRecognition);
 $('ltRecord').addEventListener('click',record);
+$('ltOralDone').addEventListener('click',markOralPractice);
 $('ltPlayRecord').addEventListener('click',()=>{if(recordUrl)$('ltVoicePreview').play().catch(()=>{});});
 $('ltSkip').addEventListener('click',()=>{index=(index+1)%current.length;display();});
 $('ltNext').addEventListener('click',()=>{index=(index+1)%current.length;display();});
