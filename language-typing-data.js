@@ -12,7 +12,7 @@
   const levels=Object.freeze(['A1','A2','B1','B2']);
   function normalize(text){
     return String(text||'').normalize('NFC').trim().toLocaleLowerCase()
-      .replace(/[.!?¿¡,;:]/g,'').replace(/\s+/g,' ');
+      .replace(/[.!?¿¡,;:]/g,'').replace(/\s+/g,' ').trim();
   }
   function accuracy(expected,actual,{strict=true}={}){
     const target=strict?String(expected||''):normalize(expected);
