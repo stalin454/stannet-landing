@@ -57,6 +57,45 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   assert.equal(requests.at(-1).page.exerciseId,'JS29-challenge');
   assert.equal(requests.at(-1).page.language,'JavaScript');
   assert.equal(requests.at(-1).editorCode,'');
+  const tutorCheck=await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    return {memoryOpen:ui.querySelector('.snai-memory').open,tutorHidden:ui.querySelector('.snai-tutor-actions').hidden,mode:ui.querySelector('.snai-modes select').value};
+  });
+  assert.equal(tutorCheck.memoryOpen,false);
+  assert.equal(tutorCheck.tutorHidden,false);
+  assert.equal(tutorCheck.mode,'auto');
+  const hintCount=requests.length;
+  await live.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-tutor-hint').click());
+  await live.waitForFunction(()=>!document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-send').disabled);
+  assert.equal(requests.length,hintCount+1);
+  assert.equal(requests.at(-1).page.lessonId,'JS29');
+  assert.ok(requests.at(-1).message.includes('primera pista'));
+  assert.equal(requests.at(-1).editorCode,'');
+  const beforeExplain=requests.length;
+  await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    ui.querySelector('.snai-form-row textarea').value='No sobrescribir este mensaje';
+    ui.querySelector('.snai-tutor-explain').click();
+  });
+  assert.equal(requests.length,beforeExplain,'tutor must not overwrite or submit a draft');
+  assert.equal(await live.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-form-row textarea').value),'No sobrescribir este mensaje');
+  await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    ui.querySelector('.snai-form-row textarea').value='';
+    ui.querySelector('.snai-tutor-explain').click();
+  });
+  await live.waitForFunction(()=>!document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-send').disabled);
+  assert.equal(requests.length,beforeExplain+1);
+  assert.ok(requests.at(-1).message.includes('Explícame la lección'));
+  assert.equal(requests.at(-1).page.lessonId,'JS29');
+  await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    ui.querySelector('.snai-memory').open=true;
+    ui.querySelector('.snai-minimize').click();
+    ui.querySelector('.snai-launcher').click();
+  });
+  assert.equal(await live.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-memory').open),false);
+  report.push('PASS: tutor hint JS29 in Auto mode, chat privacy and memory closed after reopening.');
   report.push('PASS: real emulated Android 390px opened ?lesson=JS29, recognized Fetch y APIs locally and sent exact JS29 exercise without private editor code.');
   await live.screenshot({path:out+'/programming-mobile.png',fullPage:false});await live.close();
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}

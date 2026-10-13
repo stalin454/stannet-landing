@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261013-context1';
+  const VERSION='20261014-tutor1';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION),import('/stannet-ai-context-bridge.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -26,6 +26,7 @@
       <div class="snai-modes"><label>Modo <select aria-label="Modo del agente"><option value="auto">Auto</option><option value="general">General</option><option value="programming">Programación</option><option value="cyber">Ciberseguridad</option><option value="travel">Viajes</option></select></label><button class="snai-hide" type="button">Ocultar IA</button></div>
       <div class="snai-center">
         <div class="snai-context" aria-live="polite"></div>
+        <div class="snai-tutor-actions" role="group" aria-label="Ayuda con la lección actual" hidden><button class="snai-tutor-explain" type="button">Explicar lección</button><button class="snai-tutor-hint" type="button">Dame una pista</button></div>
         <details class="snai-memory"><summary>Contexto y memoria</summary><small>Preferencias guardadas en este navegador. Solo se envían si activas la casilla.</small><textarea maxlength="1500" aria-label="Memoria personal" placeholder="Tu nivel, proyecto o forma de aprender…"></textarea><label><input class="snai-memory-enabled" type="checkbox">Usar esta memoria con la IA</label><div class="snai-memory-actions"><button class="snai-memory-save" type="button">Guardar</button><button class="snai-memory-clear" type="button">Borrar memoria</button><button class="snai-clear" type="button">Borrar chat</button></div></details>
         <div class="snai-messages" role="log" aria-label="Conversación" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
       </div>
@@ -54,12 +55,30 @@
   const bridge=createContextBridge();
   window.StanNetAIContextBridge=bridge;
   window.dispatchEvent(new CustomEvent('stannet:bridge-ready'));
-  const contextView=$('.snai-context');
-  const renderContext=()=>{const c=bridge.snapshot();contextView.textContent=[c.app,c.lesson,c.language,c.activity].filter(Boolean).join(' · ');contextView.title=c.path;$('.snai-share-editor').hidden=!/Programming Academy/.test(c.app);};
+  const contextView=$('.snai-context'),tutorActions=$('.snai-tutor-actions');
+  // The memory drawer starts collapsed even after browser form-state restoration.
+  memoryPanel.open=false;
+  const renderContext=()=>{const c=bridge.snapshot();contextView.textContent=[c.app,c.lesson,c.language,c.activity].filter(Boolean).join(' · ');contextView.title=c.path;$('.snai-share-editor').hidden=!/Programming Academy/.test(c.app);tutorActions.hidden=!(c.app==='Programming Academy'&&!!c.lesson);};
   window.addEventListener('stannet:context-updated',renderContext);renderContext();
   let shareEditor=false;
   $('.snai-share-editor').addEventListener('click',()=>{shareEditor=!shareEditor;$('.snai-share-editor').setAttribute('aria-pressed',String(shareEditor));$('.snai-share-editor').textContent=shareEditor?'Código: próximo envío':'Compartir código';});
   const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>bridge.snapshot()});
+  const tutorPrompts={
+    '.snai-tutor-explain':'Explícame la lección que estoy viendo en pasos breves, con un ejemplo distinto al reto, y hazme una pregunta para comprobar si lo entendí. No resuelvas el ejercicio.',
+    '.snai-tutor-hint':'Dame únicamente la primera pista para resolver el ejercicio activo, sin escribir la solución. Después espera mi intento.'
+  };
+  for(const [selector,prompt] of Object.entries(tutorPrompts)){
+    $(selector).addEventListener('click',()=>{
+      if(core.busy)return;
+      if(input.value.trim()||pendingAttachment||shareEditor){
+        if(!input.value.trim())input.value=prompt;
+        state.textContent='Tienes un mensaje o material pendiente. Revisa el texto y pulsa enviar.';
+        input.focus({preventScroll:true});return;
+      }
+      input.value=prompt;
+      form.requestSubmit(); // Uses the normal consent, history and context path.
+    });
+  }
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false,lastVoiceLang='es-ES';
   const detectVoiceLanguage=(value)=>{const text=String(value||'').toLowerCase();const english=(text.match(/\b(the|and|you|your|what|how|can|with|this|that|please|hello|thanks|learn|english)\b/g)||[]).length;const spanish=(text.match(/\b(el|la|los|las|y|que|como|cómo|puedes|puede|con|esto|esta|por|para|hola|gracias|aprender|inglés|ingles)\b/g)||[]).length;return english>spanish?'en-GB':'es-ES'};
@@ -267,6 +286,8 @@
   function closeAgent(){if(panel.open){panel.close();finishClose();}}
   function openAgent(){
     if(panel.open)return;
+    // Reclaim chat space on mobile every time the agent is reopened.
+    memoryPanel.open=false;
     renderContext();lockPage();avatar.render(true);
     panel.showModal();syncViewport();
     // No forced autofocus/keyboard on touch devices; the user taps the input.
