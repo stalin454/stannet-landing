@@ -38,6 +38,26 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   // The shared answer was visible but excluded from subsequent history.
   assert.equal(requests.at(-1).history.filter(x=>x.content==='test-private-answer').length,1,'only the earlier non-sensitive answer can be in history');
   report.push('PASS: real mobile widget, current model payload, consent cancellation/acceptance, one-turn sharing, redaction and private-answer history exclusion.');
+  // Deep-link from the latest Programming Coach release to the exact Fetch lesson.
+  await live.goto(new URL('pages/programming-web-lab.html?lesson=JS29',base).href,{waitUntil:'domcontentloaded'});
+  await live.waitForFunction(()=>window.StanNetAIContextBridge?.snapshot().lessonId==='JS29'&&document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-launcher'));
+  const js29=await live.evaluate(()=>window.StanNetAIContextBridge.snapshot());
+  assert.equal(js29.app,'Programming Academy');
+  assert.equal(js29.language,'JavaScript');
+  assert.equal(js29.lessonId,'JS29');
+  assert.ok(/Fetch y APIs/.test(js29.lesson),JSON.stringify(js29));
+  const beforeRecognition=requests.length;
+  await submit('¿Dónde estoy?');
+  const fetchRecognition=await live.evaluate(()=>[...document.querySelector('#stannet-ai-root').shadowRoot.querySelectorAll('.snai-msg.bot')].at(-1).textContent);
+  assert.ok(fetchRecognition.includes('Fetch y APIs'),fetchRecognition);
+  assert.ok(fetchRecognition.includes('JS29'),fetchRecognition);
+  assert.equal(requests.length,beforeRecognition,'JS29 recognition should not query the provider');
+  await submit('Ayúdame con fetch() en esta lección');
+  assert.equal(requests.at(-1).page.lessonId,'JS29');
+  assert.equal(requests.at(-1).page.exerciseId,'JS29-challenge');
+  assert.equal(requests.at(-1).page.language,'JavaScript');
+  assert.equal(requests.at(-1).editorCode,'');
+  report.push('PASS: real emulated Android 390px opened ?lesson=JS29, recognized Fetch y APIs locally and sent exact JS29 exercise without private editor code.');
   await live.screenshot({path:out+'/programming-mobile.png',fullPage:false});await live.close();
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
  console.log(report.join('\n\n'));
