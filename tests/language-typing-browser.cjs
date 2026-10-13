@@ -72,6 +72,55 @@ try{
   assert.equal(await page.$eval('#ltUnderstand',el=>el.hidden),false);
   assert.ok((await page.$eval('#ltFeedback',el=>el.textContent)).includes('sin nota'));
   assert.equal(await page.evaluate(()=>window.StanNetLearningContext.activity),'practicando simultaneous');
+
+  // Polly calls are mocked: test every allowed locale without spending AWS credits.
+  await page.evaluate(()=>{
+    window.__pollyRequests=[];
+    const originalFetch=window.fetch.bind(window);
+    window.fetch=(url,options={})=>{
+      if(String(url)==='/api/speech/status')return Promise.resolve(new Response(JSON.stringify({provider:'amazon-polly',configured:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      if(String(url)==='/api/speech'){
+        window.__pollyRequests.push({body:JSON.parse(options.body),method:options.method});
+        return Promise.resolve(new Response(new Uint8Array([73,68,51,3,0,0,0,0,0,0,0,1]),{
+          status:200,headers:{'Content-Type':'audio/mpeg','X-StanNet-Speech-Provider':'amazon-polly'}
+        }));
+      }
+      return originalFetch(url,options);
+    };
+    window.HTMLMediaElement.prototype.play=function(){return Promise.resolve();};
+    window.HTMLMediaElement.prototype.pause=function(){};
+    window.HTMLMediaElement.prototype.load=function(){};
+    document.querySelector('#ltAuto').checked=true;
+  });
+  await page.select('#ltProvider','polly');
+  await page.waitForFunction(()=>!document.querySelector('#ltPollyVoice').disabled);
+  assert.equal(await page.$eval('#ltAuto',el=>el.checked),false,'paid Polly should disable automatic replay at opt-in');
+  for(const [language,voice] of [['da','Sofie'],['sv','Elin'],['fr','Lea'],['de','Vicki'],['en','Amy']]){
+    await page.select('#ltLanguage',language);
+    assert.equal(await page.$eval('#ltPollyVoice',el=>el.value),voice);
+    const beforeCalls=await page.evaluate(()=>window.__pollyRequests.length);
+    await page.click('#ltHear');
+    await page.waitForFunction((expected)=>window.__pollyRequests.length===expected+1,{},beforeCalls);
+    const payload=await page.evaluate(()=>({
+      request:window.__pollyRequests.at(-1),
+      exercise:window.StanNetLearningContext,
+      source:window.StanNetLanguageTypingData.languages.find(l=>l.id===document.querySelector('#ltLanguage').value).items.find(l=>l.id===window.StanNetLearningContext.lessonId).target,
+      visible:!document.querySelector('#ltAmazonPreview').hidden
+    }));
+    assert.equal(payload.request.method,'POST');
+    assert.equal(payload.request.body.voice,voice);
+    assert.equal(payload.request.body.purpose,'language-typing');
+    assert.equal(payload.request.body.text,payload.source,'send only fixed curriculum phrase');
+    assert.equal(payload.visible,true,'manual play controls must be accessible on Android');
+    assert.ok(!JSON.stringify(payload.request).includes('Recognizing'),'never send microphone data');
+    const beforeRepeat=await page.evaluate(()=>window.__pollyRequests.length);
+    await page.click('#ltHear');
+    await page.waitForFunction(()=>!document.querySelector('#ltAmazonPreview').hidden);
+    assert.equal(await page.evaluate(()=>window.__pollyRequests.length),beforeRepeat,'in-session MP3 should be reused without new AWS request');
+  }
+  await page.select('#ltProvider','browser');
+  assert.equal(await page.$eval('#ltPollyVoice',el=>el.disabled),true);
+  report.push('PASS '+width+'px: mocked Amazon Polly neural synthesis in five languages, cost opt-in, MP3 cache, manual mobile audio controls, safe curriculum-only body.');
   await page.screenshot({path:out+'/language-'+width+'.png',fullPage:false});
   report.push('PASS '+width+'px: 5 languages, typing/translation/dictation/shadowing, voice-mode guards, lesson progress and private AI context');
   await page.close();
