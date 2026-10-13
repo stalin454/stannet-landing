@@ -33,8 +33,11 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-state{color:#85e5e9;font-size:11px}
 .snai-hide{flex:none;min-height:44px;padding:0 10px;border:1px solid var(--snai-line);border-radius:10px;background:#14263d;color:#b9d3ed;font-size:11px}
 .snai-center{display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}
-.snai-memory{flex:none;min-height:0;max-height:min(190px,50%);overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
-.snai-memory:not([open]){max-height:none}
+.snai-memory{flex:none;min-height:0;max-height:min(170px,42%);overflow:auto;padding:8px 12px;border-bottom:1px solid var(--snai-line);font-size:12px;background:#101d34}
+.snai-memory:not([open]){max-height:none;padding:4px 12px}
+.snai-tutor-actions{display:flex;flex:none;gap:8px;padding:6px 12px;border-bottom:1px solid var(--snai-line);background:#0b1d32}
+.snai-tutor-actions button{flex:1;min-height:34px;min-width:0;padding:5px 8px;border:1px solid var(--snai-line);border-radius:9px;background:#153047;color:#aeeaff;font-size:12px}
+.snai-tutor-actions button:focus-visible{outline:2px solid var(--snai-cyan);outline-offset:2px}
 .snai-memory summary{cursor:pointer;color:#b3c4e4;min-height:24px;line-height:24px}
 .snai-memory textarea{display:block;width:100%;height:60px;resize:none;border:1px solid var(--snai-line);border-radius:8px;background:#081426;padding:8px;margin:6px 0;font-size:16px}
 .snai-memory label{display:flex;gap:8px;align-items:center;line-height:1.5}
@@ -67,7 +70,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
    and conversation visible. Secondary controls return when it closes. */
 .snai-panel.compact{--snai-gap:0px;border-radius:12px;grid-template-rows:auto minmax(0,1fr) auto}
 .snai-panel.compact .snai-messages{padding:6px 12px}
-.snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory,.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
+.snai-panel.compact .snai-modes,.snai-panel.compact .snai-memory,.snai-panel.compact .snai-tutor-actions,.snai-panel.compact .snai-tools,.snai-panel.compact .snai-voice-status{display:none}
 @media(max-width:640px){
  .snai-headbar{padding:6px 10px;gap:7px}.snai-persona{height:38px;width:28px}.snai-title strong{font-size:13px}.snai-title small{font-size:10px}
  .snai-avatar{--snai-avatar-width:clamp(88px,22vw,104px)}.snai-launcher img{max-height:24dvh}
@@ -80,7 +83,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-share-editor[aria-pressed="true"]{border-color:var(--snai-cyan)}
 .snai-panel.compact .snai-context{max-height:24px;padding:2px 12px;font-size:10px}
 .snai-memory-actions{flex-wrap:wrap}
-@media(max-width:640px){.snai-panel{--snai-gap:8px}.snai-tools button{min-height:40px}}
+@media(max-width:640px){.snai-panel{--snai-gap:8px}.snai-tools button{min-height:40px}.snai-memory[open]{max-height:min(156px,33%)}.snai-tutor-actions button{font-size:11px}}
 
 .snai-panel.compact .snai-headbar{padding:2px 8px}
 .snai-panel.compact .snai-persona{display:none}
