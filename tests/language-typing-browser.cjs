@@ -13,6 +13,9 @@ try{
   const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e.stack||e.message)));
   await page.setViewport({width,height:844,isMobile:width<600,hasTouch:width<600});
   await page.goto(new URL('pages/language-typing.html?lang=en&level=A1',base).href,{waitUntil:'domcontentloaded'});
+  // Each viewport starts a new learner, otherwise spaced repetition correctly moves mastered en-01 behind en-02.
+  await page.evaluate(()=>localStorage.removeItem('stannet-language-typing-progress-v1'));
+  await page.reload({waitUntil:'domcontentloaded'});
   try{
     await page.waitForFunction(()=>window.StanNetLanguageTypingData?.languages.length===5&&document.querySelector('#ltPhrase')?.textContent.includes('Hello!'),{timeout:9500});
   }catch(error){
