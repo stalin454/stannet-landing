@@ -34,8 +34,11 @@
 <label>Idioma<select id="ltLanguage" aria-label="Idioma"><option value="en">🇬🇧 Inglés</option></select></label>
 <label>Nivel<select id="ltLevel" aria-label="Nivel"><option value="A1">A1 · Principiante</option><option value="A2">A2 · Básico</option><option value="B1">B1 · Intermedio</option><option value="B2">B2 · Intermedio alto</option><option value="all">Todos</option></select></label>
 <label>Tema<select id="ltTopic" aria-label="Tema"><option value="all">Todos los temas</option></select></label>
+<label>Motor de voz<select id="ltProvider" aria-label="Motor de voz"><option value="browser">Voz del navegador · sin coste AWS</option><option value="polly">Amazon Polly · voz neuronal</option></select></label>
+<label>Voz Amazon<select id="ltPollyVoice" aria-label="Voz de Amazon Polly" disabled><option value="">Elegir Amazon Polly primero</option></select></label>
 <label>Velocidad de audio<select id="ltSpeed" aria-label="Velocidad de audio"><option value="0.75">0.75× · Lenta</option><option value="0.9">0.9× · Cuidada</option><option value="1" selected>1× · Natural</option><option value="1.15">1.15× · Ágil</option></select></label>
 </div>
+<p id="ltVoiceProviderNote" class="lt-provider-note" role="status">Selecciona Amazon Polly si quieres escuchar una voz neuronal. Su uso puede generar cargos en AWS; las credenciales permanecen en Cloudflare.</p>
 <div class="lt-modes" role="group" aria-label="Modalidades de estudio">
 <button type="button" data-mode="typing" aria-pressed="true">⌨️ Escribir</button>
 <button type="button" data-mode="dictation" aria-pressed="false">🎧 Dictado</button>
@@ -71,17 +74,17 @@
 <div class="lt-section-title"><span>02 / VOZ Y SHADOWING</span><strong>Escucha e imita la pronunciación</strong></div>
 <div class="lt-voice-actions"><button type="button" id="ltMic">🎤 Reconocer mi voz</button><button type="button" id="ltRecord">● Grabar mi voz</button><button type="button" id="ltPlayRecord" disabled>▶ Escuchar grabación</button><button type="button" id="ltOralDone">✓ He practicado</button></div>
 <audio id="ltVoicePreview" controls hidden preload="none" aria-label="Reproducción de tu grabación"></audio>
-<div id="ltVoiceFeedback" class="lt-voice-feedback" aria-live="polite">El navegador reproducirá la frase con una voz del idioma elegido. El reconocimiento de voz depende del dispositivo; no es una evaluación fonética certificada.</div>
+<div id="ltVoiceFeedback" class="lt-voice-feedback" aria-live="polite">Puedes escuchar las frases con Amazon Polly o con la voz del navegador. El reconocimiento de voz depende del dispositivo; no es una evaluación fonética certificada.</div>
 </div>
 <div class="lt-understand" id="ltUnderstand" hidden><span>03 / COMPRENDER</span><strong>Lo que acabas de practicar</strong><p id="ltGrammar"></p><button type="button" id="ltNext" class="lt-next">Siguiente frase →</button></div>
 <div class="lt-footer"><button type="button" id="ltPrev">← Anterior</button><button type="button" id="ltSkip">Siguiente sin comprobar →</button><span id="ltVoiceStatus" role="status">Audio disponible según las voces instaladas en el navegador.</span></div>
 </section>
 <section class="lt-bottom"><article><span>01</span><h3>Teclado y memoria</h3><p>Escribe con precisión. Después comprueba, repite y deja que los errores vuelvan a aparecer en tus repasos.</p></article><article><span>02</span><h3>Shadowing activo</h3><p>Escucha, repite, graba tu propia voz y compara. En simultáneo se recomienda usar auriculares.</p></article><article><span>03</span><h3>StanNet AI como tutor</h3><p>El agente reconoce tu idioma, nivel y tema; nunca recibe automáticamente tus respuestas ni grabaciones.</p></article></section>
-<p class="lt-privacy"><strong>Privacidad y límites:</strong> las marcas y repasos se guardan en este navegador. Las grabaciones de voz son locales y temporales. El reconocimiento del navegador puede utilizar servicios externos del proveedor del navegador: solo se activa al pulsar el micrófono. Las voces y funciones de micrófono dependen del dispositivo. La traducción se compara con una respuesta modelo; pueden existir otras versiones válidas.</p>
+<p class="lt-privacy"><strong>Privacidad y límites:</strong> las marcas y repasos se guardan en este navegador. Las grabaciones de voz son locales y temporales. El reconocimiento del navegador puede utilizar servicios externos del proveedor del navegador: solo se activa al pulsar el micrófono. Amazon Polly requiere conexión a internet y su uso puede generar cargos; la voz del navegador no consume Polly. Las voces y funciones de micrófono dependen del dispositivo. La traducción se compara con una respuesta modelo; pueden existir otras versiones válidas.</p>
 </main>
 <footer class="lt-page-footer"><a href="/index.html">StanNet.Space</a><span>Language Typing & Shadowing Lab</span><a href="/pages/typing.html">Typing Lab ↗</a></footer>
 <script src="/language-typing-data.js?v=20261014-1"></script>
-<script src="/language-typing.js?v=20261014-1"></script>
+<script src="/language-typing.js?v=20261014-polly1"></script>
 <script src="/script.js?v=20261014-1" defer></script>
 <script src="/stannet-global-nav.js?v=20261004-perf1" defer></script>
 </body>
