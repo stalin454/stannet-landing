@@ -2,11 +2,11 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261006-android1';
+  const VERSION='20261013-context1';
   let modules;
-  try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION)]);}
+  try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION),import('/stannet-ai-context-bridge.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
-  const [{AgentCore},{resources,safeResourceUrl},{AgentAvatar}]=modules;
+  const [{AgentCore},{resources,safeResourceUrl},{AgentAvatar},{createContextBridge}]=modules;
   const root=document.createElement('div');root.id='stannet-ai-root';
   const ui=root.attachShadow({mode:'open'});
   const style=document.createElement('link');style.rel='stylesheet';style.href='/stannet-ai.css?v='+VERSION;
@@ -25,12 +25,13 @@
       </header>
       <div class="snai-modes"><label>Modo <select aria-label="Modo del agente"><option value="auto">Auto</option><option value="general">General</option><option value="programming">Programación</option><option value="cyber">Ciberseguridad</option><option value="travel">Viajes</option></select></label><button class="snai-hide" type="button">Ocultar IA</button></div>
       <div class="snai-center">
+        <div class="snai-context" aria-live="polite"></div>
         <details class="snai-memory"><summary>Contexto y memoria</summary><small>Preferencias guardadas en este navegador. Solo se envían si activas la casilla.</small><textarea maxlength="1500" aria-label="Memoria personal" placeholder="Tu nivel, proyecto o forma de aprender…"></textarea><label><input class="snai-memory-enabled" type="checkbox">Usar esta memoria con la IA</label><div class="snai-memory-actions"><button class="snai-memory-save" type="button">Guardar</button><button class="snai-memory-clear" type="button">Borrar memoria</button><button class="snai-clear" type="button">Borrar chat</button></div></details>
         <div class="snai-messages" role="log" aria-label="Conversación" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
       </div>
       <form class="snai-form">
         <div class="snai-form-row"><textarea maxlength="4000" placeholder="¿Qué quieres hacer en StanNet?" aria-label="Mensaje" enterkeyhint="send"></textarea><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div>
-        <div class="snai-tools"><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código">Adjuntar</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><span class="snai-attachment" hidden></span><button class="snai-remove-attachment" type="button" aria-label="Quitar adjunto" hidden>×</button><details class="snai-info"><summary>Privacidad</summary><p>Los mensajes y adjuntos se envían al proveedor de IA. Los archivos no se guardan en el historial. Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</p></details></div>
+        <div class="snai-tools"><button class="snai-share-editor" type="button">Compartir código</button><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código">Adjuntar</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><span class="snai-attachment" hidden></span><button class="snai-remove-attachment" type="button" aria-label="Quitar adjunto" hidden>×</button><details class="snai-info"><summary>Privacidad</summary><p>Los mensajes y adjuntos se envían al proveedor de IA. El código y los adjuntos requieren permiso en cada envío. El material y la respuesta de ese envío no se guardan en el historial. Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</p></details></div>
         <small class="snai-voice-status" aria-live="polite">Puedes escribir o activar la voz.</small>
       </form>
     </dialog>`;
@@ -50,7 +51,15 @@
   }catch{}
   const saveHistory=()=>{try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-40)))}catch{}};
   let requestHistory=[];
-  const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>({title:document.title.slice(0,160),path:location.pathname})});
+  const bridge=createContextBridge();
+  window.StanNetAIContextBridge=bridge;
+  window.dispatchEvent(new CustomEvent('stannet:bridge-ready'));
+  const contextView=$('.snai-context');
+  const renderContext=()=>{const c=bridge.snapshot();contextView.textContent=[c.app,c.lesson,c.language,c.activity].filter(Boolean).join(' · ');contextView.title=c.path;$('.snai-share-editor').hidden=!/Programming Academy/.test(c.app);};
+  window.addEventListener('stannet:context-updated',renderContext);renderContext();
+  let shareEditor=false;
+  $('.snai-share-editor').addEventListener('click',()=>{shareEditor=!shareEditor;$('.snai-share-editor').setAttribute('aria-pressed',String(shareEditor));$('.snai-share-editor').textContent=shareEditor?'Código: próximo envío':'Compartir código';});
+  const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>bridge.snapshot()});
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false,lastVoiceLang='es-ES';
   const detectVoiceLanguage=(value)=>{const text=String(value||'').toLowerCase();const english=(text.match(/\b(the|and|you|your|what|how|can|with|this|that|please|hello|thanks|learn|english)\b/g)||[]).length;const spanish=(text.match(/\b(el|la|los|las|y|que|como|cómo|puedes|puede|con|esto|esta|por|para|hola|gracias|aprender|inglés|ingles)\b/g)||[]).length;return english>spanish?'en-GB':'es-ES'};
@@ -229,7 +238,9 @@
     viewportFrame=requestAnimationFrame(()=>{
       if(!panel.open)return;
       const bounds=viewport||{width:innerWidth,height:innerHeight,offsetLeft:0,offsetTop:0};
-      panel.classList.toggle('compact',bounds.height<380);
+      panel.classList.toggle('compact',bounds.height<440);
+      const follow=messages.scrollHeight-messages.clientHeight-messages.scrollTop<70;
+      if(follow)requestAnimationFrame(scrollEnd);
       for(const [name,value] of Object.entries({x:bounds.offsetLeft,y:bounds.offsetTop,width:bounds.width,height:bounds.height}))panel.style.setProperty('--snai-'+name,value+'px');
     });
   }
@@ -256,7 +267,7 @@
   function closeAgent(){if(panel.open){panel.close();finishClose();}}
   function openAgent(){
     if(panel.open)return;
-    lockPage();avatar.render(true);
+    renderContext();lockPage();avatar.render(true);
     panel.showModal();syncViewport();
     // No forced autofocus/keyboard on touch devices; the user taps the input.
     if(mobile.matches)$('.snai-close').focus({preventScroll:true});else input.focus({preventScroll:true});
@@ -290,12 +301,13 @@
       el.append(document.createTextNode(safe.slice(last)));
       if(audible){const speak=document.createElement('button');speak.type='button';speak.className='snai-speak';speak.textContent='🔊';speak.setAttribute('aria-label','Escuchar respuesta');speak.addEventListener('click',()=>activeSpeechButton===speak?stopSpeech():speakReply(text,{button:speak}));el.append(speak);}
     }else el.textContent=text;
-    messages.append(el);scrollEnd();
+    const follow=kind==='user'||messages.scrollHeight-messages.clientHeight-messages.scrollTop<70;
+    messages.append(el);if(follow)scrollEnd();
     if(persist && ['user','bot'].includes(kind)){history.push({text:String(text),kind});history=history.slice(-40);saveHistory();}
     return el;
   };
   const welcome=()=>add('Soy StanNet AI, tu guía para aprender y crear. Conozco las academias, proyectos y herramientas de esta web. Dime qué quieres conseguir y empezamos.', 'bot',false);
-  if(history.length)history.forEach(item=>add(item.text,item.kind,false));else welcome();
+  if(history.length)history.forEach(item=>add(item.text,item.kind,false));else welcome();scrollEnd();
   $('.snai-persona').addEventListener('click',()=>add('Puedo buscar recursos de StanNet, orientarte hacia una academia y ayudarte paso a paso. Uso el contexto de esta página y nuestra conversación. La voz se activa solo cuando tú la solicitas.','bot',false));
   $('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');state.textContent='Memoria guardada';}catch{state.textContent='No se pudo guardar';}});
   $('.snai-memory-clear').addEventListener('click',()=>{memoryInput.value='';memoryEnabledInput.checked=false;try{localStorage.removeItem(MEMORY_KEY);localStorage.removeItem(MEMORY_ENABLED_KEY)}catch{}state.textContent='Memoria borrada';});
@@ -318,16 +330,21 @@
   let sending=false;
   form.addEventListener('submit',async(event)=>{
     event.preventDefault();if(sending)return;
-    const text=input.value.trim();if(!text&&!pendingAttachment)return;
+    const text=input.value.trim();if(!text&&!pendingAttachment&&!shareEditor)return;
+    const file=pendingAttachment;
+    const sharing=shareEditor;
+    if((file||sharing)&&!window.confirm('¿Permites enviar al proveedor de IA '+[sharing?'el código del editor activo':'',file?'el adjunto seleccionado':''].filter(Boolean).join(' y ')+' para esta respuesta? Revisa que no contenga datos privados. Este permiso solo vale para este envío.'))return;
+    const editorCode=sharing?bridge.editorSnapshot():'';
+    shareEditor=false;$('.snai-share-editor').setAttribute('aria-pressed','false');$('.snai-share-editor').textContent='Compartir código';
     sending=true;send.disabled=true;voiceThinking=voiceEnabled;
     state.textContent='Preparando…';requestHistory=history.slice();
-    add(text+(pendingAttachment?' [Adjunto: '+pendingAttachment.name+']':''),'user');input.value='';
+    add(text||'Analiza el material que he autorizado.','user');input.value='';
     const pending=add('Preparando tu siguiente paso…','bot',false,false);
     const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
     try{
-      const attachment=await readAttachment(pendingAttachment);
-      const result=await core.run(text||'Analiza el archivo adjunto.',{mode:$('.snai-modes select').value,attachment,signal:controller.signal});
-      pending.remove();add(result.answer,'bot');removeAttachment();state.textContent=result.source==='catalogue'?'Recurso encontrado':'Listo';
+      const attachment=await readAttachment(file);
+      const result=await core.run(text||'Analiza el material autorizado.',{mode:$('.snai-modes select').value,attachment,editorCode,consent:{attachment:!!file,editor:sharing},signal:controller.signal});
+      pending.remove();add(result.answer,'bot',!file&&!sharing);removeAttachment();state.textContent=result.source==='context'?'Contexto reconocido':result.source==='catalogue'?'Recurso encontrado':'Listo';
       if(voiceEnabled&&panel.open)await speakReply(result.answer,{listenAfter:true});
     }catch(error){
       pending.remove();add(error.name==='AbortError'?'La respuesta tardó demasiado. Inténtalo de nuevo.':error.message,'error',false);state.textContent='Inténtalo de nuevo';voiceThinking=false;

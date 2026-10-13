@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function(){
     const chapter = chapterById(id);
     if (!chapter) return;
 
+    window.StanNetDanishContext={path:location.pathname,lessonId:chapter.id,lesson:chapter.title,language:'Dansk'};
+    window.dispatchEvent(new CustomEvent('stannet:learning-context'));
     const vocab = chapter.vocab.map(function(item){
       return '<div class="deep-vocab-item"><strong>'+esc(item[0])+'</strong><span>'+esc(item[1])+'</span><button type="button" data-speak="'+esc(item[0])+'">Escuchar</button></div>';
     }).join('');

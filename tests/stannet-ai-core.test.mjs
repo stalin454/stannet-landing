@@ -7,7 +7,7 @@ assert.equal(payload,undefined,'Resource discovery must work without API');
 assert.match((await core.run('abre Shield')).answer,/\/shield\//);
 assert.equal(tools.openResource('danish').url,'/pages/danish.html');
 assert.equal(tools.openResource('unknown'),null);
-await core.run('Explícame las variables',{mode:'programming',attachment:{kind:'text',content:'let a=1'}});
+await core.run('Explícame las variables',{mode:'programming',attachment:{kind:'text',content:'let a=1'},consent:{attachment:true}});
 assert.equal(payload.history.length,2);assert.equal(payload.history[1].role,'assistant');assert.equal(payload.memory,'Prefiero pistas');assert.equal(payload.page.path,'/pages/programming.html');assert.equal(payload.mode,'programming');assert.equal(payload.attachment.kind,'text');
 await core.run('Busca noticias actuales de cybersecurity');assert.equal(payload.message,'Busca noticias actuales de cybersecurity');
 const busy=new AgentCore({transport:()=>new Promise(resolve=>{release=resolve})});

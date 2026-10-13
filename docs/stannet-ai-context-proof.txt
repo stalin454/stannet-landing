@@ -1,0 +1,16 @@
+✔ real Web Lab: lesson changes, HTML/CSS/JavaScript, core response and actual request (20.985131ms)
+ℹ {"source":"context","context":{"version":1,"title":"StanNet Programming Academy","path":"/pages/programming-web-lab","app":"Programming Academy","lessonId":"WEB-INTRO","lesson":"¿Qué es HTML? — Empieza aquí","exerciseId":"WEB-INTRO-challenge","exercise":"LABORATORIO 1: ejecuta el documento y comprueba la vista previa. Después cambia el title, el h1 y el párrafo con tus propios textos. Añade un segundo párrafo. Antes de continuar, explica con tus palabras: qué es HTML, qué diferencia hay entre etiqueta y elemento, qué es un atributo, qué contiene head, qué contiene body y qué construye el navegador a partir del HTML.","language":"HTML","activity":"explorando"}}
+ℹ {"source":"context","context":{"version":1,"title":"StanNet Programming Academy","path":"/pages/programming-web-lab","app":"Programming Academy","lessonId":"CSS00","lesson":"¿Qué es CSS? — Del HTML al diseño","exerciseId":"CSS00-challenge","exercise":"LABORATORIO CSS 1: ejecuta el documento. Cambia el color del h1, añade background-color al body, crea una clase .destacado y aplícala a un segundo párrafo. Después inspecciona ambos párrafos con DevTools. Explica qué es CSS, qué es selector/propiedad/valor, dónde conectarías una hoja externa y por qué HTML y CSS no deben mezclarse conceptualmente.","language":"CSS","activity":"explorando"}}
+ℹ {"source":"context","context":{"version":1,"title":"StanNet Programming Academy","path":"/pages/programming-web-lab","app":"Programming Academy","lessonId":"JS00","lesson":"Cómo funciona JavaScript","exerciseId":"JS00-challenge","exercise":"Declara tu nombre y muestra una frase en consola.","language":"JavaScript","activity":"explorando"}}
+✔ real Python, CS and Full Stack controllers publish exact active metadata (8.213486ms)
+✔ real Full Stack course: changing phase and lesson clears old context (18.201648ms)
+✔ default-deny context, query removal, secret redaction, adapters and late initialization (121.199286ms)
+✔ Worker sees active metadata as data, strips unexpected fields and denies unconsented material (9.037171ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 288.854408
