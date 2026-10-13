@@ -236,6 +236,8 @@
     if (rawUrl && !url) { status.textContent = 'Introduce un enlace http(s) válido.'; return; }
     state.source = { title, url }; save(); renderSource();
   });
-  global.addEventListener('focus', () => { if (doc.visibilityState !== 'hidden') render(); });
+  // Do not re-render on window focus: focusing an answer/input may discard an in-progress edit.
+  // Returning from the lab will reload this document; update the progress list only on visibility changes.
+  doc.addEventListener('visibilitychange', () => { if (doc.visibilityState === 'visible') progress(); });
   renderSource(); render();
 })(typeof window !== 'undefined' ? window : globalThis);
