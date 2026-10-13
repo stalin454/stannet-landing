@@ -49,7 +49,7 @@ for (const [fg,bg,minimum] of [
 for (const id of ['web-outline','web-theory','web-editor','web-grade','web-check','web-preview']) {
   assert.ok(html.includes('id="'+id+'"'), `Web Lab control missing: ${id}`);
 }
-for (const expression of ['function theory(', 'function load(', "load(0)", 'window.StanNetJSGrader', "document.addEventListener('DOMContentLoaded'"]) {
+for (const expression of ['function theory(', 'function load(', 'load(selected>=0?selected:0)', 'window.StanNetJSGrader', "document.addEventListener('DOMContentLoaded'"]) {
   assert.ok(program.includes(expression), `Web Lab behavior missing: ${expression}`);
 }
 console.log('PASS: Web Lab study/readability tokens and interactive lesson wiring.');

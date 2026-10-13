@@ -1,0 +1,126 @@
+name: Academy isolated preview (stannet.dev)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/academy-staging.yml"
+      - "wrangler.academy-preview.jsonc"
+      - "pages/programming*"
+      - "programming-*"
+      - "tests/programming*"
+      - "package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: academy-staging-preview
+  cancel-in-progress: true
+
+jobs:
+  staging:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/programming-academy-learning-20261013'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout proposed changes (not production)
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run repository tests before deploying
+        run: npm run test:ci
+
+      - name: Prepare isolated assets only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _academy_preview
+          files=(
+            pages/programming.html
+            pages/programming-coach.html
+            pages/programming-web-lab.html
+            style.css
+            programming-academy.css
+            programming-lab.css
+            programming-javascript-autograder.css
+            programming-web-lab-contrast.css
+            programming-coach.css
+            ios-responsive.css
+            stannet-global-theme.css
+            navigation-performance.css
+            script.js
+            stannet-global-nav.js
+            programming-curriculum.js
+            programming-academy.js
+            programming-coach.js
+            programming-web-lessons.js
+            programming-html-css-deep-theory.js
+            programming-javascript-complete.js
+            programming-javascript-deep-theory.js
+            programming-javascript-mastery.js
+            programming-javascript-reference-gaps.js
+            programming-javascript-theory-v4.js
+            programming-javascript-autograder.js
+            programming-web-lab.js
+            assets/brand/stannet-sn-cutout-20261005.png
+            assets/brand/stannet-sn-cutout-32.png
+            assets/brand/stannet-sn-cutout-180.png
+          )
+          for f in "${files[@]}"; do
+            test -f "$f" || { echo "Missing required preview asset: $f"; exit 1; }
+            cp --parents "$f" _academy_preview/
+          done
+          cat > _academy_preview/index.html <<'HTML'
+          <!doctype html>
+          <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="robots" content="noindex,nofollow">
+          <meta http-equiv="refresh" content="0;url=/pages/programming-coach.html">
+          <title>StanNet Academy · Entorno de pruebas</title></head>
+          <body><p>Entorno de pruebas StanNet: <a href="/pages/programming-coach.html">abrir ruta JavaScript</a>.</p></body></html>
+          HTML
+          cat > _academy_preview/_headers <<'HEADERS'
+          /*
+            X-Robots-Tag: noindex, nofollow
+            X-Content-Type-Options: nosniff
+          HEADERS
+
+      - name: Deploy academy to isolated Worker only
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.139.0"
+          command: deploy --config wrangler.academy-preview.jsonc
+
+      - name: Smoke test deployed custom domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsSL --connect-timeout 8 --max-time 25 https://academy.stannet.dev/pages/programming-coach.html -o /tmp/academy-preview.html; then
+              break
+            fi
+            echo "Staging domain not ready yet (attempt $attempt/6)."
+            sleep 10
+          done
+          test -s /tmp/academy-preview.html
+          grep -q 'id="coach-main"' /tmp/academy-preview.html
+          curl -fsSL --retry 4 --retry-delay 3 --max-time 25 https://academy.stannet.dev/programming-coach.js -o /tmp/academy-preview.js
+          grep -q 'stannet-js-coach-v1' /tmp/academy-preview.js
+          echo "PASS: Staging HTML and JavaScript delivered by academy.stannet.dev"
+
+      - name: Test real browser input and selection on staging
+        shell: bash
+        env:
+          NODE_PATH: /tmp/stannet-academy-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_ACADEMY_BASE_URL: https://academy.stannet.dev
+        run: |
+          npm install --prefix /tmp/stannet-academy-browser --no-save --no-audit --no-fund puppeteer-core@24
+          node tests/programming-coach-browser.cjs
+      - name: Print staging location
+        run: 'echo "Staging target: https://academy.stannet.dev/pages/programming-coach.html"'

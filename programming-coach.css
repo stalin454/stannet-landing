@@ -1,0 +1,100 @@
+/* StanNet Programming Coach — isolated academy extension */
+.stannet-page-programming-coach {--coach-surface:#111e32;--coach-panel:#182b42;--coach-line:#386077;--coach-ink:#eff8ff;--coach-muted:#c9deec;--coach-accent:#73e5ff;--coach-violet:#c9b4ff;color:var(--coach-ink);background:#081321;min-height:100vh}
+.stannet-page-programming-coach .pa-coach-hero {max-width:1100px;margin:1.25rem auto 1.5rem}
+.stannet-page-programming-coach .pa-coach-hero .pa-card-desc {color:var(--coach-muted);max-width:65ch}
+.coach-layout{max-width:1200px;margin:1rem auto 5rem;display:grid;gap:1.5rem;grid-template-columns:minmax(220px,300px) minmax(0,1fr)}
+.coach-panel{border:1px solid var(--coach-line);background:var(--coach-surface);padding:clamp(1rem,2.2vw,1.7rem);border-radius:18px;color:var(--coach-ink);min-width:0}
+.coach-panel h2,.coach-panel h3,.coach-panel legend{color:var(--coach-ink);line-height:1.3}
+.coach-panel p,.coach-panel label,.coach-panel small {color:var(--coach-muted);line-height:1.65}
+.coach-panel h3 {margin:1.8rem 0 .7rem}
+.coach-panel a {color:var(--coach-accent)}
+.coach-side {align-self:start}
+.coach-side .coach-panel + .coach-panel{margin-top:1.25rem}
+.coach-list{display:grid;gap:.55rem;margin-top:1rem}
+.coach-lesson-btn{font:inherit;line-height:1.4;text-align:left;border-radius:10px;color:var(--coach-ink);border:1px solid var(--coach-line);background:#15253b;padding:.8rem .9rem;cursor:pointer;overflow-wrap:anywhere}
+.coach-lesson-btn:hover,.coach-lesson-btn:focus-visible{background:#233c57}
+.coach-lesson-btn.is-active{outline:2px solid var(--coach-accent);outline-offset:1px;background:#243d57}
+.coach-code{background:#070e1c;color:#d5f8ff;padding:1rem 1.25rem;border:1px solid #47657a;border-radius:12px;overflow-x:auto;white-space:pre;font:500 .95rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.coach-question{border:1px solid var(--coach-line);border-radius:12px;padding:1rem;margin:1rem 0}
+.coach-question legend{font-size:1rem;font-weight:700;padding:0 .25rem}
+.coach-question label{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0;cursor:pointer}
+.coach-question input{margin-top:.45rem;accent-color:#00d8ff;flex:none}
+.coach-reason{padding:.6rem .8rem;margin:.5rem 0 0;border-left:3px solid var(--coach-accent);background:#0c2235}
+.coach-kicker{font-size:.85rem;color:var(--coach-accent)!important;letter-spacing:.05em;font-weight:750}
+.coach-label{display:block;margin:.7rem 0}
+#coach-notes,.coach-source-field{box-sizing:border-box;width:100%;border:1px solid #6690a5;background:#09182b;color:#fff;font:inherit;padding:.8rem;border-radius:10px}
+#coach-notes{resize:vertical;min-height:120px}
+.coach-source-field {margin:.25rem 0 1rem}
+#coach-notes:focus-visible,.coach-source-field:focus-visible,button:focus-visible,.coach-panel a:focus-visible{outline:3px solid #8feaff;outline-offset:3px}
+.coach-actions{display:flex;gap:.85rem;flex-wrap:wrap;margin:1.25rem 0}
+.coach-requirements{border:1px solid #437e8f;background:#102f40;border-radius:12px;padding:.9rem 1rem}
+.coach-requirements p{margin:.35rem 0}
+.coach-done{color:#a9ffcc!important;font-weight:700}
+.coach-hint{font-size:.92rem;border-left:3px solid var(--coach-violet);padding-left:1rem}
+#coach-status{font-size:.9rem;line-height:1.5;min-height:1.5rem;color:#dcf3ff}
+#coach-summary{font-size:1rem;line-height:1.65;font-weight:650;color:#dcf3ff}
+#coach-source-link{display:inline-block;overflow-wrap:anywhere;margin:.4rem 0 0}
+#coach-source-link[hidden]{display:none}
+.coach-footnote{max-width:1200px;margin:0 auto 2rem;padding:0 1rem;color:#c9deec;line-height:1.6}
+.stannet-page-programming-coach .pa-btn {white-space:normal;text-align:center}
+@media(max-width:850px){.coach-layout{grid-template-columns:1fr}.coach-side{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.coach-side .coach-panel+.coach-panel{margin-top:0}}
+@media(max-width:600px){.stannet-page-programming-coach{padding:1rem}.coach-side{grid-template-columns:1fr}.coach-panel{padding:1rem}.coach-actions>*{width:100%}.coach-code{font-size:.83rem}}
+@media(prefers-reduced-motion:reduce){.stannet-page-programming-coach *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* ios-responsive.css globally removes native appearance from ALL inputs.
+   Restore the actual radio controls on this page so choices can be selected visibly. */
+.stannet-page-programming-coach .coach-question input[type="radio"]{
+  -webkit-appearance:radio!important;
+  appearance:auto!important;
+  inline-size:20px;
+  block-size:20px;
+  min-inline-size:20px;
+  flex:0 0 20px;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  cursor:pointer;
+  accent-color:#50deff;
+  color-scheme:dark;
+}
+.stannet-page-programming-coach .coach-question label{
+  border:1px solid transparent;
+  border-radius:8px;
+  padding:.65rem .75rem;
+  margin:.15rem 0;
+  display:flex;
+  gap:.75rem;
+  align-items:center;
+  cursor:pointer;
+  color:#edf8ff!important;
+  user-select:none;
+}
+.stannet-page-programming-coach .coach-question label:has(input[type="radio"]:checked){
+  background:#16415b;
+  border-color:#6be9ff;
+  font-weight:700;
+}
+.stannet-page-programming-coach .coach-question input[type="radio"]:focus-visible{
+  outline:3px solid #8feaff!important;
+  outline-offset:3px;
+}
+.stannet-page-programming-coach #coach-notes,
+.stannet-page-programming-coach .coach-source-field{
+  pointer-events:auto!important;
+  user-select:text!important;
+  -webkit-user-select:text!important;
+  caret-color:#075985!important;
+}
+/* Shared light-form theme sets a white background with !important.
+   Use matching dark text and caret so typed letters are always readable. */
+.stannet-global.stannet-page-programming-coach #coach-notes,
+.stannet-global.stannet-page-programming-coach .coach-source-field{
+  color:#14213a!important;
+  -webkit-text-fill-color:#14213a!important;
+  background:#fff!important;
+}
+.stannet-page-programming-coach #coach-notes::placeholder,
+.stannet-page-programming-coach .coach-source-field::placeholder{
+  color:#53647b;
+  opacity:1;
+}
