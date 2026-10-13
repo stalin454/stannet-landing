@@ -101,6 +101,18 @@ try{
     const beforeCalls=await page.evaluate(()=>window.__pollyRequests.length);
     await page.click('#ltHear');
     await page.waitForFunction((expected)=>window.__pollyRequests.length===expected+1,{},beforeCalls);
+    try {
+      await page.waitForFunction(()=>!document.querySelector('#ltAmazonPreview').hidden,{timeout:7000});
+    } catch(e) {
+      const state=await page.evaluate(()=>({
+        label:document.querySelector('#ltVoiceStatus').textContent,
+        notice:document.querySelector('#ltVoiceProviderNote').textContent,
+        source:document.querySelector('#ltAmazonPreview').getAttribute('src'),
+        provider:document.querySelector('#ltProvider').value,
+        requests:window.__pollyRequests
+      }));
+      throw new Error('Polly MP3 player did not open: '+JSON.stringify(state));
+    }
     const payload=await page.evaluate(()=>({
       request:window.__pollyRequests.at(-1),
       exercise:window.StanNetLearningContext,
