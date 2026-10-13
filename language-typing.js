@@ -30,7 +30,7 @@ let pollyAbort=null,pollyAudio=null,pollyAvailable=null;
 const pollyCache=new Map();
 function clearPollyPlayback(){
   if(pollyAbort){pollyAbort.abort();pollyAbort=null;}
-  if(pollyAudio){pollyAudio.pause();pollyAudio.onended=null;pollyAudio.onerror=null;pollyAudio=null;}
+  if(pollyAudio){pollyAudio.pause();pollyAudio.onended=null;pollyAudio.onerror=null;pollyAudio.removeAttribute('src');pollyAudio.load();pollyAudio.hidden=true;pollyAudio=null;}
   $('ltHear').setAttribute('aria-pressed','false');
 }
 function updatePollyVoice(){
@@ -111,7 +111,7 @@ async function speakPolly({slow=false,after=null}={}){
       pollyAbort=null;
     }
     if(token!==playbackToken||$('ltProvider').value!=='polly')return;
-    const player=new Audio();pollyAudio=player;player.src=url;
+    const player=$('ltAmazonPreview');pollyAudio=player;player.src=url;player.hidden=false;
     player.playbackRate=slow?0.75:Number($('ltSpeed').value)||1;player.preservesPitch=true;
     player.onended=()=>{
       if(token!==playbackToken)return;
@@ -122,7 +122,7 @@ async function speakPolly({slow=false,after=null}={}){
     player.onerror=()=>{
       if(token!==playbackToken)return;
       speaking=false;$('ltHear').setAttribute('aria-pressed','false');
-      $('ltVoiceStatus').textContent='No se pudo reproducir el MP3. Intenta otra vez.';
+      $('ltVoiceStatus').textContent='No se pudo reproducir el MP3. Puedes volver a pulsar ▶ en el reproductor.';
     };
     await player.play();
     if(token===playbackToken)$('ltVoiceStatus').textContent='Reproduciendo '+voice+' · Amazon Polly.';
@@ -130,7 +130,7 @@ async function speakPolly({slow=false,after=null}={}){
     if(token!==playbackToken)return;
     speaking=false;$('ltHear').setAttribute('aria-pressed','false');
     $('ltVoiceStatus').textContent='No se pudo iniciar el audio de Amazon. Puedes seguir con la voz del navegador.';
-    providerNotice('Amazon Polly no se ha reproducido ('+(error?.name==='NotAllowedError'?'el navegador necesita un toque adicional para permitir sonido':'revisa servicio/conexión')+'). Si el móvil bloquea la reproducción, vuelve a pulsar Escuchar.');
+    providerNotice('Amazon Polly no se ha reproducido ('+(error?.name==='NotAllowedError'?'el navegador requiere un gesto para permitir audio':'revisa el servicio o la conexión')+'). Si aparece el reproductor, pulsa Play directamente.');
   }
 }
 function locale(){return corpus.languages.find(x=>x.id===language)||corpus.languages[0];}
