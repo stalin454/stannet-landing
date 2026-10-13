@@ -1,0 +1,45 @@
+# One-shot production check. Runs only when this workflow file is added/changed on main.
+# It makes one short, expressly authorized, potentially billable synthesis request.
+name: One-shot Amazon Polly live voice check
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/polly-live-smoke-20261014.yml'
+permissions:
+  contents: read
+jobs:
+  verify-polly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check configuration and synthesize one short French phrase
+        env:
+          STANNET_BASE: https://stannet.space
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base = os.environ['STANNET_BASE']
+          req = urllib.request.Request(base+'/api/speech/status',headers={'Accept':'application/json','Cache-Control':'no-store'})
+          with urllib.request.urlopen(req,timeout=15) as response:
+              meta=json.loads(response.read(8192))
+          print('Speech provider:',meta.get('provider'))
+          print('Configured:',meta.get('configured'))
+          if meta.get('provider')!='amazon-polly' or meta.get('configured') is not True:
+              raise SystemExit('Amazon Polly not selected/configured; skipped billable synthesis.')
+          payload=json.dumps({
+             'text':'Bonjour','lang':'fr-FR','voice':'Lea','purpose':'language-typing'
+          }).encode('utf-8')
+          req=urllib.request.Request(base+'/api/speech',data=payload,method='POST',
+            headers={'Content-Type':'application/json','Accept':'audio/mpeg','Cache-Control':'no-store'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+              provider=response.headers.get('X-StanNet-Speech-Provider')
+              content_type=response.headers.get('Content-Type','')
+              size=len(response.read(1250000))
+          print('Synthesis provider:',provider)
+          print('Audio mime:',content_type)
+          print('MP3 bytes:',size)
+          if provider!='amazon-polly' or 'audio/mpeg' not in content_type or size<=500:
+              raise SystemExit('Polly MP3 verification failed.')
+          print('PASS: one French neural sample synthesized in real production.')
+          PY
