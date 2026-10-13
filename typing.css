@@ -1144,3 +1144,25 @@ body.typing-page{
   .typing-status>span{min-height:94px;padding:12px!important}
   .typing-status strong{font-size:29px!important}
 }
+
+
+/* Polyglot Code Typing: additive styles, original typing modes untouched. */
+.code-typing-guide{margin:14px 0;padding:18px;border:1px solid #aacde0;border-radius:17px;background:linear-gradient(135deg,#f2fbff,#f6f3ff);color:#183b58}
+.code-typing-guide[hidden],.code-typing-symbols[hidden],.code-typing-explanation[hidden]{display:none!important}
+.code-typing-heading,.code-typing-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.code-typing-heading strong{font:700 15px/1.4 Inter,sans-serif;color:#153c5e}
+.code-typing-heading span{font-size:11px;background:#e7f4ff;color:#24547b;padding:5px 9px;border-radius:99px}
+.code-typing-guide p{font-size:13px;line-height:1.55}
+.code-typing-actions button,.code-typing-explanation button{min-height:44px;border:1px solid #accbde;background:white;color:#175276;font-weight:700;border-radius:10px;padding:9px 13px}
+.code-typing-actions button:disabled{opacity:.46;cursor:not-allowed}
+.code-typing-explanation{margin:14px 0;padding:14px;border-radius:13px;background:#fff;border:1px solid #bcdade}
+.code-typing-explanation strong{color:#096b71;font-size:14px}
+.code-typing-explanation label{display:block;font-weight:700;color:#173b56}
+.code-typing-explanation textarea{display:block;width:100%;min-height:70px;margin:7px 0;padding:12px;border:1px solid #aacfe2;border-radius:10px;background:#fff;color:#14344c;font:15px/1.5 Inter,sans-serif}
+#codeReflectionStatus{display:inline-block;margin:0 0 0 10px;color:#12665a;font-size:12px}
+.code-typing-note{color:#5a6f82!important}
+.code-typing-symbols{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.code-typing-symbols button{font:700 15px/1.1 Consolas,monospace;min-width:42px;min-height:42px;background:#e4f6ff;color:#153b52;border:1px solid #bad6e7;border-radius:8px}
+.code-typing-symbols button:last-child{font-size:12px;min-width:58px}
+.typing-page .typing-target{tab-size:2;overflow-wrap:anywhere}
+@media(max-width:620px){.code-typing-guide{padding:12px}.code-typing-actions button{flex:1}.code-typing-symbols button{min-width:40px}}
