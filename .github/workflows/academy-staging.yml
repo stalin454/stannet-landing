@@ -113,5 +113,14 @@ jobs:
           grep -q 'stannet-js-coach-v1' /tmp/academy-preview.js
           echo "PASS: Staging HTML and JavaScript delivered by academy.stannet.dev"
 
+      - name: Test real browser input and selection on staging
+        shell: bash
+        env:
+          NODE_PATH: /tmp/stannet-academy-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_ACADEMY_BASE_URL: https://academy.stannet.dev
+        run: |
+          npm install --prefix /tmp/stannet-academy-browser --no-save --no-audit --no-fund puppeteer-core@24
+          node tests/programming-coach-browser.cjs
       - name: Print staging location
         run: 'echo "Staging target: https://academy.stannet.dev/pages/programming-coach.html"'
