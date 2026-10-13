@@ -1,0 +1,44 @@
+name: Code Typing browser QA
+on:
+  pull_request:
+    paths:
+      - 'pages/typing.html'
+      - 'typing.js'
+      - 'typing.css'
+      - 'code-typing-catalog.js'
+      - 'tests/code-typing*.cjs'
+      - '.github/workflows/code-typing-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  code-typing-mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate syntax and catalog
+        run: |
+          node --check typing.js
+          node --check code-typing-catalog.js
+          node tests/code-typing.test.cjs
+      - name: Install Chrome browser driver
+        run: npm install --prefix /tmp/stannet-code-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Test original and code modes in Chrome (mobile and desktop)
+        env:
+          NODE_PATH: /tmp/stannet-code-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-code-typing.log 2>&1 &
+          sleep 2
+          node tests/code-typing-browser.cjs
+      - name: Save screenshots and report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-typing-browser-evidence
+          path: output/code-typing-browser/
+          if-no-files-found: ignore
