@@ -7,6 +7,13 @@ on:
       - home-refresh.css
       - index.html
       - stannet-global-nav.js
+      - stannet-ai*.js
+      - stannet-ai*.mjs
+      - stannet-ai.css
+      - programming-*.js
+      - qa/stannet-ai/**
+      - qa/context-bridge/**
+      - tests/stannet-ai-context-browser.cjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,3 +35,17 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-home-preview.log 2>&1 &
           sleep 2
           STANNET_AUDIT_URL=http://127.0.0.1:8765/ node tests/home-mobile-live.cjs
+
+      - name: Verify Context Bridge and agent mobile keyboard/scroll matrix
+        env:
+          NODE_PATH: /tmp/stannet-mobile-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: node tests/stannet-ai-context-browser.cjs
+      - name: Keep Context Bridge browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stannet-ai-context-browser
+          path: output/context-bridge-browser/
+          if-no-files-found: ignore
