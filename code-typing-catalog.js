@@ -17,7 +17,8 @@
   ]);
   const symbolString=(item)=>{
     const symbols=[...new Set((item.fragment+item.project).split('').filter(c=>/[{}()[\]<>$#@=+*\/!?;:.,'"\\-]/.test(c)))].join(' ');
-    return (symbols+'\n'+symbols).trim()||'() {} [] ; :';
+    const sequence=symbols||'() {} [] ; :';
+    return Array(4).fill(sequence).join('   ');
   };
   function get(id){return byId.get(id)||entries[0];}
   function exercise(id,level='fragment'){
