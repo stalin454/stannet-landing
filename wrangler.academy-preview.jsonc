@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "stannet-academy-dev",
+  "compatibility_date": "2026-10-13",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./_academy_preview"
+  },
+  "routes": [
+    {
+      "pattern": "academy.stannet.dev",
+      "custom_domain": true
+    }
+  ]
+}

@@ -35,3 +35,7 @@ The provider is mocked in these tests; this demonstrates delivery of current con
 The isolated owner-private preview has no generative, authentication or TTS backend. Recognition works locally. Code/file analysis and server voice require a future authorized backend deployment; this change does not deploy production.
 
 Browser evidence: https://github.com/stalin454/stannet-landing/actions/runs/38380792928 (tested runtime commit `b827c791ac1550422a091d51822b03108be6197e`). The provider response in the browser test is intercepted, while the locally recognized context and rendered widget are real.
+
+## Sincronización segura con Programming Coach (2026-10-14)
+
+El PR incorpora por merge la rama `main` que ya contiene Programming Coach. El script `test:ci` conserva las comprobaciones de Programming Coach y añade las del Context Bridge. En `programming-web-lab.js`, la publicación de la lección activa convive con la selección por `?lesson=JS29`. La prueba adicional carga JS29, cambia de lección, solicita reconocimiento por `¿Dónde estoy?`, verifica el payload hacia el modelo y valida el enlace profundo al capítulo. La página `/qa/context-bridge/` ofrece «Abrir Fetch · JS29» para validación visual. En dispositivos físicos Android aún se requiere prueba manual; no se ha fusionado ni publicado a producción.

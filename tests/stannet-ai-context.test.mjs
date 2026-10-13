@@ -7,12 +7,12 @@ import {sanitizeContext,redactSecrets} from '../stannet-ai-context-policy.mjs';
 import {AgentCore} from '../stannet-ai-core.mjs';
 
 // Run real curriculum and controller code with a small DOM test double.
-function academy(path,files){
+function academy(path,files,search=''){
   const nodes=new Map(),ready=[],listeners=new Map(),windowListeners=new Map();
   const make=id=>({id,value:'',textContent:'',innerHTML:'',style:{},dataset:{},hidden:false,disabled:false,listeners:{},addEventListener(n,f){this.listeners[n]=f;},querySelectorAll(){return [];},scrollIntoView(){}});
   const node=id=>{if(!nodes.has(id))nodes.set(id,make(id));return nodes.get(id);};
   const doc={title:'StanNet Programming Academy',getElementById:node,querySelector(s){return s.startsWith('#')?nodes.get(s.slice(1))||null:null;},querySelectorAll(){return [];},addEventListener(n,f){if(n==='DOMContentLoaded')ready.push(f);else listeners.set(n,f);},removeEventListener(){}};
-  const win={document:doc,location:{pathname:path},localStorage:{getItem(){return null;},setItem(){}},console,setTimeout,clearTimeout,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail;}},addEventListener(n,f){windowListeners.set(n,f);},removeEventListener(){},dispatchEvent(e){windowListeners.get(e.type)?.(e);}};
+  const win={document:doc,location:{pathname:path,search},URLSearchParams,localStorage:{getItem(){return null;},setItem(){}},console,setTimeout,clearTimeout,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail;}},addEventListener(n,f){windowListeners.set(n,f);},removeEventListener(){},dispatchEvent(e){windowListeners.get(e.type)?.(e);}};
   win.window=win;const sandbox=vm.createContext(win);
   for(const file of files)vm.runInContext(fs.readFileSync(file,'utf8'),sandbox,{filename:file});
   const bridge=createContextBridge({win,doc});ready.forEach(fn=>fn());
@@ -20,7 +20,8 @@ function academy(path,files){
 }
 
 test('real Web Lab: lesson changes, HTML/CSS/JavaScript, core response and actual request',async(t)=>{
- const a=academy('/pages/programming-web-lab',['programming-web-lessons.js','programming-html-css-deep-theory.js','programming-javascript-complete.js','programming-javascript-deep-theory.js','programming-javascript-mastery.js','programming-javascript-reference-gaps.js','programming-javascript-theory-v4.js','programming-web-lab.js']);
+ const webLabFiles=['programming-web-lessons.js','programming-html-css-deep-theory.js','programming-javascript-complete.js','programming-javascript-deep-theory.js','programming-javascript-mastery.js','programming-javascript-reference-gaps.js','programming-javascript-theory-v4.js','programming-web-lab.js'];
+ const a=academy('/pages/programming-web-lab',webLabFiles);
  let payload;const core=new AgentCore({getPage:a.bridge.snapshot,transport:async(_,init)=>{payload=JSON.parse(init.body);return Response.json({answer:'Pista'});}});
  for(const language of ['HTML','CSS','JavaScript']){
    const i=a.win.stannetWebLessons.findIndex(l=>l.track===language),l=a.win.stannetWebLessons[i];
@@ -29,6 +30,30 @@ test('real Web Lab: lesson changes, HTML/CSS/JavaScript, core response and actua
    const result=await core.run('¿Dónde estoy?');assert.equal(result.source,'context');assert.equal(core.state,'idle');t.diagnostic(JSON.stringify({source:result.source,context:result.context}));assert.ok(result.answer.includes(l.title));assert.ok(result.answer.includes(language));
    await core.run('Ayúdame con este ejercicio');assert.equal(payload.page.lessonId,l.id);assert.equal(payload.page.exerciseId,l.id+'-challenge');assert.equal(payload.page.language,language);assert.equal(payload.editorCode,'');assert.equal(payload.attachment,null);
  }
+ const fetchIndex=a.win.stannetWebLessons.findIndex(l=>l.id==='JS29'&&l.track==='JavaScript'&&/fetch/i.test(l.title));
+ assert.ok(fetchIndex>=0,'JS29 Fetch y APIs is present in real curriculum');
+ const fetchLesson=a.win.stannetWebLessons[fetchIndex];
+ a.node('web-outline').onclick({target:{closest:()=>({dataset:{i:String(fetchIndex)}})}});
+ const currentFetch=a.bridge.snapshot();
+ assert.equal(currentFetch.app,'Programming Academy');
+ assert.equal(currentFetch.lessonId,'JS29');
+ assert.equal(currentFetch.lesson,fetchLesson.title);
+ assert.equal(currentFetch.exerciseId,'JS29-challenge');
+ assert.equal(currentFetch.exercise,fetchLesson.challenge.slice(0,1200));
+ assert.equal(currentFetch.language,'JavaScript');
+ const fetchLocation=await core.run('¿Dónde estoy?');
+ assert.equal(fetchLocation.source,'context');
+ assert.ok(fetchLocation.answer.includes('Fetch y APIs'));
+ await core.run('Explícame fetch en esta lección sin resolver el ejercicio');
+ assert.equal(payload.page.lessonId,'JS29');
+ assert.equal(payload.page.lesson,fetchLesson.title);
+ assert.equal(payload.page.exerciseId,'JS29-challenge');
+ assert.equal(payload.editorCode,'');
+ const linked=academy('/pages/programming-web-lab',webLabFiles,'?lesson=JS29');
+ assert.equal(linked.bridge.snapshot().lessonId,'JS29','link to JS29 must open the expected active lesson');
+ const directLocation=await new AgentCore({getPage:linked.bridge.snapshot,transport:async()=>Response.json({answer:'No'} )}).run('¿Dónde estoy?');
+ assert.ok(directLocation.answer.includes('Fetch y APIs'));
+
  a.node('web-editor').value='const API_KEY="sk-123456789012345678901234";';
  assert.ok(!JSON.stringify(a.bridge.snapshot()).includes('API_KEY'));
  a.listeners.get('input')({target:a.node('web-editor')});assert.equal(a.bridge.snapshot().activity,'editando');
