@@ -17,5 +17,5 @@ export function sanitizeContext(input) {
 }
 export function contextAnswer(context) {
   const c=sanitizeContext(context);
-  return ['Estás en '+(c.app||c.title||'StanNet')+'.',c.path?'Ruta: '+c.path+'.':'',c.lesson?'Lección: '+c.lesson+'.':'',c.exercise?'Ejercicio: '+c.exercise+'.':'',c.language?'Lenguaje: '+c.language+'.':'',c.activity?'Actividad: '+c.activity+'.':'',!c.lesson?'Esta sección no ha publicado una lección activa.':''].filter(Boolean).join('\n');
+  return ['Estás en '+(c.app||c.title||'StanNet')+'.',c.path?'Ruta: '+c.path+'.':'',c.lesson?'Lección: '+(c.lessonId?c.lessonId+' · ':'')+c.lesson+'.':'',c.exercise?'Ejercicio: '+c.exercise+'.':'',c.language?'Lenguaje: '+c.language+'.':'',c.activity?'Actividad: '+c.activity+'.':'',!c.lesson?'Esta sección no ha publicado una lección activa.':''].filter(Boolean).join('\n');
 }
