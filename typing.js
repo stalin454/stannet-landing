@@ -655,6 +655,23 @@
   renderDrills();
   updateSoundButton();
   reset();
+  // Publish only public lesson labels to Context Bridge. No typed answers or
+  // source editor content are exposed unless the learner explicitly authorizes it.
+  const registerTypingAdapter=()=>{
+    const bridge=window.StanNetAIContextBridge;
+    if(!bridge||window.__stannetTypingAdapterRegistered)return;
+    window.__stannetTypingAdapterRegistered=true;
+    bridge.register({
+      match:()=>/^\/pages\/typing(?:\.html)?\/?$/.test(location.pathname),
+      read:()=>mode==='code'&&activeExercise
+        ? {...window.StanNetLearningContext,app:'Programming Academy'}
+        : {app:'Typing Lab',activity:'mecanografía'},
+      editor:()=>null
+    });
+    window.dispatchEvent(new CustomEvent('stannet:learning-context'));
+  };
+  window.addEventListener('stannet:bridge-ready',registerTypingAdapter,{once:true});
+  registerTypingAdapter();
   // Deep-link from Programming Academy to a specific language and level.
   const params=new URLSearchParams(location.search);
   if(params.get('mode')==='code'&&catalog){
