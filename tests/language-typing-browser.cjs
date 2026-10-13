@@ -10,9 +10,21 @@ const report=[];
 try{
  for(const width of [320,390,1280]){
   const page=await browser.newPage();
+  const pageErrors=[];page.on('pageerror',e=>pageErrors.push(String(e.stack||e.message)));
   await page.setViewport({width,height:844,isMobile:width<600,hasTouch:width<600});
   await page.goto(new URL('pages/language-typing.html?lang=en&level=A1',base).href,{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.StanNetLanguageTypingData?.languages.length===5&&document.querySelector('#ltPhrase')?.textContent.includes('Hello!'));
+  try{
+    await page.waitForFunction(()=>window.StanNetLanguageTypingData?.languages.length===5&&document.querySelector('#ltPhrase')?.textContent.includes('Hello!'),{timeout:9500});
+  }catch(error){
+    const debug=await page.evaluate(()=>({
+      ready:document.readyState,corpus:window.StanNetLanguageTypingData?.languages?.length,
+      scripts:[...document.scripts].map(s=>s.src),phrase:document.querySelector('#ltPhrase')?.textContent,
+      lesson:document.querySelector('#ltLessonTitle')?.textContent,
+      controls:document.querySelector('#ltLanguage')?.options?.length,
+      context:window.StanNetLearningContext||null
+    }));
+    throw new Error('Classroom startup failure '+JSON.stringify({debug,pageErrors,cause:error.message}));
+  }
   const first=await page.evaluate(()=>{
    const rect=document.querySelector('#ltAnswer').getBoundingClientRect();
    return {langs:document.querySelector('#ltLanguage').options.length,mode:document.querySelector('[data-mode="typing"]').getAttribute('aria-pressed'),context:window.StanNetLearningContext,rect:rect.toJSON(),text:document.querySelector('#ltPhrase').textContent};
