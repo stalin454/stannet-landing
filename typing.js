@@ -4,6 +4,8 @@
   const $ = id => document.getElementById(id);
   const STORAGE = 'stannet-typing-progress-v1';
   const SOUND_KEY = 'stannet-typing-sound-v1';
+  const REFLECTION_KEY = 'stannet-code-typing-reflections-v1';
+  const catalog = window.StanNetCodeTypingCatalog || null;
 
   const lessons = {
     es: [
@@ -119,6 +121,22 @@
   let records = [];
   let soundOn = true;
   let audioCtx = null;
+  let activeExercise = null;
+  let reflections = {};
+  try { const raw=JSON.parse(localStorage.getItem(REFLECTION_KEY)||'{}');if(raw&&typeof raw==='object'&&!Array.isArray(raw))reflections=raw; } catch {}
+  if(catalog){
+    const select=$('codeLanguage');
+    select.replaceChildren();
+    const groups=new Map();
+    for(const lang of catalog.languages){
+      let group=groups.get(lang.family);
+      if(!group){group=document.createElement('optgroup');group.label=lang.family;groups.set(lang.family,group);select.append(group);}
+      const option=document.createElement('option');option.value=lang.id;option.textContent=lang.name;group.append(option);
+    }
+    $('codeLevel').replaceChildren();
+    for(const level of catalog.levels){const option=document.createElement('option');option.value=level.id;option.textContent=level.name;$('codeLevel').append(option);}
+    $('codeLevel').value='fragment';
+  }
 
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE) || '[]');
@@ -129,7 +147,7 @@
   } catch {}
 
   const language = () => mode === 'text' ? $('textLanguage').value : $('codeLanguage').value;
-  const currentKey = () => mode === 'drill' ? 'drill:' + activeDrill : mode + ':' + language();
+  const currentKey = () => mode === 'drill' ? 'drill:' + activeDrill : mode + ':' + language() + (mode==='code' ? ':' + $('codeLevel').value : '');
 
   const formatTime = seconds => {
     const whole = Math.max(0, Math.ceil(seconds));
@@ -257,6 +275,10 @@
       while (result.length < 1100) result += (result ? '   ' : '') + d.pattern;
       return result;
     }
+    if(mode==='code'&&catalog){
+      activeExercise=catalog.exercise(language(),$('codeLevel').value);
+      return activeExercise.text;
+    }
     const items = mode === 'text' ? lessons[language()] : code[language()];
     const separator = mode === 'text' ? ' ' : '\n\n';
     let result = '';
@@ -341,6 +363,10 @@
 
     if (start && elapsed >= Number($('duration').value)) finish(elapsed, totalCorrect, totalTyped, accuracy, wpm);
     else if (start && value === target) {
+      if(mode==='code'&&catalog){
+        finish(elapsed,totalCorrect,totalTyped,accuracy,wpm);
+        return;
+      }
       completedCorrect += target.length;
       completedTyped += target.length;
       prepareTarget();
@@ -437,6 +463,24 @@
     } else {
       result.textContent = 'Práctica muy corta para registrar una marca. Pulsa «Nuevo ejercicio» e inténtalo de nuevo.';
     }
+    if(mode==='code'&&activeExercise){
+      $('codeNext').disabled=false;
+      const review=$('codeExplanation');review.hidden=false;
+      $('codeExplainText').textContent=activeExercise.explanation;
+      $('codeQuestion').textContent=activeExercise.question;
+      $('codeReflection').value=typeof reflections[activeExercise.id]==='string'?reflections[activeExercise.id]:'';
+      $('codeReflectionStatus').textContent='';
+    }
+  }
+
+  function publishTypingContext(){
+    const payload=mode==='code'&&activeExercise
+      ? {path:location.pathname,lessonId:'TYPING-'+activeExercise.languageId+'-'+activeExercise.level,lesson:activeExercise.title,
+        exerciseId:activeExercise.id,exercise:'Escribir exactamente este fragmento de '+activeExercise.language+' y responder: '+activeExercise.question,
+        language:activeExercise.language,activity:'practicando sintaxis'}
+      : {path:location.pathname,lesson:'',activity:'mecanografía'};
+    window.StanNetLearningContext=payload;
+    window.dispatchEvent(new CustomEvent('stannet:learning-context'));
   }
 
   function prepareTarget() {
@@ -460,9 +504,22 @@
     const drillMode = mode === 'drill';
     $('textLanguage').parentElement.hidden = mode !== 'text';
     $('codeLanguageLabel').hidden = mode !== 'code';
+    $('codeLevelLabel').hidden=mode!=='code';
+    $('code-lab').hidden=mode!=='code';
+    $('codeSymbolKeys').hidden=mode!=='code';
+    $('codeExplanation').hidden=true;
+    $('codeNext').disabled=true;
+    if(mode==='code'&&activeExercise){
+      $('codeExerciseTitle').textContent=activeExercise.title;
+      $('codeExerciseFamily').textContent=activeExercise.family;
+      $('codeExerciseIntro').textContent='Nivel: '+$('codeLevel').selectedOptions[0].textContent+' · Copia cada símbolo, espacio y salto de línea sin pegar.';
+    }
+    publishTypingContext();
     $('typingHint').textContent = drillMode
       ? 'Técnica guiada: no mires tus manos. Pulsa la tecla iluminada con el dedo indicado y vuelve siempre a ASDF · JKLÑ.'
-      : 'Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.';
+      : mode==='code'
+        ? 'Escribe exactamente el código. Tab inserta dos o cuatro espacios según la indentación. Al completar, explica qué hace.'
+        : 'Puedes corregir con retroceso. En el modo código, usa Tab para insertar dos espacios.';
   }
 
   function reset() {
@@ -510,7 +567,29 @@
     document.querySelector('.typing-workspace')?.scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
-  for (const id of ['textLanguage', 'codeLanguage', 'duration']) $(id).addEventListener('change', reset);
+  for (const id of ['textLanguage', 'codeLanguage', 'codeLevel','duration']) $(id).addEventListener('change', reset);
+  $('codeNext').addEventListener('click',()=>{
+    if(mode!=='code'||!finished||!catalog)return;
+    const levels=catalog.levels,idx=levels.findIndex(item=>item.id===$('codeLevel').value);
+    $('codeLevel').value=levels[(idx+1)%levels.length].id;
+    reset();$('typingInput').focus();
+  });
+  $('codeRepeat').addEventListener('click',()=>{reset();$('typingInput').focus();});
+  $('codeSaveReflection').addEventListener('click',()=>{
+    if(mode!=='code'||!activeExercise||!finished)return;
+    const value=$('codeReflection').value.trim().slice(0,1000);
+    if(value.length<12){$('codeReflectionStatus').textContent='Escribe al menos 12 caracteres.';return;}
+    reflections[activeExercise.id]=value;
+    try {localStorage.setItem(REFLECTION_KEY,JSON.stringify(reflections));$('codeReflectionStatus').textContent='Guardado en este navegador ✓';}
+    catch { $('codeReflectionStatus').textContent='No se pudo guardar.'; }
+  });
+  $('codeSymbolKeys').addEventListener('click',e=>{
+    const btn=e.target.closest('button[data-insert]');if(!btn||mode!=='code'||finished)return;
+    const input=$('typingInput'),startAt=input.selectionStart,endAt=input.selectionEnd;
+    input.setRangeText(btn.dataset.insert,startAt,endAt,'end');
+    input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:btn.dataset.insert}));
+    input.focus();
+  });
 
   $('typingSound').addEventListener('click', () => {
     soundOn = !soundOn;
@@ -545,8 +624,9 @@
       e.preventDefault();
       const input = e.currentTarget;
       const at = input.selectionStart;
-      input.setRangeText('  ', at, input.selectionEnd, 'end');
-      input.dispatchEvent(new InputEvent('input', { bubbles:true, inputType:'insertText', data:'  ' }));
+      const spaces=target.slice(at,at+4)==='    '?'    ':'  ';
+      input.setRangeText(spaces, at, input.selectionEnd, 'end');
+      input.dispatchEvent(new InputEvent('input', { bubbles:true, inputType:'insertText', data:spaces }));
     }
   });
 
@@ -575,4 +655,12 @@
   renderDrills();
   updateSoundButton();
   reset();
+  // Deep-link from Programming Academy to a specific language and level.
+  const params=new URLSearchParams(location.search);
+  if(params.get('mode')==='code'&&catalog){
+    const requested=params.get('lang'),level=params.get('level');
+    if(catalog.languages.some(item=>item.id===requested))$('codeLanguage').value=requested;
+    if(catalog.levels.some(item=>item.id===level))$('codeLevel').value=level;
+    selectMode('code');
+  }
 })();
