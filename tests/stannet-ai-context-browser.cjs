@@ -25,7 +25,7 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   await live.waitForFunction(()=>window.StanNetAIContextBridge&&document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-launcher'));
   const submit=async message=>{await live.evaluate(text=>{const ui=document.querySelector('#stannet-ai-root').shadowRoot;if(!ui.querySelector('dialog').open){if(ui.querySelector('.snai-avatar').hidden)ui.querySelector('.snai-reopen').click();ui.querySelector('.snai-launcher').click();}ui.querySelector('.snai-form-row textarea').value=text;ui.querySelector('form').requestSubmit();},message);await live.waitForFunction(()=>!document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-send').disabled);};
   for(const language of ['HTML','CSS','JavaScript']){
-   const context=await live.evaluate(lang=>{const ui=document.querySelector('#stannet-ai-root').shadowRoot;if(ui.querySelector('dialog').open)ui.querySelector('.snai-minimize').click();const i=window.stannetWebLessons.findIndex(l=>l.track===lang);document.querySelector('#web-list [data-i="'+i+'"]').click();return window.StanNetAIContextBridge.snapshot();},language);
+   const context=await live.evaluate(lang=>{const ui=document.querySelector('#stannet-ai-root').shadowRoot;if(ui.querySelector('dialog').open)ui.querySelector('.snai-minimize').click();const i=window.stannetWebLessons.findIndex(l=>l.track===lang);document.querySelector('#web-outline [data-i="'+i+'"]').click();return window.StanNetAIContextBridge.snapshot();},language);
    await submit('¿Dónde estoy?');const answer=await live.evaluate(()=>[...document.querySelector('#stannet-ai-root').shadowRoot.querySelectorAll('.snai-msg.bot')].at(-1).textContent);
    assert.ok(answer.includes(context.lesson),answer);assert.ok(answer.includes(language),answer);assert.ok(answer.includes(context.path),answer);report.push('REAL WIDGET PASS '+JSON.stringify(context));
   }
@@ -39,6 +39,6 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   assert.equal(requests.at(-1).history.filter(x=>x.content==='test-private-answer').length,1,'only the earlier non-sensitive answer can be in history');
   report.push('PASS: real mobile widget, current model payload, consent cancellation/acceptance, one-turn sharing, redaction and private-answer history exclusion.');
   await live.screenshot({path:out+'/programming-mobile.png',fullPage:false});await live.close();
- }finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
+ }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
  console.log(report.join('\n\n'));
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});
