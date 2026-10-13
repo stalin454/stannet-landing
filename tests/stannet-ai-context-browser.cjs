@@ -71,6 +71,23 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   assert.equal(requests.at(-1).page.lessonId,'JS29');
   assert.ok(requests.at(-1).message.includes('primera pista'));
   assert.equal(requests.at(-1).editorCode,'');
+  const beforeExplain=requests.length;
+  await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    ui.querySelector('.snai-form-row textarea').value='No sobrescribir este mensaje';
+    ui.querySelector('.snai-tutor-explain').click();
+  });
+  assert.equal(requests.length,beforeExplain,'tutor must not overwrite or submit a draft');
+  assert.equal(await live.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-form-row textarea').value),'No sobrescribir este mensaje');
+  await live.evaluate(()=>{
+    const ui=document.querySelector('#stannet-ai-root').shadowRoot;
+    ui.querySelector('.snai-form-row textarea').value='';
+    ui.querySelector('.snai-tutor-explain').click();
+  });
+  await live.waitForFunction(()=>!document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-send').disabled);
+  assert.equal(requests.length,beforeExplain+1);
+  assert.ok(requests.at(-1).message.includes('Explícame la lección'));
+  assert.equal(requests.at(-1).page.lessonId,'JS29');
   await live.evaluate(()=>{
     const ui=document.querySelector('#stannet-ai-root').shadowRoot;
     ui.querySelector('.snai-memory').open=true;
