@@ -9,7 +9,10 @@ const LANGUAGE_VOICES = {
   'da-DK': { default: 'Sofie', female: 'Sofie', male: 'Sofie', aliases: {'da-DK-ChristelNeural':'Sofie'} },
   'en-GB': { default: 'Amy', female: 'Amy', male: 'Brian', aliases: {'en-GB-SoniaNeural':'Amy','en-GB-RyanNeural':'Brian'} },
   'en-US': { default: 'Joanna', female: 'Joanna', male: 'Matthew', aliases: {'en-US-AriaNeural':'Joanna','en-US-GuyNeural':'Matthew','en-US-JennyNeural':'Joanna'} },
-  'es-ES': { default: 'Lucia', female: 'Lucia', male: 'Sergio', aliases: {'es-ES-ElviraNeural':'Lucia','es-ES-AlvaroNeural':'Sergio'} }
+  'es-ES': { default: 'Lucia', female: 'Lucia', male: 'Sergio', aliases: {'es-ES-ElviraNeural':'Lucia','es-ES-AlvaroNeural':'Sergio'} },
+  'de-DE': { default: 'Vicki', female: 'Vicki', male: 'Daniel', aliases: {} },
+  'fr-FR': { default: 'Lea', female: 'Lea', male: 'Remi', aliases: {} },
+  'sv-SE': { default: 'Elin', female: 'Elin', male: 'Elin', aliases: {} }
 };
 
 export function pollySelected(env) {
@@ -90,7 +93,7 @@ export async function requestPolly(text, env, {lang='es-ES', voice='', purpose='
   if (!pollyConfigured(env)) return {ok:false, status:503, error:'Amazon Polly no está configurado en Cloudflare.'};
   if (!text || text.length > 3000) return {ok:false, status:400, error:'Fragmento de voz demasiado largo.'};
   const {voice:voiceId, language} = selectPollyVoice(lang, voice);
-  const rate = purpose === 'audiobook' ? '92%' : purpose === 'chat' ? '98%' : purpose === 'radio' ? '97%' : '92%';
+  const rate = purpose === 'audiobook' ? '92%' : purpose === 'chat' ? '98%' : purpose === 'radio' ? '97%' : purpose === 'language-typing' ? '100%' : '92%';
   const ssml = '<speak><prosody rate="' + rate + '">' + xmlEscape(text) + '</prosody></speak>';
   const body = JSON.stringify({Engine:'neural', LanguageCode:language, VoiceId:voiceId,
     Text:ssml, TextType:'ssml', OutputFormat:'mp3', SampleRate:'24000'});
