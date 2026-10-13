@@ -95,6 +95,12 @@ test('Worker sees active metadata as data, strips unexpected fields and denies u
  const handler=new Function('json','stannetAiCorsHeaders','fetch','catalogueText','sanitizeContext','redactSecrets',source.slice(start,end)+';return handleStanNetAi;')((body,status=200)=>Response.json(body,{status}),()=>new Headers(),async(_,init)=>{provider=JSON.parse(init.body);return Response.json({choices:[{message:{content:'Pista contextual'}}]});},catalogueText,sanitizeContext,redactSecrets);
  const req=body=>new Request('https://stannet.space/api/stannet-ai',{method:'POST',headers:{origin:'https://stannet.space'},body:JSON.stringify(body)}),env={AI_API_KEY:'fixture-only',AI_API_URL:'https://api.groq.com/openai/v1/chat/completions',AI_MODEL:'openai/gpt-oss-20b'};
  for(const lesson of ['Variables','Funciones']){const response=await handler(req({message:'Ayúdame con esto',page:{path:'/pages/programming-web-lab',app:'Programming Academy',lesson,language:'JavaScript',exercise:'Declara una variable',code:'DO NOT SHARE'},history:[{role:'assistant',content:'Estabas en Radio'}]}),env);assert.equal(response.status,200);assert.ok(provider.messages[0].content.includes('"lesson":"'+lesson+'"'));assert.ok(provider.messages[0].content.includes('prevalece'));assert.ok(!provider.messages[0].content.includes('DO NOT SHARE'));}
+ const tutorResponse=await handler(req({message:'Dame únicamente la primera pista',mode:'auto',page:{path:'/pages/programming-web-lab',app:'Programming Academy',lessonId:'JS29',lesson:'Fetch y APIs',exerciseId:'JS29-challenge',exercise:'Carga datos y presenta loading/error/success.',language:'JavaScript'}}),env);
+ assert.equal(tutorResponse.status,200);
+ assert.ok(provider.messages[0].content.includes('"lessonId":"JS29"'));
+ assert.ok(provider.messages[0].content.includes('aunque el modo sea auto'));
+ assert.ok(provider.messages[0].content.includes('solo UNA pista progresiva'));
+ assert.equal(provider.messages.at(-1).content,'Dame únicamente la primera pista');
  for(const body of [{attachment:{kind:'text',content:'private'}},{editorCode:'private'}])assert.equal((await handler(req({message:'Ayuda',...body}),env)).status,403);
  const response=await handler(req({message:'Revisa',editorCode:'const password="secret";',consent:{editor:true}}),env);assert.equal(response.status,200);assert.ok(!provider.messages.at(-1).content.includes('"secret"'));assert.ok(provider.messages.at(-1).content.includes('[SECRETO OCULTO]'));
 });
