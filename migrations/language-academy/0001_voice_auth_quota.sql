@@ -91,7 +91,7 @@ declare
   global_minute_calls integer := 0;
 begin
   if actor is null then return jsonb_build_object('allowed',false,'reason','login_required'); end if;
-  if p_chars is null or p_chars < 1 or p_chars > 220 then
+  if p_chars is null or p_chars < 1 or p_chars > 500 then
     return jsonb_build_object('allowed',false,'reason','invalid_length');
   end if;
   select exists (
