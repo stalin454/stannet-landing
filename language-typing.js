@@ -19,6 +19,120 @@ try {const saved=JSON.parse(localStorage.getItem(STORE)||'{}');if(saved&&typeof 
 let recognition=null,mediaRecorder=null,stream=null,recordUrl='',sessionToken=0,playbackToken=0,speaking=false;
 const speech=window.speechSynthesis||null;
 const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+const pollyVoices={
+  'en-GB':[{id:'Amy',label:'Amy · británica'},{id:'Brian',label:'Brian · británico'}],
+  'de-DE':[{id:'Vicki',label:'Vicki · alemana'},{id:'Daniel',label:'Daniel · alemán'}],
+  'fr-FR':[{id:'Lea',label:'Léa · francesa'},{id:'Remi',label:'Rémi · francés'}],
+  'sv-SE':[{id:'Elin',label:'Elin · sueca'}],
+  'da-DK':[{id:'Sofie',label:'Sofie · danesa'}]
+};
+let pollyAbort=null,pollyAudio=null,pollyAvailable=null;
+const pollyCache=new Map();
+function clearPollyPlayback(){
+  if(pollyAbort){pollyAbort.abort();pollyAbort=null;}
+  if(pollyAudio){pollyAudio.pause();pollyAudio.onended=null;pollyAudio.onerror=null;pollyAudio=null;}
+  $('ltHear').setAttribute('aria-pressed','false');
+}
+function updatePollyVoice(){
+  const voices=pollyVoices[locale().locale]||[];
+  const selector=$('ltPollyVoice');
+  selector.replaceChildren();
+  for(const voice of voices){const opt=document.createElement('option');opt.value=voice.id;opt.textContent=voice.label;selector.append(opt);}
+  selector.disabled=$('ltProvider').value!=='polly';
+}
+function providerNotice(message){
+  $('ltVoiceProviderNote').textContent=message;
+}
+async function checkPollyAvailability(){
+  if(pollyAvailable!==null)return pollyAvailable;
+  try{
+    const response=await fetch('/api/speech/status',{credentials:'same-origin',cache:'no-store'});
+    if(!response.ok)throw new Error('status unavailable');
+    const status=await response.json();
+    pollyAvailable=status.provider==='amazon-polly'&&status.configured===true;
+  }catch{pollyAvailable=false;}
+  return pollyAvailable;
+}
+async function selectProvider(next){
+  $('ltProvider').value=next;
+  stopVoice();updatePollyVoice();
+  if(next!=='polly'){providerNotice('Voz del navegador seleccionada. No genera llamadas facturables a Amazon Polly.');return;}
+  // Polly synthesis is billable; never enable automatic playback without a new explicit opt-in.
+  $('ltAuto').checked=false;
+  providerNotice('Comprobando Amazon Polly… Cada frase sintetizada puede tener coste en AWS. Audio automático desactivado.');
+  const active=await checkPollyAvailability();
+  if($('ltProvider').value!=='polly')return;
+  if(!active){$('ltProvider').value='browser';updatePollyVoice();providerNotice('Amazon Polly no está disponible o configurado ahora. Se mantiene la voz gratuita del navegador.');return;}
+  providerNotice('Amazon Polly conectado · voz neuronal '+locale().name+'. Solo se solicita audio al pulsar Escuchar o activar voluntariamente Audio tras completar. Puede generar cargos en AWS.');
+}
+function audioKey(language,voice,text){return language+'|'+voice+'|'+text;}
+function rememberPolly(key,url){
+  if(pollyCache.has(key))return;
+  pollyCache.set(key,url);
+  while(pollyCache.size>18){const oldest=pollyCache.keys().next().value;URL.revokeObjectURL(pollyCache.get(oldest));pollyCache.delete(oldest);}
+}
+function releasePollyCache(){
+  for(const url of pollyCache.values())URL.revokeObjectURL(url);
+  pollyCache.clear();
+}
+async function speakPolly({slow=false,after=null}={}){
+  const l=lesson();if(!l)return;
+  if(!(await checkPollyAvailability())){
+    providerNotice('Amazon Polly no está disponible. Selecciona la voz del navegador.');
+    $('ltVoiceStatus').textContent='La conexión Amazon Polly no está disponible.';
+    return;
+  }
+  if($('ltProvider').value!=='polly')return;
+  if(recognition){try{recognition.abort();}catch{}recognition=null;}
+  if(speech)speech.cancel();
+  clearPollyPlayback();
+  const token=++playbackToken;
+  const code=locale().locale,voice=$('ltPollyVoice').value;
+  if(!pollyVoices[code]?.some(v=>v.id===voice))return;
+  const key=audioKey(code,voice,l.target);
+  $('ltVoiceStatus').textContent='Preparando '+voice+' · Amazon Polly…';
+  $('ltHear').setAttribute('aria-pressed','true');
+  speaking=true;
+  try{
+    let url=pollyCache.get(key);
+    if(!url){
+      const controller=new AbortController();pollyAbort=controller;
+      const response=await fetch('/api/speech',{
+        method:'POST',headers:{'Content-Type':'application/json','Accept':'audio/mpeg'},
+        credentials:'same-origin',cache:'no-store',signal:controller.signal,
+        body:JSON.stringify({text:l.target,lang:code,voice,purpose:'language-typing'})
+      });
+      if(!response.ok||response.headers.get('X-StanNet-Speech-Provider')!=='amazon-polly')throw new Error('Polly no devolvió MP3');
+      const blob=await response.blob();
+      if(!blob.size||blob.size>1500000)throw new Error('Audio vacío o inesperadamente grande');
+      if(token!==playbackToken||$('ltProvider').value!=='polly')return;
+      url=URL.createObjectURL(blob);
+      rememberPolly(key,url);
+      pollyAbort=null;
+    }
+    if(token!==playbackToken||$('ltProvider').value!=='polly')return;
+    const player=new Audio();pollyAudio=player;player.src=url;
+    player.playbackRate=slow?0.75:Number($('ltSpeed').value)||1;player.preservesPitch=true;
+    player.onended=()=>{
+      if(token!==playbackToken)return;
+      speaking=false;pollyAudio=null;$('ltHear').setAttribute('aria-pressed','false');
+      $('ltVoiceStatus').textContent='Amazon Polly · audio finalizado. Ahora repite la frase.';
+      if(after)after();
+    };
+    player.onerror=()=>{
+      if(token!==playbackToken)return;
+      speaking=false;$('ltHear').setAttribute('aria-pressed','false');
+      $('ltVoiceStatus').textContent='No se pudo reproducir el MP3. Intenta otra vez.';
+    };
+    await player.play();
+    if(token===playbackToken)$('ltVoiceStatus').textContent='Reproduciendo '+voice+' · Amazon Polly.';
+  }catch(error){
+    if(token!==playbackToken)return;
+    speaking=false;$('ltHear').setAttribute('aria-pressed','false');
+    $('ltVoiceStatus').textContent='No se pudo iniciar el audio de Amazon. Puedes seguir con la voz del navegador.';
+    providerNotice('Amazon Polly no se ha reproducido ('+(error?.name==='NotAllowedError'?'el navegador necesita un toque adicional para permitir sonido':'revisa servicio/conexión')+'). Si el móvil bloquea la reproducción, vuelve a pulsar Escuchar.');
+  }
+}
 function locale(){return corpus.languages.find(x=>x.id===language)||corpus.languages[0];}
 function lesson(){return current[index]||null;}
 function readProgress(){const values=Object.entries(progress);$('ltPracticed').textContent=values.filter(([,v])=>v.attempts>0).length;$('ltMastered').textContent=values.filter(([,v])=>v.best>=90).length;$('ltDue').textContent=values.filter(([,v])=>v.next&&v.next<=Date.now()).length;}
@@ -33,7 +147,7 @@ function saveProgress(grade){
   readProgress();
 }
 function stopVoice(){
-  playbackToken++;if(speech)speech.cancel();speaking=false;
+  playbackToken++;clearPollyPlayback();if(speech)speech.cancel();speaking=false;
   if(recognition){try{recognition.abort();}catch{}recognition=null;}
   if(mediaRecorder&&mediaRecorder.state!=='inactive'){try{mediaRecorder.stop();}catch{}}
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
@@ -47,6 +161,7 @@ function selectVoice(){
 }
 function speak({slow=false,after=null}={}){
   const l=lesson();if(!l)return;
+  if($('ltProvider').value==='polly'){void speakPolly({slow,after});return;}
   if(!speech||!window.SpeechSynthesisUtterance){$('ltVoiceStatus').textContent='Este navegador no ofrece síntesis de voz. Puedes continuar escribiendo.';return;}
   if(recognition){try{recognition.abort();}catch{}recognition=null;}
   speech.cancel();const token=++playbackToken;
@@ -142,6 +257,7 @@ function display(){
   $('ltMic').disabled=!Recognition||(shadowMode==='simultaneous'&&mode==='shadowing');
   $('ltOralDone').hidden=mode!=='shadowing';
   $('ltVoiceFeedback').textContent=Recognition?'Pulsa el micrófono para comprobar qué palabras reconoce el navegador; no se analiza la calidad exacta de tu acento.':'Este navegador no admite reconocimiento de voz. Puedes grabarte y escucharte si permite micrófono.';
+  updatePollyVoice();
   $('ltVoiceStatus').textContent='Pulsa «Escuchar frase» para practicar con la voz '+locale().name+'.';
   $('ltAccuracy').textContent='—';updateMetrics();publishContext();
 }
@@ -235,6 +351,7 @@ $('ltLanguage').querySelector('option:first-child')?.remove();
 $('ltLanguage').value=language;
 for(const btn of document.querySelectorAll('.lt-modes [data-mode]'))btn.addEventListener('click',()=>setMode(btn.dataset.mode));
 $('ltLanguage').addEventListener('change',()=>{language=$('ltLanguage').value;topics();renderSpecial();reload();});
+$('ltProvider').addEventListener('change',()=>{void selectProvider($('ltProvider').value);});
 $('ltLevel').addEventListener('change',()=>{level=$('ltLevel').value;topics();reload();});
 $('ltTopic').addEventListener('change',()=>{topic=$('ltTopic').value;reload();});
 $('ltShadowMode').addEventListener('change',()=>{shadowMode=$('ltShadowMode').value;display();});
@@ -264,10 +381,10 @@ $('ltSpecialKeys').addEventListener('click',e=>{
   const field=$('ltAnswer');field.setRangeText(b.dataset.char,field.selectionStart,field.selectionEnd,'end');
   field.dispatchEvent(new Event('input',{bubbles:true}));field.focus();
 });
-window.addEventListener('pagehide',()=>{stopVoice();destroyRecord();});
+window.addEventListener('pagehide',()=>{stopVoice();destroyRecord();releasePollyCache();});
 const params=new URLSearchParams(location.search);
 if(corpus.languages.some(l=>l.id===params.get('lang')))language=params.get('lang');
 if(corpus.levels.includes(params.get('level')))level=params.get('level');
 if(corpus.modes.includes(params.get('mode')))mode=params.get('mode');
-$('ltLanguage').value=language;$('ltLevel').value=level;renderSpecial();topics();reload();setMode(mode);readProgress();registerBridge();
+$('ltLanguage').value=language;$('ltLevel').value=level;renderSpecial();topics();reload();setMode(mode);readProgress();registerBridge();updatePollyVoice();
 })();
