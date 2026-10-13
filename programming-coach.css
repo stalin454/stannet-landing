@@ -40,3 +40,61 @@
 @media(max-width:850px){.coach-layout{grid-template-columns:1fr}.coach-side{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.coach-side .coach-panel+.coach-panel{margin-top:0}}
 @media(max-width:600px){.stannet-page-programming-coach{padding:1rem}.coach-side{grid-template-columns:1fr}.coach-panel{padding:1rem}.coach-actions>*{width:100%}.coach-code{font-size:.83rem}}
 @media(prefers-reduced-motion:reduce){.stannet-page-programming-coach *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+/* ios-responsive.css globally removes native appearance from ALL inputs.
+   Restore the actual radio controls on this page so choices can be selected visibly. */
+.stannet-page-programming-coach .coach-question input[type="radio"]{
+  -webkit-appearance:radio!important;
+  appearance:auto!important;
+  inline-size:20px;
+  block-size:20px;
+  min-inline-size:20px;
+  flex:0 0 20px;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  cursor:pointer;
+  accent-color:#50deff;
+  color-scheme:dark;
+}
+.stannet-page-programming-coach .coach-question label{
+  border:1px solid transparent;
+  border-radius:8px;
+  padding:.65rem .75rem;
+  margin:.15rem 0;
+  display:flex;
+  gap:.75rem;
+  align-items:center;
+  cursor:pointer;
+  color:#edf8ff!important;
+  user-select:none;
+}
+.stannet-page-programming-coach .coach-question label:has(input[type="radio"]:checked){
+  background:#16415b;
+  border-color:#6be9ff;
+  font-weight:700;
+}
+.stannet-page-programming-coach .coach-question input[type="radio"]:focus-visible{
+  outline:3px solid #8feaff!important;
+  outline-offset:3px;
+}
+.stannet-page-programming-coach #coach-notes,
+.stannet-page-programming-coach .coach-source-field{
+  pointer-events:auto!important;
+  user-select:text!important;
+  -webkit-user-select:text!important;
+  caret-color:#075985!important;
+}
+/* Shared light-form theme sets a white background with !important.
+   Use matching dark text and caret so typed letters are always readable. */
+.stannet-global.stannet-page-programming-coach #coach-notes,
+.stannet-global.stannet-page-programming-coach .coach-source-field{
+  color:#14213a!important;
+  -webkit-text-fill-color:#14213a!important;
+  background:#fff!important;
+}
+.stannet-page-programming-coach #coach-notes::placeholder,
+.stannet-page-programming-coach .coach-source-field::placeholder{
+  color:#53647b;
+  opacity:1;
+}
