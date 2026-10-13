@@ -29,7 +29,7 @@ body.lt-page{margin:0;background:#070f1d!important;color:#e9f6ff!important;font-
 .lt-stats small{display:block;color:#90b3c6;font-weight:800;font-size:10px;letter-spacing:.12em}
 .lt-stats strong{display:block;color:#f2faff;font-size:31px;margin-top:9px}
 .lt-lab{background:#0b1b2e;border:1px solid #24445f;box-shadow:0 20px 55px #0003;border-radius:23px;overflow:hidden;scroll-margin-top:18px}
-.lt-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:20px;background:#101f34;border-bottom:1px solid #23415b}
+.lt-toolbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:20px;background:#101f34;border-bottom:1px solid #23415b}
 .lt-toolbar label,.lt-shadow-options label{display:flex;flex-direction:column;gap:6px;min-width:0;color:#9dc2d5;font-weight:700;font-size:11px}
 .lt-toolbar select,.lt-shadow-options select{min-height:44px;width:100%;padding:8px 10px;border:1px solid #30536a;border-radius:10px;background:#081b2c!important;color:#e2f6ff!important;font-size:13px}
 .lt-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:15px 20px;border-bottom:1px solid #294052}
@@ -93,3 +93,9 @@ body.lt-page{margin:0;background:#070f1d!important;color:#e9f6ff!important;font-
 @media(max-width:820px){.lt-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.lt-bottom{grid-template-columns:1fr}.lt-stats{gap:8px}.lt-stats>div{padding:13px}}
 @media(max-width:560px){.lt-shell{width:calc(100% - 20px)}.lt-hero{padding:56px 7px 30px}.lt-hero h1{font-size:44px!important}.lt-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.lt-toolbar{padding:12px;gap:8px}.lt-modes{padding:12px;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lt-modes button{font-size:12px}.lt-course-head{padding:20px 14px 12px}.lt-counter{width:70px}.lt-prompt{margin:6px 12px 16px;padding:17px 14px}.lt-answer-pane{padding:0 12px 19px}.lt-speak-pane{margin:0 12px 16px;padding:14px}.lt-understand{margin:0 12px 16px;padding:14px}.lt-shadow-options{margin:0 12px 15px}.lt-footer{padding:15px 12px}.lt-auto{margin-left:0}#ltVoiceStatus{flex-basis:100%;text-align:left}.lt-page-footer{flex-wrap:wrap;justify-content:center}.lt-voice-actions button{min-width:0;flex-basis:100%}}
 @media(prefers-reduced-motion:reduce){.lt-counter-track span{transition:none}}
+
+/* Optional Amazon Polly: opt-in, accessible audio and billing disclosure. */
+.lt-provider-note{margin:0;padding:10px 22px 12px;color:#a9cbd9;background:#0b1e30;border-bottom:1px solid #24465e;font:500 12px/1.55 Inter,system-ui,sans-serif}
+.lt-prompt #ltAmazonPreview{display:block;max-width:100%;width:min(530px,100%);margin:12px 0 2px;border-radius:9px;accent-color:#75deec}
+.lt-prompt #ltAmazonPreview[hidden]{display:none!important}
+@media(max-width:420px){.lt-toolbar{grid-template-columns:1fr}}
