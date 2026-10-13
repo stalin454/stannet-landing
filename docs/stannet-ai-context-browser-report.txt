@@ -1,0 +1,59 @@
+1920×1080: Panel 450×600, mensajes 270px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+1366×768: Panel 450×600, mensajes 270px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+320×568: Panel 304×552, mensajes 232px
+  Teclado simulado: Panel 320×420, mensajes 288px
+  Rotación: Panel 450×320, mensajes 188px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+360×800: Panel 344×600, mensajes 280px
+  Teclado simulado: Panel 360×420, mensajes 288px
+  Rotación: Panel 450×360, mensajes 228px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+375×812: Panel 359×600, mensajes 280px
+  Teclado simulado: Panel 375×420, mensajes 288px
+  Rotación: Panel 450×375, mensajes 243px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+390×844: Panel 374×600, mensajes 280px
+  Teclado simulado: Panel 390×420, mensajes 288px
+  Rotación: Panel 450×390, mensajes 258px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+393×873: Panel 377×600, mensajes 280px
+  Teclado simulado: Panel 393×420, mensajes 288px
+  Rotación: Panel 450×393, mensajes 261px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+412×915: Panel 396×600, mensajes 280px
+  Teclado simulado: Panel 412×420, mensajes 288px
+  Rotación: Panel 450×412, mensajes 280px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+430×932: Panel 414×600, mensajes 280px
+  Teclado simulado: Panel 430×420, mensajes 288px
+  Rotación: Panel 450×430, mensajes 298px
+  Teclado horizontal simulado: Panel 450×180, mensajes 48px
+  PASS: abrir, modos, enviar, enlaces, mensajes largos, scroll, personaje, minimizar, cerrar, ocultar, recargar, preferencia e historial, IA y restaurar.
+PASS: matriz completa. Teclado y rotación simulados. No valida Safari ni móviles físicos.
+
+320×568 memoria abierta: Panel 304×552, mensajes 123px
+  Viewport 420px: Panel 320×420, mensajes 288px
+  Viewport 180px: Panel 320×180, mensajes 48px
+390×844 memoria abierta: Panel 374×600, mensajes 147px
+  Viewport 420px: Panel 390×420, mensajes 288px
+  Viewport 180px: Panel 390×180, mensajes 48px
+844×390 memoria abierta: Panel 450×390, mensajes 258px
+  Viewport 390px: Panel 450×390, mensajes 258px
+  Viewport 180px: Panel 450×180, mensajes 48px
+PASS: memoria abierta, teclado y restauración.
+
+REAL WIDGET PASS {"version":1,"title":"StanNet Web Lab","path":"/pages/programming-web-lab.html","app":"Programming Academy","lessonId":"WEB-INTRO","lesson":"¿Qué es HTML? — Empieza aquí","exerciseId":"WEB-INTRO-challenge","exercise":"LABORATORIO 1: ejecuta el documento y comprueba la vista previa. Después cambia el title, el h1 y el párrafo con tus propios textos. Añade un segundo párrafo. Antes de continuar, explica con tus palabras: qué es HTML, qué diferencia hay entre etiqueta y elemento, qué es un atributo, qué contiene head, qué contiene body y qué construye el navegador a partir del HTML.","language":"HTML","activity":"explorando"}
+
+REAL WIDGET PASS {"version":1,"title":"StanNet Web Lab","path":"/pages/programming-web-lab.html","app":"Programming Academy","lessonId":"CSS00","lesson":"¿Qué es CSS? — Del HTML al diseño","exerciseId":"CSS00-challenge","exercise":"LABORATORIO CSS 1: ejecuta el documento. Cambia el color del h1, añade background-color al body, crea una clase .destacado y aplícala a un segundo párrafo. Después inspecciona ambos párrafos con DevTools. Explica qué es CSS, qué es selector/propiedad/valor, dónde conectarías una hoja externa y por qué HTML y CSS no deben mezclarse conceptualmente.","language":"CSS","activity":"explorando"}
+
+REAL WIDGET PASS {"version":1,"title":"StanNet Web Lab","path":"/pages/programming-web-lab.html","app":"Programming Academy","lessonId":"JS00","lesson":"Cómo funciona JavaScript","exerciseId":"JS00-challenge","exercise":"Declara tu nombre y muestra una frase en consola.","language":"JavaScript","activity":"explorando"}
+
+PASS: real mobile widget, current model payload, consent cancellation/acceptance, one-turn sharing, redaction and private-answer history exclusion.
