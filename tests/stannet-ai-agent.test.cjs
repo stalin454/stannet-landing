@@ -16,9 +16,9 @@ const modelFetch = async (_url, init) => {
     status: 200, headers: { 'content-type': 'application/json' }
   });
 };
-let catalogueText;
-const handle = new Function('json', 'stannetAiCorsHeaders', 'fetch', 'catalogueText',
-  handlerSource + '; return handleStanNetAi;')(json, () => new Headers(), modelFetch, ()=>catalogueText());
+let catalogueText, sanitizeContext, redactSecrets;
+const handle = new Function('json', 'stannetAiCorsHeaders', 'fetch', 'catalogueText', 'sanitizeContext', 'redactSecrets',
+  handlerSource + '; return handleStanNetAi;')(json, () => new Headers(), modelFetch, ()=>catalogueText(), value=>sanitizeContext(value), value=>redactSecrets(value));
 const env = {
   AI_API_KEY: 'test-key',
   AI_API_URL: 'https://api.groq.com/openai/v1/chat/completions',
@@ -32,6 +32,7 @@ const request = body => new Request('https://www.stannet.space/api/stannet-ai', 
 
 (async () => {
   ({ catalogueText } = await import('../stannet-ai-knowledge.mjs'));
+  ({ sanitizeContext,redactSecrets } = await import('../stannet-ai-context-policy.mjs'));
   let response = await handle(request({
     message: 'Siguiente paso',
     mode: 'programming',
@@ -54,12 +55,14 @@ const request = body => new Request('https://www.stannet.space/api/stannet-ai', 
   response = await handle(request({
     message: 'Explica este fragmento',
     mode: 'programming',
+    consent:{attachment:true},
     attachment: { kind: 'text', name: 'ejemplo.js', content: 'const answer = 42;' }
   }), env);
   assert.match(lastPayload.messages.at(-1).content, /const answer = 42/);
 
   response = await handle(request({
     message: 'Describe la captura',
+    consent:{attachment:true},
     attachment: { kind: 'image', data: 'data:image/png;base64,AAAA' }
   }), env);
   assert.equal(response.status, 200);
@@ -68,6 +71,7 @@ const request = body => new Request('https://www.stannet.space/api/stannet-ai', 
 
   response = await handle(request({
     message: 'Describe la imagen',
+    consent:{attachment:true},
     attachment: { kind: 'image', data: 'not-an-image' }
   }), env);
   assert.equal(response.status, 413);

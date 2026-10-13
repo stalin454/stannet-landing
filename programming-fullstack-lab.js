@@ -137,7 +137,7 @@ function renderModes(){
  $('fs-tech-list').innerHTML=modes.map(m=>`<button class="fs-tech-button ${m.id===current?'active':''}" data-mode="${m.id}"><span class="fs-tech-icon">${esc(m.icon)}</span><span class="fs-tech-name"><strong>${esc(m.name)}</strong><span>${m.kind==='real'?'runtime real':'simulación guiada'}</span></span><i class="fs-runtime-dot ${m.kind==='sim'?'sim':''}"></i></button>`).join('');
 }
 function select(id){
- save();current=id;const m=mode();renderModes();$('fs-mode-badge').textContent=m.name;$('fs-runtime-label').textContent=m.runtime;$('fs-file-tab').textContent=m.file;$('fs-challenge-text').textContent=m.challenge;$('fs-editor').value=store[id]??m.starter;$('fs-editor-status').textContent=m.file+' · '+m.runtime;clearOutput();$('fs-run').textContent=m.id==='web'||m.id==='react'?'▶ Ejecutar / Preview':'▶ Ejecutar';$('fs-reset').disabled=false;
+ save();current=id;const m=mode();renderModes();window.StanNetLearningContext={path:location.pathname,lessonId:m.id,lesson:m.name,exerciseId:m.id+'-challenge',exercise:m.challenge,language:m.name};window.dispatchEvent(new CustomEvent('stannet:learning-context'));$('fs-mode-badge').textContent=m.name;$('fs-runtime-label').textContent=m.runtime;$('fs-file-tab').textContent=m.file;$('fs-challenge-text').textContent=m.challenge;$('fs-editor').value=store[id]??m.starter;$('fs-editor-status').textContent=m.file+' · '+m.runtime;clearOutput();$('fs-run').textContent=m.id==='web'||m.id==='react'?'▶ Ejecutar / Preview':'▶ Ejecutar';$('fs-reset').disabled=false;
 }
 function serialize(v){try{return typeof v==='string'?v:JSON.stringify(v,null,2)}catch{return String(v)}}
 function runWorker(code,timeout=4000){

@@ -73,3 +73,16 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
  .snai-avatar{--snai-avatar-width:clamp(88px,22vw,104px)}.snai-launcher img{max-height:24dvh}
 }
 @media(prefers-reduced-motion:no-preference){.snai-reopen{transition:border-color .18s}.snai-reopen:hover{border-color:#8feeff}}
+
+.snai-context{flex:none;max-height:44px;overflow:auto;padding:6px 12px;font-size:11px;line-height:16px;color:#a9eafa;background:#0b2635;overflow-wrap:anywhere}
+.snai-tools{flex-wrap:wrap}
+.snai-tools button{min-height:36px;height:auto}
+.snai-share-editor[aria-pressed="true"]{border-color:var(--snai-cyan)}
+.snai-panel.compact .snai-context{max-height:24px;padding:2px 12px;font-size:10px}
+.snai-memory-actions{flex-wrap:wrap}
+@media(max-width:640px){.snai-panel{--snai-gap:8px}.snai-tools button{min-height:40px}}
+
+.snai-panel.compact .snai-headbar{padding:2px 8px}
+.snai-panel.compact .snai-persona{display:none}
+.snai-panel.compact .snai-form{padding:6px 8px}
+.snai-panel.compact .snai-context{max-height:20px}
