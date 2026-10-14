@@ -37,3 +37,11 @@
 2. Separar párpados/boca y crear atlas de expresiones compatible con los trajes.
 3. Integrar marcas temporales de voz o visemas si el proveedor de TTS elegido los soporta, sin exponer credenciales.
 4. Extender a nuevas academias mediante el clasificador de rutas, con control opt-in.
+
+## Auditoría de la segunda fase (14/10/2026)
+- `stannet-global-nav.js`: actualiza el versionado de carga también para páginas de academia que no usan `script.js`.
+- `stannet-ai.js`: boca animada únicamente al comenzar `audio.onplaying` (o `SpeechSynthesisUtterance.onstart` del fallback local). Durante la petición al proveedor permanece en estado `thinking`. Las interrupciones fuerzan estado `idle`.
+- `tests/stannet-ai-context-browser.cjs`: valida traje y nombre de Hannah IA, ventana móvil, cabecera, ancho y fotografías de prueba de programación/idiomas/ciberseguridad. Las capturas se archivan en `stannet-ai-context-browser`.
+- La ejecución de CI y auditoría móvil de esta fase se completó correctamente: https://github.com/stalin454/stannet-landing/actions/runs/38539156955
+- `academy.stannet.dev` no se publica desde este PR porque `.github/workflows/academy-staging.yml` contiene una condición que permite únicamente `feat/programming-academy-learning-20261013`. No modificar/forzar esa condición ni interferir con el despliegue de otra academia.
+- El PR está listo para revisión humana, **sin aprobación de merge ni despliegue en `main`**.
