@@ -74,7 +74,10 @@ let runtime,browser;
  // D1 operator modifies only a disposable fixture; latest role must be enforced by server on next request.
  assert.equal((await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'})).status(),403,'nonadmin FP page forbidden');
  await db.prepare("UPDATE dev_users SET role='admin' WHERE id=?").bind(user.id).run();
- await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'});
+ const fpResponse=await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'});
+ assert.equal(fpResponse.status(),200,'admin FP document status');
+ const fpDiagnosis=await page.evaluate(()=>({loaded:Boolean(window.FP_DATA),scripts:[...document.scripts].map(s=>s.src),items:document.querySelector('#subjects')?.childElementCount??-1}));
+ console.log(JSON.stringify({fpMigrationDiagnostics:fpDiagnosis,pageErrors:errors}));
  await page.waitForSelector('#subjects .subject.active-course');
  assert.equal((await page.goto(origin+'/apps/fp-study/fp-study-data.js')).status(),200,'admin private lesson assets available');
  assert.equal((await page.goto(origin+'/private/fp-study-data.js')).status(),404,'no raw asset bypass');
