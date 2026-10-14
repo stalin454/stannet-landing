@@ -16,7 +16,7 @@ def api(account,key,method,path,body=None):
  return data.get('result')
 
 def create(call,confirmed_free,confirmed_on,today=None):
- today=today or datetime.date.today().isoformat()
+ today=today or datetime.datetime.now(datetime.timezone.utc).date().isoformat()
  if confirmed_free is not True or confirmed_on!=today:raise RuntimeError('Creation requires confirmation of current Workers Free plan and available D1 quota, dated today; no paid upgrade permitted')
  existing=call('GET','d1/database?per_page=100')
  if not isinstance(existing,list):raise RuntimeError('D1 inventory unavailable')

@@ -1,11 +1,11 @@
 {
-  "source_commit": "c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19",
-  "published_at_utc": "2026-10-14T20:56:31Z",
+  "source_commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
+  "published_at_utc": "2026-10-14T21:06:44Z",
   "url": "https://stannet-dev-portal.stalin454.workers.dev",
   "worker": "stannet-dev-portal",
-  "cloudflare_version": "d34bdfd4-c36e-4bf0-bee2-7fd82c60bce9",
-  "workflow_run": 38636092767,
-  "workflow_url": "https://github.com/stalin454/stannet-landing/actions/runs/38636092767",
+  "cloudflare_version": "b2c6b527-a17b-412b-b6db-9f6d9f30a26b",
+  "workflow_run": 38637491312,
+  "workflow_url": "https://github.com/stalin454/stannet-landing/actions/runs/38637491312",
   "status": "verified-candidate",
   "published_features": [
     "public portal",
@@ -53,14 +53,30 @@
       "source_commit": "8ddbf05ff02ad7822a5afa7686032067dd222a4a",
       "cloudflare_version": "f03857df-cdbf-4c00-ba3e-007f7150ee34",
       "workflow_run": 38634673925
+    },
+    {
+      "source_commit": "c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19",
+      "cloudflare_version": "d34bdfd4-c36e-4bf0-bee2-7fd82c60bce9",
+      "workflow_run": 38636092767
     }
   ],
   "auth_runtime_ci": {
-    "workflow_run": 38636092002,
-    "source_commit": "c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19",
+    "workflow_run": 38637491224,
+    "source_commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
     "runtime": "workerd",
     "database": "D1 local",
     "tls_browser": true,
-    "remote_auth_deployed": false
-  }
+    "remote_auth_deployed": false,
+    "security_tests": 21
+  },
+  "rolled_back_releases": [
+    {
+      "source_commit": "daa502ad0162e41b418724bb7b70454f380a6367",
+      "cloudflare_version": "4218aa00-9195-46e3-88de-0a437a2c14db",
+      "workflow_run": 38637008492,
+      "reason": "browser still received previous source SHA during propagation",
+      "rollback": "previous Dev Worker deployment restored",
+      "root_domain_changed": false
+    }
+  ]
 }

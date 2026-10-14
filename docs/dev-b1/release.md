@@ -5,10 +5,10 @@
 | URL | https://stannet-dev-portal.stalin454.workers.dev |
 | Ubicación | Candidato independiente, no dominio raíz |
 | Worker | `stannet-dev-portal` |
-| Commit | `c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19` |
-| Fecha UTC | 2026-10-14 20:56:31 |
-| Versión Cloudflare | `d34bdfd4-c36e-4bf0-bee2-7fd82c60bce9` |
-| Workflow | [38636092767](https://github.com/stalin454/stannet-landing/actions/runs/38636092767) |
+| Commit | `09703714349bba6f0f7cb8448939226ee1ff5432` |
+| Fecha UTC | 2026-10-14 21:06:44 |
+| Versión Cloudflare | `b2c6b527-a17b-412b-b6db-9f6d9f30a26b` |
+| Workflow | [38637491312](https://github.com/stalin454/stannet-landing/actions/runs/38637491312) |
 | Chrome antes/después | 320/390/1280 px, PASS |
 | HTTP/commit | 200 y SHA exacto comprobados |
 | Funcionalidad | Portada, nueve categorías, filtro, contacto, Orbitron/logo |
@@ -50,3 +50,9 @@ El catálogo fue republicado sin añadir Auth en los runs 38634673925 y 38636092
 El run [38636092002](https://github.com/stalin454/stannet-landing/actions/runs/38636092002) probó el Worker con D1 local y Chrome TLS: registro/verificación fixture/login/Typing/progreso/admin/reset/logout, cookies HttpOnly/Secure/Strict y 320/390/1280 sin overflow. Wrangler local probó migraciones y restauración SQL. Se construyó además el bundle del backend con `wrangler deploy --dry-run`, sin despliegue.
 
 D1 remoto bloqueado por HTTP 401; lectura de suscripciones 403; proyecto Supabase de comunidad excluido. [Instrucciones de permisos, elección de DB y bootstrap](cloudflare-data.md). No se publicó Auth incompleta, no se creó DB externa y no se alteró un servicio de correo o de pagos.
+
+## Publicación corregida y recibo final
+
+El run 38637008492 del commit `daa502a` se revirtió por divergencia temporal de SHA entre sonda HTTP y Chrome. La versión Dev previa quedó restaurada; no se vinculó el apex. El run [38637491312](https://github.com/stalin454/stannet-landing/actions/runs/38637491312), commit `0970371`, pasó QA tras incorporar espera de propagación en el propio navegador, sin quitar la comprobación de SHA. Versión publicada `b2c6b527-a17b-412b-b6db-9f6d9f30a26b`.
+
+El CI [38637491224](https://github.com/stalin454/stannet-landing/actions/runs/38637491224) pasó las 21 pruebas, ambos flujos Chrome, migraciones y restauración D1 local y build Worker dry-run. La regresión del repositorio también pasó en el run 38637491188. La publicación sigue limitada al catálogo público. La raíz se omitió por DNS Read 403; D1 remoto y correo siguen pendientes de acceso/configuración verificados.
