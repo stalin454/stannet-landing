@@ -28,7 +28,7 @@ test('CS Foundations wrapper retains progress limitations and private same-origi
  const html=readFileSync(new URL('../private/cs-foundations.html',import.meta.url),'utf8');
  assert.match(html,/\/apps\/cs-foundations\/cs-lessons\.js/);
  assert.match(html,/\/apps\/cs-foundations\/cs-lab\.js/);
- assert.match(html,/no se ha conectado a D1/);
+ assert.match(html,/ni se ha conectado a D1/);
  assert.doesNotMatch(html,/(?:src|href)=["'](?:https?:)?\/\//);
 });
 
