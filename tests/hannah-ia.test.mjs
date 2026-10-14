@@ -102,3 +102,23 @@ test('refined 3D face uses the approved illustration material and outfit geometr
   assert.match(renderer,/gl\.deleteTexture\(faceTexture\)/);
   assert.match(renderer,/if\(textureReady\)host\.classList\.add\('snai-3d-ready'\)/);
 });
+
+
+test('all Hannah Academy pages request the current AI bootstrap rather than sticky old browser caches',()=>{
+ const tag='20261014-hannah3d3';
+ const pages=['index.html','pages/programming.html','pages/programming-coach.html',
+  'pages/programming-web-lab.html','pages/typing.html','pages/shortcuts.html',
+  'pages/fp-study.html','pages/english.html','pages/callan.html',
+  'pages/danish.html','pages/language-music.html',
+  'pages/cybersecurity.html','pages/cyber-lab.html','pages/password-security.html'];
+ for(const page of pages){
+  const html=readFileSync(page,'utf8');
+  const versions=[...html.matchAll(/(?:script\.js|stannet-global-nav\.js)\?v=([^"'\s<>]+)/g)].map(m=>m[1]);
+  assert.ok(versions.length>0,page+' lacks a bootstrap script');
+  assert.ok(versions.every(v=>v===tag),page+' is still requesting obsolete scripts: '+versions);
+ }
+ for(const name of ['script.js','stannet-global-nav.js','stannet-ai-loader.js','stannet-ai.js']){
+  assert.ok(readFileSync(name,'utf8').includes(tag),name+' is not pinned to '+tag);
+ }
+ assert.match(readFileSync('stannet-ai-avatar.mjs','utf8'),/hannah-ia-3d\.mjs\?v=20261014-portrait3/);
+});

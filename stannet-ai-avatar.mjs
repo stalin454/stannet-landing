@@ -50,7 +50,7 @@ export class AgentAvatar {
     this.loading3D=true;
     try{
       // Only academies download the 3D engine. No change to the AI or voice services.
-      const {createHannah3D}=await import('/hannah-ia-3d.mjs?v=20261014-portrait2');
+      const {createHannah3D}=await import('/hannah-ia-3d.mjs?v=20261014-portrait3');
       if(this.destroyed||!this.isHannah)return;
       const renderer=createHannah3D({host:this.figure,look:this.look,
         reducedMotion:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false});
