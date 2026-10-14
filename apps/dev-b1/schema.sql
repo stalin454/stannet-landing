@@ -13,3 +13,5 @@ CREATE TABLE IF NOT EXISTS dev_webhook_events(id TEXT PRIMARY KEY,created INTEGE
 CREATE TABLE IF NOT EXISTS dev_audit(id TEXT PRIMARY KEY,actor TEXT NOT NULL,action TEXT NOT NULL,subject TEXT NOT NULL,created INTEGER NOT NULL);
 -- Local-only email sink. Never served by HTTP or deployed as a public resource.
 CREATE TABLE IF NOT EXISTS dev_test_mail(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,kind TEXT NOT NULL,token TEXT NOT NULL,created INTEGER NOT NULL);
+
+CREATE TABLE IF NOT EXISTS dev_typing_state(user_id TEXT PRIMARY KEY REFERENCES dev_users(id),attempt TEXT NOT NULL REFERENCES dev_attempts(id),draft TEXT NOT NULL DEFAULT '' CHECK(length(draft)<=16384),revision INTEGER NOT NULL DEFAULT 0 CHECK(revision>=0),updated INTEGER NOT NULL);

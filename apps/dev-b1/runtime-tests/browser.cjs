@@ -1,6 +1,6 @@
 // CI-only browser QA against a TLS loopback Worker and D1. No remote data or mail provider.
 const assert=require('node:assert/strict');
-const {readFileSync,readdirSync,mkdtempSync,rmSync}=require('node:fs');
+const {readFileSync,readdirSync,mkdtempSync,rmSync,mkdirSync}=require('node:fs');
 const {resolve,join,extname}=require('node:path');const {tmpdir}=require('node:os');
 const {Miniflare}=require('miniflare');const puppeteer=require('puppeteer-core');
 const root=resolve(__dirname,'..'),origin='https://127.0.0.1:8788',directory=mkdtempSync(join(tmpdir(),'stannet-d1-browser-')),mail=[];
@@ -8,7 +8,7 @@ const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf
 let runtime,browser;
 (async()=>{
  runtime=new Miniflare({host:'127.0.0.1',port:8788,https:true,modulesRoot:root,modules:['worker.mjs','app.mjs','catalog.mjs','security.mjs','exercises.mjs'].map(file=>({type:'ESModule',path:join(root,file)})),compatibilityDate:'2026-08-06',compatibilityFlags:['nodejs_compat'],d1Databases:{DEV_DB:'browser-fixture-only'},d1Persist:directory,
- bindings:{MODE:'sandbox',AUTH_RELEASE:'enabled',PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'browser-fixture-only'},
+ bindings:{MODE:'sandbox',AUTH_RELEASE:'enabled',DEV_MAILER_AUTH:'fixture-secret-never-deployed-32-characters',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',REGISTRATION_MODE:'invite',REGISTRATION_EMAIL_HASHES:require('node:crypto').createHash('sha256').update('browser-runtime@example.test').digest('hex'),PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'browser-fixture-only'},
  serviceBindings:{DEV_MAILER:async req=>{mail.push(await req.json());return new Response('accepted');},DEV_ASSETS:async req=>{
   const path=new URL(req.url).pathname;if(!/^\/(public|private)\/[a-z.-]+$/.test(path))return new Response('missing',{status:404});
   try{return new Response(readFileSync(join(root,path)),{headers:{'Content-Type':types[extname(path)]||'application/octet-stream'}});}catch{return new Response('missing',{status:404});}
@@ -18,9 +18,9 @@ let runtime,browser;
   const sql=readFileSync(join(root,'migrations',file),'utf8').split('\n').filter(x=>!x.trim().startsWith('--')).join('\n');
   await db.batch(sql.split(';').map(x=>x.trim()).filter(Boolean).map(x=>db.prepare(x)));
  }
- await db.prepare("INSERT INTO dev_environment VALUES(1,'stannet-dev-b1','browser-fixture-only',2)").run();
+ await db.prepare("INSERT INTO dev_environment(id,app,environment_id,schema_version) VALUES(1,'stannet-dev-b1','browser-fixture-only',2)").run();
  browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,acceptInsecureCerts:true,args:['--no-sandbox','--disable-dev-shm-usage']});
- const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.setViewport({width:390,height:844});
+ const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.emulate(puppeteer.KnownDevices['Pixel 7']);
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.click('[data-view="signup"]');
  const email='browser-runtime@example.test',password='Cloudflare!test-passphrase';
  await page.type('#email',email);await page.type('#password',password);await page.click('#auth-submit');
@@ -33,7 +33,24 @@ let runtime,browser;
  await page.waitForFunction(()=>!document.querySelector('#signed-in').hidden);
  const cookie=(await page.cookies()).find(x=>x.name==='__Host-stannet_dev_b1');assert.ok(cookie?.httpOnly&&cookie.secure);assert.equal(cookie.sameSite,'Strict');assert.ok(!await page.evaluate(()=>document.cookie.includes('__Host-stannet_dev_b1')));
  await page.goto(origin+'/apps/typing',{waitUntil:'networkidle0'});await page.waitForSelector('#exercise option');await page.select('#exercise','javascript:fragment');await page.click('#start');await page.waitForFunction(()=>!document.querySelector('#typing-input').disabled);
- const target=await page.$eval('#target',element=>element.textContent);await page.type('#typing-input','X');assert.equal((await page.$$('.wrong')).length,1);await page.keyboard.press('Backspace');await page.type('#typing-input',target,{delay:8});
+ const artifacts=process.env.DEV_QA_ARTIFACTS;if(artifacts){mkdirSync(artifacts,{recursive:true});await page.screenshot({path:join(artifacts,'typing-mobile.png'),fullPage:true});}
+ const target=await page.$eval('#target',element=>element.textContent);
+ // Physical keyboard input + Tab insertion; persist a partial draft and recover on a separate device/session.
+ await page.type('#typing-input',target.slice(0,9));await page.keyboard.press('Tab');
+ assert.equal(await page.$eval('#typing-input',el=>el.value),target.slice(0,9)+'  ');
+ await page.keyboard.press('Backspace');await page.keyboard.press('Backspace');
+ await page.click('#save-draft');await page.waitForFunction(()=>document.querySelector('#save-status').textContent.includes('Borrador guardado'));
+ const context=await browser.createBrowserContext(),device=await context.newPage();
+ await device.setViewport({width:1280,height:900});await device.goto(origin+'/account',{waitUntil:'networkidle0'});
+ await device.type('#email',email);await device.type('#password',password);await device.click('#auth-submit');await device.waitForFunction(()=>!document.querySelector('#signed-in').hidden);
+ await device.goto(origin+'/apps/typing',{waitUntil:'networkidle0'});await device.waitForFunction(()=>!document.querySelector('#resume').hidden);await device.click('#resume');
+ assert.equal(await device.$eval('#typing-input',el=>el.value),target.slice(0,9));
+ await device.type('#typing-input',target.slice(9));await device.waitForFunction(()=>document.querySelector('#status').textContent.includes('Progreso guardado'));
+ if(artifacts)await device.screenshot({path:join(artifacts,'typing-desktop-resume.png'),fullPage:true});
+ await context.close();
+ // Start another exercise to verify correction and full completion on the original mobile browser.
+ await page.click('#start');await page.waitForFunction(()=>document.querySelector('#typing-input').value===''&&!document.querySelector('#typing-input').disabled);
+ await page.type('#typing-input','X');assert.equal((await page.$$('.wrong')).length,1);await page.keyboard.press('Backspace');await page.type('#typing-input',target,{delay:8});
  await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Progreso guardado'));
  assert.equal((await db.prepare('SELECT completed FROM dev_progress WHERE user_id=?').bind(user.id).first()).completed,1);
  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Typing overflow '+width);}
@@ -49,5 +66,5 @@ let runtime,browser;
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.type('#email',email);await page.type('#password','New!runtime-passphrase');await page.click('#auth-submit');await page.waitForFunction(()=>!document.querySelector('#signed-in').hidden);
  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Account overflow '+width);}
  assert.deepEqual(errors,[]);
- console.log(JSON.stringify({browser:'Chromium',runtime:'workerd',database:'D1 local',tls_loopback:true,cookies:'HttpOnly Secure Strict',signup:true,mail:'in-memory fixture only',verification:true,login:true,typing_keyboard:true,correction:true,persistence:true,admin:true,reset:true,logout:true,widths:[320,390,1280],overflow:false,remote:false}));
+ console.log(JSON.stringify({browser:'Chromium',runtime:'workerd',database:'D1 local',tls_loopback:true,cookies:'HttpOnly Secure Strict',signup:true,mail:'in-memory fixture only',verification:true,login:true,typing_keyboard:true,tab:true,mobile_emulation:'Pixel 7 Chrome',cross_device_resume:true,correction:true,persistence:true,admin:true,reset:true,logout:true,widths:[320,390,1280],overflow:false,remote:false}));
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{if(browser)await browser.close();if(runtime)await runtime.dispose();rmSync(directory,{recursive:true,force:true});});

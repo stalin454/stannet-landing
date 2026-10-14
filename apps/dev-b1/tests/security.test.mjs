@@ -224,7 +224,7 @@ test('pilot backend cannot take over either StanNet domain or existing academy',
  const {default:worker}=await import('../worker.mjs');
  for(const host of ['stannet.dev','stannet.space','academy.stannet.dev']){
   let touched=false;
-  const fake={AUTH_RELEASE:'enabled',MODE:'sandbox',PUBLIC_ORIGIN:'https://'+host,
+  const fake={AUTH_RELEASE:'enabled',DEV_MAILER_AUTH:'fixture-secret',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',MODE:'sandbox',PUBLIC_ORIGIN:'https://'+host,
    DEV_ENVIRONMENT_ID:'fixture',DEV_DB:{withSession(){touched=true;throw Error('protected database touched');}},
    DEV_MAILER:{fetch(){touched=true;throw Error('mail touched');}},
    DEV_ASSETS:{fetch(){touched=true;throw Error('assets touched');}}};
@@ -232,4 +232,43 @@ test('pilot backend cannot take over either StanNet domain or existing academy',
   assert.equal(response.status,403,host);
   assert.equal(touched,false,'deny protected origins before querying bindings');
  }
+});
+
+test('registration defaults closed; invite allowlist cannot be bypassed by client role, plan or flags',async()=>{
+ const s=setup({registrationMode:'invite',registrationEmails:[hash('invited@example.test')]});try{
+  assert.equal((await s.request('/api/auth/signup',{email:'outsider@example.test',password:'Valid!long-passphrase',registrationMode:'fixture',invited:true})).status,403);
+  assert.equal(s.db.raw.prepare('SELECT COUNT(*) AS n FROM dev_users').get().n,0);
+  assert.equal((await s.request('/api/auth/signup',{email:'invited@example.test',password:'Valid!long-passphrase'})).status,200);
+  const closed=application({...s.env,registrationMode:undefined});assert.equal((await closed(new Request(origin+'/api/auth/signup',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({email:'nobody@example.test',password:'Valid!long-passphrase'})}))).status,403);
+ }finally{s.db.close();}
+});
+
+test('Typing draft resumes in another session; IDOR, stale revisions, wrong answers and revocation fail closed',async()=>{
+ const s=setup();try{
+  const a=await account(s),b=await account(s,'other@example.test');
+  const entry=await (await s.request('/api/typing/start',{exercise:'javascript:fragment'},a)).json();
+  const draft=entry.exercise.text.slice(0,17);
+  const checkpoint=await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:0},a);assert.equal(checkpoint.status,200);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:'attack',revision:1},b)).status,409);
+  assert.equal((await (await s.request('/api/typing/resume?userId='+a.user.id,undefined,b)).json()).resume,null);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:0},a)).status,409);
+  const secondLogin=await s.request('/api/auth/login',{email:a.user.email,password:'Valid!long-passphrase'}),cookie=secondLogin.headers.get('set-cookie').split(';')[0];
+  const second={...(await (await s.request('/api/session',undefined,{cookie})).json()),cookie};
+  const resume=(await (await s.request('/api/typing/resume',undefined,second)).json()).resume;assert.equal(resume.text,draft);assert.equal(resume.revision,1);assert.equal(resume.attempt,entry.attempt);
+  assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:draft},second)).status,400);
+  assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:entry.exercise.text},second)).status,200);
+  assert.equal((await (await s.request('/api/typing/resume',undefined,second)).json()).resume,null);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:1},second)).status,409);
+  s.db.raw.prepare('DELETE FROM dev_entitlements WHERE user_id=?').run(a.user.id);assert.equal((await s.request('/api/typing/resume',undefined,second)).status,403);
+ }finally{s.db.close();}
+});
+
+test('all 188 original code exercises reject altered answers, accept exact code and persist each result',async()=>{
+ const s=setup();try{
+  const a=await account(s);s.db.raw.prepare("UPDATE dev_entitlements SET plan='premium' WHERE user_id=?").run(a.user.id);
+  s.db.raw.prepare('UPDATE dev_sessions SET expires=? WHERE user_id=?').run(s.now()+31536000,a.user.id);
+  const {exercises}=await import('../exercises.mjs');assert.equal(exercises.length,188);assert.equal(new Set(exercises.map(x=>x.languageId)).size,47);
+  for(const item of exercises){s.setTime(s.now()+86401);const entry=await (await s.request('/api/typing/start',{exercise:item.id},a)).json();assert.equal(entry.exercise?.text,item.text,item.id);assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:item.text+'!'},a)).status,400,item.id);assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:item.text},a)).status,200,item.id);}
+  const progress=(await (await s.request('/api/typing/progress',undefined,a)).json()).progress;assert.equal(progress.length,188);assert.ok(progress.every(x=>x.completed===1&&x.attempts===1));
+ }finally{s.db.close();}
 });

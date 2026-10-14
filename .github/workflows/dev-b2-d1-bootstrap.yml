@@ -1,10 +1,7 @@
 name: StanNet Dev B2 - provision isolated D1 once
+# Archived after successful provisioning. Never provision on PR synchronize.
 on:
-  pull_request:
-    branches:
-      - feat/stannet-dev-b1-20261014
-    paths:
-      - .github/workflows/dev-b2-d1-bootstrap.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,12 +12,8 @@ concurrency:
 
 jobs:
   provision:
-    if: >-
-      github.repository == 'stalin454/stannet-landing' &&
-      github.event.pull_request.number == 153 &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.head_ref == 'feat/stannet-dev-b2-typing-d1-20261015' &&
-      github.base_ref == 'feat/stannet-dev-b1-20261014'
+    # Recovery receipt retained; the existing database must not be re-adopted.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:
