@@ -1,0 +1,4 @@
+.state/
+*.sqlite*
+*.log
+assets-build/

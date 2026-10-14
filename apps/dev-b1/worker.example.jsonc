@@ -1,0 +1,10 @@
+{
+  // Preparation only: no account, Worker name, routes, database IDs or domain are assumed.
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": false,
+  "assets": {"directory":"./assets-build", "binding":"DEV_ASSETS", "run_worker_first":true},
+  "vars":{"MODE":"sandbox"}
+  // PUBLIC_ORIGIN, dedicated DEV_DB and DEV_MAILER must be verified and bound before preview.
+  // Never add production routes/credentials or deploy this with Space configuration.
+}

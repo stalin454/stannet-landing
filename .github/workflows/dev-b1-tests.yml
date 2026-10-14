@@ -1,0 +1,29 @@
+name: StanNet Dev B1 isolated tests
+on:
+  pull_request:
+    paths:
+      - 'apps/dev-b1/**'
+      - 'dev-b1-preview/**'
+      - 'docs/dev-b1/**'
+      - '.assetsignore'
+      - '.github/workflows/dev-b1-tests.yml'
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify original source and recovery
+        run: python3 docs/dev-b1/verify-isolation.py
+      - name: Real local authentication, HTTP and security tests
+        working-directory: apps/dev-b1
+        run: npm test
+      - name: Verify deterministic preview packaging
+        working-directory: apps/dev-b1
+        run: |
+          npm run build:preview
+          git diff --exit-code -- ../../dev-b1-preview
