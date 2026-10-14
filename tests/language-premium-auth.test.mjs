@@ -32,7 +32,7 @@ function fakeRemote(scenario={}){
   }
   if(path.endsWith('/auth/v1/user')){
     state.session++;
-    return (opts.headers?.Authorization==='Bearer valid-session')
+    return (new Headers(opts.headers).get('Authorization')==='Bearer valid-session')
       ?Response.json({id:'11111111-1111-1111-1111-111111111111',email:'learner@example.test',email_confirmed_at:'2026-10-14T00:00:00Z'})
       :Response.json({error:'invalid'}, {status:401});
   }
