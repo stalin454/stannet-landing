@@ -30,7 +30,7 @@ const puppeteer=require('puppeteer-core');
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Typing overflow '+width);}
   // Promote only this disposable fixture using the operator boundary, then exercise admin UI.
   db.prepare("UPDATE dev_users SET role='admin' WHERE id=?").run(user.id);
-  await page.goto(base+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);
+  await page.goto(base+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);assert.equal(await page.$('#migration-pilots a').then(links=>links.length),2,'two private academy links');
   await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
   await page.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('actualizado'));
   assert.equal(db.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').get(user.id).plan,'premium');
