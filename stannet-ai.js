@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261014-tutor1';
+  const VERSION='20261014-hannah1';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION),import('/stannet-ai-context-bridge.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -40,7 +40,13 @@
   const $=selector=>ui.querySelector(selector);
   const panel=$('.snai-panel'),messages=$('.snai-messages'),form=$('.snai-form'),input=form.querySelector('textarea'),send=$('.snai-send'),voiceToggle=$('.snai-voice-toggle'),voiceStatus=$('.snai-voice-status'),state=$('.snai-state'),memoryPanel=$('.snai-memory'),memoryInput=memoryPanel.querySelector('textarea'),memoryEnabledInput=$('.snai-memory-enabled'),attachmentInput=$('.snai-file-input'),attachmentView=$('.snai-attachment');
   const avatar=new AgentAvatar(ui,{onOpen:openAgent,onHide:closeAgent});
-  const setActivity=value=>{root.dataset.activity=value;panel.dataset.activity=value};
+  avatar.decoratePersona($('.snai-persona'));
+  const syncHannahBrand=()=>{
+    avatar.updateLook();
+    $('#snai-title').textContent=avatar.isHannah?'Hannah IA':'StanNet AI';
+  };
+  syncHannahBrand();
+  const setActivity=value=>{root.dataset.activity=value;panel.dataset.activity=value;avatar.setActivity(value)};
   setActivity('idle');
   const HISTORY_KEY='stannet-ai-history-v1',MEMORY_KEY='stannet-ai-memory-v1',MEMORY_ENABLED_KEY='stannet-ai-memory-enabled-v1';
   let history=[],pendingAttachment=null;
@@ -59,7 +65,7 @@
   // The memory drawer starts collapsed even after browser form-state restoration.
   memoryPanel.open=false;
   const renderContext=()=>{const c=bridge.snapshot();contextView.textContent=[c.app,c.lesson,c.language,c.activity].filter(Boolean).join(' · ');contextView.title=c.path;$('.snai-share-editor').hidden=!/Programming Academy/.test(c.app);tutorActions.hidden=!(c.app==='Programming Academy'&&!!c.lesson);};
-  window.addEventListener('stannet:context-updated',renderContext);renderContext();
+  window.addEventListener('stannet:context-updated',()=>{renderContext();syncHannahBrand()});renderContext();
   let shareEditor=false;
   $('.snai-share-editor').addEventListener('click',()=>{shareEditor=!shareEditor;$('.snai-share-editor').setAttribute('aria-pressed',String(shareEditor));$('.snai-share-editor').textContent=shareEditor?'Código: próximo envío':'Compartir código';});
   const core=new AgentCore({onState:setActivity,readHistory:()=>requestHistory,readMemory:()=>memoryEnabledInput.checked?memoryInput.value.trim().slice(0,1500):'',getPage:()=>bridge.snapshot()});
@@ -110,7 +116,7 @@
     if(chunk)chunks.push(chunk);return chunks;
   };
   const stopSpeech=()=>{
-    speechToken++;speechActive=false;currentSpeechText='';
+    speechToken++;speechActive=false;currentSpeechText='';avatar.setActivity('idle');
     if(currentAudio){const audio=currentAudio;currentAudio=null;audio.pause();audio.onended?.()}
     if(window.speechSynthesis)window.speechSynthesis.cancel();
     if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
@@ -327,7 +333,7 @@
     if(persist && ['user','bot'].includes(kind)){history.push({text:String(text),kind});history=history.slice(-40);saveHistory();}
     return el;
   };
-  const welcome=()=>add('Soy StanNet AI, tu guía para aprender y crear. Conozco las academias, proyectos y herramientas de esta web. Dime qué quieres conseguir y empezamos.', 'bot',false);
+  const welcome=()=>add(avatar.isHannah?'Soy Hannah IA, tu guía de StanNet Academy. Puedo ayudarte con lecciones de programación, idiomas y ciberseguridad. ¡Aprendamos paso a paso!':'Soy StanNet AI, tu guía para aprender y crear. Conozco las academias, proyectos y herramientas de esta web. Dime qué quieres conseguir y empezamos.', 'bot',false);
   if(history.length)history.forEach(item=>add(item.text,item.kind,false));else welcome();scrollEnd();
   $('.snai-persona').addEventListener('click',()=>add('Puedo buscar recursos de StanNet, orientarte hacia una academia y ayudarte paso a paso. Uso el contexto de esta página y nuestra conversación. La voz se activa solo cuando tú la solicitas.','bot',false));
   $('.snai-memory-save').addEventListener('click',()=>{try{localStorage.setItem(MEMORY_KEY,memoryInput.value.slice(0,1500));localStorage.setItem(MEMORY_ENABLED_KEY,memoryEnabledInput.checked?'1':'0');state.textContent='Memoria guardada';}catch{state.textContent='No se pudo guardar';}});
