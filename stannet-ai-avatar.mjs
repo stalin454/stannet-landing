@@ -55,6 +55,7 @@ export class AgentAvatar {
     const figure=document.createElement('span');
     figure.className='snai-persona-hannah';
     figure.setAttribute('aria-hidden','true');
+    figure.innerHTML='<span class="snai-persona-mouth"></span><span class="snai-persona-lid left"></span><span class="snai-persona-lid right"></span>';
     figure.hidden=true;
     button.appendChild(figure);
     this.personaFigure=figure;
