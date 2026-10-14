@@ -331,3 +331,17 @@ test('Shortcuts Lab migration remains private for each HTML CSS and JS route',as
   for(const path of routes)assert.equal((await s.request(path,undefined,member)).status,403,'role revoked '+path);
  }finally{s.db.close();}
 });
+
+test('Cybersecurity Academy admin-only and fail-closed on individual resources',async()=>{
+ const s=setup();try{
+  const paths=['/apps/cybersecurity','/apps/cybersecurity/','/apps/cybersecurity/cybersecurity.html','/apps/cybersecurity/cyber-dev.css','/apps/cybersecurity/cyber-academy.css','/apps/cybersecurity/cyber-curriculum.js','/apps/cybersecurity/cyber-academy.js','/apps/cybersecurity/cyber-network-lab.js'];
+  for(const path of paths)assert.equal((await s.request(path)).status,401,'anonymous '+path);
+  const account1=await account(s,'cyber-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,account1)).status,403,'student '+path);
+  assert.equal((await s.request('/private/cyber-curriculum.js',undefined,account1)).status,404);
+  s.db.raw.prepare("UPDATE dev_users SET role='admin' WHERE email=?").run('cyber-pilot@example.test');
+  for(const path of paths){const response=await s.request(path,undefined,account1);assert.equal(response.status,200,'admin '+path);assert.equal(response.headers.get('Cache-Control'),'private, no-store');}
+  s.db.raw.prepare("UPDATE dev_users SET role='member' WHERE email=?").run('cyber-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,account1)).status,403,'role revoked '+path);
+ }finally{s.db.close();}
+});
