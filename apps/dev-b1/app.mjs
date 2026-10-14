@@ -216,6 +216,23 @@ export function application(options){
     const admin=await member(req);if(admin.role!=='admin'||options.mode!=='sandbox')fail(403,'ADMIN','Acceso reservado al administrador de pruebas.');
     return json({users:(await statement('SELECT u.id,u.email,u.verified,u.role,e.plan,e.expires FROM dev_users u LEFT JOIN dev_entitlements e ON e.user_id=u.id AND e.app=? ORDER BY u.email LIMIT 100','typing').all()).results});
    }
+   // Private migration pilot: never expose the FP curriculum as an ungated static asset.
+   // Fresh session and server-side role check on every HTML, CSS and script request.
+   if(req.method==='GET'){
+    const fpAssets={
+     '/apps/fp-study':'fp-study.html',
+     '/apps/fp-study/':'fp-study.html',
+     '/apps/fp-study/fp-study.html':'fp-study.html',
+     '/apps/fp-study/fp-study.js':'fp-study.js',
+     '/apps/fp-study/fp-study-data.js':'fp-study-data.js',
+     '/apps/fp-study/fp-study.css':'fp-study.css'
+    };
+    if(Object.hasOwn(fpAssets,path)){
+     const user=await member(req);
+     if(user.role!=='admin'||options.mode!=='sandbox')fail(403,'MIGRATION_PILOT','Esta aplicación aún está en revisión privada.');
+     return await serve(fpAssets[path]);
+    }
+   }
    if(['/apps/typing','/apps/typing/','/apps/typing/index.html','/apps/typing/typing.js'].includes(path)){
     const user=await member(req);await entitlement(user);return await serve(path.endsWith('.js')?'typing.js':'typing.html');
    }
