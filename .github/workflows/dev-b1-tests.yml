@@ -27,3 +27,18 @@ jobs:
         run: |
           npm run build:preview
           git diff --exit-code -- ../../dev-b1-preview
+      - name: Prepare isolated real-browser QA
+        run: npm install --prefix /tmp/dev-b1-auth-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Real browser registration, reset, typing keyboard and admin UI
+        env:
+          NODE_PATH: /tmp/dev-b1-auth-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node apps/dev-b1/server.mjs >/tmp/dev-b1-auth-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in 1 2 3 4 5; do
+            curl -fsS http://127.0.0.1:8789/api/health >/dev/null && break
+            sleep 1
+          done
+          node apps/dev-b1/tests/auth-browser.cjs

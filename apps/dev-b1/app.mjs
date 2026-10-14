@@ -76,7 +76,7 @@ export function application(options){
    if(req.method==='GET'&&path==='/api/catalog')return json({catalog,plans:[{id:'free',name:'Free',description:'3 ejercicios de Typing, cuenta verificada.'},{id:'premium',name:'Premium',description:'Catálogo completo de Typing, autorización de prueba.'}],billing:'sandbox-disabled'});
    if(req.method==='GET'&&path==='/api/health')return json({mode:'sandbox',databaseConfigured:Boolean(db),emailConfigured:Boolean(mail),billingConfigured:Boolean(options.stripeSecret&&options.stripeRead),production:false});
    if(req.method==='GET'&&['/','/account','/auth/verify','/auth/reset'].includes(path))return await serve('index.html');
-   if(req.method==='GET'&&['/assets/portal.js','/assets/site.css'].includes(path))return await serve(path.slice(8));
+   if(req.method==='GET'&&['/assets/portal.js','/assets/site.css','/assets/logo.png','/assets/orbitron.ttf'].includes(path))return await serve(path.slice(8));
    if(!db)fail(503,'DB','El backend de este entorno aún no está conectado.');
    if(req.method==='GET'&&path==='/api/session'){
     const user=await session(req);if(!user)return json({authenticated:false});
@@ -141,6 +141,18 @@ export function application(options){
      }
      if(path==='/api/auth/logout'){if(current)await run('DELETE FROM dev_sessions WHERE hash=?',current.hash);return json({ok:true},200,{'Set-Cookie':cookie('',0)});}
     }
+    if(path==='/api/admin/entitlements'){
+     const admin=await member(req);
+     if(admin.role!=='admin'||options.mode!=='sandbox')fail(403,'ADMIN','Acceso reservado al administrador de pruebas.');
+     const target=await one('SELECT id FROM dev_users WHERE id=? AND verified=1 AND disabled=0',String(data.userId||''));
+     const hours=Number(data.hours),plan=String(data.plan||'');
+     if(!target||!['free','premium','revoke'].includes(plan)||!Number.isInteger(hours)||hours<1||hours>168)fail(400,'GRANT','Cuenta, plan o duración de prueba no válidos.');
+     await db.batch([
+      plan==='revoke'?statement('DELETE FROM dev_entitlements WHERE user_id=? AND app=?',target.id,'typing'):statement('INSERT INTO dev_entitlements(user_id,app,plan,expires,source) VALUES(?,?,?,?,?) ON CONFLICT(user_id,app) DO UPDATE SET plan=excluded.plan,expires=excluded.expires,source=excluded.source',target.id,'typing',plan,clock()+hours*3600,'sandbox-admin'),
+      statement('INSERT INTO dev_audit(id,actor,action,subject,created) VALUES(?,?,?,?,?)',crypto.randomUUID(),admin.id,'typing-grant:'+plan,target.id,clock())
+     ]);
+     return json({ok:true});
+    }
     if(path==='/api/typing/start'){
      const user=await member(req),ent=await entitlement(user),exercise=exercises.find(x=>x.id===data.exercise);
      if(!exercise||!permitted(exercise,ent))fail(403,'EXERCISE','Ejercicio no autorizado.');
@@ -169,6 +181,10 @@ export function application(options){
     return json({plan:ent.plan,exercises:exercises.filter(x=>permitted(x,ent)).map(({text,...x})=>x)});
    }
    if(path==='/api/typing/progress'){const user=await member(req);await entitlement(user);return json({progress:(await statement('SELECT exercise,completed,attempts FROM dev_progress WHERE user_id=?',user.id).all()).results});}
+   if(path==='/api/admin/users'){
+    const admin=await member(req);if(admin.role!=='admin'||options.mode!=='sandbox')fail(403,'ADMIN','Acceso reservado al administrador de pruebas.');
+    return json({users:(await statement('SELECT u.id,u.email,u.verified,u.role,e.plan,e.expires FROM dev_users u LEFT JOIN dev_entitlements e ON e.user_id=u.id AND e.app=? ORDER BY u.email LIMIT 100','typing').all()).results});
+   }
    if(['/apps/typing','/apps/typing/','/apps/typing/index.html','/apps/typing/typing.js'].includes(path)){
     const user=await member(req);await entitlement(user);return await serve(path.endsWith('.js')?'typing.js':'typing.html');
    }

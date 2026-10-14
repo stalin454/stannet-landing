@@ -1,6 +1,6 @@
 import {application} from './app.mjs';
 import {exercises} from './exercises.mjs';
-const paths={'index.html':'/public/index.html','portal.js':'/public/portal.js','site.css':'/public/site.css','typing.html':'/private/typing.html','typing.js':'/private/typing.js'};
+const paths={'index.html':'/public/index.html','portal.js':'/public/portal.js','site.css':'/public/site.css','typing.html':'/private/typing.html','typing.js':'/private/typing.js','logo.png':'/public/logo.png','orbitron.ttf':'/public/orbitron.ttf'};
 export default {async fetch(request,env){
  if(env.MODE!=='sandbox'||!env.PUBLIC_ORIGIN)return new Response('Sandbox no configurado',{status:503,headers:{'Cache-Control':'no-store'}});
  try{

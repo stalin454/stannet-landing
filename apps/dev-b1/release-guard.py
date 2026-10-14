@@ -36,18 +36,29 @@ if mode=='before':
   config=json.load(open('apps/dev-b1/'+filename));assert config['name']=='stannet-dev-portal';assert config['assets']['directory']=='./site-build'
   assert config['routes']==([{'pattern':'stannet.dev','custom_domain':True}] if bound else [])
  protected=snapshot();target=read('accounts/'+account+'/workers/scripts/stannet-dev-portal/deployments')
- dns=read('zones/'+zone['id']+'/dns_records?name=stannet.dev&per_page=100')
- if not isinstance(dns,list):raise RuntimeError('Root DNS backup unavailable')
- before={'protected':protected,'dev_previous':target,'domain_before':[x for x in domains if x.get('hostname')=='stannet.dev'],'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns]}
+ try: dns=read('zones/'+zone['id']+'/dns_records?name=stannet.dev&per_page=100')
+ except RuntimeError as error:
+  if 'HTTP 403' not in str(error):raise
+  dns=None
+  print('DEV_ROOT_BLOCKED: DNS Read denied (HTTP 403). Candidate-only publication; no DNS/domain writes.')
+ if dns is not None and not isinstance(dns,list):raise RuntimeError('Root DNS backup unavailable')
+ root_before=[x for x in domains if x.get('hostname')=='stannet.dev']
+ if dns is None and root_before:raise RuntimeError('Cannot change a Worker already bound to root without DNS backup')
+ before={'protected':protected,'dev_previous':target,'domain_before':root_before,'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns] if dns is not None else None,'domain_allowed':dns is not None}
  open('/tmp/dev-b1-before.json','w').write(json.dumps(before))
- with open(os.environ['GITHUB_ENV'],'a') as f:f.write('DEV_CANDIDATE_URL=https://stannet-dev-portal.'+subdomain['subdomain']+'.workers.dev\n')
+ with open(os.environ['GITHUB_ENV'],'a') as f:
+  f.write('DEV_CANDIDATE_URL=https://stannet-dev-portal.'+subdomain['subdomain']+'.workers.dev\n')
+  f.write('DEV_DOMAIN_ALLOWED='+('true' if before['domain_allowed'] else 'false')+'\n')
+  f.write('DEV_CANDIDATE_CONFIG=apps/dev-b1/'+('portal-domain.jsonc' if root_before else 'portal-worker.jsonc')+'\n')
  print(json.dumps({'protected_snapshot':protected,'root_domain_previously_bound':bool(before['domain_before']),'zone_confirmed':True,'target':'stannet-dev-portal'}))
 elif mode=='after':
  before=json.load(open('/tmp/dev-b1-before.json'));after=snapshot()
  if before['protected']!=after:raise RuntimeError('Protected production deployment metadata changed; investigate without rolling back Space')
  domains=read('accounts/'+account+'/workers/domains')
- assert any(x.get('hostname')=='stannet.dev' and x.get('service')=='stannet-dev-portal' for x in domains),'Dev root binding not confirmed'
- print(json.dumps({'protected_production_unchanged':True,'dev_domain_binding_confirmed':True,'protected_snapshot':after}))
+ root_after=[x for x in domains if x.get('hostname')=='stannet.dev']
+ if before['domain_allowed']:assert any(x.get('service')=='stannet-dev-portal' for x in root_after),'Dev root binding not confirmed'
+ else:assert root_after==before['domain_before'],'Root changed unexpectedly in candidate-only mode'
+ print(json.dumps({'protected_production_unchanged':True,'dev_domain_binding_confirmed':before['domain_allowed'],'root_domain_write_blocked':not before['domain_allowed'],'protected_snapshot':after}))
 elif mode=='rollback':
  if not os.path.exists('/tmp/dev-b1-before.json'):
   print('No Dev deployment started; nothing to roll back.');raise SystemExit(0)
@@ -62,6 +73,8 @@ elif mode=='rollback':
   write('accounts/'+account+'/workers/scripts/stannet-dev-portal/deployments','POST',{'strategy':'percentage','versions':versions})
   print('Previous Dev Worker deployment restored.')
  else:
+  if not before.get('domain_allowed'):
+   print('Candidate-only operation failed. Root Dev, Space and academy were not changed.');raise SystemExit(0)
   domains=read('accounts/'+account+'/workers/domains')
   for d in domains:
    if d.get('hostname')=='stannet.dev' and d.get('service')=='stannet-dev-portal':write('accounts/'+account+'/workers/domains/'+d['id'],'DELETE')

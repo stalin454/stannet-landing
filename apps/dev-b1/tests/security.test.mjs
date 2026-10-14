@@ -102,6 +102,22 @@ test('password reset tokens are single-use, all previous reset tokens and sessio
  }finally{s.db.close();}
 });
 test('logout revokes server session, replaying cookie fails',async()=>{const s=setup();try{const a=await account(s);assert.equal((await s.request('/api/auth/logout',{},a)).status,200);assert.equal((await s.request('/apps/typing',undefined,a)).status,401);}finally{s.db.close();}});
+test('admin plan console enforces server role, CSRF, grant limits, audit and revocation',async()=>{
+ const s=setup();try{
+  const admin=await account(s),member=await account(s,'learner@example.test');
+  assert.equal((await s.request('/api/admin/users',undefined,member)).status,403);
+  assert.equal((await s.request('/api/admin/entitlements',{userId:member.user.id,plan:'premium',hours:24},member)).status,403);
+  s.db.raw.prepare("UPDATE dev_users SET role='admin' WHERE id=?").run(admin.user.id);
+  const users=await (await s.request('/api/admin/users',undefined,admin)).json();assert.equal(users.users.length,2);assert.ok(users.users.every(x=>!('password' in x)));
+  assert.equal((await s.request('/api/admin/entitlements',{userId:member.user.id,plan:'premium',hours:24},{cookie:admin.cookie})).status,403);
+  assert.equal((await s.request('/api/admin/entitlements',{userId:member.user.id,plan:'premium',hours:9999},admin)).status,400);
+  assert.equal((await s.request('/api/admin/entitlements',{userId:member.user.id,plan:'premium',hours:24},admin)).status,200);
+  assert.equal((await (await s.request('/api/typing/exercises',undefined,member)).json()).exercises.length,188);
+  assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS n FROM dev_audit WHERE actor=? AND action='typing-grant:premium'").get(admin.user.id).n,1);
+  assert.equal((await s.request('/api/admin/entitlements',{userId:member.user.id,plan:'revoke',hours:1},admin)).status,200);
+  assert.equal((await s.request('/apps/typing',undefined,member)).status,403);
+ }finally{s.db.close();}
+});
 test('email/token expiration, no storage/no mail, and unsupported methods fail closed',async()=>{
  const s=setup();try{await s.request('/api/auth/signup',{email:'expire@example.test',password:'Valid!long-passphrase'});const t=s.db.raw.prepare('SELECT token FROM dev_test_mail').get();s.setTime(s.now()+86401);assert.equal((await s.request('/api/auth/verify',{token:t.token})).status,400);assert.equal((await s.handle(new Request(origin+'/api/session',{method:'DELETE'}))).status,405);}finally{s.db.close();}
  const absent=application({...environment(null,origin),db:null,mail:null});assert.equal((await absent(new Request(origin+'/apps/typing'))).status,503);

@@ -67,7 +67,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4.139.0'
-          command: deploy --config apps/dev-b1/portal-worker.jsonc
+          command: deploy --config ${{ env.DEV_CANDIDATE_CONFIG }}
       - name: Verify candidate in real Chrome before binding root Dev
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
@@ -76,6 +76,7 @@ jobs:
         run: |
           QA_BASE_URL="$DEV_CANDIDATE_URL" node apps/dev-b1/tests/portal-browser.cjs
       - name: Bind verified portal exclusively to stannet.dev
+        if: env.DEV_DOMAIN_ALLOWED == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -83,6 +84,7 @@ jobs:
           wranglerVersion: '4.139.0'
           command: deploy --config apps/dev-b1/portal-domain.jsonc
       - name: Verify public domain HTTP and committed version
+        if: env.DEV_DOMAIN_ALLOWED == 'true'
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
@@ -99,6 +101,7 @@ jobs:
               time.sleep(5)
           PY
       - name: Verify published Dev in real Chrome (320, 390, 1280)
+        if: env.DEV_DOMAIN_ALLOWED == 'true'
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
           NODE_PATH: /tmp/dev-b1-browser/node_modules

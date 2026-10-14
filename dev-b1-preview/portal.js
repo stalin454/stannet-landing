@@ -19,6 +19,11 @@ function cards(category='all'){
 function switchView(value){view=value;const password=['login','signup'].includes(view);$('#password-label').hidden=!password;$('#password').required=password;$('#password').autocomplete=view==='signup'?'new-password':'current-password';$('#form-title').textContent={login:'Bienvenido de nuevo.',signup:'Crea tu espacio.',recover:'Recupera tu acceso.',resend:'Verifica tu correo.'}[view];$('#auth-submit').textContent={login:'Entrar en mi espacio →',signup:'Crear cuenta →',recover:'Enviar instrucciones →',resend:'Reenviar verificación →'}[view];$('.tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));feedback('');}
 async function refresh(){
  session=await api('/api/session');$('#signed-out').hidden=session.authenticated;$('#signed-in').hidden=!session.authenticated;
+ $('#admin-panel').hidden=!(session.authenticated&&session.user.role==='admin');
+ if(session.authenticated&&session.user.role==='admin'){
+  const data=await api('/api/admin/users');$('#admin-user').replaceChildren();
+  for(const user of data.users.filter(x=>x.verified)){const option=document.createElement('option');option.value=user.id;option.textContent=user.email+' · '+(user.plan||'sin acceso');$('#admin-user').append(option);}
+ }
  if(session.authenticated){$('#user-email').textContent=session.user.email;$('#user-role').textContent='Rol: '+session.user.role;$('#user-plan').textContent='Typing: '+(session.typing?.plan==='premium'?'Premium de pruebas':'Free');$('#account-status').textContent='Sesión iniciada. Tus accesos se verifican en el servidor.';try{const p=await api('/api/typing/progress');$('#progress-summary').textContent=p.progress.filter(x=>x.completed).length+' ejercicios completados.';}catch(e){$('#progress-summary').textContent=e.message;}}else $('#account-status').textContent='Regístrate y verifica tu correo antes de entrenar.';
  cards($('.filters button.active')?.dataset.filter||'all');
 }
@@ -26,6 +31,7 @@ $('.filters').addEventListener('click',e=>{const b=e.target.closest('[data-filte
 $('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)switchView(b.dataset.view);});
 $('#auth-form').addEventListener('submit',async e=>{e.preventDefault();if(preview)return;const b=$('#auth-submit');b.disabled=true;try{const result=await api('/api/auth/'+view,{email:$('#email').value,password:$('#password').value});$('#password').value='';if(view==='login')await refresh();feedback(result.message||'Sesión iniciada.');}catch(error){feedback(error.message,true);}finally{b.disabled=false;}});
 $('#logout').addEventListener('click',async()=>{try{await api('/api/auth/logout',{});await refresh();feedback('Sesión cerrada.');}catch(e){feedback(e.message,true);}});
+$('#admin-form').addEventListener('submit',async event=>{event.preventDefault();try{await api('/api/admin/entitlements',{userId:$('#admin-user').value,plan:$('#admin-plan').value,hours:Number($('#admin-hours').value)});await refresh();feedback('Derecho de prueba actualizado. Sin cobros.');}catch(e){feedback(e.message,true);}});
 const reset=location.pathname==='/auth/reset',verify=location.pathname==='/auth/verify';
 if(reset||verify){$('#token-form').hidden=false;$('#token-title').textContent=reset?'Restablecer contraseña':'Verificar correo';$('#new-password-label').hidden=!reset;$('#new-password').required=reset;$('#email-token').value=new URLSearchParams(location.hash.slice(1)).get('token')||'';history.replaceState(null,'',location.pathname);}
 $('#token-form').addEventListener('submit',async e=>{e.preventDefault();if(preview)return;try{await api('/api/auth/'+(reset?'reset':'verify'),{token:$('#email-token').value,password:$('#new-password').value});$('#token-form').reset();$('#token-form').hidden=true;feedback('Confirmado. Ya puedes iniciar sesión.');}catch(error){feedback(error.message,true);}});

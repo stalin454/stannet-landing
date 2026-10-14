@@ -6,8 +6,8 @@ import {database} from './sqlite.mjs';
 import {application} from './app.mjs';
 import {exercises} from './exercises.mjs';
 const root=fileURLToPath(new URL('.',import.meta.url));
-const TYPES={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8'};
-const allowed={'index.html':'public/index.html','portal.js':'public/portal.js','site.css':'public/site.css','typing.html':'private/typing.html','typing.js':'private/typing.js'};
+const TYPES={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.ttf':'font/ttf'};
+const allowed={'index.html':'public/index.html','portal.js':'public/portal.js','site.css':'public/site.css','typing.html':'private/typing.html','typing.js':'private/typing.js','logo.png':'public/logo.png','orbitron.ttf':'public/orbitron.ttf'};
 export const asset=async name=>allowed[name]?{body:readFileSync(resolve(root,allowed[name])),type:TYPES[name.slice(name.lastIndexOf('.'))]}:null;
 export function environment(db,origin){return {db,origin,mode:'sandbox',asset,exercises,dummyPassword:'scrypt$00000000000000000000000000000000$'+'0'.repeat(64),mail:async msg=>db.prepare('INSERT INTO dev_test_mail(id,user_id,kind,token,created) VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),msg.userId,msg.kind,msg.token,Math.floor(Date.now()/1000)).run()};}
 export async function start({path=':memory:',port=0}={}){
