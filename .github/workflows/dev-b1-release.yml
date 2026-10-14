@@ -74,6 +74,21 @@ jobs:
           NODE_PATH: /tmp/dev-b1-browser/node_modules
           CHROME_PATH: /usr/bin/google-chrome
         run: |
+          python3 - <<'PY'
+          import urllib.request,json,time,os
+          base=os.environ['DEV_CANDIDATE_URL']
+          for attempt in range(12):
+            try:
+              with urllib.request.urlopen(base+'/version.json',timeout=12) as response:
+                version=json.load(response)
+              assert version['commit']==os.environ['SOURCE_COMMIT']
+              with urllib.request.urlopen(base+'/',timeout=12) as response:
+                assert response.status==200
+              print('Candidate HTTP and source commit verified after propagation.');break
+            except Exception:
+              if attempt==11:raise
+              time.sleep(5)
+          PY
           QA_BASE_URL="$DEV_CANDIDATE_URL" node apps/dev-b1/tests/portal-browser.cjs
       - name: Bind verified portal exclusively to stannet.dev
         if: env.DEV_DOMAIN_ALLOWED == 'true'
