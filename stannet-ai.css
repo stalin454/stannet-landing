@@ -89,3 +89,24 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-panel.compact .snai-persona{display:none}
 .snai-panel.compact .snai-form{padding:6px 8px}
 .snai-panel.compact .snai-context{max-height:20px}
+
+
+/* Hannah IA uses one tiny same-origin SVG sprite, never a canvas or 3D engine.
+   Only academy routes opt in; the existing site-wide avatar remains unchanged. */
+.snai-hannah-figure{position:relative;display:block;width:100%;aspect-ratio:120/168;max-height:25dvh;background-image:url('/assets/ai/hannah-ia-sprite.svg');background-repeat:no-repeat;background-size:400% 100%;background-position:0 50%;filter:drop-shadow(0 6px 12px #c546de32);transform:translateZ(0)}
+.snai-launcher-label{min-width:76px;text-align:center}
+.snai-hannah-mouth{position:absolute;left:46.5%;top:50.5%;width:11%;height:4%;border-radius:50%;background:#9f4355;border:1px solid #f8b2ad;transform-origin:center center;opacity:0;pointer-events:none}
+.snai-hannah-lid{position:absolute;top:36.5%;width:13%;height:9%;border-radius:50%;background:#f7d3c0;border-bottom:2px solid #512a2c;opacity:0;pointer-events:none}
+.snai-hannah-lid.left{left:31%}.snai-hannah-lid.right{left:56%}
+.snai-persona-hannah{display:block;width:100%;height:100%;background:url('/assets/ai/hannah-ia-sprite.svg') 0 50% / 400% 100% no-repeat}
+.snai-avatar-surface[data-character="hannah"][data-activity="listening"] .snai-hannah-figure{filter:drop-shadow(0 0 10px #60e6ff88)}
+@media(prefers-reduced-motion:no-preference){
+ .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-figure{animation:snai-hannah-float 4s ease-in-out infinite}
+ .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-lid{animation:snai-hannah-blink 6s ease-in-out infinite}
+ .snai-avatar-surface[data-character="hannah"][data-activity="speaking"] .snai-hannah-mouth{opacity:1;animation:snai-hannah-talk .22s ease-in-out infinite alternate}
+}
+@keyframes snai-hannah-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes snai-hannah-blink{0%,91%,95%,100%{opacity:0}92%,94%{opacity:1}}
+@keyframes snai-hannah-talk{from{transform:scaleY(.45) scaleX(.8)}to{transform:scaleY(1.5) scaleX(1.1)}}
+@media(prefers-reduced-motion:reduce){.snai-avatar-surface[data-character="hannah"][data-activity="speaking"] .snai-hannah-mouth{opacity:1}}
+@media(max-width:640px){.snai-hannah-figure{max-height:22dvh}}
