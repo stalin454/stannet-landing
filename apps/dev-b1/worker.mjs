@@ -1,7 +1,7 @@
 import {application} from './app.mjs';
 import {exercises} from './exercises.mjs';
 import {json} from './security.mjs';
-const paths={'index.html':'/public/index.html','portal.js':'/public/portal.js','site.css':'/public/site.css','typing.html':'/private/typing.html','typing.js':'/private/typing.js','logo.png':'/public/logo.png','orbitron.ttf':'/public/orbitron.ttf'};
+const paths={'index.html':'/public/index.html','portal.js':'/public/portal.js','site.css':'/public/site.css','typing.html':'/private/typing.html','typing.js':'/private/typing.js','logo.png':'/public/logo.png','orbitron.ttf':'/public/orbitron.ttf','fp-study.html':'/private/fp-study.html','fp-study.js':'/private/fp-study.js','fp-study-data.js':'/private/fp-study-data.js','fp-study.css':'/private/fp-study.css'};
 // This pilot cannot claim the public Dev catalogue or any Space/Academy origin.
 // A future unified gateway must be designed and reviewed separately.
 const protectedHosts=new Set(['stannet.space','www.stannet.space','stannet.dev','www.stannet.dev','academy.stannet.dev']);
