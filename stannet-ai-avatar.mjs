@@ -27,7 +27,12 @@ export class AgentAvatar {
     this.persona=null;
     this.personaImg=null;
     this.look=null;
+    this.renderer3D=null;
+    this.loading3D=false;
+    this.currentActivity='idle';
+    this.isOpen=false;
     this.updateLook();
+    this.initialize3D();
     // Prefer the approved image-inspired art only after successful browser decoding.
     // Keep the locally drawn SVG as an always-available fallback.
     this.loadArtwork();
@@ -37,6 +42,22 @@ export class AgentAvatar {
     this.render(false);
   }
   get isHannah(){return this.look!==null;}
+  async initialize3D(){
+    if(!this.isHannah||this.renderer3D||this.loading3D||this.destroyed)return;
+    this.loading3D=true;
+    try{
+      // Only academies download the 3D engine. No change to the AI or voice services.
+      const {createHannah3D}=await import('/hannah-ia-3d.mjs?v=20261014-3d1');
+      if(this.destroyed||!this.isHannah)return;
+      const renderer=createHannah3D({host:this.figure,look:this.look,
+        reducedMotion:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false});
+      if(!renderer)return; // Keep the tested SVG fallback if WebGL is not supported.
+      this.renderer3D=renderer;
+      renderer.setActivity(this.currentActivity);
+      this.render(this.isOpen);
+    }catch(error){console.info('Hannah IA utiliza el respaldo 2D:',error?.message)}
+    finally{this.loading3D=false}
+  }
   loadArtwork(){
     if(typeof Image!=='function')return;
     const artwork=new Image();
@@ -62,6 +83,9 @@ export class AgentAvatar {
     this.surface.dataset.character=selected?'hannah':'stannet';
     this.surface.dataset.outfit=next||'default';
     this.figure.style.backgroundPosition=`${hannahSpritePosition(next)}% 50%`;
+    this.renderer3D?.setOutfit(next||'explorer');
+    if(selected&&!this.renderer3D)this.initialize3D();
+    this.renderer3D?.setVisible(selected&&!this.hidden);
     this.updatePersona();
   }
   decoratePersona(button){
@@ -86,7 +110,9 @@ export class AgentAvatar {
   }
   setActivity(activity='idle'){
     // The browser animates only while the voice or agent is active; no timers/polling.
-    this.surface.dataset.activity=/^(speaking|listening|thinking|loading|interrupted)$/.test(activity)?activity:'idle';
+    this.currentActivity=/^(speaking|listening|thinking|loading|interrupted)$/.test(activity)?activity:'idle';
+    this.surface.dataset.activity=this.currentActivity;
+    this.renderer3D?.setActivity(this.currentActivity);
   }
   setHidden(hidden){
     this.hidden=hidden;
@@ -94,6 +120,11 @@ export class AgentAvatar {
     this.render(false);
   }
   render(open){
+    this.isOpen=!!open;
+    if(this.renderer3D){
+      this.renderer3D.mount(open&&this.personaFigure?this.personaFigure:this.figure);
+      this.renderer3D.setVisible(this.isHannah&&!this.hidden);
+    }
     this.avatar.hidden=this.hidden||open;
     this.restore.hidden=!this.hidden||open;
     this.launcher.setAttribute('aria-expanded',String(open));
@@ -102,5 +133,10 @@ export class AgentAvatar {
       if(open&&this.surface.matches(':popover-open'))this.surface.hidePopover();
       else if(!open&&!this.surface.matches(':popover-open'))this.surface.showPopover();
     }else this.surface.hidden=open;
+  }
+  destroy(){
+    this.destroyed=true;
+    this.renderer3D?.destroy();
+    this.surface.remove();
   }
 }
