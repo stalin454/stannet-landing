@@ -78,7 +78,7 @@ async function premiumAction(action){
       return;
     }
     await refreshPremium();
-    if(action==='signout')premiumMessage('Sesión cerrada. Puedes continuar con la voz gratuita del navegador.');
+    if(action==='signout'){stopVoice();releasePollyCache();premiumMessage('Sesión cerrada. Puedes continuar con la voz gratuita del navegador.');}
   }catch{
     $('ltPremiumPassword').value='';
     premiumMessage('Servicio de acceso temporalmente no disponible.');
@@ -137,21 +137,23 @@ function releasePollyCache(){
 }
 async function speakPolly({slow=false,after=null}={}){
   const l=lesson();if(!l)return;
+  const lessonToken=sessionToken,languageCode=locale().locale;
   if(!(await checkPollyAvailability())){
     providerNotice('Amazon Polly no está disponible. Selecciona la voz del navegador.');
     $('ltVoiceStatus').textContent='La conexión Amazon Polly no está disponible.';
     return;
   }
-  if($('ltProvider').value!=='polly')return;
+  if($('ltProvider').value!=='polly'||lessonToken!==sessionToken)return;
   if(!premiumSession.authenticated||!premiumSession.premiumEnabled||premiumSession.remaining<1){
     const permitted=await refreshPremium();
-    if(!permitted){$('ltVoiceStatus').textContent='Inicia sesión con una cuenta autorizada para usar Amazon Polly.';return;}
+    if(!permitted||lessonToken!==sessionToken){$('ltVoiceStatus').textContent='Inicia sesión con una cuenta autorizada para usar Amazon Polly.';return;}
   }
+  if($('ltProvider').value!=='polly'||lessonToken!==sessionToken)return;
   if(recognition){try{recognition.abort();}catch{}recognition=null;}
   if(speech)speech.cancel();
   clearPollyPlayback();
   const token=++playbackToken;
-  const code=locale().locale,voice=$('ltPollyVoice').value;
+  const code=languageCode,voice=$('ltPollyVoice').value;
   if(!pollyVoices[code]?.some(v=>v.id===voice))return;
   const key=audioKey(code,voice,l.target);
   $('ltVoiceStatus').textContent='Preparando '+voice+' · Amazon Polly…';
