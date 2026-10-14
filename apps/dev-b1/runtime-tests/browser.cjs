@@ -20,7 +20,7 @@ let runtime,browser;
  }
  await db.prepare("INSERT INTO dev_environment(id,app,environment_id,schema_version) VALUES(1,'stannet-dev-b1','browser-fixture-only',2)").run();
  browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,acceptInsecureCerts:true,args:['--no-sandbox','--disable-dev-shm-usage']});
- const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.emulate(puppeteer.KnownDevices['Pixel 7']);
+ const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));await page.emulate({viewport:{width:390,height:844,deviceScaleFactor:1,isMobile:true,hasTouch:true},userAgent:(await browser.userAgent()).replace(/\([^)]*\)/,'(Linux; Android 13)').replace('HeadlessChrome','Chrome').replace(' Safari/',' Mobile Safari/')});
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.click('[data-view="signup"]');
  const email='browser-runtime@example.test',password='Cloudflare!test-passphrase';
  await page.type('#email',email);await page.type('#password',password);await page.click('#auth-submit');
@@ -66,5 +66,5 @@ let runtime,browser;
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.type('#email',email);await page.type('#password','New!runtime-passphrase');await page.click('#auth-submit');await page.waitForFunction(()=>!document.querySelector('#signed-in').hidden);
  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Account overflow '+width);}
  assert.deepEqual(errors,[]);
- console.log(JSON.stringify({browser:'Chromium',runtime:'workerd',database:'D1 local',tls_loopback:true,cookies:'HttpOnly Secure Strict',signup:true,mail:'in-memory fixture only',verification:true,login:true,typing_keyboard:true,tab:true,mobile_emulation:'Pixel 7 Chrome',cross_device_resume:true,correction:true,persistence:true,admin:true,reset:true,logout:true,widths:[320,390,1280],overflow:false,remote:false}));
+ console.log(JSON.stringify({browser:'Chromium',runtime:'workerd',database:'D1 local',tls_loopback:true,cookies:'HttpOnly Secure Strict',signup:true,mail:'in-memory fixture only',verification:true,login:true,typing_keyboard:true,tab:true,mobile_emulation:'Android Chrome with touch',cross_device_resume:true,correction:true,persistence:true,admin:true,reset:true,logout:true,widths:[320,390,1280],overflow:false,remote:false}));
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{if(browser)await browser.close();if(runtime)await runtime.dispose();rmSync(directory,{recursive:true,force:true});});
