@@ -282,3 +282,22 @@ test('Worker refuses Auth before database/mail/assets when CPU or mail delivery 
   assert.equal(queried,false,missing);
  }
 });
+
+test('FP Study migration pilot is private on every asset and responds to live admin role',async()=>{
+ const s=setup();try{
+  const paths=['/apps/fp-study','/apps/fp-study/','/apps/fp-study/fp-study.html','/apps/fp-study/fp-study.js','/apps/fp-study/fp-study-data.js','/apps/fp-study/fp-study.css'];
+  for(const path of paths)assert.equal((await s.request(path)).status,401,'anonymous '+path);
+  const member=await account(s,'fp-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,403,'nonadmin '+path);
+  assert.equal((await s.request('/private/fp-study-data.js',undefined,member)).status,404);
+  assert.equal((await s.request('/apps/fp-study/other.js',undefined,member)).status,404);
+  s.db.raw.prepare("UPDATE dev_users SET role='admin' WHERE email=?").run('fp-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,200,'admin '+path);
+  const page=await (await s.request('/apps/fp-study',undefined,member)).text();
+  assert.ok(page.includes('FP Grado Superior'));
+  assert.ok(page.includes('ni está sincronizado con D1'));
+  assert.equal((await s.request('/apps/fp-study/fp-study-data.js',undefined,member)).headers.get('Cache-Control'),'private, no-store');
+  s.db.raw.prepare("UPDATE dev_users SET role='member' WHERE email=?").run('fp-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,403,'revoked '+path);
+ }finally{s.db.close();}
+});

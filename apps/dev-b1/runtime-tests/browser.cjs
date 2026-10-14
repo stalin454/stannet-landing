@@ -72,7 +72,21 @@ let runtime,browser;
  assert.equal((await db.prepare('SELECT completed FROM dev_progress WHERE user_id=?').bind(user.id).first()).completed,1);
  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Typing overflow '+width);}
  // D1 operator modifies only a disposable fixture; latest role must be enforced by server on next request.
+ assert.equal((await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'})).status(),403,'nonadmin FP page forbidden');
  await db.prepare("UPDATE dev_users SET role='admin' WHERE id=?").bind(user.id).run();
+ const fpResponse=await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'});
+ assert.equal(fpResponse.status(),200,'admin FP document status');
+ const fpDiagnosis=await page.evaluate(()=>({loaded:Boolean(window.FP_DATA),scripts:[...document.scripts].map(s=>s.src),items:document.querySelector('#subjects')?.childElementCount??-1}));
+ console.log(JSON.stringify({fpMigrationDiagnostics:fpDiagnosis,pageErrors:errors}));
+ await page.waitForSelector('#subjects .subject.active-course');
+ assert.equal((await page.goto(origin+'/apps/fp-study/fp-study-data.js')).status(),200,'admin private lesson assets available');
+ assert.equal((await page.goto(origin+'/private/fp-study-data.js')).status(),404,'no raw asset bypass');
+ await page.goto(origin+'/apps/fp-study',{waitUntil:'networkidle0'});
+ await page.click('#subjects .subject.active-course');await page.click('.tabs [data-tab="quiz"]');
+ await page.waitForSelector('.quiz button');await page.click('.quiz button');
+ await page.waitForFunction(()=>document.querySelector('#completed').textContent!=='0'||document.querySelector('#mistakes').textContent!=='0');
+ if(artifacts)await page.screenshot({path:join(artifacts,'fp-study-migrated-admin.png'),fullPage:true});
+ await page.goto(origin+'/account',{waitUntil:'networkidle0'});
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
  await page.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('actualizado'));
  assert.equal((await db.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').bind(user.id).first()).plan,'premium');

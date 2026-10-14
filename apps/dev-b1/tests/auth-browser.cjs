@@ -34,6 +34,18 @@ const puppeteer=require('puppeteer-core');
   await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
   await page.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('actualizado'));
   assert.equal(db.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').get(user.id).plan,'premium');
+  // Private FP Study migration pilot: original educational content and local quiz should work under Dev.
+  await page.goto(base+'/apps/fp-study',{waitUntil:'networkidle0'});
+  await page.waitForSelector('#subjects .subject.active-course');
+  await page.click('#subjects .subject.active-course');await page.waitForSelector('.tabs [data-tab="quiz"]');
+  await page.click('.tabs [data-tab="quiz"]');await page.waitForSelector('.quiz button');
+  await page.click('.quiz button');await page.waitForFunction(()=>document.querySelector('#completed').textContent!=='0'||document.querySelector('#mistakes').textContent!=='0');
+  const fpState=await page.evaluate(()=>JSON.parse(localStorage.getItem('stannetFpState')));
+  assert.equal(fpState.done+fpState.mistakes,1);
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal(await page.$eval('#completed',el=>Number(el.textContent))+await page.$eval('#mistakes',el=>Number(el.textContent)),1);
+  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'FP Study overflow '+width);}
+  await page.goto(base+'/account',{waitUntil:'networkidle0'});
   await page.click('#logout');await page.waitForFunction(()=>document.querySelector('#signed-in').hidden);
   const denied=await page.goto(base+'/apps/typing');assert.equal(denied.status(),401);
   await page.goto(base+'/account',{waitUntil:'networkidle0'});await page.click('[data-view="recover"]');await page.type('#email',email);await page.click('#auth-submit');
