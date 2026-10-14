@@ -42,6 +42,12 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
           STANNET_AUDIT_URL: http://127.0.0.1:8765/
         run: node tests/stannet-ai-context-browser.cjs
+      - name: Validate Polly sign-in, natural voice selection and opt-in costs
+        env:
+          NODE_PATH: /tmp/stannet-mobile-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: node tests/stannet-ai-voice-browser.cjs
       - name: Keep Context Bridge browser evidence
         if: always()
         uses: actions/upload-artifact@v4
