@@ -110,7 +110,44 @@ export function createHannah3D({host,look='explorer',reducedMotion=false}={}){
   draw(body,0,-.45,-.09,.42,.14,.32,trim);
   draw(body,0,-.42,.27,.31,.042,.055,cyan);
   draw(body,-.26,.21,.28,.035,.12,.035,white,0,0,-.15);
-  draw(body,.26,.21,.28,.035,.12,.035,white,0,0,.15);
+
+  if(outfit==='english'){
+   // Pleated school skirt, white collar, red neck bow and calf-high socks.
+   for(let k=0;k<12;k++){
+     const a=k*Math.PI/6;
+     draw(body,Math.cos(a)*.33,-.53,Math.sin(a)*.26,.125,.23,.13,k%2?main:rgb('#f18ab9'),0,0,Math.sin(a)*.09);
+   }
+   draw(body,-.075,.34,.34,.105,.07,.055,white,0,0,.28);
+   draw(body,.075,.34,.34,.105,.07,.055,white,0,0,-.28);
+   draw(body,-.11,.28,.42,.115,.075,.044,red,0,0,.22);
+   draw(body,.11,.28,.42,.115,.075,.044,red,0,0,-.22);
+   draw(body,0,.28,.47,.045,.046,.026,pink);
+   for(let side of [-1,1])draw(I,side*.23,-1.53+breathe,.03,.16,.19,.20,white);
+  }else if(outfit==='programming'){
+   // Hoodie pocket and cyan piping; recognisable code-academy outfit.
+   draw(body,0,-.13,.386,.26,.15,.04,rgb('#131b31'));
+   draw(body,0,.34,.29,.34,.065,.09,trim);
+   for(let side of [-1,1]){
+     draw(body,side*.12,.21,.375,.023,.18,.025,cyan,0,0,side*.08);
+     draw(I,side*.24,-1.65+breathe,.31,.20,.052,.034,cyan);
+   }
+   draw(body,0,-.17,.425,.20,.045,.026,cyan);
+  }else if(outfit==='cybersecurity'){
+   // Segmented protective suit, shoulder and knee guards, luminous insignia.
+   draw(body,0,.09,.34,.33,.30,.095,rgb('#1e3051'));
+   draw(body,0,.10,.43,.12,.135,.035,cyan);
+   for(let side of [-1,1]){
+     draw(body,side*.45,.27,.10,.19,.15,.24,trim);
+     draw(I,side*.23,-1.43+breathe,.20,.19,.115,.09,cyan);
+   }
+   draw(body,0,-.39,.31,.32,.06,.05,cyan);
+  }else{
+   // Explorer spacesuit: padded torso, chest heart and cyan helmet fittings.
+   draw(body,0,.08,.36,.33,.31,.06,white);
+   draw(body,0,.08,.42,.16,.15,.04,trim);
+   draw(body,0,.09,.462,.09,.086,.03,cyan);
+   for(const side of [-1,1])draw(body,side*.37,.27,.15,.12,.14,.23,silver);
+  }
   for(const side of [-1,1]){
    const shoulder=multiply(body,model(side*.41,.23,0,1,1,1,0,0,side*(move?.05*Math.sin(secs*2):0)-(activity==='listening'?side*.13:0)));
    draw(shoulder,side*.15,-.34,0,.17,.43,.19,main,0,0,side*.11);
