@@ -118,6 +118,8 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
         const figure=shadow.querySelector('.snai-hannah-figure');
         return {outfit:avatar.dataset.outfit,character:avatar.dataset.character,legacyHidden:shadow.querySelector('.snai-legacy-avatar').hidden,
           artwork:window.getComputedStyle(figure).backgroundImage,
+          canvas3D:!!figure.querySelector('canvas.snai-3d-canvas'),
+          ready3D:figure.classList.contains('snai-3d-ready'),
           launcherVisible:!shadow.querySelector('.snai-avatar').hidden,
           label:shadow.querySelector('.snai-launcher-label').textContent,
           width:document.documentElement.scrollWidth,viewport:innerWidth};
@@ -128,7 +130,8 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
       assert.equal(state.label,'Hannah IA',route);
       assert.equal(state.launcherVisible,true,route);
       assert.ok(state.width<=state.viewport+1,'Horizontal overflow at '+route);
-      assert.ok(state.artwork.includes('hannah-ia-'), 'Hannah artwork not requested: '+route);
+      assert.ok(state.canvas3D?(state.ready3D&&state.artwork==='none'):state.artwork.includes('hannah-ia-'),
+        'Neither an active 3D mesh nor a vector fallback is visible: '+route+' '+JSON.stringify(state));
       await sample.screenshot({path:out+'/hannah-'+outfit+'-closed.png',fullPage:false});
       await sample.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-launcher').click());
       const modal=await sample.evaluate(()=>{
@@ -136,14 +139,16 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
         const dialog=shadow.querySelector('dialog'),box=dialog.getBoundingClientRect();
         return {title:shadow.querySelector('#snai-title').textContent,open:dialog.open,
           portraitVisible:!shadow.querySelector('.snai-persona-hannah').hidden,
+          canvasInPortrait:!!shadow.querySelector('.snai-persona-hannah canvas.snai-3d-canvas'),
           x:box.x,right:box.right,screen:innerWidth};
       });
       assert.equal(modal.title,'Hannah IA');
       assert.equal(modal.open,true);
       assert.equal(modal.portraitVisible,true);
+      if(state.canvas3D)assert.equal(modal.canvasInPortrait,true,'single 3D canvas should follow dialog');
       assert.ok(modal.x>=-1&&modal.right<=modal.screen+1,'Hannah panel overflow at '+route);
       await sample.screenshot({path:out+'/hannah-'+outfit+'-open.png',fullPage:false});
-      report.push('PASS: Hannah IA real browser '+route+' -> '+outfit+'; '+(state.artwork.includes('rendered')?'illustrated':'vector fallback')+'; panel and portrait in mobile viewport.');
+      report.push('PASS: Hannah IA real browser '+route+' -> '+outfit+'; '+(state.canvas3D?'genuine WebGL 3D':state.artwork.includes('rendered')?'illustrated':'vector fallback')+'; panel and portrait in mobile viewport.');
     } finally { await sample.close(); }
   }
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
