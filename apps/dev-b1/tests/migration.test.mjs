@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 
 // The educational source remains unchanged in Space. Dev has only an isolated,
 // privately served copy; fail CI if that copy silently diverges.
-for(const name of ['fp-study-data.js','fp-study.js','fp-study.css']){
+for(const name of ['fp-study.js','fp-study.css']){
  test('FP Study copied resource exactly matches its preserved Space source: '+name,()=>{
   const source=readFileSync(new URL('../../../'+name,import.meta.url));
   const target=readFileSync(new URL('../private/'+name,import.meta.url));
@@ -30,4 +30,12 @@ test('CS Foundations wrapper retains progress limitations and private same-origi
  assert.match(html,/\/apps\/cs-foundations\/cs-lab\.js/);
  assert.match(html,/no se ha conectado a D1/);
  assert.doesNotMatch(html,/(?:src|href)=["'](?:https?:)?\/\//);
+});
+
+test('FP Study data requires exactly one documented syntax correction, without changing curriculum',()=>{
+ const original=readFileSync(new URL('../../../fp-study-data.js',import.meta.url),'utf8');
+ const repaired=readFileSync(new URL('../private/fp-study-data.js',import.meta.url),'utf8');
+ assert.equal(original.split('}}]}]},').length,2,'original error signature changed');
+ assert.equal(repaired,original.replace('}}]}]},','}}]},'));
+ assert.doesNotThrow(()=>new Function(repaired));
 });
