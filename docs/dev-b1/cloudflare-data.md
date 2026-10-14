@@ -104,3 +104,9 @@ python3 apps/dev-b1/d1-bootstrap.py initialize --wrangler /ruta/verificada/a/wra
 La ejecución [38636092002](https://github.com/stalin454/stannet-landing/actions/runs/38636092002), commit `c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19`, superó Chrome con HTTPS loopback + Worker + D1 local: registro, verificación fixture, cookies HttpOnly/Secure/Strict, teclado y corrección, progreso en D1, admin, reset, nuevo login y logout, sin overflow a 320/390/1280. También pasó el flujo SQLite anterior. No se trata de un proveedor SMTP ni de un D1 remoto.
 
 El adaptador de correo elimina el token si falla el proveedor y conserva respuestas HTTP genéricas para recuperación de cuentas existentes e inexistentes. La telemetría del Worker registra solo `mail_delivery_failed` y el tipo de operación. No registra email, token, credenciales o respuesta del proveedor. No se afirma protección de tiempo constante frente a enumeración ni entrega real de correo.
+
+## Evitar publicaciones repetidas
+
+El workflow compara el SHA publicado en `version.json` con el head del PR y los archivos del módulo público/controles de release. Los commits exclusivos de documentación o backend que sigue sin publicar no vuelven a desplegar el catálogo. Los controles de la publicación y sus pruebas sí fuerzan release. **Re-run all jobs** fuerza la comprobación completa de DNS/vinculación aunque el código público sea idéntico, para poder continuar tras añadir el secreto de lectura. El gate no accede a secretos ni escribe en Cloudflare.
+
+La publicación del commit `daa502a` (run 38637008492) fue revertida al recibir Chrome el SHA previo durante la propagación, aunque la sonda HTTP ya veía el nuevo. Se restauró la versión anterior. La prueba de navegador ahora espera de forma acotada (45 s) que su propio contexto reciba el SHA exacto, recarga la página y conserva la verificación al terminar. Los fallos funcionales siguen provocando rollback.

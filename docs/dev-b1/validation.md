@@ -12,7 +12,7 @@ Workerd/D1 local y Wrangler local PASS: dos migraciones; aplicación repetida; m
 
 ## Resultados locales
 
-- `cd apps/dev-b1 && npm test`: **20 pruebas PASS**, cero fallos, Node 24.
+- `cd apps/dev-b1 && npm test`: **21 pruebas PASS**, cero fallos, Node 24.
 - Suite previa `npm run test:ci`: **PASS**, 100 comandos; incluye Amy/Polly y StanNet AI existentes.
 - Syntax checks de app, servidor, Worker, CLI, portal y piloto: PASS.
 - `python3 docs/dev-b1/verify-isolation.py`: **550 archivos previos comparados**, todos iguales salvo exclusión aditiva de assets; archive restaurado con 550 archivos iguales. SHA-256 `f68b2fc7e0538d84bbf472df020cd12109e6b700fbcb9a71e8be867e6d0a7599`.

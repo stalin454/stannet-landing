@@ -23,7 +23,7 @@ Las versiones activas de Space y academia se compararon en Cloudflare antes/desp
 - Progreso, escritura, errores y corrección comprobados con teclado automatizado de Chrome.
 - Webhook firmado/idempotente con estado Stripe fixture: no equivale a pagos emitidos por Stripe.
 
-**20 pruebas de integración/seguridad PASS**, suite previa de 100 comandos PASS y recorrido real en Chrome: registro → buzón local → verificación → login → Typing → error/retroceso → completado/progreso → admin → logout/bloqueo directo → reset.
+**21 pruebas de integración/seguridad PASS**, suite previa de 100 comandos PASS y recorrido real en Chrome: registro → buzón local → verificación → login → Typing → error/retroceso → completado/progreso → admin → logout/bloqueo directo → reset.
 
 Dos migraciones D1 aditivas, aislamiento por identidad de entorno, sesiones `first-primary` y bloqueo explícito de publicación Auth. Workerd/D1 local: persistencia, copia/restauración, cuotas, roles y reset comprobados. Wrangler local: aplicación/reaplicación, rollback de migración fallida y exportación SQL/restauración PASS. El login vuelve a validar atómicamente la credencial después del hash para bloquear carreras con resets.
 
