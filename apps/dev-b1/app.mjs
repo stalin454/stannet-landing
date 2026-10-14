@@ -7,7 +7,8 @@ export function application(options){
  const clock=options.clock||(()=>Math.floor(Date.now()/1000));
  const secure=new URL(origin).protocol==='https:';
  if(!secure&&!['127.0.0.1','localhost'].includes(new URL(origin).hostname))throw Error('HTTPS required');
- if(['stannet.space','www.stannet.space','academy.stannet.dev'].includes(new URL(origin).hostname)||new URL(origin).hostname==='stannet.dev'&&options.deployment!=='isolated-dev')throw Error('Protected origins forbidden in B1');
+ // The pilot must not replace the Dev public catalogue or any Space origin.
+ if(['stannet.space','www.stannet.space','stannet.dev','www.stannet.dev','academy.stannet.dev'].includes(new URL(origin).hostname))throw Error('Protected origins forbidden in B1');
  const cookieName=secure?'__Host-stannet_dev_b1':'stannet_dev_b1_local';
  const cookie=(value,age)=>cookieName+'='+value+'; Path=/; HttpOnly; SameSite=Strict; Max-Age='+age+(secure?'; Secure':'');
  const statement=(sql,...args)=>db.prepare(sql).bind(...args);
@@ -176,9 +177,12 @@ export function application(options){
      const marker=crypto.randomUUID();
      await db.batch([
       statement('INSERT INTO dev_audit(id,actor,action,subject,created) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM dev_attempts WHERE id=? AND user_id=? AND completed=0)',marker,user.id,'typing-complete',attempt.id,clock(),attempt.id,user.id),
-      statement('UPDATE dev_attempts SET completed=1 WHERE id=? AND user_id=?',attempt.id,user.id),
+      statement('UPDATE dev_attempts SET completed=1 WHERE id=? AND user_id=? AND completed=0 AND EXISTS(SELECT 1 FROM dev_audit WHERE id=?)',attempt.id,user.id,marker),
       statement('INSERT INTO dev_progress(user_id,exercise,completed,attempts) SELECT ?,?,1,1 WHERE EXISTS(SELECT 1 FROM dev_audit WHERE id=?) ON CONFLICT(user_id,exercise) DO UPDATE SET completed=1,attempts=dev_progress.attempts+1',user.id,exercise.id,marker)
      ]);
+     // An overlapping request can lose the claim after its preliminary SELECT.
+     // Only the winner of the atomic batch may report a successful completion.
+     if(!await one('SELECT id FROM dev_audit WHERE id=?',marker))fail(409,'ATTEMPT_USED','El intento ya se completó.');
      return json({ok:true});
     }
     fail(404,'NOT_FOUND','Acción no disponible.');
