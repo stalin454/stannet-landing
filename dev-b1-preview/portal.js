@@ -19,7 +19,15 @@ function cards(category='all'){
 function switchView(value){view=value;const password=['login','signup'].includes(view);$('#password-label').hidden=!password;$('#password').required=password;$('#password').autocomplete=view==='signup'?'new-password':'current-password';$('#form-title').textContent={login:'Bienvenido de nuevo.',signup:'Crea tu espacio.',recover:'Recupera tu acceso.',resend:'Verifica tu correo.'}[view];$('#auth-submit').textContent={login:'Entrar en mi espacio →',signup:'Crear cuenta →',recover:'Enviar instrucciones →',resend:'Reenviar verificación →'}[view];$('.tabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));feedback('');}
 async function refresh(){
  session=await api('/api/session');$('#signed-out').hidden=session.authenticated;$('#signed-in').hidden=!session.authenticated;
- $('#admin-panel').hidden=!(session.authenticated&&session.user.role==='admin');
+$('#admin-panel').hidden=!(session.authenticated&&session.user.role==='admin');
+ if(!$('#admin-panel').hidden&&!$('#migration-pilots')){
+  const links=document.createElement('p');links.id='migration-pilots';links.className='notice';
+  links.append('Academias en revisión privada: ');
+  for(const [path,label] of [['/apps/fp-study','FP Study Area'],['/apps/cs-foundations','CS Foundations']]){
+   const link=document.createElement('a');link.href=path;link.textContent=label+' ↗';link.style.marginRight='1rem';links.append(link);
+  }
+  $('#admin-panel').prepend(links);
+ }
  if(session.authenticated&&session.user.role==='admin'){
   const data=await api('/api/admin/users');$('#admin-user').replaceChildren();
   for(const user of data.users.filter(x=>x.verified)){const option=document.createElement('option');option.value=user.id;option.textContent=user.email+' · '+(user.plan||'sin acceso');$('#admin-user').append(option);}
