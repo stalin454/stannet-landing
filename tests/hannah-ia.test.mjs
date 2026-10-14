@@ -76,12 +76,29 @@ test('genuine WebGL 3D geometry, articulation and safe fallback are present',()=
   assert.match(css,/\.snai-3d-canvas/);
 });
 
-test('unapproved procedural character is opt-in only; visitors get approved Hannah artwork',()=>{
+test('refined 3D defaults on for academies, 2D can be explicitly requested',()=>{
   const source=readFileSync('stannet-ai-avatar.mjs','utf8');
-  assert.match(source,/new URLSearchParams\(window\.location\.search\)\.get\('hannah3d'\)==='1'/);
+  assert.match(source,/new URLSearchParams\(window\.location\.search\)\.get\('hannah3d'\)!=='0'/);
   assert.match(source,/if\(this\.experimental3D\)this\.initialize3D\(\)/);
   assert.match(source,/if\(!this\.experimental3D\|\|!this\.isHannah/);
   assert.match(source,/if\(selected&&this\.experimental3D&&!this\.renderer3D\)/);
   assert.match(source,/this\.loadArtwork\(\)/);
   assert.match(source,/hannah-ia-rendered\.svg/);
+});
+
+test('refined 3D face uses the approved illustration material and outfit geometry',async()=>{
+  const {HANNAH_FACE_URI}=await import('../hannah-ia-face.mjs');
+  const decoded=Buffer.from(HANNAH_FACE_URI.split(',')[1],'base64');
+  assert.match(HANNAH_FACE_URI,/^data:image\/webp;base64,/);
+  assert.equal(decoded.toString('ascii',0,4),'RIFF');
+  assert.equal(decoded.toString('ascii',8,12),'WEBP');
+  const renderer=readFileSync('hannah-ia-3d.mjs','utf8');
+  assert.match(renderer,/function portrait\(gl\)/);
+  assert.match(renderer,/portraitFace&&textureReady/);
+  assert.match(renderer,/gl\.texImage2D/);
+  assert.match(renderer,/outfit==='english'/);
+  assert.match(renderer,/outfit==='programming'/);
+  assert.match(renderer,/outfit==='cybersecurity'/);
+  assert.match(renderer,/gl\.deleteTexture\(faceTexture\)/);
+  assert.match(renderer,/if\(textureReady\)host\.classList\.add\('snai-3d-ready'\)/);
 });

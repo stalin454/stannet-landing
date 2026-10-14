@@ -151,6 +151,33 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
       report.push('PASS: Hannah IA real browser '+route+' -> '+outfit+'; '+(state.canvas3D?'genuine WebGL 3D':state.artwork.includes('rendered')?'illustrated':'vector fallback')+'; panel and portrait in mobile viewport.');
     } finally { await sample.close(); }
   }
+
+  // Portrait-v2 opt-in browser screenshot and functional mesh/material sanity check.
+  for(const [academyRoute,academyOutfit] of [['english','english'],['programming','programming'],['cybersecurity','cybersecurity']]){
+  const portrait=await browser.newPage();
+  await portrait.setViewport({width:390,height:844,isMobile:true,hasTouch:true});
+  try {
+    await portrait.goto(new URL('pages/'+academyRoute+'.html?hannah3d=1',base).href,{waitUntil:'domcontentloaded'});
+    await portrait.waitForFunction(()=>{
+      const a=document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-hannah-figure');
+      return !!a?.querySelector('.snai-3d-canvas')&&a.classList.contains('snai-3d-ready');
+    },{timeout:15000});
+    const portraitState=await portrait.evaluate(()=>{
+      const f=document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-hannah-figure');
+      const canvas=f.querySelector('canvas.snai-3d-canvas');
+      const gl=canvas?.getContext('webgl');
+      return {realWebGL:!!gl,canvasPixels:canvas?.width*canvas?.height,renderReady:f.classList.contains('snai-3d-ready'),outfit:document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-avatar-surface').dataset.outfit};
+    });
+    assert.ok(portraitState.realWebGL&&portraitState.canvasPixels>1000&&portraitState.renderReady,'3D portrait not rendered: '+JSON.stringify(portraitState));
+    assert.equal(portraitState.outfit,academyOutfit);
+    await portrait.screenshot({path:out+'/hannah-portrait-v2-'+academyOutfit+'.png',fullPage:false});
+    await portrait.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-launcher').click());
+    await portrait.waitForFunction(()=>document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-persona-hannah .snai-3d-canvas'));
+    await portrait.screenshot({path:out+'/hannah-portrait-v2-in-chat.png',fullPage:false});
+    report.push('PASS: Hannah portrait v2 '+academyOutfit+' opt-in WebGL facial material decoded, real geometry rendered and canvas moved to mobile chat.');
+  } finally {await portrait.close()}
+  }
+
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
  console.log(report.join('\n\n'));
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});

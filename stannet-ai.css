@@ -17,6 +17,9 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-launcher img{display:block;width:100%;height:auto;aspect-ratio:2/3;max-height:30dvh;object-fit:contain;filter:drop-shadow(0 4px 8px #1c9dcc33)}
 .snai-launcher > .snai-launcher-label{padding:3px 5px;border:1px solid var(--snai-line);border-radius:7px;background:#0b172be6;font-size:10px}
 .snai-hide-avatar{position:absolute;right:0;top:0;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--snai-line);border-radius:50%;background:#102139e6;color:#def5ff;font-size:20px}
+/* Keep the dismiss affordance clear of Hannah's face and signature bow. */
+.snai-avatar-surface[data-character="hannah"] .snai-hide-avatar{top:-18px;right:0;width:32px;height:32px;font-size:16px;opacity:.86}
+.snai-avatar-surface[data-character="hannah"] .snai-hide-avatar:is(:hover,:focus-visible){opacity:1}
 .snai-panel{--snai-gap:12px;--snai-panel-width:min(450px,calc(var(--snai-width,100vw) - 2 * var(--snai-gap) - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--snai-panel-height:min(600px,calc(var(--snai-height,100dvh) - 2 * var(--snai-gap) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));position:fixed;inset:auto;left:calc(var(--snai-x,0px) + var(--snai-width,100vw) - var(--snai-panel-width) - var(--snai-gap) - env(safe-area-inset-right,0px));top:calc(var(--snai-y,0px) + var(--snai-height,100dvh) - var(--snai-panel-height) - var(--snai-gap) - env(safe-area-inset-bottom,0px));width:var(--snai-panel-width);height:var(--snai-panel-height);max-width:none;max-height:none;margin:0;padding:0;border:1px solid var(--snai-line);border-radius:22px;background:radial-gradient(ellipse at top right,#45296650,transparent 55%),#081426;color:#eef8ff;overflow:hidden;box-shadow:0 12px 40px #01061366}
 .snai-panel[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
 .snai-panel::backdrop{background:#02091755}

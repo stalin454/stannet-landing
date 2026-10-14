@@ -31,9 +31,9 @@ export class AgentAvatar {
     this.loading3D=false;
     this.currentActivity='idle';
     this.isOpen=false;
-    // The procedural model does not meet the approved Hannah art direction.
-    // Keep it available only for explicit development QA, not for visitors.
-    this.experimental3D=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('hannah3d')==='1';
+    // Refined 3D runs in academies by default. ?hannah3d=0 disables WebGL.
+    // Rendering or texture errors retain the approved 2D illustration.
+    this.experimental3D=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('hannah3d')!=='0';
     this.updateLook();
     if(this.experimental3D)this.initialize3D();
     // Prefer the approved image-inspired art only after successful browser decoding.
@@ -50,7 +50,7 @@ export class AgentAvatar {
     this.loading3D=true;
     try{
       // Only academies download the 3D engine. No change to the AI or voice services.
-      const {createHannah3D}=await import('/hannah-ia-3d.mjs?v=20261014-3d1');
+      const {createHannah3D}=await import('/hannah-ia-3d.mjs?v=20261014-portrait2');
       if(this.destroyed||!this.isHannah)return;
       const renderer=createHannah3D({host:this.figure,look:this.look,
         reducedMotion:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false});
