@@ -116,20 +116,25 @@
     if(chunk)chunks.push(chunk);return chunks;
   };
   const stopSpeech=()=>{
-    speechToken++;speechActive=false;currentSpeechText='';avatar.setActivity('idle');
+    speechToken++;speechActive=false;currentSpeechText='';setActivity('idle');
     if(currentAudio){const audio=currentAudio;currentAudio=null;audio.pause();audio.onended?.()}
     if(window.speechSynthesis)window.speechSynthesis.cancel();
     if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
   };
-  const playAzureChunk=async(chunk,token)=>{
+  const playSpeechChunk=async(chunk,token)=>{
     const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:lastVoiceLang,voice:voiceForLanguage(lastVoiceLang),purpose:'chat'})});
-    if(!response.ok)throw new Error('Azure TTS unavailable');
+    if(!response.ok)throw new Error('La voz remota no está disponible');
     const blob=await response.blob();
     if(token!==speechToken||!panel.open)return false;
     const audioUrl=URL.createObjectURL(blob),audio=new Audio(audioUrl);
     currentAudio=audio;
     try{
-      await new Promise((resolve,reject)=>{audio.onended=resolve;audio.onerror=()=>reject(new Error('Audio playback failed'));audio.play().catch(reject)});
+      await new Promise((resolve,reject)=>{
+        audio.onplaying=()=>{if(token===speechToken)setActivity('speaking')};
+        audio.onended=()=>{if(token===speechToken)setActivity('thinking');resolve()};
+        audio.onerror=()=>reject(new Error('No fue posible reproducir el audio'));
+        audio.play().catch(reject);
+      });
     }finally{
       URL.revokeObjectURL(audioUrl);
       if(currentAudio===audio)currentAudio=null;
@@ -151,7 +156,7 @@
     if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
     voiceStatus.textContent=listenAfter?'StanNet AI está hablando… puedes interrumpirme.':'Reproduciendo respuesta…';
     speechActive=true;currentSpeechText=speech;
-    setActivity('speaking');
+    setActivity('thinking'); // Do not animate lips while the remote audio is still loading.
     if(listenAfter&&voiceEnabled&&!mobile.matches)startListening();
     if(listenAfter&&voiceEnabled&&mobile.matches&&recognitionRunning){
       try{recognition.abort()}catch{}
@@ -161,7 +166,7 @@
     try{
       for(const chunk of speechChunks(speech)){
         if(token!==speechToken)return;
-        const completed=await playAzureChunk(chunk,token);
+        const completed=await playSpeechChunk(chunk,token);
         if(!completed)return;
       }
     }catch{
@@ -173,7 +178,12 @@
           utterance.lang=lastVoiceLang;
           const localVoice=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(lastVoiceLang.slice(0,2).toLowerCase()));
           if(localVoice)utterance.voice=localVoice;
-          await new Promise(resolve=>{utterance.onend=resolve;utterance.onerror=resolve;window.speechSynthesis.speak(utterance)});
+          await new Promise(resolve=>{
+            utterance.onstart=()=>{if(token===speechToken)setActivity('speaking')};
+            utterance.onend=resolve;
+            utterance.onerror=resolve;
+            window.speechSynthesis.speak(utterance);
+          });
         }catch{}
       }else{
         voiceStatus.textContent='No pude reproducir audio en este navegador.';
