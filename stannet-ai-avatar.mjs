@@ -31,8 +31,11 @@ export class AgentAvatar {
     this.loading3D=false;
     this.currentActivity='idle';
     this.isOpen=false;
+    // The procedural model does not meet the approved Hannah art direction.
+    // Keep it available only for explicit development QA, not for visitors.
+    this.experimental3D=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('hannah3d')==='1';
     this.updateLook();
-    this.initialize3D();
+    if(this.experimental3D)this.initialize3D();
     // Prefer the approved image-inspired art only after successful browser decoding.
     // Keep the locally drawn SVG as an always-available fallback.
     this.loadArtwork();
@@ -43,7 +46,7 @@ export class AgentAvatar {
   }
   get isHannah(){return this.look!==null;}
   async initialize3D(){
-    if(!this.isHannah||this.renderer3D||this.loading3D||this.destroyed)return;
+    if(!this.experimental3D||!this.isHannah||this.renderer3D||this.loading3D||this.destroyed)return;
     this.loading3D=true;
     try{
       // Only academies download the 3D engine. No change to the AI or voice services.
@@ -84,7 +87,7 @@ export class AgentAvatar {
     this.surface.dataset.outfit=next||'default';
     this.figure.style.backgroundPosition=`${hannahSpritePosition(next)}% 50%`;
     this.renderer3D?.setOutfit(next||'explorer');
-    if(selected&&!this.renderer3D)this.initialize3D();
+    if(selected&&this.experimental3D&&!this.renderer3D)this.initialize3D();
     this.renderer3D?.setVisible(selected&&!this.hidden);
     this.updatePersona();
   }
