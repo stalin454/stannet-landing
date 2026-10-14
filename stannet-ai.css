@@ -15,7 +15,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-avatar{--snai-avatar-width:clamp(108px,9vw,140px);position:relative;width:var(--snai-avatar-width);padding-top:16px}
 .snai-launcher{display:flex;flex-direction:column;align-items:center;width:100%;height:auto;padding:0;border:0;background:transparent;color:var(--snai-cyan)}
 .snai-launcher img{display:block;width:100%;height:auto;aspect-ratio:2/3;max-height:30dvh;object-fit:contain;filter:drop-shadow(0 4px 8px #1c9dcc33)}
-.snai-launcher span{padding:3px 5px;border:1px solid var(--snai-line);border-radius:7px;background:#0b172be6;font-size:10px}
+.snai-launcher > .snai-launcher-label{padding:3px 5px;border:1px solid var(--snai-line);border-radius:7px;background:#0b172be6;font-size:10px}
 .snai-hide-avatar{position:absolute;right:0;top:0;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--snai-line);border-radius:50%;background:#102139e6;color:#def5ff;font-size:20px}
 .snai-panel{--snai-gap:12px;--snai-panel-width:min(450px,calc(var(--snai-width,100vw) - 2 * var(--snai-gap) - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)));--snai-panel-height:min(600px,calc(var(--snai-height,100dvh) - 2 * var(--snai-gap) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));position:fixed;inset:auto;left:calc(var(--snai-x,0px) + var(--snai-width,100vw) - var(--snai-panel-width) - var(--snai-gap) - env(safe-area-inset-right,0px));top:calc(var(--snai-y,0px) + var(--snai-height,100dvh) - var(--snai-panel-height) - var(--snai-gap) - env(safe-area-inset-bottom,0px));width:var(--snai-panel-width);height:var(--snai-panel-height);max-width:none;max-height:none;margin:0;padding:0;border:1px solid var(--snai-line);border-radius:22px;background:radial-gradient(ellipse at top right,#45296650,transparent 55%),#081426;color:#eef8ff;overflow:hidden;box-shadow:0 12px 40px #01061366}
 .snai-panel[open]{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
@@ -89,3 +89,51 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-panel.compact .snai-persona{display:none}
 .snai-panel.compact .snai-form{padding:6px 8px}
 .snai-panel.compact .snai-context{max-height:20px}
+
+
+/* Hannah IA uses one tiny same-origin SVG sprite, never a canvas or 3D engine.
+   Only academy routes opt in; the existing site-wide avatar remains unchanged. */
+.snai-hannah-figure{position:relative;display:block;width:100%;aspect-ratio:120/168;max-height:25dvh;background-image:url('/assets/ai/hannah-ia-sprite.svg');background-repeat:no-repeat;background-size:400% 100%;background-position:0 50%;filter:drop-shadow(0 6px 12px #c546de32);transform:translateZ(0)}
+.snai-launcher-label{min-width:76px;text-align:center}
+.snai-hannah-mouth{position:absolute;left:46.5%;top:50.5%;width:11%;height:4%;border-radius:50%;background:#9f4355;border:1px solid #f8b2ad;transform-origin:center center;opacity:0;pointer-events:none}
+.snai-hannah-lid{position:absolute;top:36.5%;width:13%;height:9%;border-radius:50%;background:#f7d3c0;border-bottom:2px solid #512a2c;opacity:0;pointer-events:none}
+.snai-hannah-lid.left{left:31%}.snai-hannah-lid.right{left:56%}
+.snai-persona-hannah{display:block;width:100%;height:100%;background:url('/assets/ai/hannah-ia-sprite.svg') 0 50% / 400% 100% no-repeat}
+.snai-avatar-surface[data-character="hannah"][data-activity="listening"] .snai-hannah-figure{filter:drop-shadow(0 0 10px #60e6ff88)}
+@media(prefers-reduced-motion:no-preference){
+ .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-figure{animation:snai-hannah-float 4s ease-in-out infinite}
+ .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-lid{animation:snai-hannah-blink 6s ease-in-out infinite}
+ .snai-avatar-surface[data-character="hannah"][data-activity="speaking"] .snai-hannah-mouth{opacity:1;animation:snai-hannah-talk .22s ease-in-out infinite alternate}
+}
+@keyframes snai-hannah-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes snai-hannah-blink{0%,91%,95%,100%{opacity:0}92%,94%{opacity:1}}
+@keyframes snai-hannah-talk{from{transform:scaleY(.45) scaleX(.8)}to{transform:scaleY(1.5) scaleX(1.1)}}
+@media(prefers-reduced-motion:reduce){.snai-avatar-surface[data-character="hannah"][data-activity="speaking"] .snai-hannah-mouth{opacity:1}}
+@media(max-width:640px){.snai-hannah-figure{max-height:22dvh}}
+
+
+/* The full floating avatar hides while dialog is open, so the header portrait
+   carries the same speech/listening states without covering lesson content. */
+.snai-persona-hannah{position:relative;overflow:hidden}
+.snai-persona-mouth{position:absolute;left:46%;top:49%;width:12%;height:5%;border-radius:50%;background:#9f4355;opacity:0;pointer-events:none}
+.snai-persona-lid{position:absolute;top:36%;width:13%;height:8%;border-radius:50%;background:#f7d3c0;border-bottom:1px solid #512a2c;opacity:0;pointer-events:none}
+.snai-persona-lid.left{left:31%}.snai-persona-lid.right{left:56%}
+.snai-panel[data-activity="listening"] .snai-persona-hannah{filter:drop-shadow(0 0 4px #63ecff)}
+@media(prefers-reduced-motion:no-preference){
+ .snai-panel[data-activity="speaking"] .snai-persona-mouth{opacity:1;animation:snai-hannah-talk .22s ease-in-out infinite alternate}
+ .snai-panel .snai-persona-lid{animation:snai-hannah-blink 6s ease-in-out infinite}
+}
+@media(prefers-reduced-motion:reduce){
+ .snai-panel[data-activity="speaking"] .snai-persona-mouth{opacity:1}
+}
+
+
+/* True 3D renderer: the SVG remains visible until WebGL initialization succeeds. */
+.snai-hannah-figure[hidden],.snai-persona-hannah[hidden],.snai-legacy-avatar[hidden]{display:none!important}
+.snai-hannah-figure.snai-3d-ready,.snai-persona-hannah.snai-3d-ready{background-image:none!important}
+.snai-3d-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none;contain:strict}
+.snai-3d-ready > .snai-hannah-mouth,.snai-3d-ready > .snai-hannah-lid,
+.snai-3d-ready > .snai-persona-mouth,.snai-3d-ready > .snai-persona-lid{display:none!important}
+@media(prefers-reduced-motion:no-preference){
+  .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-figure.snai-3d-ready{animation:none}
+}
