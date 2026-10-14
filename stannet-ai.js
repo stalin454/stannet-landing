@@ -2,7 +2,7 @@
 (async()=>{
   if(window.__StanNetAIWidgetLoaded)return;
   window.__StanNetAIWidgetLoaded=true;
-  const VERSION='20261014-tutor1';
+  const VERSION='20261014-voice2';
   let modules;
   try {modules=await Promise.all([import('/stannet-ai-core.mjs?v='+VERSION),import('/stannet-ai-knowledge.mjs?v='+VERSION),import('/stannet-ai-avatar.mjs?v='+VERSION),import('/stannet-ai-context-bridge.mjs?v='+VERSION)]);}
   catch(error){window.__StanNetAIWidgetLoaded=false;console.error('StanNet AI no pudo cargar sus módulos.',error);return;}
@@ -34,6 +34,20 @@
         <div class="snai-form-row"><textarea maxlength="4000" placeholder="¿Qué quieres hacer en StanNet?" aria-label="Mensaje" enterkeyhint="send"></textarea><button class="snai-voice-toggle" type="button" aria-label="Activar conversación por voz" aria-pressed="false">🎙️</button><button class="snai-send" type="submit" aria-label="Enviar mensaje">➜</button></div>
         <div class="snai-tools"><button class="snai-share-editor" type="button">Compartir código</button><button class="snai-attach" type="button" aria-label="Adjuntar imagen o código">Adjuntar</button><input class="snai-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.txt,.md,.csv,.json,.js,.ts,.tsx,.html,.css,.py,.sql,.java,.php,.c,.cpp,.cs"><span class="snai-attachment" hidden></span><button class="snai-remove-attachment" type="button" aria-label="Quitar adjunto" hidden>×</button><details class="snai-info"><summary>Privacidad</summary><p>Los mensajes y adjuntos se envían al proveedor de IA. El código y los adjuntos requieren permiso en cada envío. El material y la respuesta de ese envío no se guardan en el historial. Al activar el micrófono, el navegador procesa el audio; StanNet recibe la transcripción.</p></details></div>
         <small class="snai-voice-status" aria-live="polite">Puedes escribir o activar la voz.</small>
+        <details class="snai-neural-access" hidden>
+          <summary>Voz natural · Amazon Polly</summary>
+          <div class="snai-neural-content">
+            <small class="snai-neural-state" role="status" aria-live="polite">Comprobando acceso a la voz natural…</small>
+            <small>Polly puede generar cargos en AWS dentro de tu cuota autorizada. Solo se solicita audio al activar la conversación por voz o pulsar 🔊.</small>
+            <div class="snai-neural-credentials">
+              <label>Correo de StanNet Language Academy<input class="snai-neural-email" type="email" maxlength="180" autocomplete="username" inputmode="email" placeholder="Correo electrónico"></label>
+              <label>Contraseña<input class="snai-neural-password" type="password" maxlength="256" autocomplete="current-password" placeholder="Contraseña"></label>
+              <button class="snai-neural-signin" type="button">Iniciar sesión para voz natural</button>
+              <a href="/pages/language-typing.html">Crear cuenta o gestionar acceso</a>
+            </div>
+            <button class="snai-neural-local" type="button" hidden>Escuchar con voz básica de este dispositivo</button>
+          </div>
+        </details>
       </form>
     </dialog>`;
   ui.append(content);
@@ -82,8 +96,102 @@
   const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   let voiceEnabled=false,voiceThinking=false,recognition=null,recognitionRunning=false,lastVoiceLang='es-ES';
   const detectVoiceLanguage=(value)=>{const text=String(value||'').toLowerCase();const english=(text.match(/\b(the|and|you|your|what|how|can|with|this|that|please|hello|thanks|learn|english)\b/g)||[]).length;const spanish=(text.match(/\b(el|la|los|las|y|que|como|cómo|puedes|puede|con|esto|esta|por|para|hola|gracias|aprender|inglés|ingles)\b/g)||[]).length;return english>spanish?'en-GB':'es-ES'};
-  const voiceForLanguage=lang=>lang==='en-GB'?'en-GB-SoniaNeural':'es-ES-ElviraNeural';
+  const voiceForLanguage=(lang,provider='azure-speech')=>provider==='amazon-polly'
+    ?(lang==='en-GB'?'Amy':'Lucia')
+    :(lang==='en-GB'?'en-GB-SoniaNeural':'es-ES-ElviraNeural');
   let currentAudio=null,activeSpeechButton=null,speechToken=0,speechActive=false,currentSpeechText='';
+  const neuralPanel=$('.snai-neural-access'),neuralState=$('.snai-neural-state'),
+    neuralLogin=$('.snai-neural-credentials'),neuralEmail=$('.snai-neural-email'),
+    neuralPassword=$('.snai-neural-password'),neuralSignin=$('.snai-neural-signin'),
+    basicVoiceButton=$('.snai-neural-local');
+  let voiceAccess=null,voiceAccessCheckedAt=0,lastUnplayedSpeech='';
+  const showNeuralMessage=(message,{login=false,allowBasic=false,expand=false}={})=>{
+    neuralPanel.hidden=false;
+    neuralState.textContent=message;
+    neuralLogin.hidden=!login;
+    basicVoiceButton.hidden=!allowBasic;
+    if(expand)neuralPanel.open=true;
+  };
+  const refreshVoiceAccess=async({force=false}={})=>{
+    if(!force&&voiceAccess&&Date.now()-voiceAccessCheckedAt<12000)return voiceAccess;
+    let result;
+    try{
+      const response=await fetch('/api/speech/status',{credentials:'same-origin',cache:'no-store'});
+      if(!response.ok)throw new Error('voice-status-http-'+response.status);
+      const status=await response.json();
+      if(status.provider==='amazon-polly'){
+        const sessionResponse=await fetch('/api/language-premium/session',{credentials:'same-origin',cache:'no-store'});
+        const session=await sessionResponse.json();
+        const available=status.configured===true;
+        const authenticated=sessionResponse.ok&&session.authenticated===true;
+        const approved=authenticated&&session.premiumEnabled===true;
+        const remaining=Number(session.remaining)||0;
+        result={provider:'amazon-polly',ready:available&&approved&&remaining>0,
+          reason:!available?'unavailable':!sessionResponse.ok?'session-error':!authenticated?'login':!approved?'approval':remaining<=0?'quota':'ready',
+          remaining};
+        if(result.ready)showNeuralMessage('Amazon Polly · voz natural activada. Solicitudes disponibles: '+remaining+'.',{login:false});
+        else if(result.reason==='login')showNeuralMessage('La voz natural requiere iniciar sesión. No utilizaré una voz robótica sin avisarte.',{login:true,allowBasic:true});
+        else if(result.reason==='approval')showNeuralMessage('Tu cuenta aún requiere aprobación para utilizar Amazon Polly.',{login:false,allowBasic:true});
+        else if(result.reason==='quota')showNeuralMessage('Has agotado el límite de voz natural. Puedes usar la voz gratuita si lo deseas.',{allowBasic:true});
+        else showNeuralMessage('Amazon Polly no está disponible ahora. Puedes usar la voz del dispositivo.',{login:result.reason==='session-error',allowBasic:true});
+      }else if(status.provider==='azure-speech'){
+        result={provider:'azure-speech',ready:status.regionConfigured===true&&status.keyConfigured===true&&status.azureReachable===true,reason:'azure'};
+        neuralPanel.hidden=true;
+      }else result={provider:'unknown',ready:false,reason:'unknown'};
+    }catch{
+      result={provider:'unknown',ready:false,reason:'network'};
+      showNeuralMessage('No pude verificar el servicio de voz natural. Puedes probar más tarde.',{allowBasic:true});
+    }
+    voiceAccess=result;voiceAccessCheckedAt=Date.now();
+    return result;
+  };
+  basicVoiceButton.addEventListener('click',()=>{
+    if(!lastUnplayedSpeech||!window.SpeechSynthesisUtterance||!window.speechSynthesis)return;
+    stopSpeech();
+    const token=speechToken;
+    speechActive=true;
+    if(recognition){try{recognition.abort()}catch{}}
+    recognitionRunning=false;
+    const u=new SpeechSynthesisUtterance(lastUnplayedSpeech);
+    u.lang=detectVoiceLanguage(lastUnplayedSpeech);
+    u.rate=.94;
+    u.onstart=()=>{if(token===speechToken)setActivity('speaking')};
+    const finish=()=>{
+      if(token!==speechToken)return;
+      speechActive=false;setActivity('idle');
+      if(voiceEnabled&&panel.open)finishVoiceTurn();
+    };
+    u.onend=finish;u.onerror=finish;
+    neuralState.textContent='Reproduciendo con la voz básica de este dispositivo (no es Amazon Polly).';
+    window.speechSynthesis.speak(u);
+  });
+  for(const entry of [neuralEmail,neuralPassword]){
+    entry.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();event.stopPropagation();neuralSignin.click()}
+    });
+  }
+  neuralPanel.addEventListener('toggle',()=>{if(neuralPanel.open)void refreshVoiceAccess({force:true})});
+  neuralSignin.addEventListener('click',async()=>{
+    const email=neuralEmail.value.trim(),password=neuralPassword.value;
+    if(!email||password.length<10){
+      neuralState.textContent='Introduce tu correo y contraseña (mínimo 10 caracteres).';return;
+    }
+    neuralSignin.disabled=true;
+    neuralState.textContent='Comprobando el acceso a la voz natural…';
+    try{
+      const response=await fetch('/api/language-premium/signin',{
+        method:'POST',credentials:'same-origin',cache:'no-store',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email,password})
+      });
+      const data=await response.json();
+      if(!response.ok){neuralState.textContent=data.error||'No se pudo iniciar sesión.';return}
+      await refreshVoiceAccess({force:true});
+      neuralEmail.value='';
+      if(voiceAccess?.ready)voiceStatus.textContent='Voz natural disponible. Pulsa 🔊 de nuevo para escuchar; no se ha generado audio de pago.';
+    }catch{neuralState.textContent='Error de conexión al iniciar sesión. Inténtalo de nuevo.'}
+    finally{neuralPassword.value='';neuralSignin.disabled=false}
+  });
   const normalizeSpeech=value=>String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
   const INTERRUPTION_WORDS=new Set(['para','espera','no','oye','stop','wait','sorry','perdon','perdona']);
   const isExplicitInterruption=value=>{const heard=normalizeSpeech(value);return heard.split(' ').some(word=>INTERRUPTION_WORDS.has(word));};
@@ -110,20 +218,36 @@
     if(chunk)chunks.push(chunk);return chunks;
   };
   const stopSpeech=()=>{
-    speechToken++;speechActive=false;currentSpeechText='';
+    speechToken++;speechActive=false;currentSpeechText='';setActivity('idle');
     if(currentAudio){const audio=currentAudio;currentAudio=null;audio.pause();audio.onended?.()}
     if(window.speechSynthesis)window.speechSynthesis.cancel();
     if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
   };
-  const playAzureChunk=async(chunk,token)=>{
-    const response=await fetch('/api/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:chunk,lang:lastVoiceLang,voice:voiceForLanguage(lastVoiceLang),purpose:'chat'})});
-    if(!response.ok)throw new Error('Azure TTS unavailable');
+  const playSpeechChunk=async(chunk,token,provider)=>{
+    const response=await fetch('/api/speech',{
+      method:'POST',headers:{'Content-Type':'application/json','Accept':'audio/mpeg'},
+      credentials:'same-origin',cache:'no-store',
+      body:JSON.stringify({text:chunk,lang:lastVoiceLang,voice:voiceForLanguage(lastVoiceLang,provider),purpose:'chat'})
+    });
+    if(!response.ok){
+      const failure=await response.json().catch(()=>({}));
+      const error=new Error(failure.error||'La voz natural no está disponible');
+      error.code=String(failure.code||'');
+      error.status=response.status;
+      throw error;
+    }
+    if(!String(response.headers.get('content-type')||'').includes('audio/'))throw new Error('El servicio de voz no devolvió audio.');
     const blob=await response.blob();
     if(token!==speechToken||!panel.open)return false;
     const audioUrl=URL.createObjectURL(blob),audio=new Audio(audioUrl);
     currentAudio=audio;
     try{
-      await new Promise((resolve,reject)=>{audio.onended=resolve;audio.onerror=()=>reject(new Error('Audio playback failed'));audio.play().catch(reject)});
+      await new Promise((resolve,reject)=>{
+        audio.onplaying=()=>{if(token===speechToken)setActivity('speaking')};
+        audio.onended=()=>{if(token===speechToken)setActivity('thinking');resolve()};
+        audio.onerror=()=>reject(new Error('No fue posible reproducir el audio'));
+        audio.play().catch(reject);
+      });
     }finally{
       URL.revokeObjectURL(audioUrl);
       if(currentAudio===audio)currentAudio=null;
@@ -143,42 +267,52 @@
     stopSpeech();
     const token=speechToken;
     if(button){activeSpeechButton=button;button.classList.add('is-speaking');button.textContent='■'}
-    voiceStatus.textContent=listenAfter?'StanNet AI está hablando… puedes interrumpirme.':'Reproduciendo respuesta…';
+    voiceStatus.textContent='Comprobando voz natural…';
     speechActive=true;currentSpeechText=speech;
-    setActivity('speaking');
+    setActivity('thinking'); // Mouth/avatar only speaks when real audio playback starts.
     if(listenAfter&&voiceEnabled&&!mobile.matches)startListening();
     if(listenAfter&&voiceEnabled&&mobile.matches&&recognitionRunning){
       try{recognition.abort()}catch{}
       recognitionRunning=false;
-      voiceStatus.textContent='StanNet AI está hablando… volveré a escucharte al terminar.';
+      voiceStatus.textContent='Preparando voz natural… volveré a escucharte al terminar.';
     }
+    let delivered=false;
     try{
+      const access=await refreshVoiceAccess();
+      if(token!==speechToken||!panel.open)return;
+      if(!access.ready){
+        lastUnplayedSpeech=speech;
+        neuralPanel.open=true;
+        voiceStatus.textContent=access.reason==='login'
+          ?'La voz natural requiere inicio de sesión. Abre «Voz natural · Amazon Polly».'
+          :'La voz natural no está disponible; consulta el estado debajo del chat.';
+        return;
+      }
+      lastUnplayedSpeech='';
+      voiceStatus.textContent='Reproduciendo respuesta con voz natural…';
       for(const chunk of speechChunks(speech)){
         if(token!==speechToken)return;
-        const completed=await playAzureChunk(chunk,token);
+        const completed=await playSpeechChunk(chunk,token,access.provider);
         if(!completed)return;
       }
-    }catch{
+      delivered=true;
+    }catch(error){
       if(token!==speechToken)return;
-      if(window.speechSynthesis&&window.SpeechSynthesisUtterance){
-        try{
-          window.speechSynthesis.cancel();
-          const utterance=new SpeechSynthesisUtterance(speech);
-          utterance.lang=lastVoiceLang;
-          const localVoice=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(lastVoiceLang.slice(0,2).toLowerCase()));
-          if(localVoice)utterance.voice=localVoice;
-          await new Promise(resolve=>{utterance.onend=resolve;utterance.onerror=resolve;window.speechSynthesis.speak(utterance)});
-        }catch{}
-      }else{
-        voiceStatus.textContent='No pude reproducir audio en este navegador.';
-      }
+      lastUnplayedSpeech=speech;
+      voiceAccess=null;voiceAccessCheckedAt=0;
+      const code=error?.code||'';
+      if(['LANGUAGE_LOGIN_REQUIRED','LANGUAGE_NOT_APPROVED','LANGUAGE_QUOTA','LANGUAGE_QUOTA_UNAVAILABLE'].includes(code)){
+        const login=code==='LANGUAGE_LOGIN_REQUIRED';
+        showNeuralMessage(error.message||'No se pudo autorizar la voz natural.',{login,allowBasic:true,expand:true});
+      }else showNeuralMessage('La voz neural falló. No cambiaré a una voz robótica automáticamente.',{allowBasic:true,expand:true});
+      voiceStatus.textContent='No se ha reproducido voz natural. Comprueba el acceso en el panel de voz.';
     }finally{
       if(token===speechToken){
         speechActive=false;currentSpeechText='';
         setActivity('idle');
         if(activeSpeechButton){activeSpeechButton.classList.remove('is-speaking');activeSpeechButton.textContent='🔊';activeSpeechButton=null}
         if(listenAfter&&voiceEnabled)finishVoiceTurn();
-        else if(!voiceEnabled)voiceStatus.textContent='La voz funciona en navegadores compatibles; también puedes escribir.';
+        else if(delivered)voiceStatus.textContent='Audio neural finalizado.';
       }
     }
   }
@@ -244,7 +378,9 @@
       voiceStatus.textContent='Este navegador no admite dictado por voz. Puedes escribir y pulsar 🔊 para oír las respuestas.';
       return;
     }
-    voiceEnabled=true;voiceThinking=false;updateVoiceButton();startListening();
+    voiceEnabled=true;voiceThinking=false;updateVoiceButton();
+    void refreshVoiceAccess({force:true});
+    startListening();
   });
 
   // The dialog enters the browser top layer, bypassing transformed/contained

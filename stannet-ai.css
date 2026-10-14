@@ -89,3 +89,17 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .snai-panel.compact .snai-persona{display:none}
 .snai-panel.compact .snai-form{padding:6px 8px}
 .snai-panel.compact .snai-context{max-height:20px}
+
+
+/* Premium speech status is separate from the existing agent/mic and never exposes keys. */
+.snai-neural-access{margin-top:4px;border:1px solid #34516b;border-radius:9px;background:#10233b;color:#e0f7ff;max-height:min(230px,38dvh);overflow-y:auto;overscroll-behavior:contain}
+.snai-neural-access summary{cursor:pointer;min-height:30px;padding:6px 9px;font-size:12px;font-weight:650;color:#78dcf1}
+.snai-neural-content{display:grid;gap:8px;padding:0 10px 10px}
+.snai-neural-state{font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.snai-neural-credentials{display:grid;gap:7px}
+.snai-neural-credentials label{display:grid;gap:3px;font-size:11px}
+.snai-neural-credentials input{width:100%;min-height:38px;padding:7px 9px;border:1px solid #496780;border-radius:8px;background:#071529;color:#f1faff;font-size:16px}
+.snai-neural-credentials button,.snai-neural-local{min-height:38px;border:1px solid #427790;border-radius:8px;background:#164462;color:#f2ffff;cursor:pointer;font-size:12px;padding:6px 9px}
+.snai-neural-credentials a{font-size:12px;color:#88e6ff;text-decoration:underline}
+.snai-panel.compact .snai-neural-access{display:none}
+@media(max-width:640px){.snai-neural-access{max-height:min(190px,30dvh)}}
