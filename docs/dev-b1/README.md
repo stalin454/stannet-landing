@@ -1,5 +1,7 @@
 # StanNet Dev B1 · estado actual
 
+Estado actualizado: [piloto Typing, evidencia y bloqueo D1 — 15/10/2026](typing-pilot-20261015.md). El dominio Dev ya está vinculado; Auth/Typing alojados siguen desactivados.
+
 Entrega del 14/10/2026. Rama `feat/stannet-dev-b1-20261014`, [PR #150](https://github.com/stalin454/stannet-landing/pull/150), continuación del PR #149. No merge a `main`.
 
 ## Publicado y verificado
