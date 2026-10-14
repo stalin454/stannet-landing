@@ -28,12 +28,27 @@ export class AgentAvatar {
     this.personaImg=null;
     this.look=null;
     this.updateLook();
+    // Prefer the approved image-inspired art only after successful browser decoding.
+    // Keep the locally drawn SVG as an always-available fallback.
+    this.loadArtwork();
     this.launcher.addEventListener('click',onOpen);
     this.surface.querySelector('.snai-hide-avatar').addEventListener('click',()=>{this.setHidden(true);onHide();this.restore.focus({preventScroll:true})});
     this.restore.addEventListener('click',()=>{this.setHidden(false);this.launcher.focus({preventScroll:true})});
     this.render(false);
   }
   get isHannah(){return this.look!==null;}
+  loadArtwork(){
+    if(typeof Image!=='function')return;
+    const artwork=new Image();
+    artwork.onload=()=>{
+      const src="url('/assets/ai/hannah-ia-rendered.svg')";
+      this.figure.style.backgroundImage=src;
+      if(this.personaFigure)this.personaFigure.style.backgroundImage=src;
+      this.renderedArtwork=src;
+    };
+    artwork.onerror=()=>{}; // Keep the local vector version.
+    artwork.src='/assets/ai/hannah-ia-rendered.svg';
+  }
   updateLook(){
     const next=resolveHannahLook(this.path());
     if(next===this.look)return;
@@ -59,6 +74,7 @@ export class AgentAvatar {
     figure.hidden=true;
     button.appendChild(figure);
     this.personaFigure=figure;
+    if(this.renderedArtwork)figure.style.backgroundImage=this.renderedArtwork;
     this.updatePersona();
   }
   updatePersona(){
