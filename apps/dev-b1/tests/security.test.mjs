@@ -272,3 +272,13 @@ test('all 188 original code exercises reject altered answers, accept exact code 
   const progress=(await (await s.request('/api/typing/progress',undefined,a)).json()).progress;assert.equal(progress.length,188);assert.ok(progress.every(x=>x.completed===1&&x.attempts===1));
  }finally{s.db.close();}
 });
+
+test('Worker refuses Auth before database/mail/assets when CPU or mail delivery evidence is absent',async()=>{
+ const {default:worker}=await import('../worker.mjs');
+ for(const missing of ['HASH_CPU_VERIFIED','MAIL_DELIVERY_VERIFIED','DEV_MAILER_AUTH']){
+  let queried=false;
+  const env={MODE:'sandbox',AUTH_RELEASE:'enabled',PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'fixture',DEV_MAILER_AUTH:'fixture-secret',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',DEV_DB:{withSession(){queried=true;throw Error('must not query');}},DEV_MAILER:{fetch(){queried=true;}},DEV_ASSETS:{fetch(){queried=true;}},[missing]:undefined};
+  assert.equal((await worker.fetch(new Request(origin+'/api/auth/signup',{method:'POST'}),env)).status,503);
+  assert.equal(queried,false,missing);
+ }
+});

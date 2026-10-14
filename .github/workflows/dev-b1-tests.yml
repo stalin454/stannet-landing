@@ -31,6 +31,7 @@ jobs:
         run: |
           node apps/dev-b1/runtime-tests/cloudflare.cjs
           node apps/dev-b1/runtime-tests/migrations.cjs
+          node apps/dev-b1/runtime-tests/b1-rollback.mjs
           node apps/dev-b1/runtime-tests/hash-budget.cjs
           python3 apps/dev-b1/tests/readiness.test.py
           node apps/dev-b1/prepare-preview.mjs

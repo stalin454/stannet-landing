@@ -72,6 +72,8 @@ async function main(){
  // Concurrent starts must not exceed the server's free quota of 10/day.
  const starts=await Promise.all(Array.from({length:14},()=>call('/api/typing/start',{exercise:'javascript:fragment'})));
  assert.equal(starts.filter(r=>r.status===200).length,9);assert.equal(starts.filter(r=>r.status===429).length,5);
+ const unfinished=(await (await expect('/api/typing/resume',200)).json()).resume;assert.ok(unfinished);
+ await expect('/api/typing/checkpoint',200,{attempt:unfinished.attempt,text:unfinished.exercise.text.slice(0,13),revision:unfinished.revision});
  // D1 batch rollback actually undoes earlier statements on later constraint failure.
  await assert.rejects(()=>db.batch([db.prepare("INSERT INTO dev_audit VALUES('rollback-fixture','fixture','test','fixture',1)"),db.prepare("INSERT INTO dev_users(id,email,password,role) VALUES('bad-fixture','bad@example.test','test','invalid-role')")]));
  assert.equal(await db.prepare("SELECT id FROM dev_audit WHERE id='rollback-fixture'").first(),null);
@@ -80,6 +82,7 @@ async function main(){
  assert.equal((await (await expect('/api/session',200)).json()).authenticated,true);
  assert.equal((await (await expect('/api/typing/progress',200)).json()).progress[0].completed,1);
  assert.equal((await db.prepare('PRAGMA quick_check').first()).quick_check,'ok');
+ assert.equal((await (await expect('/api/typing/resume',200)).json()).resume.text,unfinished.exercise.text.slice(0,13));
  // A reversible additive schema change leaves data available to the old code.
  await db.prepare('CREATE INDEX runtime_rollback_probe ON dev_users(verified)').run();await db.prepare('DROP INDEX runtime_rollback_probe').run();
  assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM dev_users').first()).n,2);
