@@ -146,10 +146,21 @@
   };
   basicVoiceButton.addEventListener('click',()=>{
     if(!lastUnplayedSpeech||!window.SpeechSynthesisUtterance||!window.speechSynthesis)return;
-    window.speechSynthesis.cancel();
+    stopSpeech();
+    const token=speechToken;
+    speechActive=true;
+    if(recognition){try{recognition.abort()}catch{}}
+    recognitionRunning=false;
     const u=new SpeechSynthesisUtterance(lastUnplayedSpeech);
     u.lang=detectVoiceLanguage(lastUnplayedSpeech);
     u.rate=.94;
+    u.onstart=()=>{if(token===speechToken)setActivity('speaking')};
+    const finish=()=>{
+      if(token!==speechToken)return;
+      speechActive=false;setActivity('idle');
+      if(voiceEnabled&&panel.open)finishVoiceTurn();
+    };
+    u.onend=finish;u.onerror=finish;
     neuralState.textContent='Reproduciendo con la voz básica de este dispositivo (no es Amazon Polly).';
     window.speechSynthesis.speak(u);
   });
