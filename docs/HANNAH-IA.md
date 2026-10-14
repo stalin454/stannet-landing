@@ -45,3 +45,24 @@
 - La ejecución de CI y auditoría móvil de esta fase se completó correctamente: https://github.com/stalin454/stannet-landing/actions/runs/38539156955
 - `academy.stannet.dev` no se publica desde este PR porque `.github/workflows/academy-staging.yml` contiene una condición que permite únicamente `feat/programming-academy-learning-20261013`. No modificar/forzar esa condición ni interferir con el despliegue de otra academia.
 - El PR está listo para revisión humana, **sin aprobación de merge ni despliegue en `main`**.
+
+## Decisión aprobada: Hannah IA será una figura 3D real (14/10/2026)
+
+La ilustración/SVG actual es **solo un prototipo técnico provisional**. La versión final solicitada no será una imagen plana ni un sprite con efecto 3D: será un **modelo tridimensional real**, con volumen y partes articulables, construido a partir de la identidad artística aprobada (cabello oscuro, lazo rojo y cuatro atuendos). No utilizar fotografías privadas en el sitio ni en recursos descargables.
+
+### Orden de trabajo acordado
+1. **Proteger la base existente.** Validar en una preview aislada el chat, las respuestas, la memoria y sus consentimientos, la lectura de contexto, la apertura/cierre del panel, la entrada de texto, el micrófono y el audio reproducido. Comprobar el comportamiento de teclado/scroll en móvil. La CI es necesaria pero no sustituye una prueba en un teléfono real.
+2. **Producir un modelo 3D propio** en glTF 2.0/GLB optimizado, con el mismo personaje base y variantes de ropa: exploradora, programación, inglés y ciberseguridad. El rig deberá permitir al menos cabeza, párpados, mandíbula/boca y brazos; animaciones mínimas: reposo, parpadeo, escucha, pensamiento, habla y saludo.
+3. **Montar un visor 3D opcional y aislado** dentro del Shadow DOM del widget, sin modificar los servicios de IA. Cargar el motor/modelo solo donde aparece Hannah; conservar la ilustración actual como respaldo automático en caso de falta de WebGL, error de carga o preferencia de movimiento reducido. El modelo no debe cubrir controles ni bloquear el teclado.
+4. **Sincronizar el movimiento con el audio real:** entrar en «hablando» al comenzar la reproducción, no durante la generación de voz; volver a reposo al detener, interrumpir o fallar. La sincronización fonética mediante visemas necesita soporte verificable del motor TTS y será una mejora separada.
+5. **Revisar el aspecto definitivo y rendimiento** en móvil y escritorio, y pedir aprobación expresa antes de sustituir el avatar provisional o publicar.
+
+### Contrato de integración y criterios de aceptación
+- El avatar es **presentación**, no un segundo chat/agente: reutiliza `AgentAvatar`, `setActivity()`, `resolveHannahLook()` y el estado del reproductor existente.
+- Prohibido incrustar claves API, fotos originales de menores, telemetría adicional o modelos descargados desde terceros sin revisión. Los modelos y texturas serán archivos locales con procedencia/licencia documentadas.
+- El 3D tendrá controles de ciclo de vida: iniciar al mostrarse, pausar al ocultarse y liberar recursos al desmontarse. Compatible con `prefers-reduced-motion` y dispositivos sin WebGL.
+- Objetivos iniciales de rendimiento **por validar, no resultados medidos**: modelo base comprimido idealmente <=1,5 MB, carga diferida, ninguna interrupción visible del desplazamiento, presupuesto de render adaptativo en móviles.
+- Regresiones obligatorias: una sola instancia del agente; abrir, minimizar, cerrar, ocultar y restaurar; vestuario según ruta; foco de teclado; controles táctiles; historial y privacidad intactos; ausencia de peticiones de pago de voz sin autorización.
+- `main`, `stannet.space` y el staging reservado de `academy.stannet.dev` permanecerán intactos. Esta decisión no autoriza fusionar el PR #143.
+
+**Estado de ejecución:** contrato y orden de trabajo definidos. **Aún no existe un archivo GLB final ni una figura 3D integrada en el widget**; no presentar el sprite como 3D real.
