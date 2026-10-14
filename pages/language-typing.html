@@ -39,6 +39,17 @@
 <label>Velocidad de audio<select id="ltSpeed" aria-label="Velocidad de audio"><option value="0.75">0.75× · Lenta</option><option value="0.9">0.9× · Cuidada</option><option value="1" selected>1× · Natural</option><option value="1.15">1.15× · Ágil</option></select></label>
 </div>
 <p id="ltVoiceProviderNote" class="lt-provider-note" role="status">Selecciona Amazon Polly si quieres escuchar una voz neuronal. Su uso puede generar cargos en AWS; las credenciales permanecen en Cloudflare.</p>
+<section id="ltPremiumAccount" class="lt-premium-account" aria-labelledby="ltPremiumTitle" hidden>
+  <div class="lt-premium-head"><div><strong id="ltPremiumTitle">🔐 Acceso a voces Amazon Polly</strong><p>Inicia sesión para utilizar el audio neuronal. Las cuentas nuevas necesitan aprobación antes de consumir AWS.</p></div><span id="ltPremiumRemaining"></span></div>
+  <form id="ltPremiumForm" class="lt-premium-form">
+    <label>Correo electrónico<input id="ltPremiumEmail" type="email" name="email" autocomplete="username" inputmode="email" maxlength="180" required></label>
+    <label>Contraseña<input id="ltPremiumPassword" type="password" name="password" autocomplete="current-password" minlength="10" maxlength="256" required></label>
+    <button type="submit" id="ltPremiumSignin">Iniciar sesión</button>
+    <button type="button" id="ltPremiumSignup">Crear cuenta</button>
+  </form>
+  <div id="ltPremiumLoggedIn" hidden><span id="ltPremiumIdentity"></span> <button type="button" id="ltPremiumSignout">Cerrar sesión</button></div>
+  <p id="ltPremiumMessage" role="status" aria-live="polite">El audio gratuito del navegador sigue disponible sin login.</p>
+</section>
 <div class="lt-modes" role="group" aria-label="Modalidades de estudio">
 <button type="button" data-mode="typing" aria-pressed="true">⌨️ Escribir</button>
 <button type="button" data-mode="dictation" aria-pressed="false">🎧 Dictado</button>
@@ -81,11 +92,11 @@
 <div class="lt-footer"><button type="button" id="ltPrev">← Anterior</button><button type="button" id="ltSkip">Siguiente sin comprobar →</button><span id="ltVoiceStatus" role="status">Audio disponible según las voces instaladas en el navegador.</span></div>
 </section>
 <section class="lt-bottom"><article><span>01</span><h3>Teclado y memoria</h3><p>Escribe con precisión. Después comprueba, repite y deja que los errores vuelvan a aparecer en tus repasos.</p></article><article><span>02</span><h3>Shadowing activo</h3><p>Escucha, repite, graba tu propia voz y compara. En simultáneo se recomienda usar auriculares.</p></article><article><span>03</span><h3>StanNet AI como tutor</h3><p>El agente reconoce tu idioma, nivel y tema; nunca recibe automáticamente tus respuestas ni grabaciones.</p></article></section>
-<p class="lt-privacy"><strong>Privacidad y límites:</strong> las marcas y repasos se guardan en este navegador. Las grabaciones de voz son locales y temporales. El reconocimiento del navegador puede utilizar servicios externos del proveedor del navegador: solo se activa al pulsar el micrófono. Amazon Polly requiere conexión a internet y su uso puede generar cargos; la voz del navegador no consume Polly. Las voces y funciones de micrófono dependen del dispositivo. La traducción se compara con una respuesta modelo; pueden existir otras versiones válidas.</p>
+<p class="lt-privacy"><strong>Privacidad y límites:</strong> las marcas y repasos se guardan en este navegador. Las grabaciones de voz son locales y temporales. El reconocimiento del navegador puede utilizar servicios externos del proveedor del navegador: solo se activa al pulsar el micrófono. Amazon Polly requiere inicio de sesión y autorización, dispone de límites por usuario y globales, y su uso puede generar cargos; la voz del navegador no consume Polly. Las voces y funciones de micrófono dependen del dispositivo. La traducción se compara con una respuesta modelo; pueden existir otras versiones válidas.</p>
 </main>
 <footer class="lt-page-footer"><a href="/index.html">StanNet.Space</a><span>Language Typing & Shadowing Lab</span><a href="/pages/typing.html">Typing Lab ↗</a></footer>
 <script src="/language-typing-data.js?v=20261014-1"></script>
-<script src="/language-typing.js?v=20261014-polly1"></script>
+<script src="/language-typing.js?v=20261014-auth1"></script>
 <script src="/script.js?v=20261014-1" defer></script>
 <script src="/stannet-global-nav.js?v=20261004-perf1" defer></script>
 </body>
