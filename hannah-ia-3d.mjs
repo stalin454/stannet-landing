@@ -192,7 +192,7 @@ export function createHannah3D({host,look='explorer',reducedMotion=false}={}){
   if(!reducedMotion)frame=requestAnimationFrame(tick);
  }
  function pause(){if(frame)cancelAnimationFrame(frame);frame=0}
- function start(){pause();if(!alive||!visible||document.hidden)return;if(reducedMotion)paint(clock);else frame=requestAnimationFrame(tick)}
+ function start(){pause();if(!alive||!visible||!textureReady||document.hidden)return;if(reducedMotion)paint(clock);else frame=requestAnimationFrame(tick)}
  function mount(next){if(!alive||!next)return;host?.classList.remove('snai-3d-ready');host=next;host.append(canvas);if(textureReady)host.classList.add('snai-3d-ready');ro?.disconnect();ro?.observe(host);start()}
  const handleVisibility=()=>document.hidden?pause():start();document.addEventListener('visibilitychange',handleVisibility);
  const onLost=e=>{e.preventDefault();pause();host.classList.remove('snai-3d-ready')};canvas.addEventListener('webglcontextlost',onLost);
