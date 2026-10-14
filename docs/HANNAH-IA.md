@@ -9,18 +9,19 @@
 
 ## Estructura
 - `hannah-ia-looks.mjs`: clasificación de rutas públicas a atuendos. No analiza contenido de lecciones ni documentos.
-- `assets/ai/hannah-ia-sprite.svg`: sprite local, cuatro personajes de 120×168 px, en este orden: explorer, programming, english, cybersecurity.
+- `assets/ai/hannah-ia-sprite.svg`: sprite vectorial de respaldo, cuatro personajes de 120×168 px, en este orden: explorer, programming, english, cybersecurity.
+- `assets/ai/hannah-ia-rendered.svg`: prueba artística de cuatro atuendos, inspirada en las ilustraciones aprobadas. Se carga solo si el navegador reconoce el SVG; si falla, se mantiene el vector de respaldo.
 - `stannet-ai-avatar.mjs`: launcher flotante, soporte de vestuario y cara de cabecera. Mantiene la clave localStorage previa de ocultación.
 - `stannet-ai.css`: movimiento leve, pestañeo y boca en estado speaking; respeto a reduced motion y viewport móvil.
 - `stannet-ai.js`: conecta el estado de la voz y del agente con el avatar; no cambia `/api/speech`, SpeechRecognition, AgentCore, consentimiento ni memoria.
 - `tests/hannah-ia.test.mjs`: pruebas de roles, assets y contratos de regresión.
 
 ## Limitaciones reales (no confundir con demo terminada)
-- El sprite SVG es **provisional** y NO reproduce con fidelidad las imágenes finales con aspecto 3D previamente diseñadas.
+- El sprite es **provisional**: la prueba artística usa una imagen raster comprimida y NO es el avatar definitivo articulado. Se conserva el SVG vectorial como fallback. El aspecto final requiere verificar el parecido a Hannah en una preview real.
 - La boca usa movimiento rítmico cuando el reproductor está activo, **no sincronización fonética ni visemas por audio**.
 - No hay personaje 3D riggeado, ni animación esquelética de manos/ropa.
 - La voz sigue configurada como estaba en StanNet AI. La integración de Amazon Polly/Amy es **una tarea aparte** que requerirá confirmar proveedor, autorización de costes, compatibilidad y seguridad.
-- No se ha comprobado en un teléfono físico ni se ha verificado un preview de Cloudflare hasta ejecutar su despliegue de rama.
+- Las suites automatizadas de CI y auditoría móvil por navegador han pasado en la rama (antes de la mejora artística de fallback). No se ha comprobado en teléfono físico ni existe URL verificada de preview: el workflow de `stannet.dev` se ha omitido.
 
 ## Comprobaciones antes de aprobar
 1. `npm run test:hannah` y `npm test`.
