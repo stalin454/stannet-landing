@@ -6,7 +6,7 @@ Entrega del 14/10/2026. Rama `feat/stannet-dev-b1-20261014`, [PR #150](https://g
 
 **Portal candidato:** https://stannet-dev-portal.stalin454.workers.dev
 
-Worker independiente `stannet-dev-portal`, commit publicado `8ddbf05ff02ad7822a5afa7686032067dd222a4a`, versión Cloudflare `f03857df-cdbf-4c00-ba3e-007f7150ee34`. Publicación: 14/10/2026 20:46:07 UTC (22:46:07 Madrid).
+Worker independiente `stannet-dev-portal`, commit publicado `c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19`, versión Cloudflare `d34bdfd4-c36e-4bf0-bee2-7fd82c60bce9`. Publicación: 14/10/2026 20:56:31 UTC (22:56:31 Madrid).
 
 Portada, nueve categorías, filtros, enlaces de contacto, logo original y Orbitron alojada localmente. Chrome antes/después del despliegue: 320, 390 y 1280 px; filtros, teclado, tipografía y ausencia de desbordamiento horizontal comprobados. HTTP 200 y commit comprobados por segunda sonda. Bundle público de aproximadamente 104 kB sin comprimir; no carga IA, voz ni terceros.
 
@@ -23,7 +23,7 @@ Las versiones activas de Space y academia se compararon en Cloudflare antes/desp
 - Progreso, escritura, errores y corrección comprobados con teclado automatizado de Chrome.
 - Webhook firmado/idempotente con estado Stripe fixture: no equivale a pagos emitidos por Stripe.
 
-**18 pruebas de integración/seguridad PASS**, suite previa de 100 comandos PASS y recorrido real en Chrome: registro → buzón local → verificación → login → Typing → error/retroceso → completado/progreso → admin → logout/bloqueo directo → reset.
+**20 pruebas de integración/seguridad PASS**, suite previa de 100 comandos PASS y recorrido real en Chrome: registro → buzón local → verificación → login → Typing → error/retroceso → completado/progreso → admin → logout/bloqueo directo → reset.
 
 Dos migraciones D1 aditivas, aislamiento por identidad de entorno, sesiones `first-primary` y bloqueo explícito de publicación Auth. Workerd/D1 local: persistencia, copia/restauración, cuotas, roles y reset comprobados. Wrangler local: aplicación/reaplicación, rollback de migración fallida y exportación SQL/restauración PASS. El login vuelve a validar atómicamente la credencial después del hash para bloquear carreras con resets.
 

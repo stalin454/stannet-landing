@@ -76,6 +76,31 @@ Las pruebas usan exclusivamente directorios temporales y correos `example.test`,
 3. D1 batch con segunda sentencia inválida: la primera escritura también revierte.
 4. Wrangler aplica 0001/0002 y repetir no vuelve a aplicarlas. Migración 0003 de fixture falla: no persisten escrituras ni registro en ledger; siguen aplicadas dos.
 5. Exportación SQL de D1 local; eliminar únicamente el estado temporal; importar y comprobar usuario fixture, ledger y claves foráneas.
-6. Las migraciones son aditivas: rollback de código conserva tablas/datos. No hay un `down` destructivo. En remoto se registrará bookmark/exportación antes de migrar y se probará restauración en un destino separado. Time Travel remoto aún no se ha ejecutado.
+6. Las migraciones son aditivas: rollback de código conserva tablas/datos. No hay un `down` destructivo. En una futura migración de datos remotos se registrará bookmark/exportación antes de migrar y se probará restauración en un destino separado. Time Travel remoto aún no se ha ejecutado.
 
 Fuentes oficiales: [tokens](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/), [permisos](https://developers.cloudflare.com/fundamentals/api/reference/permissions/), [Custom Domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/), [D1 precios](https://developers.cloudflare.com/d1/platform/pricing/), [migraciones](https://developers.cloudflare.com/d1/reference/migrations/), [recuperación](https://developers.cloudflare.com/d1/reference/time-travel/), [crypto](https://developers.cloudflare.com/workers/runtime-apis/nodejs/crypto/), [Supabase Auth](https://supabase.com/docs/guides/auth/architecture), [Supabase costes](https://supabase.com/docs/guides/platform/billing-on-supabase).
+
+## Bootstrap preparado, no ejecutado en remoto
+
+`apps/dev-b1/d1-bootstrap.py` prepara la creación de **una base nueva** con nombre propuesto `stannet-dev-b1-sandbox`; ese nombre no afirma la existencia de un recurso contratado.
+
+- `create` exige confirmar Workers Free y cuota D1 disponible con fecha de hoy. Sin esa declaración explícita o con fecha antigua no hace ni el inventario. La API no ha permitido comprobar el plan: la declaración debe provenir del propietario tras verlo en el dashboard, nunca inferirse del campo `standard`. Si ya existe ese nombre, se detiene sin adoptar ni modificar la base. No modifica Workers ni tiene ninguna operación DELETE.
+- Guarda un recibo de recurso nuevo con permiso 0600 en `.state/d1-target.json`, fuera de Git. La identidad de entorno coincide con el UUID real recibido de Cloudflare.
+- `initialize` valida nombre/UUID/identidad y rehúsa migrar una base con usuarios o tablas ajenas. Ejecuta Wrangler exclusivamente contra ese destino nuevo, aplica las migraciones, añade el marcador, comprueba identidad y `quick_check`. No habilita autenticación ni despliega un Worker.
+- La configuración temporal para Wrangler se genera con el UUID real; no contiene secretos. Solo el proceso hijo recibe el token D1 como credencial de Wrangler. La salida pública se limita a metadatos del recurso.
+- Las guardas se probaron con respuestas de API fixture. **No prueban creación, migración ni restauración D1 remotas.** No se ejecutó `create`/`initialize` contra Cloudflare porque faltan permiso y confirmación de coste.
+
+Estos comandos se ejecutarán en el runner con secretos cuando se resuelvan los bloqueos; no solicitan copiar credenciales al equipo ni a la conversación:
+
+```sh
+python3 apps/dev-b1/d1-bootstrap.py create --confirmed-free --confirmed-on YYYY-MM-DD
+python3 apps/dev-b1/d1-bootstrap.py initialize --wrangler /ruta/verificada/a/wrangler
+```
+
+`YYYY-MM-DD` debe ser la fecha UTC del día en que se confirmó el plan y la cuota. No utilizar `--confirmed-free` como atajo: no se ha confirmado que esta cuenta esté en Free. El recibo y cualquier respaldo externo deben conservarse fuera de Git antes de avanzar; el recibo no contiene datos de usuarios. La publicación Auth requiere además correo real probado y medida de CPU remota: este bootstrap no elimina esas condiciones.
+
+## Evidencia adicional de navegador
+
+La ejecución [38636092002](https://github.com/stalin454/stannet-landing/actions/runs/38636092002), commit `c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19`, superó Chrome con HTTPS loopback + Worker + D1 local: registro, verificación fixture, cookies HttpOnly/Secure/Strict, teclado y corrección, progreso en D1, admin, reset, nuevo login y logout, sin overflow a 320/390/1280. También pasó el flujo SQLite anterior. No se trata de un proveedor SMTP ni de un D1 remoto.
+
+El adaptador de correo elimina el token si falla el proveedor y conserva respuestas HTTP genéricas para recuperación de cuentas existentes e inexistentes. La telemetría del Worker registra solo `mail_delivery_failed` y el tipo de operación. No registra email, token, credenciales o respuesta del proveedor. No se afirma protección de tiempo constante frente a enumeración ni entrega real de correo.

@@ -60,7 +60,15 @@ async function main(){
  await expect('/api/admin/users',403);
  await db.prepare('UPDATE dev_users SET disabled=1 WHERE id=?').bind(session.user.id).run();await expect('/apps/typing',401);
  await db.prepare('UPDATE dev_users SET disabled=0 WHERE id=?').bind(session.user.id).run();
- const other=await call('/api/typing/progress?userId='+session.user.id,undefined,{Cookie:''});assert.equal(other.status,401);
+ // A second authenticated identity cannot read or complete the first learner's work.
+ await db.prepare("INSERT INTO dev_users(id,email,password,verified) SELECT 'second-fixture','second@example.test',password,1 FROM dev_users WHERE id=?").bind(session.user.id).run();
+ await db.prepare("INSERT INTO dev_entitlements VALUES('second-fixture','typing','free',?,'free')").bind(Math.floor(Date.now()/1000)+3600).run();
+ const otherLogin=await expect('/api/auth/login',200,{email:'second@example.test',password},{Cookie:''});const otherCookie=otherLogin.headers.get('set-cookie').split(';')[0];
+ const otherSession=await (await expect('/api/session',200,undefined,{Cookie:otherCookie})).json();
+ const otherProgress=await (await expect('/api/typing/progress?userId='+session.user.id,200,undefined,{Cookie:otherCookie})).json();assert.deepEqual(otherProgress.progress,[]);
+ const otherStart=await (await expect('/api/typing/start',200,{exercise:'javascript:fragment'},{Cookie:otherCookie,'X-CSRF-Token':otherSession.csrf})).json();
+ await expect('/api/typing/complete',400,{attempt:otherStart.attempt,text:otherStart.exercise.text});
+ assert.equal((await db.prepare('SELECT completed FROM dev_attempts WHERE id=?').bind(otherStart.attempt).first()).completed,0);
  // Concurrent starts must not exceed the server's free quota of 10/day.
  const starts=await Promise.all(Array.from({length:14},()=>call('/api/typing/start',{exercise:'javascript:fragment'})));
  assert.equal(starts.filter(r=>r.status===200).length,9);assert.equal(starts.filter(r=>r.status===429).length,5);
@@ -74,7 +82,7 @@ async function main(){
  assert.equal((await db.prepare('PRAGMA quick_check').first()).quick_check,'ok');
  // A reversible additive schema change leaves data available to the old code.
  await db.prepare('CREATE INDEX runtime_rollback_probe ON dev_users(verified)').run();await db.prepare('DROP INDEX runtime_rollback_probe').run();
- assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM dev_users').first()).n,1);
+ assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM dev_users').first()).n,2);
  await expect('/api/auth/recover',200,{email});const reset=mail.find(x=>x.kind==='reset');assert.ok(reset);
  await expect('/api/auth/reset',200,{token:reset.token,password:'Runtime!new-passphrase'});await expect('/apps/typing',401);
  cookie='';csrf='';const login=await expect('/api/auth/login',200,{email,password:'Runtime!new-passphrase'});cookie=login.headers.get('set-cookie').split(';')[0];csrf=(await (await call('/api/session')).json()).csrf;

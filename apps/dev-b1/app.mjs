@@ -32,7 +32,12 @@ export function application(options){
   if(!mail)fail(503,'EMAIL_UNAVAILABLE','El correo de este entorno no está conectado.');
   const secret=token();
   await run('INSERT INTO dev_tokens(hash,user_id,purpose,expires) VALUES(?,?,?,?)',hash(secret),user.id,kind,clock()+(kind==='reset'?1800:86400));
-  try{await mail({userId:user.id,email:user.email,kind,token:secret});}catch{await run('DELETE FROM dev_tokens WHERE hash=?',hash(secret));fail(503,'EMAIL_UNAVAILABLE','No se pudo enviar el correo.');}
+  try{await mail({userId:user.id,email:user.email,kind,token:secret});}catch{
+   await run('DELETE FROM dev_tokens WHERE hash=?',hash(secret));
+   // Provider failure must not turn recovery into an account-enumeration oracle.
+   // Operator telemetry contains only the event kind, never recipient, token or provider response.
+   try{options.onMailFailure?.(kind);}catch{}
+  }
  }
  async function mutation(req){
   if(req.headers.get('origin')!==origin||['cross-site','same-site'].includes(req.headers.get('sec-fetch-site')))fail(403,'ORIGIN','Origen no permitido.');

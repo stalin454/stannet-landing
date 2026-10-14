@@ -172,3 +172,14 @@ test('a concurrent credential reset cannot create a session using the old passwo
   assert.equal(s.db.raw.prepare('SELECT COUNT(*) AS n FROM dev_sessions').get().n,0);
  }finally{s.db.close();}
 });
+test('mail provider failure does not reveal known accounts and leaves no usable token',async()=>{
+ const s=setup(),events=[];try{
+  const accountInfo=await account(s);
+  const handler=application({...s.env,mail:async()=>{throw Error('private provider response');},onMailFailure:kind=>events.push(kind)});
+  const send=email=>handler(new Request(origin+'/api/auth/recover',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({email})}));
+  const known=await send(accountInfo.user.email),absent=await send('missing@example.test');
+  assert.equal(known.status,200);assert.equal(absent.status,200);assert.deepEqual(await known.json(),await absent.json());
+  assert.deepEqual(events,['reset']);
+  assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS n FROM dev_tokens WHERE purpose='reset'").get().n,0);
+ }finally{s.db.close();}
+});

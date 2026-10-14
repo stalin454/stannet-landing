@@ -31,6 +31,8 @@ jobs:
         run: |
           node apps/dev-b1/runtime-tests/cloudflare.cjs
           node apps/dev-b1/runtime-tests/migrations.cjs
+          node apps/dev-b1/prepare-preview.mjs
+          /tmp/dev-b1-runtime/node_modules/.bin/wrangler deploy --dry-run --config apps/dev-b1/worker.example.jsonc --name stannet-dev-auth-build-test --outdir /tmp/dev-b1-worker-build
       - name: Verify deterministic preview packaging
         working-directory: apps/dev-b1
         run: |

@@ -5,10 +5,10 @@
 | URL | https://stannet-dev-portal.stalin454.workers.dev |
 | Ubicación | Candidato independiente, no dominio raíz |
 | Worker | `stannet-dev-portal` |
-| Commit | `11caf59255d414c8ecb2742d74789016794b1bea` |
-| Fecha UTC | 2026-10-14 20:26:35 |
-| Versión Cloudflare | `3f6e9264-ecd3-4062-9ba7-02750438b345` |
-| Workflow | [38631969214](https://github.com/stalin454/stannet-landing/actions/runs/38631969214) |
+| Commit | `c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19` |
+| Fecha UTC | 2026-10-14 20:56:31 |
+| Versión Cloudflare | `d34bdfd4-c36e-4bf0-bee2-7fd82c60bce9` |
+| Workflow | [38636092767](https://github.com/stalin454/stannet-landing/actions/runs/38636092767) |
 | Chrome antes/después | 320/390/1280 px, PASS |
 | HTTP/commit | 200 y SHA exacto comprobados |
 | Funcionalidad | Portada, nueve categorías, filtro, contacto, Orbitron/logo |
@@ -42,3 +42,11 @@ También se corrigieron antes del éxito: caché entre tamaños, ruta de Orbitro
 Auth, Typing y admin están probados con SQLite y buzón local, incluidas acciones reales del navegador. No hay entorno Supabase de pruebas accesible ni correo externo verificado. La cuenta visible es de comunidad y no tiene branch; no se utiliza como staging ni se registran allí usuarios de prueba.
 
 Los webhooks se prueban con firmas y estado fixture. No hay Checkout, precios ni cobros reales. Los tamaños de Chrome no certifican Windows/Android/iPhone físicos. La aplicación/currículos originales siguen accesibles en su ubicación previa; no se anuncian como contenidos exclusivos Premium.
+
+## Continuación de datos aislados
+
+El catálogo fue republicado sin añadir Auth en los runs 38634673925 y 38636092767. El recibo conserva ambos puntos previos verificados. La sonda independiente del 14/10 a las 21:00 UTC confirmó portal 200, commit `c15b4a1`, rutas privadas 404 y Space/academia 200. La raíz siguió devolviendo 502 del proxy y DNS Read continuó en 403.
+
+El run [38636092002](https://github.com/stalin454/stannet-landing/actions/runs/38636092002) probó el Worker con D1 local y Chrome TLS: registro/verificación fixture/login/Typing/progreso/admin/reset/logout, cookies HttpOnly/Secure/Strict y 320/390/1280 sin overflow. Wrangler local probó migraciones y restauración SQL. Se construyó además el bundle del backend con `wrangler deploy --dry-run`, sin despliegue.
+
+D1 remoto bloqueado por HTTP 401; lectura de suscripciones 403; proyecto Supabase de comunidad excluido. [Instrucciones de permisos, elección de DB y bootstrap](cloudflare-data.md). No se publicó Auth incompleta, no se creó DB externa y no se alteró un servicio de correo o de pagos.

@@ -15,6 +15,7 @@ export default {async fetch(request,env){
   const identity=await db.prepare('SELECT app,environment_id,schema_version FROM dev_environment WHERE id=1').first();
   if(identity?.app!=='stannet-dev-b1'||identity.environment_id!==env.DEV_ENVIRONMENT_ID||identity.schema_version!==2)return json({error:'Entorno no disponible.',code:'DB_ISOLATION'},503);
   const handler=application({db,origin:env.PUBLIC_ORIGIN,mode:'sandbox',deployment:'isolated-dev',exercises,
+   onMailFailure:kind=>console.error(JSON.stringify({component:'stannet-dev',event:'mail_delivery_failed',kind})),
    dummyPassword:'scrypt$00000000000000000000000000000000$'+'0'.repeat(64),
    asset:async name=>{if(!paths[name])return null;const res=await env.DEV_ASSETS.fetch(new Request(new URL(paths[name],request.url)));if(!res.ok)return null;return {body:res.body,type:res.headers.get('Content-Type')};},
    mail:async msg=>{const res=await env.DEV_MAILER.fetch(new Request('https://mail.internal/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...msg,origin:env.PUBLIC_ORIGIN})}));if(!res.ok)throw Error('Email failure');}

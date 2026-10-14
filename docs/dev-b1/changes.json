@@ -1,6 +1,6 @@
 {
   "baseline_commit": "44ee2b8fcd24f5ca04258f7d9662cc2b4cc4db1c",
-  "published_commit": "11caf59255d414c8ecb2742d74789016794b1bea",
+  "published_commit": "c15b4a1228ecd19434d9ba117dc3ef77ef8c2c19",
   "files": [
     {
       "status": "M",
@@ -44,7 +44,23 @@
     },
     {
       "status": "A",
+      "path": "apps/dev-b1/cloudflare-read.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/d1-bootstrap.py"
+    },
+    {
+      "status": "A",
       "path": "apps/dev-b1/exercises.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/migrations/0001_initial.sql"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/migrations/0002_environment_and_indexes.sql"
     },
     {
       "status": "A",
@@ -112,6 +128,18 @@
     },
     {
       "status": "A",
+      "path": "apps/dev-b1/runtime-tests/browser.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/runtime-tests/cloudflare.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/runtime-tests/migrations.cjs"
+    },
+    {
+      "status": "A",
       "path": "apps/dev-b1/schema.sql"
     },
     {
@@ -129,6 +157,14 @@
     {
       "status": "A",
       "path": "apps/dev-b1/tests/auth-browser.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/cloudflare-read.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/d1-bootstrap.test.mjs"
     },
     {
       "status": "A",
@@ -189,6 +225,10 @@
     {
       "status": "A",
       "path": "docs/dev-b1/changes.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/cloudflare-data.md"
     },
     {
       "status": "A",
