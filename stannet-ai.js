@@ -268,6 +268,7 @@
     if(listenAfter&&voiceEnabled&&mobile.matches&&recognitionRunning){
       try{recognition.abort()}catch{}
       recognitionRunning=false;
+      voiceStatus.textContent='Preparando voz natural… volveré a escucharte al terminar.';
     }
     let delivered=false;
     try{
