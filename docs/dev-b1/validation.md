@@ -1,8 +1,14 @@
 # Pruebas y alcance
 
+## Actualización operativa
+
+El portal candidato fue publicado y superó HTTP y Chrome antes/después en 320/390/1280 px: filtros, teclado, logo/Orbitron, ausencia de overflow y commit exacto. La raíz sigue bloqueada por DNS Read 403; no se publicó allí. Se compararon los despliegues activos de Space/academia y permanecieron idénticos. Recibos en `release-receipt.json` y `http-verification.json`.
+
+El flujo Auth/Typing/admin se ejecutó en Chrome con SQLite y buzón de fixtures reales: registro, confirmación, login, escritura/error/retroceso, progreso, gestión de permiso por admin, logout/bloqueo directo y reset. La prueba figura en `tests/auth-browser.cjs` y el job de CI aislado. No demuestra email externo, compras Stripe o dispositivos físicos.
+
 ## Resultados locales
 
-- `cd apps/dev-b1 && npm test`: **15 pruebas PASS**, cero fallos, Node 24.
+- `cd apps/dev-b1 && npm test`: **16 pruebas PASS**, cero fallos, Node 24.
 - Suite previa `npm run test:ci`: **PASS**, 100 comandos; incluye Amy/Polly y StanNet AI existentes.
 - Syntax checks de app, servidor, Worker, CLI, portal y piloto: PASS.
 - `python3 docs/dev-b1/verify-isolation.py`: **550 archivos previos comparados**, todos iguales salvo exclusión aditiva de assets; archive restaurado con 550 archivos iguales. SHA-256 `f68b2fc7e0538d84bbf472df020cd12109e6b700fbcb9a71e8be867e6d0a7599`.
@@ -30,15 +36,15 @@ Las pruebas usan base SQLite real y HTTP loopback real. **No se simulan autentic
 
 ## No probado
 
-- Backend completo alojado: sin DB/bindings/mail sandbox Cloudflare disponibles. Config/API D1 no ejecutadas en runtime Workers real.
+- Backend Auth completo alojado: sin DB/bindings/mail sandbox disponibles. Config/API D1 no ejecutadas en runtime Workers real. Solo se ha alojado el portal público.
 - Correo externo, SPF/DKIM, enlaces recibidos, SMTP/Supabase Auth dedicado.
 - Stripe sandbox conectado, Checkout, precios, intervalos mensual/anual, portal de cancelación y eventos emitidos por Stripe.
-- E2E en navegador y teclado físico, scroll/foco, Android, iPhone y Windows reales. CSS responsive y handlers implementados, pero no certificación visual/hardware.
+- Android/iPhone/Windows físicos y teclado de hardware: pendientes. Sí hay E2E de Chrome con teclado automatizado y tres tamaños, tanto para portal como para el entorno local de Auth/Typing/admin.
 - Core Web Vitals, carga concurrente de servicio real, accesibilidad mediante navegador/lector.
 - Cambios de DNS/root Dev. El portal raíz continúa sin reparación aplicada.
 - Escucha Amy real. Módulos/variables de voz intactos y suite previa PASS; sin síntesis/audio real aquí.
 
-El entorno managed no ofrece `$control-browser`; la guía Sites indica omitir browser QA en ese caso. No se inició un servidor de preview con un navegador alternativo ni se instaló uno. Los servidores HTTP temporales usados en los tests pertenecen a los tests de integración, no a una publicación o preview visual.
+El entorno local managed no ofrece `$control-browser`; no se instaló un navegador allí. Las pruebas de navegador se ejecutaron en el runner de GitHub Actions, con Chrome ya disponible, conforme al control de calidad solicitado. Se usaron servidores locales aislados de fixtures y el candidato publicado; no se probó Auth contra producción.
 
 ## Recuperación
 
@@ -62,4 +68,4 @@ Antes de arrancar/editar cuentas de prueba locales, guardar una copia offline de
 | `.github/workflows/dev-b1-tests.yml` | Nuevo CI read-only en PR; no deploy, secrets ni escrituras externas |
 | `docs/dev-b1/` | Informes, DNS y verificador de aislamiento/recuperación |
 
-Ninguna edición de `worker.js`, Wrangler de Space/academia, Amy/Polly, StanNet AI, Typing original, menú global, AWS, DNS, registros ni bases externas. Ningún merge, cobro o despliegue manual. El PR puede recibir preview automática de Cloudflare ya configurada; eso no repara Dev ni despliega el backend B1.
+Ninguna edición de `worker.js`, Wrangler de Space/academia, Amy/Polly, StanNet AI, Typing original, menú global, AWS, DNS o bases externas. Ningún merge o cobro. Sí se publicó explícitamente el módulo público en el Worker separado `stannet-dev-portal`, bajo la nueva autorización. Los archivos de release, pruebas Chrome y el panel admin se detallan en `changes.json`; no se despliega el backend completo B1 por publicar ese módulo.

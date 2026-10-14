@@ -1,5 +1,11 @@
 # Arquitectura B1
 
+## Publicación actual
+
+El módulo `portal-public/` se compila con `build-portal.mjs` a `site-build/` (solo assets públicos) y está publicado en el Worker independiente `stannet-dev-portal`. No contiene formularios de cuenta, textos de ejercicios privados, secretos ni backend. El bundle utiliza el logo original y Orbitron con licencia OFL. La raíz Dev sigue sin vincularse porque falta lectura DNS para respaldar la operación. Véase `release.md` y `release-receipt.json` para URL, versión y evidencia actual.
+
+`portal-worker.jsonc` publica sin rutas de zona; `portal-domain.jsonc` contiene exclusivamente el dominio exacto `stannet.dev`. El workflow comprueba destinos, versiones protegidas y navegador antes/después. No se confunde este módulo público con el backend Auth de los apartados siguientes, que continúa aislado/local. La nueva autorización permite publicar Dev, pero no elimina sus precondiciones de seguridad ni autoriza modificar Space.
+
 ## Aislamiento real
 
 El proyecto Supabase existente es de comunidad/idiomas y comparte su directorio Auth. El listado de branches devuelve vacío. Añadir tablas con otro prefijo o una cookie distinta **no separaría sus usuarios de Auth**. No se reutiliza ese directorio ni se registran cuentas de prueba en él. Bóveda y Ayuda en Casa quedan intactas. No se crea un proyecto nuevo ni se presuponen SMTP, claves o permisos de branching.

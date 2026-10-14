@@ -1,18 +1,35 @@
-# StanNet Dev B1 · entrega funcional aislada
+# StanNet Dev B1 · estado actual
 
-Continuación del PR #149. Base: `44ee2b8fcd24f5ca04258f7d9662cc2b4cc4db1c`. Rama: `feat/stannet-dev-b1-20261014`. Recuperación: `recovery/pre-dev-b1-20261014`; también se conserva `recovery/space-dev-phase-a-20261014`.
+Entrega del 14/10/2026. Rama `feat/stannet-dev-b1-20261014`, [PR #150](https://github.com/stalin454/stannet-landing/pull/150), continuación del PR #149. No merge a `main`.
 
-## Resultado
+## Publicado y verificado
 
-Portal y backend funcionales **en entorno local aislado**, con SQLite persistente y Node 24. Registro, verificación mediante buzón local de pruebas, login, logout, recuperación, sesiones, roles, derechos Free/Premium, cuotas y Typing de programación. No se usa un login simulado, cuentas hardcoded, `localStorage` para sesión ni una variable del navegador para conceder Premium.
+**Portal candidato:** https://stannet-dev-portal.stalin454.workers.dev
 
-El catálogo público contiene las nueve categorías solicitadas. Solo Typing está conectado; las otras se identifican como próximas. Piloto: 188 ejercicios existentes, 47 lenguajes/formatos, cuatro niveles, sin voz/IA. Free permite tres ejercicios y diez inicios diarios; Premium de pruebas, 188 y cien inicios. Precios no definidos, sin Checkout, cobros ni tarjetas. Derechos Premium de prueba asignados por operador local, caducan y no equivalen a suscripciones compradas.
+Worker independiente `stannet-dev-portal`, commit publicado `11caf59255d414c8ecb2742d74789016794b1bea`, versión Cloudflare `3f6e9264-ecd3-4062-9ba7-02750438b345`. Publicación: 14/10/2026 20:26:35 UTC (22:26:35 Madrid).
 
-**Límites:** la entrega no está desplegada como SaaS completo. Hay adaptador Worker preparado que exige bindings propios y deniega operaciones privadas sin ellos. No se han creado recursos Cloudflare/D1/Supabase, ni enviado emails externos. El webhook Stripe implementa firma/idempotencia/estado de prueba, pero las pruebas suministran un estado Stripe de fixture: no son pagos efectuados en el sandbox de Stripe. La preview pública empaquetada es únicamente del catálogo y lo indica visiblemente.
+Portada, nueve categorías, filtros, enlaces de contacto, logo original y Orbitron alojada localmente. Chrome antes/después del despliegue: 320, 390 y 1280 px; filtros, teclado, tipografía y ausencia de desbordamiento horizontal comprobados. HTTP 200 y commit comprobados por segunda sonda. Bundle público de aproximadamente 104 kB sin comprimir; no carga IA, voz ni terceros.
+
+**`https://stannet.dev` todavía no está recuperado.** Cloudflare confirma zona activa, academia vinculada y ausencia de Worker/dominio personalizado en el apex. El token de Actions permite inventariar/desplegar Workers, pero consultar registros DNS devuelve 403. No se vincula el apex sin poder respaldarlo: `DEV_DOMAIN_ALLOWED=false`. No se escribieron DNS/dominio ni se ampliaron permisos, secretos o políticas. Para continuar se necesita lectura DNS autorizada en la credencial de despliegue.
+
+Las versiones activas de Space y academia se compararon en Cloudflare antes/después y son idénticas. Ambas páginas siguen respondiendo 200. `main` conserva `aacd5ff9d85f13ec47506d0076f57e8bdfbc1b7e`.
+
+## Implementado y probado, todavía local
+
+- Backend con SQLite real: registro, verificación, login/logout, reset, sesiones revocables, roles y CSRF.
+- Derechos por app Free/Premium de prueba, caducidad, revocación y cuotas atómicas.
+- Typing: 188 ejercicios, 47 lenguajes/formatos, cuatro niveles. Free: tres ejercicios/diez inicios diarios; Premium de pruebas: 188/cien. No hay compras.
+- Panel admin protegido por rol servidor, CSRF, límites y auditoría. Los miembros no pueden autoasignarse permisos.
+- Progreso, escritura, errores y corrección comprobados con teclado automatizado de Chrome.
+- Webhook firmado/idempotente con estado Stripe fixture: no equivale a pagos emitidos por Stripe.
+
+**16 pruebas de integración/seguridad PASS**, suite previa de 100 comandos PASS y recorrido real en Chrome: registro → buzón local → verificación → login → Typing → error/retroceso → completado/progreso → admin → logout/bloqueo directo → reset.
+
+Los emails llegan al buzón local de pruebas, sin envío externo. No hay DB/correo aislados alojados ni Stripe sandbox verificado. Registro, login, Premium y Typing no se ofrecen en el candidato; `/api/session`, `/apps/typing` y `/schema.sql` devuelven 404. La aplicación original de Space permanece intacta y pública; no se afirma exclusividad de sus contenidos por suscripción.
 
 ## Ejecutar el entorno completo
 
-En una copia de esta rama, con Node 24:
+Con Node 24 en una copia de la rama:
 
 ```sh
 cd apps/dev-b1
@@ -20,38 +37,27 @@ npm test
 npm run dev
 ```
 
-Abrir `http://127.0.0.1:8789/`. El servidor solo escucha loopback; nunca se inicia contra Space/Dev productivos. Registrar un correo ficticio bajo `.test` y una contraseña de al menos 12 caracteres. No usar credenciales personales.
-
-El correo se entrega a un **buzón local del operador**, no a Gmail/SMTP. Para obtener el enlace de una cuenta ficticia:
+Abrir `http://127.0.0.1:8789/`, usar correos ficticios `.test` y contraseñas de prueba (12–128 caracteres). El servidor solo escucha loopback.
 
 ```sh
 npm run admin -- mail alumno@example.test
-```
-
-Abrir el enlace de verificación, entrar y seleccionar Typing. Para probar Premium durante 24 horas:
-
-```sh
 npm run admin -- premium alumno@example.test 24
+npm run admin -- role alumno@example.test admin
 ```
 
-El CLI opera solo sobre `.state/sandbox.sqlite`; no existe un endpoint HTTP que exponga el buzón o conceda permisos. También admite `free`, `revoke` y `role correo member|admin`. Un cambio de rol revoca sesiones; rol admin no salta la autorización de Typing. Recuperar contraseña desde el formulario y consultar el enlace de reset por el mismo buzón. No se imprimen tokens de servicios reales.
+El CLI actúa sobre `.state/sandbox.sqlite`. `mail` muestra enlaces del buzón local, sin endpoint HTTP para leer tokens; `premium` concede derechos de prueba hasta 168 horas; `role` cambia rol y revoca sesiones. El panel web permite administrar derechos tras entrar como admin. También existen `free` y `revoke`. No subir DB o tokens a Git.
 
-## Preview y despliegue
+## Despliegue y recuperación
 
-- `dev-b1-preview/`: catálogo filtrable y presentación del portal. Registro/login deshabilitados porque el backend aislado no se despliega junto a la web Space.
-- `apps/dev-b1/public/` y `private/`: interfaz completa servida por `server.mjs`; **no abrir el HTML directamente** para probar autenticación.
-- `worker.mjs` / `worker.example.jsonc`: adaptador independiente, sin nombre de Worker, rutas, dominio, account ID ni ID de base inventados. Necesita `PUBLIC_ORIGIN` de sandbox, `DEV_DB`, `DEV_ASSETS` y un servicio `DEV_MAILER` verificado. `run_worker_first=true` protege también assets privados. No hay script de deploy.
-- El adaptador rechaza explícitamente orígenes `stannet.space`, `www.stannet.space`, `stannet.dev` y `academy.stannet.dev` en B1; activar cualquiera requiere una revisión posterior aprobada.
-- La integración Cloudflare existente publica previews automáticamente al abrir un PR. No confundir esa preview de Space con un despliegue de backend Dev. Se ha observado en #149; no se cambiaron sus reglas ni secretos.
+`.github/workflows/dev-b1-release.yml` funciona solo en esta rama/PR del propio repositorio. Valida código/recuperación/navegador antes de publicar. La vinculación al apex exige respaldo DNS. No usa el deploy de Space ni fusiona `main`; ante fallo crítico restaura solo la versión Dev previa. El rollback fue ejecutado durante la corrección de una sonda HTTP.
 
-Sin el acceso a bindings y al servicio de correo no se puede entregar una preview alojada de Auth/Typing. El catálogo alojado no sustituye la funcionalidad: el backend completo se demuestra por tests HTTP con base real, y su despliegue queda bloqueado/documentado.
+Respaldo adicional: `recovery/dev-b1-recovered-20261014`, sobre `0c004c60c780d3e7e21722aee53220817ef41407`. Conservados los respaldos anteriores. Los 550 archivos de la base se restauraron/verificaron; solo se añadió la exclusión `apps/dev-b1/` a `.assetsignore`. También se restauró SQLite de fixtures, no bases externas.
 
-## Documentos
+## Evidencia y pendientes
 
-- [Diagnóstico del dominio](diagnosis.md).
-- [Arquitectura y decisiones](architecture.md).
-- [Pruebas, recuperación y bloqueos](validation.md).
-- `dns-evidence.json`: observaciones de DNS públicas.
-- `verify-isolation.py`: compara 550 archivos previos y prueba recuperación.
+- [Registro de publicación](release.md), `release-receipt.json`, `http-verification.json`.
+- [Arquitectura](architecture.md), [diagnóstico](diagnosis.md), [validación](validation.md).
+- `changes.json`: relación exacta de archivos B1 respecto a la base del PR #149.
+- `verify-isolation.py`: comparación y recuperación de originales.
 
-No hacer merge: el workflow de `main` despliega automáticamente. Ninguna autorización para DNS, infraestructura, producción o cobros se infiere de este PR.
+Pendientes: DNS Read para root Dev; Auth/DB/correo alojados aislados; RLS en eventual tenant Supabase dedicado; pago sandbox real; dispositivos físicos y carga. La cuenta Supabase visible sigue siendo la comunidad, sin branch de desarrollo: no se escribieron datos ni usuarios. No se contrataron servicios ni se cambiaron AWS, Amy/Polly, IA, radio, bóveda, marketplace, clientes o academia.

@@ -1,0 +1,52 @@
+{
+  "checked_at_utc": "2026-10-14T20:27:15Z",
+  "checks": [
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/version.json",
+      "status": 200,
+      "content_type": "application/json",
+      "version": {
+        "commit": "11caf59255d414c8ecb2742d74789016794b1bea",
+        "module": "public-portal",
+        "auth": false,
+        "payments": false,
+        "typing": false
+      }
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/api/session",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/apps/typing",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/schema.sql",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet.dev/",
+      "status": 502,
+      "server": "mitmproxy 12.2.3"
+    },
+    {
+      "url": "https://stannet.space/",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "url": "https://academy.stannet.dev/pages/programming-coach.html",
+      "status": 200,
+      "content_type": "text/html"
+    }
+  ]
+}

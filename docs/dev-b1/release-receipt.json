@@ -1,0 +1,46 @@
+{
+  "source_commit": "11caf59255d414c8ecb2742d74789016794b1bea",
+  "published_at_utc": "2026-10-14T20:26:35Z",
+  "url": "https://stannet-dev-portal.stalin454.workers.dev",
+  "worker": "stannet-dev-portal",
+  "cloudflare_version": "3f6e9264-ecd3-4062-9ba7-02750438b345",
+  "workflow_run": 38631969214,
+  "workflow_url": "https://github.com/stalin454/stannet-landing/actions/runs/38631969214",
+  "status": "verified-candidate",
+  "published_features": [
+    "public portal",
+    "nine-category catalogue",
+    "category filters",
+    "contact email links",
+    "Orbitron brand and original logo"
+  ],
+  "not_published": [
+    "authentication",
+    "premium access",
+    "typing pilot",
+    "payments"
+  ],
+  "browser": {
+    "engine": "Chromium",
+    "widths": [
+      320,
+      390,
+      1280
+    ],
+    "tested_before_and_after_publication": true,
+    "filter": true,
+    "keyboard_navigation": true,
+    "horizontal_overflow": false,
+    "font": "Orbitron"
+  },
+  "root_domain": {
+    "url": "https://stannet.dev",
+    "published": false,
+    "reason": "Cloudflare DNS records read denied HTTP 403; no DNS or custom-domain writes attempted"
+  },
+  "protected_deployments_before_and_after": {
+    "stannet-landing": "a9583e3b-2814-44d9-a874-800596488fa6",
+    "stannet-academy-dev": "7cc1cd54-13f6-4127-97e3-add08bb8fe51"
+  },
+  "main_commit_unchanged": "aacd5ff9d85f13ec47506d0076f57e8bdfbc1b7e"
+}
