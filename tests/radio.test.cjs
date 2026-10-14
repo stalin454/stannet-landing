@@ -1,5 +1,6 @@
 const fs=require("fs"),assert=require("assert");
 const html=fs.readFileSync("pages/radio.html","utf8");
+const musicHtml=fs.readFileSync("pages/music.html","utf8");
 const js=fs.readFileSync("radio.js","utf8");
 const api=fs.readFileSync("radio-api.js","utf8");
 const worker=fs.readFileSync("worker.js","utf8");
@@ -11,6 +12,10 @@ assert(api.includes("RADIO_STREAM_URL"),"Cloudflare stream env missing");
 assert(worker.includes("/api/radio/status"),"worker route missing");
 assert(!html.toLowerCase().includes("vercel"),"radio page must not reference Vercel");
 assert(!js.toLowerCase().includes("vercel"),"radio JS must not reference Vercel");
+assert(musicHtml.includes('id="stannet-radio"'),"Music Lab must include StanNet Radio");
+assert(musicHtml.includes('id="radioAudio"'),"Music Lab radio player missing");
+assert(musicHtml.includes('../radio.js'),"Music Lab must reuse the radio client");
+assert(musicHtml.includes('../radio.css'),"Music Lab must reuse the radio styles");
 
 assert(worker.includes("/api/radio/feed"),"Stage 2 feed endpoint missing");
 assert(worker.includes("RADIO_FEEDS"),"Stage 2 source registry missing");

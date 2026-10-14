@@ -7,7 +7,17 @@
 <title>Music Lab | StanNet.Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../radio.css">
 <style>
+.music-radio-section{border-top:1px solid var(--line);background:radial-gradient(circle at 78% 45%,rgba(89,232,255,.09),transparent 32%)}
+.music-radio-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,560px);gap:clamp(36px,7vw,100px);align-items:center}
+.music-radio-copy h2{font-size:clamp(35px,4.5vw,66px);line-height:1;letter-spacing:-.065em;margin:0 0 24px}
+.music-radio-copy h2 em{color:var(--cyan);font-style:normal}
+.music-radio-copy>p:not(.eyebrow){max-width:620px;color:var(--muted);line-height:1.75}
+.music-radio-copy .card-link{display:inline-flex;margin-top:18px}
+.music-radio-section .radio-console{justify-self:stretch}
+.music-radio-section .radio-play:disabled{cursor:not-allowed;opacity:.45}
+@media(max-width:900px){.music-radio-layout{grid-template-columns:1fr}.music-radio-section .radio-console{justify-self:start}}
 .youtube-section{border-top:1px solid var(--line)}
 .youtube-section .section-heading{align-items:end}
 .youtube-section h2{font-size:clamp(35px,4.5vw,66px);line-height:1;letter-spacing:-.065em;margin:0}
@@ -35,7 +45,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/stannet-sn-cutout-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/stannet-sn-cutout-180.png">
 </head>
-<body id="top" class="stannet-global stannet-page-music">
+<body id="top" class="radio-page stannet-global stannet-page-music">
 <header class="site-header">
 <a class="brand brand-lockup" href="../index.html" aria-label="StanNet.Space, inicio"><img class="brand-mark" src="../assets/brand/stannet-sn-cutout-20261005.png" width="44" height="44" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
@@ -52,10 +62,33 @@
 <h1>Tu historia,<br><em>en otra frecuencia.</em></h1>
 <p>Un espacio para escuchar, estudiar guitarra y compartir la frecuencia musical de StanNet.Space.</p><p><a class="card-link" href="language-music.html">ABRIR LANGUAGE MUSIC LAB · APRENDER CON LETRAS ↗</a></p><p><a class="card-link" href="guitar.html">ABRIR STANNET GUITAR ACADEMY · ESCALAS Y MODOS ↗</a></p>
 </section>
+<section class="section radio-section music-radio-section" id="stannet-radio">
+<div class="music-radio-layout">
+<div class="music-radio-copy">
+<p class="eyebrow">04 / STANNET RADIO</p>
+<h2>Tu música.<br><em>En directo.</em></h2>
+<p>Escucha StanNet Radio sin salir de Music Lab: música, tecnología, ciberseguridad e inteligencia artificial en una sola frecuencia.</p>
+<a class="card-link" href="radio.html">ABRIR STANNET RADIO COMPLETA ↗</a>
+</div>
+<div class="radio-console radio-deck" aria-label="Reproductor StanNet Radio">
+<div class="radio-console-top"><span>STANNET RADIO · CONTROL DESK</span><span id="liveBadge">CONECTANDO</span></div>
+<div class="radio-deck-visual">
+<img class="radio-deck-image" src="../assets/radio/stannet-radio-console.jpg" alt="Consola de StanNet Radio con controles Music, Tech, Cyber y AI.">
+<button id="radioPlay" class="radio-play" type="button" aria-label="Reproducir radio" disabled><span aria-hidden="true">▶</span></button>
+</div>
+<div class="radio-deck-track">
+<div class="radio-now"><small>AHORA EN STANNET RADIO</small><h2 id="nowTitle">StanNet Radio</h2><p id="nowMeta">Music · Tech · Cyber · AI</p></div>
+<div class="radio-volume"><label for="radioVolume">VOL</label><input id="radioVolume" type="range" min="0" max="1" step=".05" value=".8" aria-label="Volumen de la radio"></div>
+</div>
+<audio id="radioAudio" preload="none"></audio>
+<p id="radioMessage" class="radio-message" role="status" aria-live="polite">Conectando con la emisión de StanNet Radio…</p>
+</div>
+</div>
+</section>
 <section class="section">
 <div class="section-heading">
 <div>
-<p class="eyebrow">04 / GUITAR ACADEMY</p>
+<p class="eyebrow">05 / GUITAR ACADEMY</p>
 <h2>Teoria que<br><em>se toca.</em></h2>
 </div>
 <p>Una nueva herramienta visual para ver escalas, modos, mastil, pentagrama, tablatura y audio sin salir de StanNet.Space.</p>
@@ -68,7 +101,7 @@
 <section class="section youtube-section">
 <div class="section-heading">
 <div>
-<p class="eyebrow">04 / YOUTUBE</p>
+<p class="eyebrow">06 / YOUTUBE</p>
 <h2>Escucha la<br><em>frecuencia.</em></h2>
 </div>
 <p>Reproduce tus vídeos directamente desde StanNet.Space sin sacar al visitante de la página.</p>
@@ -93,6 +126,7 @@ allowfullscreen></iframe>
 </footer>
 <script src="../script.js?v=20261005-aireset1"></script>
 <script src="/stannet-global-nav.js?v=20261009-dj1" defer></script>
+<script src="../radio.js"></script>
 </body>
 </html>
 
