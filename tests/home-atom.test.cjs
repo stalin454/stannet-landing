@@ -4,42 +4,23 @@ const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'home-refresh.css'), 'utf8');
-const rails = fs.readFileSync(path.join(root, 'home-access-rail.js'), 'utf8');
-const groupNames = ['desarrollo', 'idiomas', 'musica', 'seguridad', 'apps', 'dinamarca', 'stannet'];
 
-// The 35 old animated chip links were retired in favor of accessible project rails.
-const cards = [...html.matchAll(/<a class="home-rail-card[^"]*" href="([^"]+)"[^>]*>[\s\S]*?<strong>([^<]+)<\/strong>/g)];
-assert.equal(cards.length, 35, 'all 35 StanNet projects must have accessible links');
-for (const [, href, label] of cards) {
-  assert.ok(label.trim(), `missing project label for ${href}`);
-  let destination = href.split('#')[0].replace(/^\//, '');
-  if (destination.endsWith('/')) destination += 'index.html';
-  assert.ok(fs.existsSync(path.join(root, destination)), `project destination does not exist: ${href}`);
+// The Space homepage is now a B2B presentation. The original 35-app directory
+// remains in Git/history and its app routes are preserved until Dev is ready.
+for (const section of ['contenido', 'servicios', 'soluciones', 'portfolio', 'metodo', 'contacto']) {
+  assert.ok(html.includes('id="'+section+'"'), 'missing corporate section '+section);
 }
-
-assert.equal((html.match(/data-project-group="/g) || []).length, 7, 'seven project groups must be present');
-for (const name of groupNames) {
-  assert.ok(html.includes(`data-project-group="${name}"`), `missing project category ${name}`);
-  assert.ok(html.includes(`data-project-filter="${name}"`), `missing category filter ${name}`);
-  assert.ok(html.includes(`id="rail-${name}"`), `missing accessible rail ${name}`);
+assert.equal((html.match(/class="service-card"/g)||[]).length, 4);
+assert.equal((html.match(/class="project-card"/g)||[]).length, 3);
+assert.match(html, /https:\/\/stannet\.dev\//);
+assert.match(html, /mailto:contacto@stannet\.space/);
+assert.match(html, /\/script\.js\?v=/, 'keep shared AI and voice bootstrap');
+assert.match(html, /@media\(max-width:820px\)/);
+assert.match(html, /prefers-reduced-motion:reduce/);
+for (const route of ['/pages/typing.html', '/pages/english.html', '/pages/radio.html', '/dj-studio/', '/sentinel/']) {
+  assert.ok(!html.includes('href="'+route+'"'), 'Dev-only app promoted in Space home: '+route);
 }
-assert.match(html, /data-project-filter="solutions"/);
-assert.match(html, /data-project-filter="all"/);
-assert.match(html, /class="directory-status" role="status" aria-live="polite"/);
-assert.match(html, /home-access-rail\.js\?v=/);
-
-assert.match(css, /\.directory-group\[hidden\]\{display:none!important\}/);
-assert.match(css, /\.home-rail-card:focus-visible/);
-assert.match(css, /prefers-reduced-motion:reduce/);
-assert.doesNotMatch(css, /#stannet-ai-root/, 'The project directory must not constrain the isolated agent');
-assert.match(rails, /ResizeObserver/);
-assert.match(rails, /ArrowRight/);
-assert.match(rails, /data-project-filter/);
-assert.match(rails, /aria-pressed/);
-assert.match(rails, /prefers-reduced-motion/);
-assert.match(rails, /pointermove/);
-assert.match(rails, /hashchange/);
-assert.match(rails, /applyFilter\('solutions'\)/);
-
-console.log('PASS: 35 project rail links, 7 categories, accessible filters and reduced-motion handling verified.');
+for (const file of ['pages/web-development.html','pages/cv.html','pages/blog.html']) {
+  assert.ok(fs.existsSync(path.join(root,file)), 'corporate route missing: '+file);
+}
+console.log('PASS: Space corporate home links, services, portfolio, accessibility and AI bootstrap verified.');
