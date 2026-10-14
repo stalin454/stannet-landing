@@ -7,7 +7,7 @@ const puppeteer=require('puppeteer-core');
  const results=[];
  try{
   for(const width of [320,390,1280]){
-   const page=await browser.newPage();await page.setViewport({width,height:900});
+   const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    const response=await page.goto(base+'/',{waitUntil:'networkidle0',timeout:45000});assert.equal(response.status(),200);
    await page.waitForSelector('.card');
