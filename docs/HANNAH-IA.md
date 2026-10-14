@@ -66,3 +66,15 @@ La ilustración/SVG actual es **solo un prototipo técnico provisional**. La ver
 - `main`, `stannet.space` y el staging reservado de `academy.stannet.dev` permanecerán intactos. Esta decisión no autoriza fusionar el PR #143.
 
 **Estado de ejecución:** contrato y orden de trabajo definidos. **Aún no existe un archivo GLB final ni una figura 3D integrada en el widget**; no presentar el sprite como 3D real.
+
+
+## Entrega WebGL 3D articulada (14/10/2026)
+La primera figura **3D de verdad** usa geometría de esfera UV, matrices de transformación, perspectiva, normales e iluminación por fragmento con WebGL. La cabeza, ojos, párpados, boca y ambos brazos se transforman en 3 dimensiones; un único canvas se desplaza entre la ventana flotante y la cabecera de conversación para evitar dos contextos WebGL. Incluye indumentaria de exploración, programación, inglés y ciberseguridad.
+
+- Motor sin dependencias ni cargas de terceros: `hannah-ia-3d.mjs`, importado de forma diferida desde `stannet-ai-avatar.mjs` únicamente en academias.
+- Se detiene al ocultar el agente o cambiar de pestaña; respeta preferencia de movimiento reducido y limita la resolución del framebuffer.
+- El personaje mantiene cara y ropa como **modelo procedural estilizado**; representa a Hannah IA pero **no es todavía un escaneo ni modelo GLB con semejanza facial fotográfica**. La ilustración SVG sirve de respaldo sin WebGL.
+- La boca se mueve al estado `speaking`, no tiene visemas calculados por texto/audio; no cambia servicios TTS, tarifas ni permisos.
+- Las pruebas con Chromium observan lienzo 3D real o respaldo 2D y que el lienzo sea único al abrir el chat.
+- No se publican fotos originales de Hannah Laura, identificadores personales ni claves.
+- El despliegue en producción exige que pasen CI y navegador móvil sobre el último commit y que Cloudflare publique la preview correcta. El equipo debe comprobar apariencia y comportamiento tras el deploy.
