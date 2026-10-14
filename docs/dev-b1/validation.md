@@ -6,9 +6,13 @@ El portal candidato fue publicado y superó HTTP y Chrome antes/después en 320/
 
 El flujo Auth/Typing/admin se ejecutó en Chrome con SQLite y buzón de fixtures reales: registro, confirmación, login, escritura/error/retroceso, progreso, gestión de permiso por admin, logout/bloqueo directo y reset. La prueba figura en `tests/auth-browser.cjs` y el job de CI aislado. No demuestra email externo, compras Stripe o dispositivos físicos.
 
+## Nueva cobertura Cloudflare
+
+Workerd/D1 local y Wrangler local PASS: dos migraciones; aplicación repetida; migración fallida revertida; exportación/restauración SQL; copia del estado tras cerrar; identidad de entorno incorrecta bloqueada; roles y revocación; cuotas concurrentes; progreso persistente; reset/logout. Correos exclusivamente fixtures en memoria, sin buzón de tokens en D1. Prueba adicional de intercalación login/reset: la contraseña antigua no puede emitir sesión. Herramientas/versiones/comandos y límites en [cloudflare-data.md](cloudflare-data.md).
+
 ## Resultados locales
 
-- `cd apps/dev-b1 && npm test`: **16 pruebas PASS**, cero fallos, Node 24.
+- `cd apps/dev-b1 && npm test`: **18 pruebas PASS**, cero fallos, Node 24.
 - Suite previa `npm run test:ci`: **PASS**, 100 comandos; incluye Amy/Polly y StanNet AI existentes.
 - Syntax checks de app, servidor, Worker, CLI, portal y piloto: PASS.
 - `python3 docs/dev-b1/verify-isolation.py`: **550 archivos previos comparados**, todos iguales salvo exclusión aditiva de assets; archive restaurado con 550 archivos iguales. SHA-256 `f68b2fc7e0538d84bbf472df020cd12109e6b700fbcb9a71e8be867e6d0a7599`.
@@ -36,7 +40,7 @@ Las pruebas usan base SQLite real y HTTP loopback real. **No se simulan autentic
 
 ## No probado
 
-- Backend Auth completo alojado: sin DB/bindings/mail sandbox disponibles. Config/API D1 no ejecutadas en runtime Workers real. Solo se ha alojado el portal público.
+- Backend Auth completo alojado: sin DB/bindings/mail sandbox disponibles. Runtime workerd/D1 local probado; no prueba remota ni binding a D1 alojado. Solo se ha alojado el portal público.
 - Correo externo, SPF/DKIM, enlaces recibidos, SMTP/Supabase Auth dedicado.
 - Stripe sandbox conectado, Checkout, precios, intervalos mensual/anual, portal de cancelación y eventos emitidos por Stripe.
 - Android/iPhone/Windows físicos y teclado de hardware: pendientes. Sí hay E2E de Chrome con teclado automatizado y tres tamaños, tanto para portal como para el entorno local de Auth/Typing/admin.

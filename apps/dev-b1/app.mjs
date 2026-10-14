@@ -7,7 +7,7 @@ export function application(options){
  const clock=options.clock||(()=>Math.floor(Date.now()/1000));
  const secure=new URL(origin).protocol==='https:';
  if(!secure&&!['127.0.0.1','localhost'].includes(new URL(origin).hostname))throw Error('HTTPS required');
- if(['stannet.space','www.stannet.space','stannet.dev','academy.stannet.dev'].includes(new URL(origin).hostname))throw Error('Production origins forbidden in B1');
+ if(['stannet.space','www.stannet.space','academy.stannet.dev'].includes(new URL(origin).hostname)||new URL(origin).hostname==='stannet.dev'&&options.deployment!=='isolated-dev')throw Error('Protected origins forbidden in B1');
  const cookieName=secure?'__Host-stannet_dev_b1':'stannet_dev_b1_local';
  const cookie=(value,age)=>cookieName+'='+value+'; Path=/; HttpOnly; SameSite=Strict; Max-Age='+age+(secure?'; Secure':'');
  const statement=(sql,...args)=>db.prepare(sql).bind(...args);
@@ -136,7 +136,9 @@ export function application(options){
       const valid=encoded?await passwordMatches(data.password,encoded):false;
       if(!valid||!user||!user.verified||user.disabled)fail(401,'CREDENTIALS','No se pudo iniciar sesión. Comprueba los datos y la verificación de correo.');
       const secret=token(),csrf=token();
-      await db.batch([statement('DELETE FROM dev_sessions WHERE user_id=? AND expires<=?',user.id,clock()),statement('INSERT INTO dev_sessions(hash,user_id,csrf,expires) VALUES(?,?,?,?)',hash(secret),user.id,csrf,clock()+3600),...(current?[statement('DELETE FROM dev_sessions WHERE hash=?',current.hash)]:[])]);
+      // Password hashing can overlap a reset/disable/role change. Re-check the exact verified identity inside the atomic write.
+      const saved=await db.batch([statement('DELETE FROM dev_sessions WHERE user_id=? AND expires<=?',user.id,clock()),statement('INSERT INTO dev_sessions(hash,user_id,csrf,expires) SELECT ?,?,?,? WHERE EXISTS(SELECT 1 FROM dev_users WHERE id=? AND password=? AND role=? AND verified=1 AND disabled=0)',hash(secret),user.id,csrf,clock()+3600,user.id,encoded,user.role),...(current?[statement('DELETE FROM dev_sessions WHERE hash=? AND EXISTS(SELECT 1 FROM dev_sessions WHERE hash=?)',current.hash,hash(secret))]:[])]);
+      if(saved[1].meta.changes!==1)fail(401,'CREDENTIALS','No se pudo iniciar sesión. Vuelve a intentarlo.');
       return json({ok:true},200,{'Set-Cookie':cookie(secret,3600)});
      }
      if(path==='/api/auth/logout'){if(current)await run('DELETE FROM dev_sessions WHERE hash=?',current.hash);return json({ok:true},200,{'Set-Cookie':cookie('',0)});}

@@ -11,6 +11,11 @@ assert m.credential('zones/'+m.DEV_ZONE+'/dns_records?name=stannet.dev',e)=='tes
 for path in ['zones/other-zone/dns_records','accounts/account/workers/domains','zones/'+m.DEV_ZONE+'/dns_records/unrelated','zones/'+m.DEV_ZONE+'/dns_records-malicious']:
  assert m.credential(path,e)=='test-deployer'
 assert m.credential('zones/'+m.DEV_ZONE+'/dns_records',{'CLOUDFLARE_API_TOKEN':'test-deployer'})=='test-deployer'
+e.update(CLOUDFLARE_ACCOUNT_ID='dev-account',CLOUDFLARE_DEV_D1_TOKEN='test-d1')
+assert m.credential('accounts/dev-account/d1/database?per_page=100',e)=='test-d1'
+assert m.credential('accounts/other-account/d1/database',e)=='test-deployer'
+assert m.credential('accounts/dev-account/d1/database/db/query',e)=='test-deployer'
+
 `],{cwd:new URL('../../../',import.meta.url),encoding:'utf8'});
  assert.equal(result.status,0,result.stderr);
 });

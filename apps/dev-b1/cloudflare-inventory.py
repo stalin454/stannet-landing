@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Read-only Cloudflare inventory through existing Actions credentials. Never prints values."""
-import os,json,urllib.request,urllib.error
+import os,json,urllib.request,urllib.error,importlib.util
+spec=importlib.util.spec_from_file_location('cf_read',os.path.join(os.path.dirname(__file__),'cloudflare-read.py'))
+reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader)
 ACCOUNT=os.environ.get('CLOUDFLARE_ACCOUNT_ID','')
 KEY=os.environ.get('CLOUDFLARE_API_TOKEN','')
 if not ACCOUNT or not KEY:
  print('CLOUDFLARE_ACCESS_BLOCKED: configured Actions credentials unavailable')
  raise SystemExit(1)
 def read(path):
- req=urllib.request.Request('https://api.cloudflare.com/client/v4/'+path,headers={'Authorization':'Bearer '+KEY,'Accept':'application/json'})
+ req=urllib.request.Request('https://api.cloudflare.com/client/v4/'+path,headers={'Authorization':'Bearer '+reader.credential(path),'Accept':'application/json'})
  try:
   with urllib.request.urlopen(req,timeout=25) as r:body=json.load(r)
   if body.get('success') is not True:return {'blocked':True,'codes':[e.get('code') for e in body.get('errors',[])]}

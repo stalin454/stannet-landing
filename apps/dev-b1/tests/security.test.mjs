@@ -149,3 +149,26 @@ test('webhooks require a signed test event and authoritative test state; replay/
   assert.equal(s.db.raw.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').get(a.user.id).plan,'premium');
  }finally{s.db.close();}
 });
+test('a concurrent credential reset cannot create a session using the old password',async()=>{
+ const s=setup();try{
+  const a=await account(s);await s.request('/api/auth/recover',{email:a.user.email});
+  const reset=s.db.raw.prepare("SELECT token FROM dev_test_mail WHERE kind='reset'").get();
+  // Interleave exactly after reading the old credential, before the expensive password hash returns.
+  const original=s.db.prepare.bind(s.db);let intercepted=false;
+  s.db.prepare=sql=>{
+   const statement=original(sql);const first=statement.first.bind(statement);
+   statement.first=async()=>{
+    const row=await first();
+    if(sql==='SELECT * FROM dev_users WHERE email=?'&&!intercepted){
+     intercepted=true;
+     const response=await s.request('/api/auth/reset',{token:reset.token,password:'Changed!long-passphrase'});
+     assert.equal(response.status,200);
+    }
+    return row;
+   };return statement;
+  };
+  const response=await s.request('/api/auth/login',{email:a.user.email,password:'Valid!long-passphrase'});
+  assert.equal(response.status,401);assert.equal(response.headers.get('set-cookie'),null);
+  assert.equal(s.db.raw.prepare('SELECT COUNT(*) AS n FROM dev_sessions').get().n,0);
+ }finally{s.db.close();}
+});

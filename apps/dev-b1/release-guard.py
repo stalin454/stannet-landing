@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Snapshot protected production metadata, validate the Dev-only target; no secret serialization."""
-import os,json,urllib.request,urllib.error,sys
+import os,json,urllib.request,urllib.error,sys,hashlib
 account=os.environ['CLOUDFLARE_ACCOUNT_ID'];secret=os.environ['CLOUDFLARE_API_TOKEN'];mode=sys.argv[1]
 import importlib.util
 _spec=importlib.util.spec_from_file_location('cf_read',os.path.join(os.path.dirname(__file__),'cloudflare-read.py'))
 _reader=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(_reader)
 read=_reader.read
+def fingerprint(records):
+ # Hash values in memory; never serialize TXT contents or credentials into a backup/log.
+ fields=('id','name','type','content','proxied','ttl','priority','data')
+ return hashlib.sha256(json.dumps([{key:record.get(key) for key in fields} for record in sorted(records,key=lambda x:x['id'])],sort_keys=True).encode()).hexdigest()
 def snapshot():
  result={}
  for name in ['stannet-landing','stannet-academy-dev']:
@@ -40,13 +44,22 @@ if mode=='before':
  root_before=[x for x in domains if x.get('hostname')=='stannet.dev']
  if dns is not None and not root_before and any(x.get('type') in ['A','AAAA','CNAME'] for x in dns):raise RuntimeError('Existing apex origin records require manual review; no overwrite permitted')
  if dns is None and root_before:raise RuntimeError('Cannot change a Worker already bound to root without DNS backup')
- before={'protected':protected,'dev_previous':target,'domain_before':root_before,'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns] if dns is not None else None,'domain_allowed':dns is not None}
+ before={'protected':protected,'dev_previous':target,'domain_before':root_before,'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns] if dns is not None else None,'root_dns_fingerprint':fingerprint(dns) if dns is not None else None,'domain_allowed':dns is not None}
  open('/tmp/dev-b1-before.json','w').write(json.dumps(before))
  with open(os.environ['GITHUB_ENV'],'a') as f:
   f.write('DEV_CANDIDATE_URL=https://stannet-dev-portal.'+subdomain['subdomain']+'.workers.dev\n')
   f.write('DEV_DOMAIN_ALLOWED='+('true' if before['domain_allowed'] else 'false')+'\n')
   f.write('DEV_CANDIDATE_CONFIG=apps/dev-b1/'+('portal-domain.jsonc' if root_before else 'portal-worker.jsonc')+'\n')
  print(json.dumps({'protected_snapshot':protected,'root_domain_previously_bound':bool(before['domain_before']),'zone_confirmed':True,'target':'stannet-dev-portal'}))
+elif mode=='bind-check':
+ before=json.load(open('/tmp/dev-b1-before.json'))
+ if not before.get('domain_allowed') or before['zone_id']!=_reader.DEV_ZONE:raise RuntimeError('Root binding not authorized by DNS snapshot')
+ domains=read('accounts/'+account+'/workers/domains')
+ if [x for x in domains if x.get('hostname')=='stannet.dev']!=before['domain_before']:raise RuntimeError('Root ownership changed during QA; stopped')
+ dns=read('zones/'+before['zone_id']+'/dns_records?name=stannet.dev&per_page=100')
+ if fingerprint(dns)!=before['root_dns_fingerprint']:raise RuntimeError('Root DNS changed during QA; stopped')
+ if snapshot()!=before['protected']:raise RuntimeError('Protected deployments changed during QA; stopped')
+ print('Root DNS and ownership unchanged since snapshot; binding gate passed.')
 elif mode=='after':
  before=json.load(open('/tmp/dev-b1-before.json'));after=snapshot()
  if before['protected']!=after:raise RuntimeError('Protected production deployment metadata changed; investigate without rolling back Space')
@@ -73,7 +86,7 @@ elif mode=='rollback':
   for domain in domains:
    if domain.get('hostname')=='stannet.dev' and domain.get('service')=='stannet-dev-portal':write('accounts/'+account+'/workers/domains/'+domain['id'],'DELETE')
   dns=read('zones/'+before['zone_id']+'/dns_records?name=stannet.dev&per_page=100')
-  if any(record['id'] not in before['root_dns_ids'] for record in dns):
+  if fingerprint(dns)!=before['root_dns_fingerprint']:
    raise RuntimeError('Dev domain detached, but new managed DNS records remain: owner review required; no DNS Edit permission requested or used')
   print('New Dev root binding removed; original root DNS record IDs preserved.')
  elif not deployments:
