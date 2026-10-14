@@ -1,6 +1,7 @@
 import {sanitizeContext,redactSecrets} from './stannet-ai-context-policy.mjs';
 import { handleAyudaEnCasaApi } from './ayudaencasa-api.js';
 import { pollySelected, pollyConfigured, requestPolly, requestPollyRadio } from './aws-polly.js';
+import { handleLanguagePremiumAuth, authorizePaidSpeech, attachSessionCookies } from './language-premium-auth.mjs';
 import { handleCommunity } from './community-dinamarca/api.mjs';
 import { catalogueText } from './stannet-ai-knowledge.mjs';
 import { radioProgramClock, radioStatus, resolveRadioProgram } from './radio-api.js';
@@ -112,15 +113,16 @@ export default {
       return json(radioStatus(env, new Date()), 200, { 'Cache-Control': 'public, max-age=20, s-maxage=20' });
     }
 
+    if (url.pathname.startsWith('/api/language-premium/')) {
+      return handleLanguagePremiumAuth(request,env,url);
+    }
+
     if (url.pathname === '/api/speech/test') {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       if (pollySelected(env)) {
-        const result = await requestPolly('Hej', env, {lang:'da-DK'});
-        if (!result.ok) return json({ok:false,provider:'amazon-polly',reason:result.error,
-          providerStatus:result.providerStatus || null},200,{'Cache-Control':'no-store'});
-        const bytes = await result.response.arrayBuffer();
-        return json({ok:bytes.byteLength>0,provider:'amazon-polly',region:env.AWS_POLLY_REGION||'eu-south-2',
-          language:result.language,voice:result.voice,byteLength:bytes.byteLength},200,{'Cache-Control':'no-store'});
+        // This historically billable GET diagnostic was public. Disable synthesis
+        // entirely; authenticated POST /api/speech provides a quota-bound test.
+        return json({error:'Diagnóstico de voz por GET desactivado; usa Language Academy para probar la voz.'},405,{'Cache-Control':'no-store'});
       }
       const region = env.AZURE_SPEECH_REGION;
       const key = env.AZURE_SPEECH_KEY;
@@ -171,7 +173,8 @@ export default {
       if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
       if (pollySelected(env)) return json({
         provider:'amazon-polly',region:env.AWS_POLLY_REGION||'eu-south-2',
-        configured:pollyConfigured(env),connectionTest:'/api/speech/test'
+        configured:pollyConfigured(env),authRequired:true,
+        authEndpoint:'/api/language-premium/session'
       },200,{'Cache-Control':'no-store'});
       const regionConfigured = Boolean(env.AZURE_SPEECH_REGION);
       const keyConfigured = Boolean(env.AZURE_SPEECH_KEY);
@@ -222,14 +225,17 @@ export default {
       }
 
       if (pollySelected(env)) {
-        if (!text || text.length > 500) return json({error:'Texto no válido.'},400);
-        const result = await requestPolly(text,env,{lang:requestedLang,voice:requestedVoice,purpose});
-        if (!result.ok) return json({error:result.error,providerStatus:result.providerStatus||null},result.status);
-        return new Response(result.response.body,{status:200,headers:{
-          'Content-Type':'audio/mpeg',
-          'Cache-Control':purpose === 'chat' || purpose === 'audiobook' ? 'no-store' : 'public, max-age=86400, s-maxage=604800',
-          'X-Content-Type-Options':'nosniff','X-StanNet-Speech-Provider':'amazon-polly'
-        }});
+        // Central gate for ALL billable /api/speech consumers, not just Academy UI.
+        // No unauthenticated GET, no public CDN storage, atomic quota BEFORE AWS.
+        const permit=await authorizePaidSpeech(request,env,text);
+        if (!permit.ok)return permit.response;
+        const result=await requestPolly(text,env,{lang:requestedLang,voice:requestedVoice,purpose});
+        if (!result.ok)return attachSessionCookies(json({error:result.error},result.status,{'Cache-Control':'no-store'}),permit.setCookies);
+        return attachSessionCookies(new Response(result.response.body,{status:200,headers:{
+          'Content-Type':'audio/mpeg','Cache-Control':'private, no-store',
+          'X-Content-Type-Options':'nosniff','X-StanNet-Speech-Provider':'amazon-polly',
+          'X-StanNet-Voice-Remaining':String(permit.remaining)
+        }}),permit.setCookies);
       }
 
       const voiceMap = {
