@@ -2,15 +2,10 @@
 """Snapshot protected production metadata, validate the Dev-only target; no secret serialization."""
 import os,json,urllib.request,urllib.error,sys
 account=os.environ['CLOUDFLARE_ACCOUNT_ID'];secret=os.environ['CLOUDFLARE_API_TOKEN'];mode=sys.argv[1]
-def read(path):
- req=urllib.request.Request('https://api.cloudflare.com/client/v4/'+path,headers={'Authorization':'Bearer '+secret,'Accept':'application/json'})
- try:
-  with urllib.request.urlopen(req,timeout=25) as r:data=json.load(r)
- except urllib.error.HTTPError as e:
-  if e.code==404:return None
-  raise RuntimeError('Cloudflare metadata read blocked: HTTP '+str(e.code)) from None
- if data.get('success') is not True:raise RuntimeError('Cloudflare metadata read rejected')
- return data.get('result')
+import importlib.util
+_spec=importlib.util.spec_from_file_location('cf_read',os.path.join(os.path.dirname(__file__),'cloudflare-read.py'))
+_reader=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(_reader)
+read=_reader.read
 def snapshot():
  result={}
  for name in ['stannet-landing','stannet-academy-dev']:
@@ -24,7 +19,7 @@ if mode=='before':
  domains=read('accounts/'+account+'/workers/domains');zones=read('zones?name=stannet.dev')
  if not isinstance(domains,list) or not isinstance(zones,list):raise RuntimeError('Incomplete destination inventory')
  zone=next((x for x in zones if x['name']=='stannet.dev' and x['status']=='active'),None)
- if not zone:raise RuntimeError('Active Dev zone not confirmed')
+ if not zone or zone['id']!=_reader.DEV_ZONE:raise RuntimeError('Verified active Dev zone not confirmed')
  for domain in domains:
   if domain.get('hostname')=='stannet.dev' and domain.get('service')!='stannet-dev-portal':raise RuntimeError('Root Dev is already owned by a different Worker; stopped')
  routes=read('zones/'+zone['id']+'/workers/routes')
@@ -43,6 +38,7 @@ if mode=='before':
   print('DEV_ROOT_BLOCKED: DNS Read denied (HTTP 403). Candidate-only publication; no DNS/domain writes.')
  if dns is not None and not isinstance(dns,list):raise RuntimeError('Root DNS backup unavailable')
  root_before=[x for x in domains if x.get('hostname')=='stannet.dev']
+ if dns is not None and not root_before and any(x.get('type') in ['A','AAAA','CNAME'] for x in dns):raise RuntimeError('Existing apex origin records require manual review; no overwrite permitted')
  if dns is None and root_before:raise RuntimeError('Cannot change a Worker already bound to root without DNS backup')
  before={'protected':protected,'dev_previous':target,'domain_before':root_before,'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns] if dns is not None else None,'domain_allowed':dns is not None}
  open('/tmp/dev-b1-before.json','w').write(json.dumps(before))
@@ -72,15 +68,14 @@ elif mode=='rollback':
   versions=[{'version_id':v['version_id'],'percentage':v['percentage']} for v in deployments[0]['versions']]
   write('accounts/'+account+'/workers/scripts/stannet-dev-portal/deployments','POST',{'strategy':'percentage','versions':versions})
   print('Previous Dev Worker deployment restored.')
- else:
-  if not before.get('domain_allowed'):
-   print('Candidate-only operation failed. Root Dev, Space and academy were not changed.');raise SystemExit(0)
+ if before.get('domain_allowed') and not before.get('domain_before'):
   domains=read('accounts/'+account+'/workers/domains')
-  for d in domains:
-   if d.get('hostname')=='stannet.dev' and d.get('service')=='stannet-dev-portal':write('accounts/'+account+'/workers/domains/'+d['id'],'DELETE')
+  for domain in domains:
+   if domain.get('hostname')=='stannet.dev' and domain.get('service')=='stannet-dev-portal':write('accounts/'+account+'/workers/domains/'+domain['id'],'DELETE')
   dns=read('zones/'+before['zone_id']+'/dns_records?name=stannet.dev&per_page=100')
-  for record in dns:
-   if record['id'] not in before['root_dns_ids'] and record.get('name')=='stannet.dev' and record.get('type') in ['A','AAAA','CNAME'] and record.get('content') in ['100::',os.environ.get('DEV_CANDIDATE_URL','').removeprefix('https://')]:
-    write('zones/'+before['zone_id']+'/dns_records/'+record['id'],'DELETE')
-  print('First Dev publication unbound; prior root DNS records preserved. No previous working portal existed.')
+  if any(record['id'] not in before['root_dns_ids'] for record in dns):
+   raise RuntimeError('Dev domain detached, but new managed DNS records remain: owner review required; no DNS Edit permission requested or used')
+  print('New Dev root binding removed; original root DNS record IDs preserved.')
+ elif not deployments:
+  print('No previous Dev deployment. Protected domains unchanged; candidate remains unbound.')
 else:raise RuntimeError('Unknown guard mode')
