@@ -76,9 +76,9 @@ test('genuine WebGL 3D geometry, articulation and safe fallback are present',()=
   assert.match(css,/\.snai-3d-canvas/);
 });
 
-test('unapproved procedural character is opt-in only; visitors get approved Hannah artwork',()=>{
+test('refined 3D defaults on for academies, 2D can be explicitly requested',()=>{
   const source=readFileSync('stannet-ai-avatar.mjs','utf8');
-  assert.match(source,/new URLSearchParams\(window\.location\.search\)\.get\('hannah3d'\)==='1'/);
+  assert.match(source,/new URLSearchParams\(window\.location\.search\)\.get\('hannah3d'\)!=='0'/);
   assert.match(source,/if\(this\.experimental3D\)this\.initialize3D\(\)/);
   assert.match(source,/if\(!this\.experimental3D\|\|!this\.isHannah/);
   assert.match(source,/if\(selected&&this\.experimental3D&&!this\.renderer3D\)/);
