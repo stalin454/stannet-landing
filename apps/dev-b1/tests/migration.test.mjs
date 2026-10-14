@@ -19,6 +19,19 @@ test('FP Study wrapper does not fetch Space or external services',()=>{
  assert.doesNotMatch(html,/(?:https?:)?\/\/|\/api\/|stannet\.space/);
 });
 
+for(const [source,target] of [['programming-cs-lessons.js','cs-lessons.js'],['programming-cs-lab.js','cs-lab.js']]){
+ test('CS Foundations source matches original Space content: '+source,()=>{
+  assert.deepEqual(readFileSync(new URL('../../../'+source,import.meta.url)),readFileSync(new URL('../private/'+target,import.meta.url)));
+ });
+}
+test('CS Foundations wrapper retains progress limitations and private same-origin assets only',()=>{
+ const html=readFileSync(new URL('../private/cs-foundations.html',import.meta.url),'utf8');
+ assert.match(html,/\/apps\/cs-foundations\/cs-lessons\.js/);
+ assert.match(html,/\/apps\/cs-foundations\/cs-lab\.js/);
+ assert.match(html,/no se ha conectado a D1/);
+ assert.doesNotMatch(html,/(?:src|href)=["'](?:https?:)?\/\//);
+});
+
 test('FP Study data requires exactly one documented syntax correction, without changing curriculum',()=>{
  const original=readFileSync(new URL('../../../fp-study-data.js',import.meta.url),'utf8');
  const repaired=readFileSync(new URL('../private/fp-study-data.js',import.meta.url),'utf8');

@@ -216,7 +216,7 @@ export function application(options){
     const admin=await member(req);if(admin.role!=='admin'||options.mode!=='sandbox')fail(403,'ADMIN','Acceso reservado al administrador de pruebas.');
     return json({users:(await statement('SELECT u.id,u.email,u.verified,u.role,e.plan,e.expires FROM dev_users u LEFT JOIN dev_entitlements e ON e.user_id=u.id AND e.app=? ORDER BY u.email LIMIT 100','typing').all()).results});
    }
-   // Private migration pilot: never expose the FP curriculum as an ungated static asset.
+   // Private migration pilots: never expose curricula as ungated static assets.
    // Fresh session and server-side role check on every HTML, CSS and script request.
    if(req.method==='GET'){
     const fpAssets={
@@ -225,7 +225,13 @@ export function application(options){
      '/apps/fp-study/fp-study.html':'fp-study.html',
      '/apps/fp-study/fp-study.js':'fp-study.js',
      '/apps/fp-study/fp-study-data.js':'fp-study-data.js',
-     '/apps/fp-study/fp-study.css':'fp-study.css'
+     '/apps/fp-study/fp-study.css':'fp-study.css',
+     '/apps/cs-foundations':'cs-foundations.html',
+     '/apps/cs-foundations/':'cs-foundations.html',
+     '/apps/cs-foundations/cs-foundations.html':'cs-foundations.html',
+     '/apps/cs-foundations/cs-foundations.css':'cs-foundations.css',
+     '/apps/cs-foundations/cs-lessons.js':'cs-lessons.js',
+     '/apps/cs-foundations/cs-lab.js':'cs-lab.js'
     };
     if(Object.hasOwn(fpAssets,path)){
      const user=await member(req);

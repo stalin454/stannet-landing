@@ -45,6 +45,16 @@ const puppeteer=require('puppeteer-core');
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$eval('#completed',el=>Number(el.textContent))+await page.$eval('#mistakes',el=>Number(el.textContent)),1);
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'FP Study overflow '+width);}
+  await page.goto(base+'/apps/cs-foundations',{waitUntil:'networkidle0'});
+  await page.waitForSelector('#cs-list .pa-lesson-btn');
+  assert.equal((await page.$('#cs-list .pa-lesson-btn')).length,17);
+  await page.type('#cs-answer','Una respuesta razonada con estructuras de datos y ejemplos prácticos.');
+  await page.click('#cs-save');
+  await page.waitForFunction(()=>document.querySelector('#cs-status').textContent.includes('Respuesta guardada'));
+  assert.ok((await page.evaluate(()=>localStorage.getItem('stannet-cs-answers-v1'))).includes('estructuras de datos'));
+  await page.reload({waitUntil:'networkidle0'});
+  assert.ok((await page.$eval('#cs-answer',el=>el.value)).includes('estructuras de datos'));
+  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'CS Foundations overflow '+width);}
   await page.goto(base+'/account',{waitUntil:'networkidle0'});
   await page.click('#logout');await page.waitForFunction(()=>document.querySelector('#signed-in').hidden);
   const denied=await page.goto(base+'/apps/typing');assert.equal(denied.status(),401);

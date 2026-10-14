@@ -301,3 +301,18 @@ test('FP Study migration pilot is private on every asset and responds to live ad
   for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,403,'revoked '+path);
  }finally{s.db.close();}
 });
+
+test('CS Foundations migrated source is admin-only with no public asset bypass',async()=>{
+ const s=setup();try{
+  const paths=['/apps/cs-foundations','/apps/cs-foundations/','/apps/cs-foundations/cs-foundations.html','/apps/cs-foundations/cs-foundations.css','/apps/cs-foundations/cs-lessons.js','/apps/cs-foundations/cs-lab.js'];
+  for(const path of paths)assert.equal((await s.request(path)).status,401,'anonymous '+path);
+  const student=await account(s,'cs-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,student)).status,403,'student '+path);
+  s.db.raw.prepare("UPDATE dev_users SET role='admin' WHERE email=?").run('cs-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,student)).status,200,'admin '+path);
+  assert.equal((await s.request('/private/cs-lessons.js',undefined,student)).status,404);
+  assert.equal((await s.request('/apps/cs-foundations/other.js',undefined,student)).status,404);
+  s.db.raw.prepare("UPDATE dev_users SET disabled=1 WHERE email=?").run('cs-pilot@example.test');
+  for(const path of paths)assert.equal((await s.request(path,undefined,student)).status,401,'disabled '+path);
+ }finally{s.db.close();}
+});
