@@ -92,7 +92,7 @@ let runtime,browser;
  assert.ok((await page.$eval('#cs-answer',el=>el.value)).includes('fundamentos de informática'));
  if(artifacts)await page.screenshot({path:join(artifacts,'cs-foundations-migrated-admin.png'),fullPage:true});
  await page.goto(origin+'/account',{waitUntil:'networkidle0'});
- await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);assert.equal(await page.$('#migration-pilots a').then(links=>links.length),2,'two private academy links');await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
+ await page.goto(origin+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);assert.equal(await page.evaluate(()=>document.querySelectorAll('#migration-pilots a').length),2,'two private academy links');await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
  await page.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('actualizado'));
  assert.equal((await db.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').bind(user.id).first()).plan,'premium');
  await page.click('#logout');await page.waitForFunction(()=>document.querySelector('#signed-in').hidden);
