@@ -1,6 +1,8 @@
 # Space → Dev | traslado controlado · fase 1
 
-Estado: propuesta en rama; **sin publicación ni borrado en producción**.
+Estado: inventario y plan de mudanza; **la portada actual de Space queda intacta, sin publicación ni borrado en producción**.
+
+**Instrucción del propietario (15/10/2026): conservar exactamente el diseño actual de la portada Space.** Se descarta el rediseño corporativo propuesto en el primer borrador del PR #151. Mantener el hero, fondo, imagen, animaciones, tipografía, colores, disposición y navegación visual actuales. Solo limpiar los enlaces/catálogos de proyectos cuando ya estén funcionales en Dev y ajustar el contenido textual para posicionamiento B2B, sin sustituir plantillas ni rehacer CSS.
 Fecha: 2026-10-14.
 
 ## Objetivo comercial
@@ -9,13 +11,13 @@ Fecha: 2026-10-14.
 - `stannet.dev`: producto independiente para academias, herramientas, laboratorios, música, DJ Studio, STAN6IX y aplicaciones experimentales; los contenidos privados exigirán autenticación y derechos verificados por el servidor.
 - No mezclar cookies, sesiones, claves, cuotas, usuarios, bases, certificados, música alojada o dominio de un proyecto de cliente.
 
-## Lo que incluye este PR
+## Alcance del PR #151 (corregido)
 
-1. Portada corporativa candidata en `index.html` y hoja `space-corporate.css`, sin carrusel de 35 apps ni navegación de academias.
-2. Enlace público a `https://stannet.dev/` como **catálogo**, no como promesa de acceso a las aplicaciones ni suscripciones activas.
-3. Conservación deliberada de `script.js` (bootstrap del agente/voz), recursos e integraciones antiguos, URL del contacto, enlaces corporativos (`/pages/web-development.html`, `/pages/cv.html`, `/pages/blog.html`).
-4. Ningún cambio a `worker.js`, Cloudflare, IAM, AWS, D1, Supabase, URLs antiguas o rutas de cliente.
-5. Validación estática de navegación B2B y preservación de accesos.
+1. El `index.html` original se ha restaurado **byte a byte respecto a `main`**: sin nuevo hero, diseño, HTML ni cambios de CSS. También se han restaurado las pruebas originales de la portada y la navegación.
+2. **Ningún proyecto se ha retirado aún de Space**, porque Dev todavía no sirve las aplicaciones completas ni tiene habilitada la autenticación remota. La mudanza se realizará solo después de las pruebas correspondientes; no eliminar rutas a ciegas.
+3. El destino comercial se define sin modificar apps: Space es B2B; Dev reúne academias, música, STAN6IX, DJ, IA y labs. Ayuda en Casa y la web de cliente siguen independientes.
+4. En fases posteriores se cambiarán únicamente **textos, vínculos y bloques de proyectos concretos**, conservando la composición visual. Para cualquier cambio de diseño, consultar antes al propietario.
+5. No tocar `worker.js`, claves, bases, AWS, Cloudflare, scripts globales de IA/voz, recursos multimedia ni el despliegue real de Space hasta QA, preview y nueva autorización.
 
 ## Mapa de traslado: por destino y riesgo
 
@@ -45,6 +47,6 @@ Fecha: 2026-10-14.
 6. Verificar rutas entrantes, SEO y enlaces externos; solo entonces retirar acceso a las apps desde Space, con redirección 308 o página informativa cuando sea apropiado. No redirigir secretos ni recursos privados.
 7. Antes de merge/puesta en producción, revisar interfaz de 320/390/1280 px y móvil real, teclado, accesibilidad, contraste, IA/voz, navegadores y regressiones existentes.
 
-**Orden de ejecución recomendado:** página B2B en preview → piloto Typing protegido Dev → correos+cuotas+bases Dev → academias → apps con AWS/IA → herramientas con datos sensibles → radio/música → retirar orígenes. En esta fase se prepara únicamente el nuevo escaparate; los recursos originales siguen intactos y accesibles.
+**Orden de ejecución actualizado:** activar piloto Typing protegido en Dev → datos, correo, sesión y cuotas reales aisladas → migrar y probar las academias → IA/AWS y datos sensibles → radio/música/STAN6IX → retirar únicamente los catálogos/enlaces de las apps ya trasladadas de la portada actual de Space, actualizando sus textos B2B sin cambiar el diseño. La retirada de rutas antiguas, si procede, necesita confirmación separada y rollback. **No se aprueba una nueva portada visual.**
 
-**Rollback de portada:** `recovery/space-b2b-before-move-20261014` apunta a `main` anterior al PR. Si se aprueba más adelante la publicación, respaldar además la versión desplegada de `stannet-landing` y revertir a su versión exacta si la regresión falla.
+**Rollback de cambios futuros (no hay cambios de portada en este PR):** `recovery/space-b2b-before-move-20261014` apunta a `main` anterior al PR. Si se aprueba más adelante la publicación, respaldar además la versión desplegada de `stannet-landing` y revertir a su versión exacta si la regresión falla.
