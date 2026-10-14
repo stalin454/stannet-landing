@@ -316,3 +316,18 @@ test('CS Foundations migrated source is admin-only with no public asset bypass',
   for(const path of paths)assert.equal((await s.request(path,undefined,student)).status,401,'disabled '+path);
  }finally{s.db.close();}
 });
+
+test('Shortcuts Lab migration remains private for each HTML CSS and JS route',async()=>{
+ const s=setup();try{
+  const routes=['/apps/shortcuts','/apps/shortcuts/','/apps/shortcuts/shortcuts.html','/apps/shortcuts/shortcuts-dev.css','/apps/shortcuts/shortcuts.css','/apps/shortcuts/shortcuts.js','/apps/shortcuts/shortcuts-keyboard.js','/apps/shortcuts/shortcuts-lab.js'];
+  for(const path of routes)assert.equal((await s.request(path)).status,401,'anonymous '+path);
+  const member=await account(s,'shortcuts-pilot@example.test');
+  for(const path of routes)assert.equal((await s.request(path,undefined,member)).status,403,'member '+path);
+  assert.equal((await s.request('/private/shortcuts.js',undefined,member)).status,404);
+  assert.equal((await s.request('/apps/shortcuts/unknown.js',undefined,member)).status,404);
+  s.db.raw.prepare("UPDATE dev_users SET role='admin' WHERE email=?").run('shortcuts-pilot@example.test');
+  for(const path of routes){const response=await s.request(path,undefined,member);assert.equal(response.status,200,'admin '+path);assert.equal(response.headers.get('Cache-Control'),'private, no-store');}
+  s.db.raw.prepare("UPDATE dev_users SET role='member' WHERE email=?").run('shortcuts-pilot@example.test');
+  for(const path of routes)assert.equal((await s.request(path,undefined,member)).status,403,'role revoked '+path);
+ }finally{s.db.close();}
+});

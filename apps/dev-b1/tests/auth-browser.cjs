@@ -30,7 +30,7 @@ const puppeteer=require('puppeteer-core');
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Typing overflow '+width);}
   // Promote only this disposable fixture using the operator boundary, then exercise admin UI.
   db.prepare("UPDATE dev_users SET role='admin' WHERE id=?").run(user.id);
-  await page.goto(base+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);assert.equal(await page.evaluate(()=>document.querySelectorAll('#migration-pilots a').length),2,'two private academy links');
+  await page.goto(base+'/account',{waitUntil:'networkidle0'});await page.waitForFunction(()=>!document.querySelector('#admin-panel').hidden);assert.equal(await page.evaluate(()=>document.querySelectorAll('#migration-pilots a').length),3,'three private academy links');
   await page.select('#admin-user',user.id);await page.select('#admin-plan','premium');await page.click('#admin-form button');
   await page.waitForFunction(()=>document.querySelector('#feedback').textContent.includes('actualizado'));
   assert.equal(db.prepare('SELECT plan FROM dev_entitlements WHERE user_id=?').get(user.id).plan,'premium');
@@ -55,6 +55,12 @@ const puppeteer=require('puppeteer-core');
   await page.reload({waitUntil:'networkidle0'});
   assert.ok((await page.$eval('#cs-answer',el=>el.value)).includes('estructuras de datos'));
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'CS Foundations overflow '+width);}
+  const shortcutsResponse=await page.goto(base+'/apps/shortcuts',{waitUntil:'networkidle0'});
+  assert.equal(shortcutsResponse.status(),200);
+  await page.waitForFunction(()=>document.querySelector('#shortcutList')?.children.length>0);
+  await page.click('#labStart');await page.waitForFunction(()=>document.querySelector('#labTask')?.textContent?.trim().length>5);
+  assert.ok((await page.$eval('#labTimer',el=>el.textContent)).includes(':'));
+  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Shortcuts overflow '+width);}
   await page.goto(base+'/account',{waitUntil:'networkidle0'});
   await page.click('#logout');await page.waitForFunction(()=>document.querySelector('#signed-in').hidden);
   const denied=await page.goto(base+'/apps/typing');assert.equal(denied.status(),401);

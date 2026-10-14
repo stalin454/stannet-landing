@@ -39,3 +39,16 @@ test('FP Study data requires exactly one documented syntax correction, without c
  assert.equal(repaired,original.replace('}}]}]},','}}]},'));
  assert.doesNotThrow(()=>new Function(repaired));
 });
+
+for(const name of ['shortcuts.js','shortcuts-keyboard.js','shortcuts-lab.js','shortcuts.css']){
+ test('Shortcuts Lab module matches original Space source: '+name,()=>{
+  assert.deepEqual(readFileSync(new URL('../../../'+name,import.meta.url)),readFileSync(new URL('../private/'+name,import.meta.url)));
+ });
+}
+test('Shortcuts Lab wrapper uses only same-origin executable assets and declares local progress',()=>{
+ const html=readFileSync(new URL('../private/shortcuts.html',import.meta.url),'utf8');
+ for(const name of ['shortcuts.js','shortcuts-keyboard.js','shortcuts-lab.js','shortcuts.css','shortcuts-dev.css'])assert.ok(html.includes('/apps/shortcuts/'+name),name);
+ assert.match(html,/no se sincronizan con D1/);
+ assert.doesNotMatch(html,/<script[^>]+src=["'](?:https?:)?\/\//);
+ assert.ok(html.includes('id="shortcutList"')&&html.includes('id="labConsole"')&&html.includes('id="labKeyboard"'));
+});
