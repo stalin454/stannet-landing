@@ -99,3 +99,20 @@ body.lt-page{margin:0;background:#070f1d!important;color:#e9f6ff!important;font-
 .lt-prompt #ltAmazonPreview{display:block;max-width:100%;width:min(530px,100%);margin:12px 0 2px;border-radius:9px;accent-color:#75deec}
 .lt-prompt #ltAmazonPreview[hidden]{display:none!important}
 @media(max-width:420px){.lt-toolbar{grid-template-columns:1fr}}
+
+
+/* Premium voice only: lesson typing and browser voices stay accessible. */
+.lt-premium-account{margin:0;padding:18px 20px;background:#10273d;border-bottom:1px solid #2a5973;color:#d9f4ff}
+.lt-premium-account[hidden],.lt-premium-form[hidden],#ltPremiumLoggedIn[hidden]{display:none!important}
+.lt-premium-head{display:flex;align-items:start;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.lt-premium-head strong{font-weight:800;font-size:16px}
+.lt-premium-head p{font-size:12px!important;color:#b5cedf!important;line-height:1.5;max-width:600px;margin:6px 0 12px}
+#ltPremiumRemaining{font-size:12px;color:#9fe8d1;font-weight:700}
+.lt-premium-form{display:flex;flex-wrap:wrap;align-items:end;gap:10px}
+.lt-premium-form label{display:flex;flex-direction:column;gap:5px;color:#a9d0e1;font-size:12px;flex:1;min-width:170px}
+.lt-premium-form input{background:#071827!important;color:#eef9ff!important;border:1px solid #41718c;border-radius:10px;min-height:44px;padding:10px}
+.lt-premium-form button,#ltPremiumSignout{min-height:44px;padding:10px 14px;border:1px solid #3d7486;background:#17394b;border-radius:10px;color:#e0f9ff;font-size:12px;font-weight:750}
+#ltPremiumSignin{background:#86e6ed;color:#08212d;border-color:#86e6ed}
+#ltPremiumLoggedIn{display:flex;align-items:center;flex-wrap:wrap;gap:12px;font-size:13px}
+#ltPremiumMessage{font-size:12px;line-height:1.5;color:#b7e1ee;margin:12px 0 0}
+@media(max-width:560px){.lt-premium-account{padding:14px 12px}.lt-premium-form{display:flex;flex-direction:column;align-items:stretch}.lt-premium-form label{width:100%;min-width:0;flex:none}.lt-premium-form button{width:100%}}
