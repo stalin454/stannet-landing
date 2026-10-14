@@ -2,7 +2,7 @@
 (()=>{
   if(document.querySelector('script[data-stannet-ai-loader]'))return;
   const ai=document.createElement('script');
-  ai.src='/stannet-ai.js?v=20261014-hannah3d3';
+  ai.src='/stannet-ai.js?v=20261014-tutor1';
   ai.defer=true;ai.dataset.stannetAiLoader='true';
   document.body.appendChild(ai);
 })();
