@@ -110,3 +110,19 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 @keyframes snai-hannah-talk{from{transform:scaleY(.45) scaleX(.8)}to{transform:scaleY(1.5) scaleX(1.1)}}
 @media(prefers-reduced-motion:reduce){.snai-avatar-surface[data-character="hannah"][data-activity="speaking"] .snai-hannah-mouth{opacity:1}}
 @media(max-width:640px){.snai-hannah-figure{max-height:22dvh}}
+
+
+/* The full floating avatar hides while dialog is open, so the header portrait
+   carries the same speech/listening states without covering lesson content. */
+.snai-persona-hannah{position:relative;overflow:hidden}
+.snai-persona-mouth{position:absolute;left:46%;top:49%;width:12%;height:5%;border-radius:50%;background:#9f4355;opacity:0;pointer-events:none}
+.snai-persona-lid{position:absolute;top:36%;width:13%;height:8%;border-radius:50%;background:#f7d3c0;border-bottom:1px solid #512a2c;opacity:0;pointer-events:none}
+.snai-persona-lid.left{left:31%}.snai-persona-lid.right{left:56%}
+.snai-panel[data-activity="listening"] .snai-persona-hannah{filter:drop-shadow(0 0 4px #63ecff)}
+@media(prefers-reduced-motion:no-preference){
+ .snai-panel[data-activity="speaking"] .snai-persona-mouth{opacity:1;animation:snai-hannah-talk .22s ease-in-out infinite alternate}
+ .snai-panel .snai-persona-lid{animation:snai-hannah-blink 6s ease-in-out infinite}
+}
+@media(prefers-reduced-motion:reduce){
+ .snai-panel[data-activity="speaking"] .snai-persona-mouth{opacity:1}
+}
