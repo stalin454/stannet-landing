@@ -35,6 +35,23 @@ let runtime,browser;
  await page.goto(origin+'/apps/typing',{waitUntil:'networkidle0'});await page.waitForSelector('#exercise option');await page.select('#exercise','javascript:fragment');await page.click('#start');await page.waitForFunction(()=>!document.querySelector('#typing-input').disabled);
  const artifacts=process.env.DEV_QA_ARTIFACTS;if(artifacts){mkdirSync(artifacts,{recursive:true});await page.screenshot({path:join(artifacts,'typing-mobile.png'),fullPage:true});}
  const target=await page.$eval('#target',element=>element.textContent);
+ // Simulate a temporary checkpoint failure. Starting a new exercise must not erase unsaved work.
+ await page.setRequestInterception(true);
+ const rejectCheckpoint=request=>new URL(request.url()).pathname==='/api/typing/checkpoint'
+  ?request.respond({status:503,contentType:'application/json',body:JSON.stringify({error:'Error de prueba al guardar',code:'CHECKPOINT_UNAVAILABLE'})})
+  :request.continue();
+ page.on('request',rejectCheckpoint);
+ await page.type('#typing-input',target.slice(0,4));
+ await page.click('#start');
+ await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('No se ha guardado el borrador'));
+ assert.equal(await page.$eval('#typing-input',element=>element.value),target.slice(0,4),'unsaved text must survive a failed checkpoint');
+ assert.equal(await page.$eval('#typing-input',element=>element.disabled),false,'typing must remain editable');
+ page.off('request',rejectCheckpoint);
+ await page.setRequestInterception(false);
+ await page.click('#save-draft');
+ await page.waitForFunction(()=>document.querySelector('#save-status').textContent.includes('Borrador guardado'));
+ await page.click('#start');
+ await page.waitForFunction(()=>document.querySelector('#typing-input').value===''&&!document.querySelector('#typing-input').disabled);
  // Physical keyboard input + Tab insertion; persist a partial draft and recover on a separate device/session.
  await page.type('#typing-input',target.slice(0,9));await page.keyboard.press('Tab');
  assert.equal(await page.$eval('#typing-input',el=>el.value),target.slice(0,9)+'  ');
