@@ -13,3 +13,7 @@ Tests de regresión general, integridad fuente, control de acceso por recurso, r
 Bloqueos para publicar: contraseña segura vs CPU Workers Free, correo real Dev, recuperación remota D1 y hostname aislado. No hay autenticación remota habilitada, planes cobrados ni eliminación de archivos o enlaces de Space. No se ha desplegado este cambio en Cloudflare.
 
 La vista previa automática de Cloudflare sobre el PR **no** es evidencia de que el Worker Auth esté desplegado: el repositorio mantiene las academias en rutas backend separadas de la preview de catálogo.
+
+## Incidencia de la fase previa
+
+El currículum FP de Space contenía un cierre adicional `]}` que impedía interpretar el archivo. Se aplica una única reparación mínima en la copia privada de Dev; el original de Space permanece intacto. Una prueba de regresión compara la reparación con el original.
