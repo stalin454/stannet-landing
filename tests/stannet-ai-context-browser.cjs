@@ -153,10 +153,11 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   }
 
   // Portrait-v2 opt-in browser screenshot and functional mesh/material sanity check.
+  for(const [academyRoute,academyOutfit] of [['english','english'],['programming','programming'],['cybersecurity','cybersecurity']]){
   const portrait=await browser.newPage();
   await portrait.setViewport({width:390,height:844,isMobile:true,hasTouch:true});
   try {
-    await portrait.goto(new URL('pages/english.html?hannah3d=1',base).href,{waitUntil:'domcontentloaded'});
+    await portrait.goto(new URL('pages/'+academyRoute+'.html?hannah3d=1',base).href,{waitUntil:'domcontentloaded'});
     await portrait.waitForFunction(()=>{
       const a=document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-hannah-figure');
       return !!a?.querySelector('.snai-3d-canvas')&&a.classList.contains('snai-3d-ready');
@@ -168,13 +169,14 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
       return {realWebGL:!!gl,canvasPixels:canvas?.width*canvas?.height,renderReady:f.classList.contains('snai-3d-ready'),outfit:document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-avatar-surface').dataset.outfit};
     });
     assert.ok(portraitState.realWebGL&&portraitState.canvasPixels>1000&&portraitState.renderReady,'3D portrait not rendered: '+JSON.stringify(portraitState));
-    assert.equal(portraitState.outfit,'english');
-    await portrait.screenshot({path:out+'/hannah-portrait-v2-english.png',fullPage:false});
+    assert.equal(portraitState.outfit,academyOutfit);
+    await portrait.screenshot({path:out+'/hannah-portrait-v2-'+academyOutfit+'.png',fullPage:false});
     await portrait.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-launcher').click());
     await portrait.waitForFunction(()=>document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-persona-hannah .snai-3d-canvas'));
     await portrait.screenshot({path:out+'/hannah-portrait-v2-in-chat.png',fullPage:false});
-    report.push('PASS: Hannah portrait v2 opt-in WebGL facial material decoded, real geometry rendered and canvas moved to mobile chat.');
+    report.push('PASS: Hannah portrait v2 '+academyOutfit+' opt-in WebGL facial material decoded, real geometry rendered and canvas moved to mobile chat.');
   } finally {await portrait.close()}
+  }
 
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
  console.log(report.join('\n\n'));
