@@ -28,6 +28,9 @@ test('Hannah appears in academies only, not in the public site or private app ro
 test('outfit sprite is locally available and position is deterministic',()=>{
   const sprite=readFileSync('assets/ai/hannah-ia-sprite.svg','utf8');
   assert.match(sprite,/<svg[^>]+viewBox="0 0 480 168"/);
+  const rendered=readFileSync('assets/ai/hannah-ia-rendered.svg','utf8');
+  assert.match(rendered,/<image[^>]*href="data:image\/webp;base64,/);
+  assert.match(rendered,/<svg[^>]*viewBox="0 0 480 168"/);
   assert.equal(Object.keys(HANNAH_LOOKS).length,4);
   assert.deepEqual(['explorer','programming','english','cybersecurity'].map(hannahSpritePosition),[0,100/3,200/3,100]);
 });
@@ -37,6 +40,9 @@ test('only presentation changes; keep existing voice, consent, history and focus
   const css=readFileSync('stannet-ai.css','utf8');
   assert.match(avatar,/stannet-ai-avatar-hidden-v1/);
   assert.match(avatar,/decoratePersona/);
+  assert.match(avatar,/loadArtwork\(\)/);
+  assert.match(avatar,/artwork.onerror/);
+  assert.match(avatar,/hannah-ia-rendered\.svg/);
   assert.match(avatar,/this\.surface\.setAttribute\('popover','manual'\)/);
   assert.match(avatar,/this\.figure\.hidden=!selected/);
   assert.match(avatar,/this\.surface\.dataset\.activity/);
