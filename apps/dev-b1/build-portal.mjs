@@ -4,6 +4,7 @@ const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
 for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copyFileSync(new URL('./public/'+file,import.meta.url),new URL(file,destination));
+writeFileSync(new URL('site.css',destination),readFileSync(new URL('./public/site.css',import.meta.url),'utf8').replaceAll('/assets/orbitron.ttf','/orbitron.ttf'));
 const commit=process.env.SOURCE_COMMIT||'local';
 if(commit!=='local'&&!/^[a-f0-9]{40}$/.test(commit))throw Error('Invalid source commit');
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:'pending'}))}));
