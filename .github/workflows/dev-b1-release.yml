@@ -79,10 +79,12 @@ jobs:
           base=os.environ['DEV_CANDIDATE_URL']
           for attempt in range(12):
             try:
-              with urllib.request.urlopen(base+'/version.json',timeout=12) as response:
+              request=urllib.request.Request(base+'/version.json',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(request,timeout=12) as response:
                 version=json.load(response)
               assert version['commit']==os.environ['SOURCE_COMMIT']
-              with urllib.request.urlopen(base+'/',timeout=12) as response:
+              request=urllib.request.Request(base+'/',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(request,timeout=12) as response:
                 assert response.status==200
               print('Candidate HTTP and source commit verified after propagation.');break
             except Exception:
@@ -107,7 +109,8 @@ jobs:
           import urllib.request,json,time,os
           for attempt in range(12):
             try:
-              with urllib.request.urlopen('https://stannet.dev/version.json',timeout=12) as r:
+              request=urllib.request.Request('https://stannet.dev/version.json',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(request,timeout=12) as r:
                 d=json.load(r)
               assert d['commit']==os.environ['SOURCE_COMMIT'] and d['auth'] is False and d['payments'] is False
               print(json.dumps({'domain':'https://stannet.dev','http_verified':True,'source_commit':d['commit']}));break
