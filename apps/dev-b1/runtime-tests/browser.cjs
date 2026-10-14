@@ -33,9 +33,16 @@ let runtime,browser;
  await page.waitForFunction(()=>!document.querySelector('#signed-in').hidden);
  const cookie=(await page.cookies()).find(x=>x.name==='__Host-stannet_dev_b1');assert.ok(cookie?.httpOnly&&cookie.secure);assert.equal(cookie.sameSite,'Strict');assert.ok(!await page.evaluate(()=>document.cookie.includes('__Host-stannet_dev_b1')));
  await page.goto(origin+'/apps/typing',{waitUntil:'networkidle0'});await page.waitForSelector('#exercise option');await page.select('#exercise','javascript:fragment');await page.click('#start');await page.waitForFunction(()=>!document.querySelector('#typing-input').disabled);
- const target=await page.$eval('#target',element=>element.textContent);await page.type('#typing-input','X');assert.equal((await page.$$('.wrong')).length,1);await page.keyboard.press('Backspace');await page.type('#typing-input',target,{delay:8});
+ const target=await page.$eval('#target',element=>element.textContent);
+ await page.reload({waitUntil:'networkidle0'});await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('recuperado'));
+ assert.equal(await page.$eval('#target',element=>element.textContent),target);
+ assert.ok((await page.$eval('#quota',element=>element.textContent)).includes('9 de 10'));
+ assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM dev_attempts WHERE user_id=?').bind(user.id).first()).n,1,'Reload must not consume quota');
+ await page.type('#typing-input','X');assert.equal((await page.$$('.wrong')).length,1);await page.keyboard.press('Backspace');await page.type('#typing-input',target,{delay:8});
  await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Progreso guardado'));
  assert.equal((await db.prepare('SELECT completed FROM dev_progress WHERE user_id=?').bind(user.id).first()).completed,1);
+ await page.reload({waitUntil:'networkidle0'});await page.waitForFunction(()=>document.querySelector('#completed').textContent==='1');
+ assert.equal(await page.$eval('#typing-input',element=>element.disabled),true,'Completed attempt is not resumed');
  for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'Typing overflow '+width);}
  // D1 operator modifies only a disposable fixture; latest role must be enforced by server on next request.
  await db.prepare("UPDATE dev_users SET role='admin' WHERE id=?").bind(user.id).run();

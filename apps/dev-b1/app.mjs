@@ -187,6 +187,16 @@ export function application(options){
     const user=await member(req),ent=await entitlement(user);
     return json({plan:ent.plan,exercises:exercises.filter(x=>permitted(x,ent)).map(({text,...x})=>x)});
    }
+   if(path==='/api/typing/state'){
+    const user=await member(req),ent=await entitlement(user),day=Math.floor(clock()/86400)*86400;
+    const used=await one('SELECT COUNT(*) AS count FROM dev_attempts WHERE user_id=? AND created>=?',user.id,day);
+    const limit=ent.plan==='free'?10:100;
+    // Restore only this learner's latest unfinished, currently authorized exercise.
+    // Reloading a page must not consume a second daily start.
+    const pending=await one('SELECT id,exercise FROM dev_attempts WHERE user_id=? AND completed=0 AND created>=? ORDER BY created DESC,rowid DESC LIMIT 1',user.id,day);
+    const exercise=pending&&exercises.find(x=>x.id===pending.exercise);
+    return json({quota:{limit,used:used.count,remaining:Math.max(0,limit-used.count),resetsAt:day+86400},active:exercise&&permitted(exercise,ent)?{attempt:pending.id,exercise}:null});
+   }
    if(path==='/api/typing/progress'){const user=await member(req);await entitlement(user);return json({progress:(await statement('SELECT exercise,completed,attempts FROM dev_progress WHERE user_id=?',user.id).all()).results});}
    if(path==='/api/admin/users'){
     const admin=await member(req);if(admin.role!=='admin'||options.mode!=='sandbox')fail(403,'ADMIN','Acceso reservado al administrador de pruebas.');

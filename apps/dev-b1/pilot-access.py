@@ -1,5 +1,5 @@
 """Read-only permission evidence. No SQL, billing API, secret output or mutation."""
-import datetime, importlib.util, json, os, pathlib
+import datetime, importlib.util, json, os, pathlib, urllib.request, urllib.error
 
 spec = importlib.util.spec_from_file_location('reader', pathlib.Path(__file__).with_name('cloudflare-read.py'))
 reader = importlib.util.module_from_spec(spec)
@@ -33,5 +33,25 @@ def inspect():
             result[name] = {'readable': False, 'reason': type(error).__name__}
     return result
 
+def public_preview():
+    result = []
+    for origin in ['https://stannet.dev', 'https://stannet-dev-portal.stalin454.workers.dev']:
+        entry = {'origin': origin}
+        for path in ['/', '/version.json', '/apps/typing', '/private/typing.js']:
+            request = urllib.request.Request(origin + path, headers={'User-Agent': 'StanNet-Pilot-ReadOnly-QA/1.0', 'Cache-Control': 'no-cache'})
+            try:
+                with urllib.request.urlopen(request, timeout=20) as response:
+                    item = {'status': response.status, 'content_type': response.headers.get('Content-Type')}
+                    if path == '/version.json':
+                        version = json.load(response)
+                        item['version'] = {key: version.get(key) for key in ['commit', 'module', 'auth', 'typing', 'payments']}
+                    entry[path] = item
+            except urllib.error.HTTPError as error:
+                entry[path] = {'status': error.code}
+            except Exception as error:
+                entry[path] = {'error': type(error).__name__}
+        result.append(entry)
+    return result
+
 if __name__ == '__main__':
-    print(json.dumps(inspect(), indent=2))
+    print(json.dumps({'access': inspect(), 'public_preview': public_preview()}, indent=2))
