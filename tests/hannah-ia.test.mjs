@@ -85,3 +85,20 @@ test('unapproved procedural character is opt-in only; visitors get approved Hann
   assert.match(source,/this\.loadArtwork\(\)/);
   assert.match(source,/hannah-ia-rendered\.svg/);
 });
+
+test('refined 3D face uses the approved illustration material and outfit geometry',async()=>{
+  const {HANNAH_FACE_URI}=await import('../hannah-ia-face.mjs');
+  const decoded=Buffer.from(HANNAH_FACE_URI.split(',')[1],'base64');
+  assert.match(HANNAH_FACE_URI,/^data:image\/webp;base64,/);
+  assert.equal(decoded.toString('ascii',0,4),'RIFF');
+  assert.equal(decoded.toString('ascii',8,12),'WEBP');
+  const renderer=readFileSync('hannah-ia-3d.mjs','utf8');
+  assert.match(renderer,/function portrait\(gl\)/);
+  assert.match(renderer,/portraitFace&&textureReady/);
+  assert.match(renderer,/gl\.texImage2D/);
+  assert.match(renderer,/outfit==='english'/);
+  assert.match(renderer,/outfit==='programming'/);
+  assert.match(renderer,/outfit==='cybersecurity'/);
+  assert.match(renderer,/gl\.deleteTexture\(faceTexture\)/);
+  assert.match(renderer,/if\(textureReady\)host\.classList\.add\('snai-3d-ready'\)/);
+});
