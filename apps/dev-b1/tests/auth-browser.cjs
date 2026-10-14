@@ -47,7 +47,7 @@ const puppeteer=require('puppeteer-core');
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'FP Study overflow '+width);}
   await page.goto(base+'/apps/cs-foundations',{waitUntil:'networkidle0'});
   await page.waitForSelector('#cs-list .pa-lesson-btn');
-  assert.equal((await page.$('#cs-list .pa-lesson-btn')).length,17);
+  assert.equal(await page.evaluate(()=>document.querySelectorAll('#cs-list .pa-lesson-btn').length),17);
   await page.type('#cs-answer','Una respuesta razonada con estructuras de datos y ejemplos prácticos.');
   await page.click('#cs-save');
   await page.waitForFunction(()=>document.querySelector('#cs-status').textContent.includes('Respuesta guardada'));
