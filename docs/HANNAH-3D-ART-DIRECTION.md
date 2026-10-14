@@ -29,3 +29,13 @@ No cargar fotografías familiares originales en producción, servicios de tercer
 - **Producción**: ilustraciones oficiales aprobadas hasta que exista y se valide un modelo 3D satisfactorio.
 - **Experimental**: `?hannah3d=1` es únicamente un acceso técnico a la prueba rudimentaria anterior; no debe confundirse con Hannah definitiva.
 - **Pendiente**: modelo 3D elaborado por flujo de modelado/escultura y rigging; no se han fabricado ni verificado archivos GLB con esta calidad.
+
+
+## Versión WebGL 3D con rostro ilustrado (14/10/2026)
+Se ha construido una segunda versión real de mallas WebGL: cabeza convexa con coordenadas UV y textura WebP comprimida derivada únicamente de la ilustración aprobada de Hannah; cabello/flequillo/lazo tridimensionales, partes articuladas, cuatro atuendos, pestañeo y boca vinculada al estado efectivo de reproducción. La textura no se obtiene de fotografías familiares.
+
+El archivo `hannah-ia-face.mjs` contiene la textura artística derivada, sin llamadas de red. El motor `hannah-ia-3d.mjs` crea geometría real, materiales WebGL, movimiento jerárquico y pausas/limpieza del render. La versión 3D se carga en academias, con opción temporal de comprobar el SVG en `?hannah3d=0` y respaldo automático ante ausencia de WebGL o error de textura.
+
+**Transparencia artística:** la implementación WebGL es una figura 3D estilizada con materiales ilustrados y piezas procedurales; no es todavía el GLB esculpido y riggeado con apariencia cinematográfica ni dispone de visemas fonéticos. No afirmar lo contrario. Para igualar exactamente el arte promocional hacen falta escultura 3D avanzada y rig/morph targets profesionales, que permanecen como evolución artística posterior.
+
+Verificación exigida: `npm run test:ci`, auditoría Chromium móvil (programación, inglés, ciberseguridad), respaldo de `main` y despliegue Cloudflare confirmado. En caso de fallos, volver al respaldo de `main` o desactivar la vista 3D.
