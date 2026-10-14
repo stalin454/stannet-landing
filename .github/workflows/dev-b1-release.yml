@@ -1,0 +1,24 @@
+name: Dev B1 isolated release
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/dev-b1-release.yml'
+      - 'apps/dev-b1/cloudflare-inventory.py'
+permissions:
+  contents: read
+concurrency:
+  group: stannet-dev-b1-isolated-release
+  cancel-in-progress: false
+jobs:
+  inventory:
+    if: github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/stannet-dev-b1-20261014'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect Dev destination only (read-only, no secret output)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python3 apps/dev-b1/cloudflare-inventory.py
