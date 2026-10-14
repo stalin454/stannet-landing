@@ -76,9 +76,20 @@ try{
   // Polly calls are mocked: test every allowed locale without spending AWS credits.
   await page.evaluate(()=>{
     window.__pollyRequests=[];
+    window.__premiumLoggedIn=false;
     const originalFetch=window.fetch.bind(window);
     window.fetch=(url,options={})=>{
       if(String(url)==='/api/speech/status')return Promise.resolve(new Response(JSON.stringify({provider:'amazon-polly',configured:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      if(String(url)==='/api/language-premium/session')return Promise.resolve(new Response(JSON.stringify(window.__premiumLoggedIn?{ok:true,authenticated:true,premiumEnabled:true,email:'tutor@example.test',remaining:20,globalRemaining:40}:{ok:false,authenticated:false}),{status:200,headers:{'Content-Type':'application/json'}}));
+      if(String(url)==='/api/language-premium/signin'){
+        window.__premiumLoggedIn=true;
+        return Promise.resolve(new Response(JSON.stringify({ok:true,authenticated:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      }
+      if(String(url)==='/api/language-premium/signout'){
+        window.__premiumLoggedIn=false;
+        return Promise.resolve(new Response(JSON.stringify({ok:true}),{status:200,headers:{'Content-Type':'application/json'}}));
+      }
+
       if(String(url)==='/api/speech'){
         window.__pollyRequests.push({body:JSON.parse(options.body),method:options.method});
         return Promise.resolve(new Response(new Uint8Array([73,68,51,3,0,0,0,0,0,0,0,1]),{
@@ -93,6 +104,14 @@ try{
     document.querySelector('#ltAuto').checked=true;
   });
   await page.select('#ltProvider','polly');
+  await page.waitForFunction(()=>!document.querySelector('#ltPremiumForm').hidden);
+  await page.click('#ltHear');
+  assert.equal(await page.evaluate(()=>window.__pollyRequests.length),0,'anonymous student cannot synthesize AWS speech');
+  await page.type('#ltPremiumEmail','tutor@example.test');
+  await page.type('#ltPremiumPassword','correct-horse-battery');
+  await page.click('#ltPremiumSignin');
+  await page.waitForFunction(()=>document.querySelector('#ltPremiumForm').hidden);
+  assert.ok((await page.$eval('#ltPremiumRemaining',el=>el.textContent)).includes('20'));
   await page.waitForFunction(()=>!document.querySelector('#ltPollyVoice').disabled);
   assert.equal(await page.$eval('#ltAuto',el=>el.checked),false,'paid Polly should disable automatic replay at opt-in');
   for(const [language,voice] of [['da','Sofie'],['sv','Elin'],['fr','Lea'],['de','Vicki'],['en','Amy']]){
