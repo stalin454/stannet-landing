@@ -1,0 +1,22 @@
+name: Hannah post-deploy live verification
+
+on:
+  workflow_run:
+    workflows: ["Deploy StanNet to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify public Academy assets after release
+        run: node tests/hannah-live-smoke.mjs
