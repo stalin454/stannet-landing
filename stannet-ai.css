@@ -126,3 +126,14 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 @media(prefers-reduced-motion:reduce){
  .snai-panel[data-activity="speaking"] .snai-persona-mouth{opacity:1}
 }
+
+
+/* True 3D renderer: the SVG remains visible until WebGL initialization succeeds. */
+.snai-hannah-figure[hidden],.snai-persona-hannah[hidden],.snai-legacy-avatar[hidden]{display:none!important}
+.snai-hannah-figure.snai-3d-ready,.snai-persona-hannah.snai-3d-ready{background-image:none!important}
+.snai-3d-canvas{display:block;position:absolute;inset:0;width:100%;height:100%;pointer-events:none;contain:strict}
+.snai-3d-ready > .snai-hannah-mouth,.snai-3d-ready > .snai-hannah-lid,
+.snai-3d-ready > .snai-persona-mouth,.snai-3d-ready > .snai-persona-lid{display:none!important}
+@media(prefers-reduced-motion:no-preference){
+  .snai-avatar-surface[data-character="hannah"][data-presentation="idle"] .snai-hannah-figure.snai-3d-ready{animation:none}
+}
