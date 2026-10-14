@@ -55,3 +55,23 @@ test('only presentation changes; keep existing voice, consent, history and focus
   assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(css,/\.snai-launcher > \.snai-launcher-label/);
 });
+
+test('genuine WebGL 3D geometry, articulation and safe fallback are present',()=>{
+  const engine=readFileSync('hannah-ia-3d.mjs','utf8');
+  const avatar=readFileSync('stannet-ai-avatar.mjs','utf8');
+  const css=readFileSync('stannet-ai.css','utf8');
+  assert.match(engine,/export function createHannah3D/);
+  assert.match(engine,/getContext\('webgl'/);
+  assert.match(engine,/drawElements\(gl\.TRIANGLES/);
+  assert.match(engine,/const head=multiply/);
+  assert.match(engine,/const shoulder=multiply/);
+  assert.match(engine,/activity==='speaking'/);
+  assert.match(engine,/setOutfit\(v\)/);
+  assert.match(engine,/setVisible\(v\)/);
+  assert.match(engine,/destroy\(\)/);
+  assert.match(avatar,/import\('\/hannah-ia-3d\.mjs/);
+  assert.match(avatar,/if\(!renderer\)return/);
+  assert.match(avatar,/this\.renderer3D\.mount/);
+  assert.match(css,/\.snai-hannah-figure\[hidden\]/);
+  assert.match(css,/\.snai-3d-canvas/);
+});
