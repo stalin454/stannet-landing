@@ -15,6 +15,6 @@ test('FP Study wrapper does not fetch Space or external services',()=>{
  const html=readFileSync(new URL('../private/fp-study.html',import.meta.url),'utf8');
  assert.match(html,/\/apps\/fp-study\/fp-study-data\.js/);
  assert.match(html,/\/apps\/fp-study\/fp-study\.js/);
- assert.match(html,/no está sincronizado con D1/);
+ assert.match(html,/ni está sincronizado con D1/);
  assert.doesNotMatch(html,/(?:https?:)?\/\/|\/api\/|stannet\.space/);
 });
