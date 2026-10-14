@@ -76,7 +76,9 @@ test('typing completion is real and persistent; IDOR, forged answers and Premium
   assert.equal((await s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},b)).status,400);
   assert.equal((await s.request('/api/typing/complete',{attempt:started.attempt,text:'forged'},a)).status,400);
   const answers=await Promise.all([s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},a),s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},a)]);
-  assert.ok(answers.some(r=>r.status===200));assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(a.user.id).attempts,1);
+  assert.equal(answers.filter(r=>r.status===200).length,1,'only one concurrent completion may succeed');
+  assert.ok([400,409].includes(answers.find(r=>r.status!==200)?.status),'the other completion must be rejected');
+  assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(a.user.id).attempts,1);
   const progress=await (await s.request('/api/typing/progress?userId='+a.user.id,undefined,b)).json();assert.equal(progress.progress.length,0);
  }finally{s.db.close();}
 });
@@ -182,4 +184,52 @@ test('mail provider failure does not reveal known accounts and leaves no usable 
   assert.deepEqual(events,['reset']);
   assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS n FROM dev_tokens WHERE purpose='reset'").get().n,0);
  }finally{s.db.close();}
+});
+
+test('a stale overlapping Typing completion cannot claim success after another request finishes',async()=>{
+ const s=setup();try{
+  const learner=await account(s);
+  const started=await (await s.request('/api/typing/start',{exercise:'javascript:fragment'},learner)).json();
+  const input={attempt:started.attempt,text:started.exercise.text};
+  const prepare=s.db.prepare.bind(s.db);let intercepted=false;
+  s.db.prepare=sql=>{
+   const statement=prepare(sql),original=statement.first.bind(statement);
+   if(sql.includes('FROM dev_attempts WHERE id=? AND user_id=? AND completed=0')){
+    statement.first=async()=>{
+     const row=await original();
+     if(row&&!intercepted){
+      intercepted=true;
+      const winner=await s.request('/api/typing/complete',input,learner);
+      assert.equal(winner.status,200,'nested request takes ownership before outer batch');
+     }
+     return row;
+    };
+   }
+   return statement;
+  };
+  const lost=await s.request('/api/typing/complete',input,learner);
+  assert.equal(lost.status,409);
+  assert.equal((await lost.json()).code,'ATTEMPT_USED');
+  assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(learner.user.id).attempts,1);
+  assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS total FROM dev_audit WHERE action='typing-complete'").get().total,1);
+ }finally{s.db.close();}
+});
+
+test('pilot backend cannot take over either StanNet domain or existing academy',async()=>{
+ for(const host of ['stannet.dev','www.stannet.dev','stannet.space','www.stannet.space','academy.stannet.dev']){
+  const db=database();try{
+   assert.throws(()=>application({...environment(db,'https://'+host),deployment:'isolated-dev'}),/Protected origins/);
+  }finally{db.close();}
+ }
+ const {default:worker}=await import('../worker.mjs');
+ for(const host of ['stannet.dev','stannet.space','academy.stannet.dev']){
+  let touched=false;
+  const fake={AUTH_RELEASE:'enabled',MODE:'sandbox',PUBLIC_ORIGIN:'https://'+host,
+   DEV_ENVIRONMENT_ID:'fixture',DEV_DB:{withSession(){touched=true;throw Error('protected database touched');}},
+   DEV_MAILER:{fetch(){touched=true;throw Error('mail touched');}},
+   DEV_ASSETS:{fetch(){touched=true;throw Error('assets touched');}}};
+  const response=await worker.fetch(new Request('https://'+host+'/apps/typing'),fake);
+  assert.equal(response.status,403,host);
+  assert.equal(touched,false,'deny protected origins before querying bindings');
+ }
 });
