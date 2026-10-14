@@ -27,6 +27,63 @@ const pollyVoices={
   'da-DK':[{id:'Sofie',label:'Sofie · danesa'}]
 };
 let pollyAbort=null,pollyAudio=null,pollyAvailable=null;
+let premiumSession={authenticated:false,premiumEnabled:false,remaining:0};
+function premiumMessage(message){$('ltPremiumMessage').textContent=message;}
+function showPremium(){
+  const visible=$('ltProvider').value==='polly';
+  $('ltPremiumAccount').hidden=!visible;
+  $('ltPremiumForm').hidden=premiumSession.authenticated;
+  $('ltPremiumLoggedIn').hidden=!premiumSession.authenticated;
+  $('ltPremiumIdentity').textContent=premiumSession.authenticated?'Cuenta: '+(premiumSession.email||'verificada'):'';
+  $('ltPremiumRemaining').textContent=premiumSession.authenticated&&premiumSession.premiumEnabled
+    ?'Reproducciones disponibles: '+premiumSession.remaining+'/20':'';
+}
+async function refreshPremium(){
+  try{
+    const response=await fetch('/api/language-premium/session',{credentials:'same-origin',cache:'no-store'});
+    if(!response.ok)throw new Error('session not available');
+    const data=await response.json();
+    premiumSession={
+      authenticated:data.authenticated===true,premiumEnabled:data.premiumEnabled===true,
+      remaining:Number(data.remaining)||0,email:data.email||''
+    };
+    showPremium();
+    premiumMessage(!premiumSession.authenticated
+      ?'Para utilizar Amazon Polly inicia sesión. La voz gratuita no requiere cuenta.'
+      :!premiumSession.premiumEnabled
+        ?'Tu cuenta está activa, pero las voces de pago necesitan aprobación del administrador.'
+        :'Cuenta aprobada. Tu límite es 20 peticiones diarias y el límite de la plataforma es compartido.');
+    return premiumSession.authenticated&&premiumSession.premiumEnabled;
+  }catch{
+    premiumSession={authenticated:false,premiumEnabled:false,remaining:0};
+    showPremium();premiumMessage('No se pudo verificar el acceso. No realizaremos llamadas de pago.');
+    return false;
+  }
+}
+async function premiumAction(action){
+  const email=$('ltPremiumEmail').value.trim(),password=$('ltPremiumPassword').value;
+  if(action!=='signout'&&(!email||password.length<10)){premiumMessage('Introduce correo y contraseña de al menos 10 caracteres.');return;}
+  $('ltPremiumSignin').disabled=true;$('ltPremiumSignup').disabled=true;
+  try{
+    const response=await fetch('/api/language-premium/'+action,{
+      method:'POST',credentials:'same-origin',cache:'no-store',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(action==='signout'?{}:{email,password})
+    });
+    const result=await response.json();
+    $('ltPremiumPassword').value='';
+    if(!response.ok){premiumMessage(result.error||'No se pudo completar el acceso.');return;}
+    if(result.requiresConfirmation){
+      premiumMessage('Te hemos solicitado confirmar tu correo. Después debes iniciar sesión. Las voces premium requieren autorización.');
+      return;
+    }
+    await refreshPremium();
+    if(action==='signout')premiumMessage('Sesión cerrada. Puedes continuar con la voz gratuita del navegador.');
+  }catch{
+    $('ltPremiumPassword').value='';
+    premiumMessage('Servicio de acceso temporalmente no disponible.');
+  }finally{$('ltPremiumSignin').disabled=false;$('ltPremiumSignup').disabled=false;}
+}
 const pollyCache=new Map();
 function clearPollyPlayback(){
   if(pollyAbort){pollyAbort.abort();pollyAbort=null;}
@@ -55,15 +112,18 @@ async function checkPollyAvailability(){
 }
 async function selectProvider(next){
   $('ltProvider').value=next;
-  stopVoice();updatePollyVoice();
+  stopVoice();updatePollyVoice();showPremium();
   if(next!=='polly'){providerNotice('Voz del navegador seleccionada. No genera llamadas facturables a Amazon Polly.');return;}
   // Polly synthesis is billable; never enable automatic playback without a new explicit opt-in.
   $('ltAuto').checked=false;
   providerNotice('Comprobando Amazon Polly… Cada frase sintetizada puede tener coste en AWS. Audio automático desactivado.');
   const active=await checkPollyAvailability();
   if($('ltProvider').value!=='polly')return;
-  if(!active){$('ltProvider').value='browser';updatePollyVoice();providerNotice('Amazon Polly no está disponible o configurado ahora. Se mantiene la voz gratuita del navegador.');return;}
-  providerNotice('Amazon Polly conectado · voz neuronal '+locale().name+'. Solo se solicita audio al pulsar Escuchar o activar voluntariamente Audio tras completar. Puede generar cargos en AWS.');
+  if(!active){$('ltProvider').value='browser';updatePollyVoice();showPremium();providerNotice('Amazon Polly no está disponible o configurado ahora. Se mantiene la voz gratuita del navegador.');return;}
+  const permitted=await refreshPremium();
+  providerNotice(permitted
+    ?'Amazon Polly protegido con login y límites de consumo. Solo se solicita audio al pulsar Escuchar o activar voluntariamente Audio tras completar.'
+    :'Amazon Polly requiere una cuenta aprobada. Inicia sesión aquí abajo o utiliza la voz gratuita del navegador.');
 }
 function audioKey(language,voice,text){return language+'|'+voice+'|'+text;}
 function rememberPolly(key,url){
@@ -83,6 +143,10 @@ async function speakPolly({slow=false,after=null}={}){
     return;
   }
   if($('ltProvider').value!=='polly')return;
+  if(!premiumSession.authenticated||!premiumSession.premiumEnabled||premiumSession.remaining<1){
+    const permitted=await refreshPremium();
+    if(!permitted){$('ltVoiceStatus').textContent='Inicia sesión con una cuenta autorizada para usar Amazon Polly.';return;}
+  }
   if(recognition){try{recognition.abort();}catch{}recognition=null;}
   if(speech)speech.cancel();
   clearPollyPlayback();
@@ -102,7 +166,17 @@ async function speakPolly({slow=false,after=null}={}){
         credentials:'same-origin',cache:'no-store',signal:controller.signal,
         body:JSON.stringify({text:l.target,lang:code,voice,purpose:'language-typing'})
       });
-      if(!response.ok||response.headers.get('X-StanNet-Speech-Provider')!=='amazon-polly')throw new Error('Polly no devolvió MP3');
+      if(!response.ok){
+        const failure=await response.json().catch(()=>({}));
+        if(['LANGUAGE_LOGIN_REQUIRED','LANGUAGE_NOT_APPROVED','LANGUAGE_QUOTA','LANGUAGE_QUOTA_UNAVAILABLE'].includes(failure.code)){
+          premiumMessage(failure.error||'No hay permiso para gastar voz premium.');
+          await refreshPremium();
+        }
+        throw new Error('Servidor de voz rechazó la petición.');
+      }
+      if(response.headers.get('X-StanNet-Speech-Provider')!=='amazon-polly')throw new Error('Polly no devolvió MP3');
+      premiumSession.remaining=Math.max(0,Number(response.headers.get('X-StanNet-Voice-Remaining'))||0);
+      showPremium();
       const blob=await response.blob();
       if(!blob.size||blob.size>1500000)throw new Error('Audio vacío o inesperadamente grande');
       if(token!==playbackToken||$('ltProvider').value!=='polly')return;
@@ -351,6 +425,9 @@ $('ltLanguage').querySelector('option:first-child')?.remove();
 $('ltLanguage').value=language;
 for(const btn of document.querySelectorAll('.lt-modes [data-mode]'))btn.addEventListener('click',()=>setMode(btn.dataset.mode));
 $('ltLanguage').addEventListener('change',()=>{language=$('ltLanguage').value;topics();renderSpecial();reload();});
+$('ltPremiumForm').addEventListener('submit',event=>{event.preventDefault();void premiumAction('signin');});
+$('ltPremiumSignup').addEventListener('click',()=>{void premiumAction('signup');});
+$('ltPremiumSignout').addEventListener('click',()=>{void premiumAction('signout');});
 $('ltProvider').addEventListener('change',()=>{void selectProvider($('ltProvider').value);});
 $('ltLevel').addEventListener('change',()=>{level=$('ltLevel').value;topics();reload();});
 $('ltTopic').addEventListener('change',()=>{topic=$('ltTopic').value;reload();});
@@ -386,5 +463,5 @@ const params=new URLSearchParams(location.search);
 if(corpus.languages.some(l=>l.id===params.get('lang')))language=params.get('lang');
 if(corpus.levels.includes(params.get('level')))level=params.get('level');
 if(corpus.modes.includes(params.get('mode')))mode=params.get('mode');
-$('ltLanguage').value=language;$('ltLevel').value=level;renderSpecial();topics();reload();setMode(mode);readProgress();registerBridge();updatePollyVoice();
+$('ltLanguage').value=language;$('ltLevel').value=level;renderSpecial();topics();reload();setMode(mode);readProgress();registerBridge();updatePollyVoice();showPremium();
 })();
