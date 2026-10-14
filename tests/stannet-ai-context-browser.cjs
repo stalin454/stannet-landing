@@ -98,6 +98,54 @@ const out='output/context-bridge-browser';fs.mkdirSync(out,{recursive:true});
   report.push('PASS: tutor hint JS29 in Auto mode, chat privacy and memory closed after reopening.');
   report.push('PASS: real emulated Android 390px opened ?lesson=JS29, recognized Fetch y APIs locally and sent exact JS29 exercise without private editor code.');
   await live.screenshot({path:out+'/programming-mobile.png',fullPage:false});await live.close();
+
+  // Exercise Hannah's actual shared widget on three academy routes. All browser
+  // requests are local test server only; no Cloudflare deployment or paid TTS.
+  for(const [route,outfit] of [
+    ['pages/programming.html','programming'],
+    ['pages/english.html','english'],
+    ['pages/cybersecurity.html','cybersecurity']
+  ]){
+    const sample=await browser.newPage();
+    await sample.setViewport({width:390,height:844,isMobile:true,hasTouch:true});
+    try{
+      await sample.goto(new URL(route,base).href,{waitUntil:'domcontentloaded'});
+      await sample.waitForFunction(()=>document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-launcher'),{timeout:30000});
+      await sample.waitForFunction(()=>document.querySelector('#stannet-ai-root')?.shadowRoot?.querySelector('.snai-hannah-figure')?.hidden===false,{timeout:8000});
+      const state=await sample.evaluate(()=>{
+        const shadow=document.querySelector('#stannet-ai-root').shadowRoot;
+        const avatar=shadow.querySelector('.snai-avatar-surface');
+        const figure=shadow.querySelector('.snai-hannah-figure');
+        return {outfit:avatar.dataset.outfit,character:avatar.dataset.character,legacyHidden:shadow.querySelector('.snai-legacy-avatar').hidden,
+          artwork:window.getComputedStyle(figure).backgroundImage,
+          launcherVisible:!shadow.querySelector('.snai-avatar').hidden,
+          label:shadow.querySelector('.snai-launcher-label').textContent,
+          width:document.documentElement.scrollWidth,viewport:innerWidth};
+      });
+      assert.equal(state.character,'hannah',route);
+      assert.equal(state.outfit,outfit,route);
+      assert.equal(state.legacyHidden,true,route);
+      assert.equal(state.label,'Hannah IA',route);
+      assert.equal(state.launcherVisible,true,route);
+      assert.ok(state.width<=state.viewport+1,'Horizontal overflow at '+route);
+      assert.ok(state.artwork.includes('hannah-ia-'), 'Hannah artwork not requested: '+route);
+      await sample.screenshot({path:out+'/hannah-'+outfit+'-closed.png',fullPage:false});
+      await sample.evaluate(()=>document.querySelector('#stannet-ai-root').shadowRoot.querySelector('.snai-launcher').click());
+      const modal=await sample.evaluate(()=>{
+        const shadow=document.querySelector('#stannet-ai-root').shadowRoot;
+        const dialog=shadow.querySelector('dialog'),box=dialog.getBoundingClientRect();
+        return {title:shadow.querySelector('#snai-title').textContent,open:dialog.open,
+          portraitVisible:!shadow.querySelector('.snai-persona-hannah').hidden,
+          x:box.x,right:box.right,screen:innerWidth};
+      });
+      assert.equal(modal.title,'Hannah IA');
+      assert.equal(modal.open,true);
+      assert.equal(modal.portraitVisible,true);
+      assert.ok(modal.x>=-1&&modal.right<=modal.screen+1,'Hannah panel overflow at '+route);
+      await sample.screenshot({path:out+'/hannah-'+outfit+'-open.png',fullPage:false});
+      report.push('PASS: Hannah IA real browser '+route+' -> '+outfit+'; '+(state.artwork.includes('rendered')?'illustrated':'vector fallback')+'; panel and portrait in mobile viewport.');
+    } finally { await sample.close(); }
+  }
  }catch(error){report.push('FAIL: '+error.stack);throw error;}finally{fs.writeFileSync(out+'/report.txt',report.join('\n\n'));await browser.close();}
  console.log(report.join('\n\n'));
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});
