@@ -31,9 +31,7 @@ export class AgentAvatar {
     this.loading3D=false;
     this.currentActivity='idle';
     this.isOpen=false;
-    // The procedural model does not meet the approved Hannah art direction.
-    // Keep it available only for explicit development QA, not for visitors.
-    this.experimental3D=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('hannah3d')==='1';
+    // Refined 3D runs in academies by default. ?hannah3d=0 offers a no-WebGL\n    // escape hatch; failed rendering or facial texture decoding retains the 2D art.\n    this.experimental3D=typeof window!=='undefined'&&new URLSearchParams(window.location.search).get('hannah3d')!=='0';
     this.updateLook();
     if(this.experimental3D)this.initialize3D();
     // Prefer the approved image-inspired art only after successful browser decoding.
