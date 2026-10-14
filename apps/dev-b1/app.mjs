@@ -231,7 +231,15 @@ export function application(options){
      '/apps/cs-foundations/cs-foundations.html':'cs-foundations.html',
      '/apps/cs-foundations/cs-foundations.css':'cs-foundations.css',
      '/apps/cs-foundations/cs-lessons.js':'cs-lessons.js',
-     '/apps/cs-foundations/cs-lab.js':'cs-lab.js'
+     '/apps/cs-foundations/cs-lab.js':'cs-lab.js',
+     '/apps/shortcuts':'shortcuts.html',
+     '/apps/shortcuts/':'shortcuts.html',
+     '/apps/shortcuts/shortcuts.html':'shortcuts.html',
+     '/apps/shortcuts/shortcuts-dev.css':'shortcuts-dev.css',
+     '/apps/shortcuts/shortcuts.css':'shortcuts.css',
+     '/apps/shortcuts/shortcuts.js':'shortcuts.js',
+     '/apps/shortcuts/shortcuts-keyboard.js':'shortcuts-keyboard.js',
+     '/apps/shortcuts/shortcuts-lab.js':'shortcuts-lab.js'
     };
     if(Object.hasOwn(fpAssets,path)){
      const user=await member(req);
