@@ -38,6 +38,7 @@
           <summary>Voz natural · Amazon Polly</summary>
           <div class="snai-neural-content">
             <small class="snai-neural-state" role="status" aria-live="polite">Comprobando acceso a la voz natural…</small>
+            <small>Polly puede generar cargos en AWS dentro de tu cuota autorizada. Solo se solicita audio al activar la conversación por voz o pulsar 🔊.</small>
             <div class="snai-neural-credentials">
               <label>Correo de StanNet Language Academy<input class="snai-neural-email" type="email" maxlength="180" autocomplete="username" inputmode="email" placeholder="Correo electrónico"></label>
               <label>Contraseña<input class="snai-neural-password" type="password" maxlength="256" autocomplete="current-password" placeholder="Contraseña"></label>
@@ -164,6 +165,11 @@
     neuralState.textContent='Reproduciendo con la voz básica de este dispositivo (no es Amazon Polly).';
     window.speechSynthesis.speak(u);
   });
+  for(const entry of [neuralEmail,neuralPassword]){
+    entry.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();event.stopPropagation();neuralSignin.click()}
+    });
+  }
   neuralPanel.addEventListener('toggle',()=>{if(neuralPanel.open)void refreshVoiceAccess({force:true})});
   neuralSignin.addEventListener('click',async()=>{
     const email=neuralEmail.value.trim(),password=neuralPassword.value;
