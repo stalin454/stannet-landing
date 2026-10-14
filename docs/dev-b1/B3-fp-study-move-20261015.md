@@ -6,7 +6,7 @@ Destino candidato: `/apps/fp-study` bajo el **Worker Auth independiente** de Sta
 
 Código fuente original intacto en `main`: `pages/fp-study.html`, `fp-study.js`, `fp-study-data.js`, `fp-study.css`.
 
-La versión Dev usa un nuevo shell HTML sin scripts de navegación, avatar/voz ni enlaces internos a Space. Conserva copias byte a byte de `fp-study.js`, `fp-study-data.js` y `fp-study.css`, supervisadas mediante el test `tests/migration.test.mjs`. Todas las URLs del piloto se sirven por el manejador del backend de Dev tras validación de sesión **en cada petición**, sin copiar el proyecto en el `dev-b1-preview/` público.
+La versión Dev usa un nuevo shell HTML sin scripts de navegación, avatar/voz ni enlaces internos a Space. Conserva copias byte a byte de `fp-study.js` y `fp-study.css`. La copia de `fp-study-data.js` corrige exclusivamente un cierre extra `]}` al terminar la primera unidad; el archivo Space original no se modifica. Una prueba compara exactamente la reparación puntual con la fuente de Space y valida que el resultado es JavaScript sintácticamente correcto. Todas las URLs del piloto se sirven por el manejador del backend de Dev tras validación de sesión **en cada petición**, sin copiar el proyecto en el `dev-b1-preview/` público.
 
 ## Rutas Dev
 
