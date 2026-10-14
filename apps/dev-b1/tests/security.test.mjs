@@ -295,7 +295,7 @@ test('FP Study migration pilot is private on every asset and responds to live ad
   for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,200,'admin '+path);
   const page=await (await s.request('/apps/fp-study',undefined,member)).text();
   assert.ok(page.includes('FP Grado Superior'));
-  assert.ok(page.includes('no está sincronizado con D1'));
+  assert.ok(page.includes('ni está sincronizado con D1'));
   assert.equal((await s.request('/apps/fp-study/fp-study-data.js',undefined,member)).headers.get('Cache-Control'),'private, no-store');
   s.db.raw.prepare("UPDATE dev_users SET role='member' WHERE email=?").run('fp-pilot@example.test');
   for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,403,'revoked '+path);
