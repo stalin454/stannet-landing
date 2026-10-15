@@ -47,6 +47,10 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
     assert.ok((await page.$eval('#radioPodcastDownload',e=>e.href)).startsWith('blob:'));
     assert.equal(await page.$eval('#radioPodcastAudio',e=>e.paused),true,'Audio must not autoplay');
     assert.equal(await page.$eval('#radioPodcastPlaylist',e=>e.value),'7','Prefer a podcast playlist over 24/7');
+    await page.select('#radioPodcastPlaylist','1');await page.click('#radioPodcastRefresh');
+    await page.waitForFunction(()=>document.querySelector('#radioPodcastPlaylist').value==='1'&&!document.querySelector('#radioPodcastRefresh').disabled);
+    assert.equal(await page.$eval('#radioPodcastPlaylist',e=>e.value),'1','Refreshing retains the chosen destination');
+    await page.select('#radioPodcastPlaylist','7');
     await page.click('#radioPodcastGenerate');assert.equal(calls.synthesis,1,'The same MP3 is reused without billing again');
     const boxes=await page.evaluate(()=>({width:innerWidth,doc:document.documentElement.scrollWidth,controls:[...document.querySelectorAll('#radioPodcastForm input,#radioPodcastForm textarea,#radioPodcastPreview audio,#radioPodcastPreview select')].map(e=>({left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right}))}));
     assert.ok(boxes.doc<=boxes.width+1,'page horizontal overflow @'+width);

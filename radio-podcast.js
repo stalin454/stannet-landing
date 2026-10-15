@@ -28,7 +28,7 @@ async function loadPlaylists(){
     if(version!==sessionVersion)return;
     playlist.replaceChildren(new Option('Selecciona una playlist…',''));
     for(const item of data.items||[])playlist.add(new Option(item.name,String(item.id)));
-    if([...playlist.options].some(option=>option.value===selected))playlist.value=selected;
+    if(selected&&[...playlist.options].some(option=>option.value===selected))playlist.value=selected;
     else playlist.value=[...playlist.options].find(option=>/podcast/i.test(option.textContent))?.value||'';
   }catch(error){if(version===sessionVersion)message(error.message)}
   update();
