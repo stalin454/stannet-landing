@@ -54,6 +54,19 @@ const puppeteer=require('puppeteer-core');
    assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
+   const discovery=await page.evaluate(async()=>{
+    const [map,bots]=await Promise.all([fetch('/sitemap.xml',{cache:'no-store'}),fetch('/robots.txt',{cache:'no-store'})]);
+    const sitemap=map.ok?await map.text():'';
+    const robots=bots.ok?await bots.text():'';
+    return {mapOk:map.ok,botsOk:bots.ok,listed:(sitemap.match(/<url><loc>/g)||[]).length,
+      artist:sitemap.includes('https://stannet.dev/open/artists/'),
+      typing:sitemap.includes('https://stannet.dev/open/typing/'),
+      botMap:robots.includes('Sitemap: https://stannet.dev/sitemap.xml'),
+      canonical:document.querySelector('link[rel="canonical"]')?.href};
+   });
+   assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
+   assert.equal(discovery.listed,7);assert.ok(discovery.artist&&discovery.typing&&discovery.botMap);
+   assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing']);
    if(width===390){
