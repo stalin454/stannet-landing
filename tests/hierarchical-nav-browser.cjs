@@ -14,7 +14,8 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
     await page.setViewport({width,height:900,hasTouch:width<=768,isMobile:width<=768});
     await page.setRequestInterception(true);
     page.on('request',req=>{const u=new URL(req.url());if(u.origin!==new URL(base).origin||u.pathname.startsWith('/api/'))req.abort();else req.continue()});
-    assert.equal((await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'})).status(),200);
+    const status=(await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'})).status();
+    assert.ok([200,304].includes(status),path+' HTTP '+status);
     await page.waitForSelector('#stannet-canonical-nav');
     const check=await page.evaluate(()=>{
      const h=document.querySelector('#stannet-canonical-nav');
