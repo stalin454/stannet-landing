@@ -81,7 +81,7 @@ const puppeteer=require('puppeteer-core');
      const count=await lab.$$eval(selectors[url],nodes=>nodes.length);
      assert.ok(count>0,'Lab must render interactive content: '+url);
      if(url==='/open/denmark/'){
-       assert.equal(await lab.$eval('.stage-link',x=>x.length),5,'All migration stages present');
+       assert.equal(await lab.evaluate(()=>document.querySelectorAll('.stage-link').length),5,'All migration stages present');
        await lab.select('#dkCity','odense');
        assert.equal(await lab.$eval('#dkSelectedCityName',x=>x.textContent),'Odense','City assistant must update');
        assert.equal(await lab.$eval('a[href="https://stannet.space/pages/comunidad-dinamarca.html"]',x=>x.getAttribute('href')),'https://stannet.space/pages/comunidad-dinamarca.html','Community stays at Space');
