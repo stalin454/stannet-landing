@@ -44,6 +44,10 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
     if(path!=='/'){
      assert.ok(await page.$('#stannet-section-nav a[aria-current="page"]'),'area current page');
      const more='#stannet-section-nav .section-more>button';
+     if(path==='/pages/radio.html'&&width===851){
+      await page.screenshot({path:'output/navigation/radio851-before.png'});
+      console.log('RADIO851',await page.$eval(more,e=>{const r=e.getBoundingClientRect();const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return JSON.stringify({rect:r.toJSON(),hit:hit?.outerHTML?.slice(0,500),header:document.querySelector('#stannet-canonical-nav').getBoundingClientRect().toJSON(),section:document.querySelector('#stannet-section-nav').getBoundingClientRect().toJSON()})}));
+     }
      await page.click(more);assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'true');
      const bounds=await page.$eval('#stannet-area-links',e=>{const r=e.getBoundingClientRect();return{left:r.left,right:r.right}});
      assert.ok(bounds.left>=-1&&bounds.right<=width+1,'area dropdown off screen');
