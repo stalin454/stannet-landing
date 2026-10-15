@@ -7,8 +7,33 @@ for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copy
 writeFileSync(new URL('site.css',destination),readFileSync(new URL('./public/site.css',import.meta.url),'utf8').replaceAll('/assets/orbitron.ttf','/orbitron.ttf'));
 const commit=process.env.SOURCE_COMMIT||'local';
 if(commit!=='local'&&!/^[a-f0-9]{40}$/.test(commit))throw Error('Invalid source commit');
-writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:'pending'}))}));
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false}));
+// Public learning modules are previously public educational content copied to Dev-only URLs.
+// No Auth endpoints, per-user D1 state, cloud credentials or payment features are included.
+const openLabs=[
+ {id:'fp-study',page:'fp-study.html',assets:['fp-study.css','fp-study-data.js','fp-study.js','fp-study-transfer.js']},
+ {id:'cs-foundations',page:'cs-foundations.html',assets:['cs-foundations.css','cs-lessons.js','cs-lab.js']},
+ {id:'shortcuts',page:'shortcuts.html',assets:['shortcuts-dev.css','shortcuts.css','shortcuts.js','shortcuts-keyboard.js','shortcuts-lab.js']},
+ {id:'cybersecurity',page:'cybersecurity.html',assets:['cyber-dev.css','cyber-academy.css','cyber-curriculum.js','cyber-academy.js','cyber-network-lab.js']}
+];
+for(const lab of openLabs){
+ const dir=new URL('open/'+lab.id+'/',destination);
+ mkdirSync(dir,{recursive:true});
+ const base='/apps/'+lab.id+'/';
+ let html=readFileSync(new URL('./private/'+lab.page,import.meta.url),'utf8')
+  .replaceAll(base,'/open/'+lab.id+'/')
+  .replaceAll('href="/account"','href="/"')
+  .replaceAll('PILOTO PRIVADO','ACCESO ABIERTO')
+  .replaceAll('Piloto privado','Acceso abierto')
+  .replaceAll('piloto privado','acceso abierto')
+  .replaceAll('<meta name="robots" content="noindex,nofollow">','<meta name="robots" content="index,follow">');
+ // Preserve truthful local-only progress notices. No access to Space localStorage is implied.
+ writeFileSync(new URL('index.html',dir),html);
+ for(const file of lab.assets)copyFileSync(new URL('./private/'+file,import.meta.url),new URL(file,dir));
+}
+const openURLs={programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/'};
+writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
+
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:openLabs.map(x=>x.id)}));
 writeFileSync(new URL('_headers',destination),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
@@ -17,4 +42,4 @@ writeFileSync(new URL('_headers',destination),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   Cache-Control: public, max-age=0, must-revalidate
 `);
-console.log('Built public portal only. Auth, payments and private apps are not published.');
+console.log('Built public portal and four open educational copies. Auth, payments and private apps are not published.');
