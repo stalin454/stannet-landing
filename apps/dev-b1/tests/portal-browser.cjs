@@ -19,8 +19,23 @@ const puppeteer=require('puppeteer-core');
   for(const width of [320,390,1280]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
-   const response=await page.goto(base+'/',{waitUntil:'networkidle0',timeout:45000});assert.equal(response.status(),200);
-   await publishedVersion(page);const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
+   // Worker static assets may propagate at different moments across edges.
+   // Never accept the release receipt while old HTML/catalog is still served.
+   const expected=process.env.SOURCE_COMMIT||'local';
+   let response=null,consistent=false;
+   for(let attempt=0;attempt<24;attempt++){
+    response=await page.goto(base+'/?qa='+encodeURIComponent(expected)+'-'+attempt,{waitUntil:'networkidle0',timeout:45000});
+    assert.equal(response.status(),200);
+    const counts=await page.evaluate(()=>({
+     featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
+     catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
+    }));
+    if(counts.featured===5&&counts.catalog===4){consistent=true;break;}
+    await new Promise(resolve=>setTimeout(resolve,1500));
+   }
+   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (five public routes expected)');
+   await publishedVersion(page);
+   const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
    await page.waitForSelector('.card');
    await page.evaluate(()=>document.fonts.ready);
    assert.equal(await page.$$eval('.card',items=>items.length),9);
