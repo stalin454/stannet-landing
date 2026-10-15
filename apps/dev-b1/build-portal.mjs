@@ -1,5 +1,6 @@
 import {readFileSync,writeFileSync,mkdirSync,copyFileSync,rmSync} from 'node:fs';
 import {catalog} from './catalog.mjs';
+import {buildDenmark} from './denmark-open.mjs';
 const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
@@ -63,12 +64,13 @@ let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.me
  .replace('StanNet.Space</a></footer>','StanNet.Dev</a></footer>');
 artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
 writeFileSync(new URL('index.html',artistPageDir),artistHtml);
-const openURLs={programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
+buildDenmark(destination);
+const openURLs={denmark:'/open/denmark/',programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/'];
+const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/denmark/','/open/denmark/cv/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
 writeFileSync(new URL('_headers',destination),`/*
@@ -79,4 +81,4 @@ writeFileSync(new URL('_headers',destination),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   Cache-Control: public, max-age=0, must-revalidate
 `);
-console.log('Built public portal and five open educational copies and STAN6IX artist universe. Auth, payments and private apps are not published.');
+console.log('Built public portal, educational copies, STAN6IX and public Ruta Dinamarca + CV. Auth, payments and private apps are not published.');
