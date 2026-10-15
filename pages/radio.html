@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="../radio.css?v=20261007-admin1">
+<link rel="stylesheet" href="../radio.css?v=20261015-podcast1">
 <link rel="stylesheet" href="/ios-responsive.css?v=20261001-7">
 <link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
 <link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">
@@ -82,6 +82,31 @@
       <div class="radio-upload-progress" aria-hidden="true"><i id="radioUploadProgress"></i></div>
       <p id="radioUploadStatus" class="radio-admin-status" role="status">Selecciona una canción para comenzar.</p>
     </form>
+    <section class="radio-podcast" aria-labelledby="radioPodcastHeading">
+      <div class="radio-podcast-heading"><div><p class="eyebrow">STANNET TECH PODCAST</p><h3 id="radioPodcastHeading">Tu próximo episodio.</h3></div><span>LUCÍA · ESPAÑOL</span></div>
+      <p>Prepara el guion, genera la voz y escucha el resultado antes de incorporarlo a una playlist.</p>
+      <form id="radioPodcastForm">
+        <label for="radioPodcastTitle">Título del episodio</label>
+        <input id="radioPodcastTitle" type="text" maxlength="120" required placeholder="¿De qué hablamos hoy?">
+        <div class="radio-podcast-script-label"><label for="radioPodcastScript">Guion</label><button id="radioPodcastExample" type="button">CARGAR EPISODIO 001</button></div>
+        <textarea id="radioPodcastScript" rows="12" maxlength="8500" required aria-describedby="radioPodcastCount radioPodcastCost" placeholder="Escribe o pega aquí el texto que narrará Lucía…"></textarea>
+        <p id="radioPodcastCount">0 / 8500 caracteres</p>
+        <p id="radioPodcastCost">Generar un audio utiliza Amazon Polly y consume caracteres. Escuchar, descargar y subir el mismo MP3 no vuelven a generar la voz.</p>
+        <button id="radioPodcastGenerate" type="submit">GENERAR MP3 CON LUCÍA</button>
+      </form>
+      <p id="radioPodcastStatus" class="radio-admin-status" role="status" aria-live="polite">Carga el primer episodio o prepara tu propio guion.</p>
+      <div id="radioPodcastPreview" class="radio-podcast-preview" hidden>
+        <h4 id="radioPodcastPreviewTitle"></h4>
+        <audio id="radioPodcastAudio" controls preload="metadata" aria-label="Escuchar el podcast generado"></audio>
+        <a id="radioPodcastDownload">DESCARGAR MP3</a>
+        <div class="radio-upload-meta">
+          <label>Playlist de destino<select id="radioPodcastPlaylist" aria-describedby="radioPodcastPlaylistHelp"><option value="">Selecciona una playlist…</option></select></label>
+          <button id="radioPodcastUpload" type="button" disabled>AÑADIR A LA PLAYLIST</button>
+        </div>
+        <p id="radioPodcastPlaylistHelp">Selecciona una playlist existente. Si quieres un bloque independiente, crea «Podcasts de tecnología» en AzuraCast y pulsa actualizar.</p>
+        <button id="radioPodcastRefresh" type="button">ACTUALIZAR PLAYLISTS</button>
+      </div>
+    </section>
   </div>
 </div>
 </section>
@@ -141,7 +166,8 @@
 </main>
 <footer><a class="brand" href="../index.html">Stan<b>Net</b><i>.Space</i></a><span>StanNet Radio · Music · Tech · Cyber · AI</span><a href="#top">↑ ARRIBA</a></footer>
 <script src="../script.js?v=20261005-aireset1"></script>
-<script src="../radio.js?v=20261015-playlist-fix"></script>
+<script src="../radio.js?v=20261015-podcast1"></script>
+<script src="../radio-podcast.js?v=20261015-podcast1" defer></script>
 <script src="/stannet-global-nav.js?v=20261015-discovery1" defer></script>
 </body>
 </html>

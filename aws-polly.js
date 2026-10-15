@@ -112,10 +112,10 @@ export async function requestPolly(text, env, {lang='es-ES', voice='', purpose='
   }
 }
 
-export async function requestPollyRadio(raw, env) {
+export async function requestPollyRadio(raw, env, {voice:requestedVoice} = {}) {
   const parts = splitPollyText(raw);
   if (!parts.length || raw.length > 8500) return {ok:false, status:400, error:'Guion de radio no válido.'};
-  const voice = String(env.RADIO_POLLY_VOICE || 'Sergio');
+  const voice = String(requestedVoice || env.RADIO_POLLY_VOICE || 'Sergio');
   if (!['Sergio','Lucia'].includes(voice)) return {ok:false,status:503,error:'RADIO_POLLY_VOICE no es válida.'};
   const buffers = [];
   for (const text of parts) {
