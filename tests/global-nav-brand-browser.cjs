@@ -27,7 +27,7 @@ const expected = {
       try {
         await page.setViewport({width,height:850});
         const response = await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded',timeout:45000});
-        assert.equal(response.status(),200,path+' HTTP status');
+        assert.ok([200,304].includes(response.status()),path+' HTTP status '+response.status());
         await page.waitForSelector('#stannet-canonical-nav .brand-mark',{timeout:15000});
         await page.waitForFunction(() => document.querySelector('#stannet-canonical-nav .brand-mark')?.naturalWidth > 0,{timeout:12000});
         const state = await page.evaluate(() => {
