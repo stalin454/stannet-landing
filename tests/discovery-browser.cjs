@@ -60,10 +60,15 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
     await page.setRequestInterception(true);page.on('request',req=>{const u=new URL(req.url());if(u.origin!==new URL(base).origin||u.pathname.startsWith('/api/'))req.abort();else req.continue()});
     await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.StanNetDiscovery?.openSearch&&document.querySelector('link[href^="/stannet-discovery.css"]')?.sheet);await page.click('.search-toggle');
     await page.type('#stannet-search-input','radio');assert.ok(await page.$('.search-result[href="/pages/radio.html"]'));
-    await page.keyboard.press('Escape');assert.equal(await page.$eval('#stannet-search-dialog',e=>e.open),false);console.log('PASS shared search '+path);
+    if(path==='/pages/programming.html'){
+     await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.keyboard.press('Enter')]);
+     assert.ok(new URL(page.url()).pathname.includes('/pages/radio'),'Enter opens the selected destination');
+     assert.equal(await page.$eval('audio',e=>e.paused),true,'search never starts radio playback');
+    }else{await page.keyboard.press('Escape');assert.equal(await page.$eval('#stannet-search-dialog',e=>e.open),false)}
+    console.log('PASS shared search '+path);
    }finally{await page.close()}
   }
   // No-JS fallback remains a complete, navigable catalogue.
-  const page=await browser.newPage();await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'domcontentloaded'});assert.equal(await page.$$eval('.directory-card[href]',els=>els.length),41);await page.close();
+  const page=await browser.newPage();await page.setRequestInterception(true);page.on('request',req=>new URL(req.url()).origin===new URL(base).origin?req.continue():req.abort());await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'domcontentloaded'});assert.equal(await page.$$eval('.directory-card[href]',els=>els.length),41);await page.close();
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

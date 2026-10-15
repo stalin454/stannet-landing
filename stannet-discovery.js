@@ -421,6 +421,13 @@ function closeSearch(){if(!dialog.open)return;dialog.close();}
 dialog.addEventListener('close',()=>{document.body.style.overflow=previousOverflow;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true})});
 dialog.querySelector('.search-close').addEventListener('click',closeSearch);
 dialog.addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
+dialog.addEventListener('keydown',e=>{
+ if(e.key!=='Tab')return;
+ const items=[...dialog.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href]:not([tabindex="-1"]),[tabindex="0"]')];
+ const first=items[0],last=items[items.length-1];
+ if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}
+ else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}
+});
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
 input.addEventListener('input',renderSearch);
 input.addEventListener('keydown',e=>{
