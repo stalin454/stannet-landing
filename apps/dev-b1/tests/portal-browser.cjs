@@ -30,10 +30,10 @@ const puppeteer=require('puppeteer-core');
      featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
      catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
     }));
-    if(counts.featured===7&&counts.catalog===6){consistent=true;break;}
+    if(counts.featured===9&&counts.catalog===7){consistent=true;break;}
     await new Promise(resolve=>setTimeout(resolve,1500));
    }
-   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (seven featured routes expected)');
+   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (nine featured routes expected)');
    await publishedVersion(page);
    const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
    await page.waitForSelector('.card');
@@ -48,10 +48,10 @@ const puppeteer=require('puppeteer-core');
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
    await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),10);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
-   assert.equal(links.filter(x=>x.startsWith('/open/')).length,6);
-   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,4);
+   assert.equal(links.filter(x=>x.startsWith('/open/')).length,7);
+   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,3);
    const openLabs=await page.$$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
-   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/denmark/']);
+   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/programming/','/open/radio/','/open/denmark/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
    const discovery=await page.evaluate(async()=>{
@@ -63,16 +63,18 @@ const puppeteer=require('puppeteer-core');
       typing:sitemap.includes('https://stannet.dev/open/typing/'),
       denmark:sitemap.includes('https://stannet.dev/open/denmark/'),
       denmarkCv:sitemap.includes('https://stannet.dev/open/denmark/cv/'),
+      programming:sitemap.includes('https://stannet.dev/open/programming/coach/'),
+      radio:sitemap.includes('https://stannet.dev/open/radio/'),
       botMap:robots.includes('Sitemap: https://stannet.dev/sitemap.xml'),
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,9);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.botMap);
+   assert.equal(discovery.listed,17);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
    if(width===390){
-    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity'};
+    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
@@ -80,6 +82,21 @@ const puppeteer=require('puppeteer-core');
      assert.equal(response.status(),200,'Lab must load: '+url);
      const count=await lab.$$eval(selectors[url],nodes=>nodes.length);
      assert.ok(count>0,'Lab must render interactive content: '+url);
+
+     if(url==='/open/programming/'){
+       assert.ok((await lab.$eval('#pa-tracks-container .pa-card',x=>x.length))>0);
+       const jsLink=await lab.$('a[href="/open/programming/coach/"]');
+       assert.ok(jsLink,'Programming Academy links to JavaScript coach');
+     }
+     if(url==='/open/radio/'){
+       const stream=await lab.evaluate(async()=>{const r=await fetch('/open/radio/schedule.json');return {ok:r.ok,schedule:(await r.json()).items.length,source:document.querySelector('#radioAudio').getAttribute('src'),play:document.querySelector('#radioPlay').disabled}});
+       assert.equal(stream.ok,true);
+       assert.ok(stream.schedule>12);
+       assert.equal(stream.source,null,'Stream must not auto-play or connect before consent');
+       assert.equal(stream.play,false);
+       assert.equal(await lab.$('#radioAdminLoginForm'),null,'Radio admin panel must not be bundled');
+       assert.equal(await lab.$('script[src*="radio.js"]'),null,'Original admin JS must not be deployed');
+     }
      if(url==='/open/denmark/'){
        assert.equal(await lab.evaluate(()=>document.querySelectorAll('.stage-link').length),5,'All migration stages present');
        await lab.select('#dkCity','odense');
@@ -103,6 +120,37 @@ const puppeteer=require('puppeteer-core');
     assert.equal(worker[0],200,'PDF worker served locally');
     assert.deepEqual(cvErrors,[]);
     await cv.close();
+    // Every public academy route must load its original teaching UI and scripts.
+    const academy={
+      '/open/programming/coach/':'#coach-list',
+      '/open/programming/web/':'#web-list',
+      '/open/programming/python/':'#lesson-list',
+      '/open/programming/computer-science/':'#cs-list',
+      '/open/programming/fullstack/':'#fs-editor',
+      '/open/programming/course/':'#cw-phases'
+    };
+    for(const [route,selector] of Object.entries(academy)){
+      const app=await browser.newPage(),appErrors=[];
+      app.on('pageerror',error=>appErrors.push(error.message));
+      const res=await app.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});
+      assert.equal(res.status(),200,'Academy route '+route);
+      await app.waitForSelector(selector,{timeout:30000});
+      if(route.endsWith('/coach/')){
+        await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>10,{timeout:12000});
+        assert.ok((await app.$eval('#coach-list button',x=>x.length))>=30,'Full JavaScript lessons');
+      }
+      if(route.endsWith('/web/')){
+        await app.waitForFunction(()=>document.querySelectorAll('#web-list button, #web-outline button').length>20,{timeout:12000});
+        await app.$eval('#web-editor',el=>{el.value='<main><h1>Aprendiendo</h1></main>';el.dispatchEvent(new Event('input',{bubbles:true}))});
+        await app.click('#preview-btn');
+        assert.equal(await app.$eval('#web-preview',x=>Boolean(x.srcdoc)),true,'Web editor executes preview');
+      }
+      if(route.endsWith('/python/'))assert.ok((await app.$eval('#lesson-list button',x=>x.length))>0,'Python lessons visible');
+      if(route.endsWith('/course/'))await app.waitForFunction(()=>document.querySelectorAll('#cw-phases button').length>0,{timeout:12000});
+      assert.deepEqual(appErrors,[],'No academy initialization errors at '+route);
+      await app.close();
+    }
+
    }
    assert.deepEqual(errors,[]);
    results.push({width,status:'PASS',filter:true,keyboard_navigation:true,overflow:false,font:'Orbitron',commit:version.commit});await page.close();
