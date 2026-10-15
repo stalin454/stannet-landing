@@ -37,7 +37,6 @@ const assets=[
 const header='<header class="site-header programming-dev-header"><a class="brand" href="/" aria-label="StanNet Dev"><img src="/logo.png" width="38" height="38" alt="">Stan<span>Net</span>.dev</a><nav aria-label="Programming Academy"><a href="/open/programming/">Academia</a><a href="/open/programming/coach/">JavaScript</a><a href="/open/programming/web/">Web Lab</a><a href="/open/programming/python/">Python</a><a href="/open/programming/fullstack/">Full-Stack</a><a href="/open/programming/course/">Curso</a><a href="/open/programming/computer-science/">CS</a><a href="/open/typing/">Typing</a><a href="/">Portal</a></nav></header>';
 function convertHtml(html,id,dir){
  html=html.replace(/<script\b[^>]*src="[^"]*(?:\/script\.js|\/stannet-global-nav\.js)[^"]*"[^>]*><\/script>/g,'');
- html=html.replace(/<header class="site-header"[\s\S]*?<\/header>/,header);
  html=html.replace(/<link\b[^>]*https:\/\/fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*/g,'');
  html=html.replace(/(?:href|src)="([^"]+)"/g,(whole,raw)=>{
    if(raw.startsWith('#')||raw.startsWith('https://')||raw.startsWith('http://')||raw.startsWith('mailto:')||raw.startsWith('data:'))return whole;
@@ -58,6 +57,7 @@ function convertHtml(html,id,dir){
    }
    throw Error('Unexpected local script/image dependency '+raw+' in '+id);
  });
+ html=html.replace(/<header class="site-header"[\s\S]*?<\/header>/,header);
  if(/stannet-global-nav\.js|<script[^>]*src="[^"]*\/script\.js/.test(html))throw Error('Space global code leaked to Dev Academy');
  const canonical='https://stannet.dev'+site+dir;
  html=html.replace('</head>','<link rel="canonical" href="'+canonical+'"><link rel="stylesheet" href="/open/programming/academy-dev.css"></head>');
