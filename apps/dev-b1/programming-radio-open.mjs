@@ -70,7 +70,12 @@ function convertHtml(html,id,dir){
 export function buildProgramming(destination){
  const dir=new URL('open/programming/',destination),assetsDir=new URL('assets/',dir);
  mkdirSync(assetsDir,{recursive:true});
- for(const file of new Set(assets))copyFileSync(source(file),new URL(file,assetsDir));
+ for(const file of new Set(assets)){
+  if(file==='programming-coach.js'){
+    const code=read(file).replaceAll('programming-web-lab.html?lesson=','/open/programming/web/?lesson=');
+    writeFileSync(new URL(file,assetsDir),code);
+  }else copyFileSync(source(file),new URL(file,assetsDir));
+ }
  const sourceCss=readFileSync(new URL('style.css',assetsDir),'utf8').replace(/^@import[^;]+;\s*/,'');
  writeFileSync(new URL('style.css',assetsDir),"@font-face{font-family:Orbitron;src:url('/orbitron.ttf') format('truetype');font-display:swap;font-weight:400 700}\n"+sourceCss);
  for(const [id,page,subdir] of academyPages){
