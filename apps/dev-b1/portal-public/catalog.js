@@ -9,8 +9,8 @@ function render(category='all'){
   const title=document.createElement('h3');title.textContent=item.name;
   const description=document.createElement('p');description.textContent=item.description;
   const bottom=document.createElement('div');bottom.className='card-bottom';
-  const badge=document.createElement('span');badge.className='badge';badge.textContent='EN PREPARACIÓN';
-  const link=document.createElement('a');link.href='mailto:contacto@stannet.space?subject='+encodeURIComponent('StanNet Dev · '+item.name);link.textContent='Me interesa ↗';
+  const badge=document.createElement('span');badge.className='badge';badge.textContent=item.status==='open'?'ACCESO ABIERTO':'EN PREPARACIÓN';
+  const link=document.createElement('a');link.href=item.status==='open'&&item.url?item.url:'mailto:contacto@stannet.space?subject='+encodeURIComponent('StanNet Dev · '+item.name);link.textContent=item.status==='open'?'Explorar ahora ↗':'Me interesa ↗';
   bottom.append(badge,link);article.append(icon,title,description,bottom);container.append(article);
  }
 }
