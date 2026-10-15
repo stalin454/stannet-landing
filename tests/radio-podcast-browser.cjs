@@ -6,7 +6,7 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
  const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  try{
   for(const width of [360,1280]){
-   const page=await browser.newPage();const calls={synthesis:0,uploads:0};let assigned=true,uploadNetworkFailure=false;
+   const page=await browser.newPage();const calls={synthesis:0,uploads:0};let assigned=true,uploadNetworkFailure=false,uploadRejectedBeforeFile=false;
    try{
     await page.setViewport({width,height:900,isMobile:width<600,hasTouch:width<600});
     await page.evaluateOnNewDocument(()=>sessionStorage.setItem('stannet_radio_admin_token','test-session'));
@@ -27,6 +27,7 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
      if(url.pathname==='/api/radio/admin/upload'){
       calls.uploads++;assert.equal(request.headers().authorization,'Bearer test-session');
       if(uploadNetworkFailure)return request.abort('failed');
+      if(uploadRejectedBeforeFile)return json({uploaded:false,error:'No se pudo preparar la lista. No se ha subido el archivo.'},502);
       return json({uploaded:true,file:{name:'test-podcast.mp3'},playlistAssigned:assigned,assignmentError:assigned?null:'No se confirmó la asignación.'});
      }
      if(url.pathname==='/api/radio/status')return json({});
@@ -78,6 +79,13 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
     await page.click('#radioPodcastGenerate');await page.waitForFunction(()=>!document.querySelector('#radioPodcastPreview').hidden);uploadNetworkFailure=true;
     await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Revisa la biblioteca'));
     assert.equal(await page.$eval('#radioPodcastUpload',e=>e.disabled),true,'A lost upload response must not trigger a duplicate');
+    await page.$eval('#radioPodcastTitle',e=>{e.value+=' destino';e.dispatchEvent(new Event('input',{bubbles:true}))});
+    await page.click('#radioPodcastGenerate');await page.waitForFunction(()=>!document.querySelector('#radioPodcastPreview').hidden);
+    uploadNetworkFailure=false;uploadRejectedBeforeFile=true;
+    await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Corrige el destino'));
+    assert.equal(await page.$eval('#radioPodcastUpload',e=>e.disabled),false,'Known section preparation failure permits safe retry without regenerating audio');
+    uploadRejectedBeforeFile=false;assigned=true;
+    await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Asignación verificada'));
     await page.click('#radioAdminLogout');assert.equal(await page.$eval('#radioAdminPanel',e=>e.hidden),true);
     assert.equal(await page.$eval('#radioPodcastAudio',e=>e.hasAttribute('src')),false,'Logout clears private audio');
     console.log('PASS podcast @'+width+': private session, load script, explicit generation, reuse, preview/download, manual publish, partial success, network failure and logout');

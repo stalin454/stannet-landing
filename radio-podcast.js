@@ -95,7 +95,7 @@ upload.addEventListener('click',async()=>{
     }
     if(data.playlistAssigned===true)message('✓ Episodio incorporado a «'+playlistName+'». Asignación verificada.');
     else message('El episodio está en la biblioteca, pero no se confirmó la playlist. '+(data.assignmentError||'')+' Revísalo en AzuraCast sin volver a subirlo.');
-  }catch(error){if(version===sessionVersion)message(error.message+' Revisa la biblioteca de AzuraCast antes de volver a subir el archivo.')}
+  }catch(error){if(version===sessionVersion)message(error.message+(savedToLibrary?' Revisa la biblioteca de AzuraCast antes de volver a subir el archivo.':' Corrige el destino y vuelve a intentarlo.'))}
   finally{busy=false;update()}
 });
 document.addEventListener('stannet:radio-admin',event=>{
