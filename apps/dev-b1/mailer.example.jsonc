@@ -1,0 +1,12 @@
+{
+  "main": "mailer.mjs",
+  "compatibility_date": "2026-08-06",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [],
+  "vars": {"MODE":"sandbox", "MAIL_RELEASE":"disabled"}
+  // Dedicated service only: RESEND_DEV_API_KEY and DEV_MAILER_AUTH as secrets.
+  // PUBLIC_ORIGIN: isolated Auth hostname. MAIL_FROM: verified @mail.stannet.dev.
+  // MAIL_ALLOWLIST_HASHES: SHA-256 of approved test recipients; no public recipients.
+  // No deploy until provider/domain and free quota are verified by the operator.
+}

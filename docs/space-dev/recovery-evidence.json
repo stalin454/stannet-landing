@@ -1,0 +1,10 @@
+{
+  "baseline_commit": "aacd5ff9d85f13ec47506d0076f57e8bdfbc1b7e",
+  "git_tree": "2781288d91656cbbad58c6b4af99a8de08ebd684",
+  "archive_sha256": "bb0a0afaed6349e7a55a07b695eb41279d89abe6bcc7548f940f248e57da9931",
+  "restored_and_blob_verified": 540,
+  "executable_modes_verified": true,
+  "existing_tracked_files_unchanged": true,
+  "scope": "Tracked source only. No external database, object storage, secrets, DNS or VPS restore is claimed.",
+  "status": "PASS"
+}
