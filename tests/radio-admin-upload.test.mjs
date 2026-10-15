@@ -189,3 +189,10 @@ test('admin client distinguishes a library-only upload',async()=>{
   assert.match(message,/sin asignar a ninguna playlist/);
   assert.equal(requests[0].body.has('playlists'),false);
 });
+
+test('admin client sends a section key rather than inventing a numeric playlist id',async()=>{
+  const {requests,message}=await clientUpload({file:{name:'episode.mp3'},playlistAssigned:true},'section:ai');
+  assert.equal(requests[0].body.get('section'),'ai');
+  assert.equal(requests[0].body.has('playlists'),false);
+  assert.match(message,/verificada/);
+});

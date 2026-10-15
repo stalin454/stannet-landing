@@ -1701,6 +1701,55 @@ function azuraConfig(env) {
 function azuraHeaders(apiKey, extra = {}) {
   return { Authorization: 'Bearer ' + apiKey, Accept: 'application/json', ...extra };
 }
+const RADIO_UPLOAD_SECTIONS = Object.freeze([
+  { key:'cybersecurity', name:'Cybersecurity News' },
+  { key:'ai', name:'AI News' },
+  { key:'programming', name:'Programming Sessions' },
+  { key:'electronic', name:'StanNet Electronic' }
+]);
+const radioPlaylistName = value => String(value || '').normalize('NFKC').trim().replace(/\s+/g,' ').toLowerCase();
+const radioPlaylistRows = data => Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : null);
+function radioUploadDestinations(rows) {
+  const items = rows.map(p => ({ id:p.id, name:p.name || p.playlist_name || ('Playlist '+p.id), type:p.type || null }));
+  for (const section of RADIO_UPLOAD_SECTIONS) {
+    if (!items.some(p => radioPlaylistName(p.name) === radioPlaylistName(section.name))) {
+      items.push({ id:null, name:section.name, section:section.key, requiresCreation:true });
+    }
+  }
+  return items;
+}
+async function resolveRadioUploadSection(cfg, section) {
+  const url = cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/playlists';
+  const headers = azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' });
+  const read = async () => {
+    const response = await fetch(url, { headers });
+    if (!response.ok) throw new Error('No se pudieron consultar las playlists de la sección (HTTP '+response.status+').');
+    const rows = radioPlaylistRows(await response.json());
+    if (!rows) throw new Error('AzuraCast no devolvió un listado de playlists válido.');
+    return rows.filter(p => radioPlaylistName(p.name || p.playlist_name) === radioPlaylistName(section.name));
+  };
+  try {
+    let matches = await read(), created = false;
+    if (!matches.length) {
+      // Collect section audio without inserting a new rotation into the live station.
+      const response = await fetch(url, { method:'POST', headers, body:JSON.stringify({
+        name:section.name, source:'songs', type:'default', is_enabled:false
+      }) });
+      if (!response.ok) return { ok:false, error:'AzuraCast no permitió crear «'+section.name+'» (HTTP '+response.status+'). No se ha subido el archivo.' };
+      matches = await read();
+      created = true;
+    }
+    if (matches.length !== 1 || !radioMediaId(matches[0]?.id)) {
+      return { ok:false, error:'No se pudo identificar una única playlist para «'+section.name+'». Revisa las listas en AzuraCast antes de subir el archivo.' };
+    }
+    if (matches[0].source && matches[0].source !== 'songs') {
+      return { ok:false, error:'La lista «'+section.name+'» no admite archivos de audio. Revisa su configuración en AzuraCast.' };
+    }
+    return { ok:true, id:radioMediaId(matches[0].id), created };
+  } catch (error) {
+    return { ok:false, error:error.message || 'No se pudo preparar la playlist de la sección.' };
+  }
+}
 async function handleRadioAdminPlaylists(env) {
   const cfg = azuraConfig(env);
   if (!cfg.apiKey) return json({ error:'Falta configurar AZURACAST_API_KEY en Cloudflare.' }, 503);
@@ -1710,8 +1759,9 @@ async function handleRadioAdminPlaylists(env) {
     });
     const data = await upstream.json().catch(() => ([]));
     if (!upstream.ok) return json({ error:'AzuraCast no pudo devolver las listas.', providerStatus:upstream.status }, 502);
-    const items = Array.isArray(data) ? data : (Array.isArray(data?.rows) ? data.rows : []);
-    return json({ ok:true, items:items.map(p => ({ id:p.id, name:p.name || p.playlist_name || ('Playlist '+p.id), type:p.type || null })) }, 200, { 'Cache-Control':'no-store' });
+    const rows = radioPlaylistRows(data);
+    if (!rows) return json({ error:'AzuraCast no devolvió un listado de playlists válido.' }, 502);
+    return json({ ok:true, items:radioUploadDestinations(rows) }, 200, { 'Cache-Control':'no-store' });
   } catch {
     return json({ error:'No se pudo conectar con AzuraCast.' }, 502);
   }
@@ -1758,7 +1808,19 @@ async function handleRadioAdminUpload(request, env) {
     return json({ error:'La selección de playlist no es válida.' }, 400);
   }
   playlists = [...new Set(playlists.map(Number))];
+  const sectionKey = form.get('section');
+  const section = sectionKey ? RADIO_UPLOAD_SECTIONS.find(item => item.key === sectionKey) : null;
+  if ((sectionKey && !section) || (section && playlists.length)) {
+    return json({ error:'Selecciona una playlist existente o una sección válida.' }, 400);
+  }
   try {
+    let playlistCreated = false;
+    if (section) {
+      const destination = await resolveRadioUploadSection(cfg, section);
+      if (!destination.ok) return json({ error:destination.error, uploaded:false }, 502, { 'Cache-Control':'no-store' });
+      playlists = [destination.id];
+      playlistCreated = destination.created;
+    }
     const buffer = await file.arrayBuffer();
     const payload = {
       path: safeName,
@@ -1786,6 +1848,8 @@ async function handleRadioAdminUpload(request, env) {
       file:{ name:safeName, size:file.size, id:mediaId },
       ...assignment,
       selectedPlaylists:playlists,
+      section:section?.key || null,
+      playlistCreated,
       azuracast:data
     }, 200, { 'Cache-Control':'no-store' });
   } catch {

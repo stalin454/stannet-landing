@@ -6,7 +6,7 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
  const browser=await puppeteer.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
  try{
   for(const width of [360,1280]){
-   const page=await browser.newPage();const calls={synthesis:0,uploads:0};let assigned=true,uploadNetworkFailure=false;
+   const page=await browser.newPage();const calls={synthesis:0,uploads:0};let assigned=true,uploadNetworkFailure=false,uploadRejectedBeforeFile=false;
    try{
     await page.setViewport({width,height:900,isMobile:width<600,hasTouch:width<600});
     await page.evaluateOnNewDocument(()=>sessionStorage.setItem('stannet_radio_admin_token','test-session'));
@@ -16,7 +16,9 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
      const json=(body,status=200)=>request.respond({status,contentType:'application/json',body:JSON.stringify(body)});
      if(url.origin!==new URL(base).origin)return request.abort();
      if(url.pathname==='/api/admin/session')return json({email:'owner@example.test'});
-     if(url.pathname==='/api/radio/admin/playlists')return json({items:[{id:1,name:'StanNet Radio 24/7'},{id:7,name:'Podcasts de tecnología'}]});
+     if(url.pathname==='/api/radio/admin/playlists')return json({items:[{id:1,name:'StanNet Radio 24/7'},{id:7,name:'Podcasts de tecnología'},
+      {id:null,name:'Cybersecurity News',section:'cybersecurity'},{id:null,name:'AI News',section:'ai'},
+      {id:null,name:'Programming Sessions',section:'programming'},{id:null,name:'StanNet Electronic',section:'electronic'}]});
      if(url.pathname==='/api/radio/admin/podcast'){
       calls.synthesis++;assert.equal(request.method(),'POST');assert.equal(request.headers().authorization,'Bearer test-session');
       const body=JSON.parse(request.postData());assert.equal(body.text,episode.text);
@@ -25,6 +27,7 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
      if(url.pathname==='/api/radio/admin/upload'){
       calls.uploads++;assert.equal(request.headers().authorization,'Bearer test-session');
       if(uploadNetworkFailure)return request.abort('failed');
+      if(uploadRejectedBeforeFile)return json({uploaded:false,error:'No se pudo preparar la lista. No se ha subido el archivo.'},502);
       return json({uploaded:true,file:{name:'test-podcast.mp3'},playlistAssigned:assigned,assignmentError:assigned?null:'No se confirmó la asignación.'});
      }
      if(url.pathname==='/api/radio/status')return json({});
@@ -32,7 +35,11 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
      request.continue();
     });
     await page.goto(new URL('/pages/radio.html',base).href,{waitUntil:'networkidle0'});
-    await page.waitForFunction(()=>document.querySelector('#radioAdminPanel').hidden===false&&document.querySelector('#radioPodcastPlaylist').options.length===3);
+    await page.waitForFunction(()=>document.querySelector('#radioAdminPanel').hidden===false&&document.querySelector('#radioPodcastPlaylist').options.length===7);
+    for(const selector of ['#radioUploadPlaylist','#radioPodcastPlaylist']){
+     const destinations=await page.$eval(selector,e=>[...e.options].map(o=>[o.value,o.textContent]));
+     for(const [key,name] of [['cybersecurity','Cybersecurity News'],['ai','AI News'],['programming','Programming Sessions'],['electronic','StanNet Electronic']])assert.ok(destinations.some(o=>o[0]==='section:'+key&&o[1]===name),'Section present in '+selector+': '+name);
+    }
     assert.equal(calls.synthesis,0,'Opening admin must not generate billable audio');
     assert.equal(calls.uploads,0,'Opening admin must not upload media');
     await page.click('#radioPodcastExample');
@@ -51,13 +58,14 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
     await page.select('#radioPodcastPlaylist','1');await page.click('#radioPodcastRefresh');
     await page.waitForFunction(()=>document.querySelector('#radioPodcastPlaylist').value==='1'&&!document.querySelector('#radioPodcastRefresh').disabled);
     assert.equal(await page.$eval('#radioPodcastPlaylist',e=>e.value),'1','Refreshing retains the chosen destination');
-    await page.select('#radioPodcastPlaylist','7');
+    await page.select('#radioPodcastPlaylist','section:ai');
     await page.click('#radioPodcastGenerate');assert.equal(calls.synthesis,1,'The same MP3 is reused without billing again');
     const boxes=await page.evaluate(()=>({width:innerWidth,doc:document.documentElement.scrollWidth,controls:[...document.querySelectorAll('#radioPodcastForm input,#radioPodcastForm textarea,#radioPodcastPreview audio,#radioPodcastPreview select')].map(e=>({left:e.getBoundingClientRect().left,right:e.getBoundingClientRect().right}))}));
     assert.ok(boxes.doc<=boxes.width+1,'page horizontal overflow @'+width);
     assert.ok(boxes.controls.every(b=>b.left>=0&&b.right<=width+1),'podcast controls fit @'+width);
     await page.$eval('#radioPodcastHeading',e=>e.scrollIntoView());await page.screenshot({path:output+'/editor-'+width+'.png'});
     await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Asignación verificada'));
+    assert.ok((await page.$eval('#radioPodcastStatus',e=>e.textContent)).includes('«AI News»'),'Podcast upload targets the chosen section');
     assert.equal(calls.uploads,1);assert.equal(calls.synthesis,1);
     assert.equal(await page.$eval('#radioPodcastUpload',e=>e.disabled),true,'Block uploading the same generated MP3 again');
     // Editing invalidates the old preview and produces a new explicit action.
@@ -71,6 +79,13 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
     await page.click('#radioPodcastGenerate');await page.waitForFunction(()=>!document.querySelector('#radioPodcastPreview').hidden);uploadNetworkFailure=true;
     await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Revisa la biblioteca'));
     assert.equal(await page.$eval('#radioPodcastUpload',e=>e.disabled),true,'A lost upload response must not trigger a duplicate');
+    await page.$eval('#radioPodcastTitle',e=>{e.value+=' destino';e.dispatchEvent(new Event('input',{bubbles:true}))});
+    await page.click('#radioPodcastGenerate');await page.waitForFunction(()=>!document.querySelector('#radioPodcastPreview').hidden);
+    uploadNetworkFailure=false;uploadRejectedBeforeFile=true;
+    await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Corrige el destino'));
+    assert.equal(await page.$eval('#radioPodcastUpload',e=>e.disabled),false,'Known section preparation failure permits safe retry without regenerating audio');
+    uploadRejectedBeforeFile=false;assigned=true;
+    await page.click('#radioPodcastUpload');await page.waitForFunction(()=>document.querySelector('#radioPodcastStatus').textContent.includes('Asignación verificada'));
     await page.click('#radioAdminLogout');assert.equal(await page.$eval('#radioAdminPanel',e=>e.hidden),true);
     assert.equal(await page.$eval('#radioPodcastAudio',e=>e.hasAttribute('src')),false,'Logout clears private audio');
     console.log('PASS podcast @'+width+': private session, load script, explicit generation, reuse, preview/download, manual publish, partial success, network failure and logout');
