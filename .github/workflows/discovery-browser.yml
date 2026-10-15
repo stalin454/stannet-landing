@@ -1,0 +1,41 @@
+name: Search and catalogue browser QA
+on:
+  pull_request:
+    paths:
+      - stannet-discovery.js
+      - stannet-discovery.css
+      - stannet-global-nav.js
+      - home-access-rail.js
+      - index.html
+      - scripts/build-resource-directory.cjs
+      - tests/discovery-browser.cjs
+      - .github/workflows/discovery-browser.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/stannet-discovery --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Check search, catalogue and existing navigation
+        env:
+          NODE_PATH: /tmp/stannet-discovery/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-discovery-server.log 2>&1 &
+          node tests/discovery-browser.cjs
+          node tests/global-nav-brand-browser.cjs
+          node tests/hierarchical-nav-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: search-catalogue-screenshots
+          path: output/discovery/
+          if-no-files-found: ignore

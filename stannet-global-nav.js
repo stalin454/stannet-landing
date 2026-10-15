@@ -207,6 +207,25 @@ sectionNav?.addEventListener('keydown',onEscape);
 [header,sectionNav].filter(Boolean).forEach(container=>container.addEventListener('click',e=>{if(e.target.closest('a')){closeGroups();closeSection();setMenu(false)}}));
 window.matchMedia('(max-width:850px)').addEventListener('change',()=>{closeGroups();closeSection();setMenu(false)});
 
+/* Shared local discovery: a failed enhancement keeps the catalogue link available. */
+if(!document.querySelector('link[href^="/stannet-discovery.css"]')){
+ const discoveryStyle=document.createElement('link');discoveryStyle.rel='stylesheet';discoveryStyle.href='/stannet-discovery.css?v=20261015-discovery1';document.head.appendChild(discoveryStyle);
+}
+const searchToggle=document.createElement('a');searchToggle.className='search-toggle';searchToggle.href='/#proyectos';searchToggle.setAttribute('aria-label','Buscar proyectos y recursos');searchToggle.setAttribute('aria-keyshortcuts','Control+K Meta+K');searchToggle.setAttribute('aria-haspopup','dialog');searchToggle.setAttribute('aria-controls','stannet-search-dialog');
+searchToggle.innerHTML='<span class="search-symbol" aria-hidden="true">⌕</span><span class="search-label">Buscar proyectos…</span><kbd aria-hidden="true">Ctrl K</kbd>';
+header.querySelector('.brand').after(searchToggle);
+let discoveryFailed=false;
+searchToggle.addEventListener('click',e=>{
+ if(discoveryFailed)return;
+ e.preventDefault();e.stopPropagation();closeGroups();closeSection();setMenu(false);
+ if(window.StanNetDiscovery)window.StanNetDiscovery.openSearch();else window.__StanNetSearchRequested=true;
+});
+if(!window.StanNetDiscovery&&!document.getElementById('stannet-discovery-loader')){
+ const discovery=document.createElement('script');discovery.id='stannet-discovery-loader';discovery.src='/stannet-discovery.js?v=20261015-discovery1';
+ discovery.addEventListener('error',()=>{discoveryFailed=true;window.__StanNetSearchRequested=false;searchToggle.removeAttribute('aria-haspopup');searchToggle.removeAttribute('aria-controls');searchToggle.setAttribute('aria-label','Ver catálogo de proyectos')});
+ document.body.appendChild(discovery);
+}
+
 /* Warm only a small number of same-origin documents after clear menu intent. */
 const connection=navigator.connection;
 if(!connection?.saveData && !/(^|-)2g/.test(connection?.effectiveType||'')){
