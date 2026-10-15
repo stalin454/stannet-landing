@@ -131,7 +131,7 @@ const menu=header.querySelector('.menu-toggle');
 const groups=[...header.querySelectorAll('.nav-group')];
 
 // Use the same route catalogue for global navigation and the area's second row.
-const cleanPath=value=>(value.replace(/\/index\.html$|\/$/,'')||'/');
+const cleanPath=value=>(value.replace(/\/index\.html$|\/$/,'').replace(/\.html$/,'')||'/');
 const currentPath=cleanPath(path);
 const allLinks=[...nav.querySelectorAll('a[href]')];
 const matches=a=>cleanPath(new URL(a.href,location.origin).pathname)===currentPath;
