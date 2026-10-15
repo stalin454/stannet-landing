@@ -285,7 +285,7 @@ test('Worker refuses Auth before database/mail/assets when CPU or mail delivery 
 
 test('FP Study migration pilot is private on every asset and responds to live admin role',async()=>{
  const s=setup();try{
-  const paths=['/apps/fp-study','/apps/fp-study/','/apps/fp-study/fp-study.html','/apps/fp-study/fp-study.js','/apps/fp-study/fp-study-data.js','/apps/fp-study/fp-study.css'];
+  const paths=['/apps/fp-study','/apps/fp-study/','/apps/fp-study/fp-study.html','/apps/fp-study/fp-study.js','/apps/fp-study/fp-study-data.js','/apps/fp-study/fp-study-transfer.js','/apps/fp-study/fp-study.css'];
   for(const path of paths)assert.equal((await s.request(path)).status,401,'anonymous '+path);
   const member=await account(s,'fp-pilot@example.test');
   for(const path of paths)assert.equal((await s.request(path,undefined,member)).status,403,'nonadmin '+path);

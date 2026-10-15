@@ -225,6 +225,7 @@ export function application(options){
      '/apps/fp-study/fp-study.html':'fp-study.html',
      '/apps/fp-study/fp-study.js':'fp-study.js',
      '/apps/fp-study/fp-study-data.js':'fp-study-data.js',
+     '/apps/fp-study/fp-study-transfer.js':'fp-study-transfer.js',
      '/apps/fp-study/fp-study.css':'fp-study.css',
      '/apps/cs-foundations':'cs-foundations.html',
      '/apps/cs-foundations/':'cs-foundations.html',

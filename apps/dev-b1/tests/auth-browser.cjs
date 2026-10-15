@@ -45,6 +45,21 @@ const puppeteer=require('puppeteer-core');
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$eval('#completed',el=>Number(el.textContent))+await page.$eval('#mistakes',el=>Number(el.textContent)),1);
   for(const width of [320,390,1280]){await page.setViewport({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'FP Study overflow '+width);}
+  // Manual export/import never silently overwrites a pre-existing browser progress.
+  await page.evaluate(()=>{
+   const backup=new File(['{"done":7,"mistakes":3}'],'fp-space.json',{type:'application/json'});
+   const data=new DataTransfer();data.items.add(backup);
+   const input=document.getElementById('fp-import-file');input.files=data.files;
+   input.dispatchEvent(new Event('change',{bubbles:true}));
+  });
+  await page.waitForFunction(()=>!document.getElementById('fp-import').disabled);
+  await page.click('#fp-import');
+  await page.waitForFunction(()=>document.getElementById('fp-transfer-status').textContent.includes('Marca la casilla'));
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('stannetFpState'))),fpState);
+  await page.click('#fp-overwrite');
+  await page.click('#fp-import');
+  await page.waitForFunction(()=>document.querySelector('#completed').textContent==='7'&&document.querySelector('#mistakes').textContent==='3');
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('stannetFpState'))),{done:7,mistakes:3});
   await page.goto(base+'/apps/cs-foundations',{waitUntil:'networkidle0'});
   await page.waitForSelector('#cs-list .pa-lesson-btn');
   assert.equal(await page.evaluate(()=>document.querySelectorAll('#cs-list .pa-lesson-btn').length),17);
