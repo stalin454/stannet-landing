@@ -47,7 +47,7 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
      const bounds=await page.$eval('#stannet-area-links',e=>{const r=e.getBoundingClientRect();return{left:r.left,right:r.right}});
      assert.ok(bounds.left>=-1&&bounds.right<=width+1,'area dropdown off screen');
      await page.keyboard.press('Escape');assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'false');
-     await page.click(more);await page.click('main');assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'false');
+     await page.click(more);await page.click('#stannet-canonical-nav',{offset:{x:2,y:2}});assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'false');
     }
     if([393,1280].includes(width)&&['/','/pages/programming.html','/pages/ett-dinamarca.html'].includes(path))await page.screenshot({path:'output/navigation/'+width+'-'+(path.split('/').pop()||'home')+'.png'});
     console.log('PASS hierarchical menu '+path+' @ '+width);
