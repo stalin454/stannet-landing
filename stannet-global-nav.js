@@ -6,8 +6,8 @@ if(document.getElementById(NAV_ID))return;
 const style=document.createElement('style');
 style.textContent=`
 #${NAV_ID}.site-header{
-  position:relative;z-index:100000;min-height:76px;height:auto;width:100%;
-  display:flex;align-items:center;gap:24px;padding:0 clamp(18px,4vw,54px);
+  position:relative;z-index:100000;min-height:76px;height:auto;width:100%;flex-wrap:wrap;
+  display:flex;align-items:center;gap:0 24px;padding:16px clamp(18px,4vw,54px) 0;
   background:rgba(10,10,12,.97)!important;border-bottom:1px solid rgba(255,255,255,.15)!important;
   box-shadow:0 8px 28px rgba(0,0,0,.2);backdrop-filter:blur(18px);
   font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -35,7 +35,8 @@ style.textContent=`
   background:#18181b!important;border:1px solid rgba(255,255,255,.15)!important;
   border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.35)!important
 }
-#${NAV_ID} .nav-group.open>.nav-dropdown{display:grid}
+#${NAV_ID} .nav-group.open>.nav-dropdown{display:grid!important}
+#${NAV_ID} .nav-group:not(.open)>.nav-dropdown{display:none!important}
 #${NAV_ID} .nav-dropdown a{padding:10px 11px;border-radius:9px;color:#dedee5!important;text-decoration:none!important;font:500 12px Inter,system-ui,sans-serif}
 #${NAV_ID} .nav-dropdown a:hover,#${NAV_ID} .nav-dropdown a.active{background:#25252b!important;color:#53e5f5!important}
 #${NAV_ID} .site-nav>a.nav-cta{
@@ -48,15 +49,35 @@ style.textContent=`
 }
 /* Keep the homepage's dark identity across Space; menus remain legible on light academies. */
 #${NAV_ID} :is(.site-nav a,.nav-trigger,.menu-toggle):focus-visible{outline:2px solid #53e5f5;outline-offset:3px}
-/* Keep desktop navigation on one row, with compact spacing on smaller screens. */
-@media(min-width:851px) and (max-width:1500px){
-  #${NAV_ID}.site-header{gap:8px;padding:0 14px}
-  #${NAV_ID} .site-nav{gap:0}
-  #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:clamp(8px,calc(0.63vw + 1.55px),11px)!important;padding:10px clamp(2px,calc(1.47vw - 13px),9px);gap:3px}
-  #${NAV_ID} .nav-cta{padding:11px 8px!important}
+/* A dedicated category row keeps labels readable as the catalogue grows. */
+@media(min-width:851px){
+  #${NAV_ID} .brand{margin-bottom:14px}
+  #${NAV_ID} .site-nav{flex:1 0 100%;width:100%;margin:0;justify-content:space-between;border-top:1px solid #303038;gap:0}
+  #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:11px;padding:14px 10px;min-height:52px}
+  #${NAV_ID} .site-nav>a.nav-cta{margin:6px 0}
+  #${NAV_ID} .nav-group:nth-last-of-type(-n+2) .nav-dropdown{left:auto;right:0}
+  #${NAV_ID} .nav-dropdown{max-height:min(620px,70dvh);overflow-y:auto}
+}
+#${NAV_ID} .nav-dropdown a{min-height:44px;display:flex;align-items:center;white-space:normal;line-height:1.5}
+#${NAV_ID} .nav-dropdown a[aria-current]{border-left:2px solid #53e5f5}
+#${NAV_ID} .nav-trigger[aria-expanded="true"]{color:#53e5f5!important;background:#25252b;border-radius:8px}
+#stannet-section-nav{position:relative;z-index:99999;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px clamp(14px,4vw,54px);background:#151518!important;border-bottom:1px solid #34343e;color:#dedee5;font-family:Inter,system-ui,sans-serif}
+#stannet-section-nav *{box-sizing:border-box}
+#stannet-section-nav .section-heading{margin:0;padding:0 16px 0 0;border-right:1px solid #454550;color:#ba8cff;font-size:12px;font-weight:700;white-space:nowrap}
+#stannet-section-nav .section-links{display:flex;align-items:center;gap:4px;flex:1;flex-wrap:wrap;min-width:0}
+#stannet-section-nav a,#stannet-section-nav button{display:flex;align-items:center;min-height:44px;padding:10px 12px;border:0;border-radius:7px;background:transparent;color:#dedee5!important;text-decoration:none!important;font:500 13px/1.5 Inter,system-ui,sans-serif;text-align:left;cursor:pointer}
+#stannet-section-nav a:hover,#stannet-section-nav button:hover,#stannet-section-nav a[aria-current]{background:#25252b;color:#53e5f5!important}
+#stannet-section-nav :is(a,button):focus-visible{outline:2px solid #53e5f5;outline-offset:2px}
+#stannet-section-nav .section-more{position:relative}
+#stannet-section-nav .section-panel{display:none;position:absolute;top:100%;right:0;min-width:260px;max-width:calc(100vw - 28px);max-height:60dvh;overflow-y:auto;padding:8px;background:#18181b;border:1px solid #454550;border-radius:12px;box-shadow:0 20px 40px #0006}
+#stannet-section-nav .section-more.open .section-panel{display:grid}
+#stannet-section-nav .section-mobile{display:none}
+@media(max-width:1100px) and (min-width:851px){
+  #${NAV_ID} .site-nav{flex-wrap:wrap;justify-content:flex-start;gap:0 12px;min-width:0}
+  #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:10px;padding:14px 5px}
 }
 @media(max-width:850px){
-  #${NAV_ID}{min-height:68px!important;padding:0 14px!important}
+  #${NAV_ID}{min-height:68px!important;padding:0 14px!important;flex-wrap:nowrap;gap:8px}
   #${NAV_ID} .menu-toggle{display:block}
   #${NAV_ID} .site-nav{
     display:none;position:absolute;top:68px;left:10px;right:10px;margin:0;padding:10px;
@@ -67,6 +88,13 @@ style.textContent=`
   #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{width:100%;justify-content:space-between;text-align:left;font-size:13px}
   #${NAV_ID} .nav-dropdown{position:static;box-shadow:none!important;margin:0 4px 5px;border-radius:10px}
   #${NAV_ID} .site-nav>a.nav-cta{justify-content:center!important;margin:4px 0 0}
+  #${NAV_ID} .site-nav>.nav-group{width:100%}
+  #${NAV_ID} .nav-dropdown{min-width:0;width:auto}
+  #stannet-section-nav{flex-wrap:nowrap;gap:8px}
+  #stannet-section-nav .section-heading{font-size:11px;padding-right:8px;white-space:normal;flex:0 1 auto}
+  #stannet-section-nav .section-links{justify-content:flex-end;flex:1 0 auto}
+  #stannet-section-nav .section-links>.section-direct,#stannet-section-nav .section-desktop{display:none}
+  #stannet-section-nav .section-mobile{display:inline}
 }
 `;
 document.head.appendChild(style);
@@ -84,12 +112,12 @@ header.innerHTML=`
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
 <nav class="site-nav home-nav" aria-label="Navegación principal">
 <a data-nav="/" href="/">Inicio</a>
-<div class="nav-group" data-group="/pages/web-development"><button class="nav-trigger" type="button" aria-expanded="false">Desarrollo <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/web-development.html">Web Development</a><a href="/pages/programming.html">Programming Academy</a><a href="/pages/programming-fullstack-course.html">Full-Stack Course</a><a href="/pages/programming-fullstack.html">Full-Stack Lab</a><a href="/pages/programming-web-lab.html">Web Programming Lab</a><a href="/pages/programming-lab.html">Programming Lab</a><a href="/pages/programming-cs-lab.html">C++ / C# Lab</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/shortcuts.html">Atajos de teclado</a><a href="/pages/fp-study.html">FP · DAW</a><a href="/sanacion/">Alfa y Omega</a></div></div>
-<div class="nav-group" data-group="/pages/english"><button class="nav-trigger" type="button" aria-expanded="false">Idiomas <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/english.html">English Academy</a><a href="/pages/callan.html">Callan English Coach</a><a href="/pages/danish.html">Danish Academy</a><a href="/pages/language-music.html">Language Music Lab</a></div></div>
-<div class="nav-group" data-group="/pages/guitar"><button class="nav-trigger" type="button" aria-expanded="false">Música <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/guitar.html">Guitar Academy</a><a href="/pages/music.html">Music Lab</a><a href="/pages/radio.html">StanNet Radio</a><a href="/pages/vocal-studio.html">Vocal Studio</a><a href="/dj-studio/">DJ Studio Pro</a></div></div>
+<div class="nav-group" data-group="/pages/web-development"><button class="nav-trigger" type="button" aria-expanded="false">Desarrollo <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/web-development.html">Web Development</a><a href="/pages/programming.html">Programming Academy</a><a href="/pages/programming-coach.html">JavaScript Coach</a><a href="/pages/programming-fullstack-course.html">Full-Stack Course</a><a href="/pages/programming-fullstack.html">Full-Stack Lab</a><a href="/pages/programming-web-lab.html">Web Programming Lab</a><a href="/pages/programming-lab.html">Programming Lab</a><a href="/pages/programming-cs-lab.html">C++ / C# Lab</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/shortcuts.html">Atajos de teclado</a><a href="/pages/fp-study.html">FP · DAW</a><a href="/sanacion/">Alfa y Omega</a></div></div>
+<div class="nav-group" data-group="/pages/english"><button class="nav-trigger" type="button" aria-expanded="false">Idiomas <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/english.html">English Academy</a><a href="/pages/callan.html">Callan English Coach</a><a href="/pages/danish.html">Danish Academy</a><a href="/pages/language-music.html">Language Music Lab</a><a href="/pages/language-typing.html">Typing de idiomas</a></div></div>
+<div class="nav-group" data-group="/pages/guitar"><button class="nav-trigger" type="button" aria-expanded="false">Música <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/guitar.html">Guitar Academy</a><a href="/pages/music.html">Music Lab</a><a href="/pages/artist-universe.html">Artistas · STAN6IX y Astrid Nova</a><a href="/pages/radio.html">StanNet Radio</a><a href="/pages/vocal-studio.html">Vocal Studio</a><a href="/dj-studio/">DJ Studio Pro</a></div></div>
 <div class="nav-group" data-group="/pages/cybersecurity"><button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cybersecurity.html">Cybersecurity Hub</a><a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a><a href="/pages/cyber-lab.html">Cyber Defense Lab</a><a href="/sentinel/">Sentinel</a><a href="/shield/">Shield</a><a href="/pages/password-security.html">Password Security</a></div></div>
-<div class="nav-group" data-group="/pages/ai"><button class="nav-trigger" type="button" aria-expanded="false">Apps e IA <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ai.html">StanNet AI</a><a href="/pdf-tutor/">PDF Tutor · Study AI</a><a href="/nutri-ia/">Nutri IA</a><a href="/pages/marketplace.html">AyudaEnCasa</a></div></div>
-<div class="nav-group" data-group="/pages/ruta-dinamarca"><button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a><a href="/pages/denmark-cv.html">CV Dinamarca</a><a href="/pages/comunidad-dinamarca.html">Comunidad Dinamarca</a></div></div>
+<div class="nav-group" data-group="/pages/ai"><button class="nav-trigger" type="button" aria-expanded="false">Apps e IA <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ai.html">StanNet AI</a><a href="/pages/apps.html">Aplicaciones y productos</a><a href="/pdf-tutor/">PDF Tutor · Study AI</a><a href="/nutri-ia/">Nutri IA</a><a href="/pages/marketplace.html">AyudaEnCasa</a></div></div>
+<div class="nav-group" data-group="/pages/ruta-dinamarca"><button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a><a href="/pages/ett-dinamarca.html">ETT · Trabajo por regiones</a><a href="/pages/denmark-cv.html">CV Dinamarca</a><a href="/pages/comunidad-dinamarca.html">Comunidad Dinamarca</a></div></div>
 <div class="nav-group" data-group="/pages/cv"><button class="nav-trigger" type="button" aria-expanded="false">StanNet <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cv.html">Sobre mí · CV</a><a href="/pages/education.html">Formación y certificados</a><a href="/pages/blog.html">Blog StanNet</a></div></div>
 <a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
@@ -103,28 +131,81 @@ const nav=header.querySelector('.site-nav');
 const menu=header.querySelector('.menu-toggle');
 const groups=[...header.querySelectorAll('.nav-group')];
 
-header.querySelectorAll('[data-nav]').forEach(a=>{if(is(a.dataset.nav))a.classList.add('active')});
-const groupMatch=(g)=>{
-  const hrefs=[...g.querySelectorAll('.nav-dropdown a')].map(a=>new URL(a.href,location.origin).pathname.replace(/\/$/,''));
-  return hrefs.some(h=>h && (path===h||path.startsWith(h+'/')));
-};
-groups.forEach(g=>{if(groupMatch(g))g.classList.add('active')});
-
-menu.addEventListener('click',e=>{
-  e.stopPropagation();const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'×':'☰';
-});
-groups.forEach(g=>{
-  const b=g.querySelector('.nav-trigger');
-  b.addEventListener('click',e=>{
-    e.stopPropagation();
-    groups.forEach(x=>{if(x!==g){x.classList.remove('open');x.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false')}});
-    const open=g.classList.toggle('open');b.setAttribute('aria-expanded',String(open));
+// Use the same route catalogue for global navigation and the area's second row.
+const cleanPath=value=>(value.replace(/\/index\.html$|\/$/,'').replace(/\.html$/,'')||'/');
+const currentPath=cleanPath(path);
+const allLinks=[...nav.querySelectorAll('a[href]')];
+const matches=a=>cleanPath(new URL(a.href,location.origin).pathname)===currentPath;
+let sectionNav=null;
+let sectionMore=null;
+const closeGroups=()=>groups.forEach(g=>{g.classList.remove('open');g.querySelector('.nav-trigger').setAttribute('aria-expanded','false')});
+const setMenu=open=>{nav.classList.toggle('open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');menu.textContent=open?'×':'☰'};
+const closeSection=()=>{if(sectionMore){sectionMore.classList.remove('open');sectionMore.querySelector('button').setAttribute('aria-expanded','false')}};
+menu.setAttribute('aria-controls','stannet-primary-links');
+nav.id='stannet-primary-links';
+const activeGroup=groups.find(g=>[...g.querySelectorAll('a')].some(matches));
+if(activeGroup){
+  activeGroup.classList.add('active');
+  sectionNav=document.createElement('nav');
+  sectionNav.id='stannet-section-nav';
+  const label=activeGroup.querySelector('.nav-trigger').childNodes[0].textContent.trim();
+  sectionNav.setAttribute('aria-label','Secciones de '+label);
+  const heading=document.createElement('span');heading.className='section-heading';heading.textContent=label;
+  const links=document.createElement('div');links.className='section-links';
+  const originals=[...activeGroup.querySelectorAll('a')];
+  // Keep the current page visible even when it sits near the end of a long list.
+  const current=originals.find(a=>matches(a)&&!new URL(a.href).hash)||originals.find(matches);
+  const direct=originals.slice(0,3);
+  if(current&&!direct.includes(current))direct[2]=current;
+  direct.forEach(a=>{const copy=a.cloneNode(true);copy.className='section-direct';links.appendChild(copy)});
+  sectionMore=document.createElement('div');sectionMore.className='section-more';
+  const trigger=document.createElement('button');trigger.type='button';trigger.setAttribute('aria-expanded','false');trigger.setAttribute('aria-controls','stannet-area-links');
+  trigger.innerHTML='<span class="section-desktop">Todas las secciones</span><span class="section-mobile">En esta área</span> ▾';
+  const panel=document.createElement('div');panel.id='stannet-area-links';panel.className='section-panel';
+  originals.forEach(a=>panel.appendChild(a.cloneNode(true)));
+  sectionMore.append(trigger,panel);links.appendChild(sectionMore);sectionNav.append(heading,links);header.after(sectionNav);
+  trigger.addEventListener('click',()=>{closeGroups();const open=sectionMore.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open))});
+  trigger.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();sectionMore.classList.add('open');trigger.setAttribute('aria-expanded','true');panel.querySelector('a')?.focus()}});
+}
+const updateCurrent=()=>{
+  const links=[...allLinks,...(sectionNav?.querySelectorAll('a')||[])];
+  const exactHash=links.some(a=>matches(a)&&new URL(a.href).hash===location.hash&&location.hash);
+  links.forEach(a=>{
+    const url=new URL(a.href);
+    const active=matches(a)&&(exactHash?url.hash===location.hash:!url.hash);
+    a.classList.toggle('active',active);
+    a.removeAttribute('aria-current');
+    if(active)a.setAttribute('aria-current',url.hash?'location':'page');
   });
+};
+updateCurrent();
+window.addEventListener('hashchange',updateCurrent);
+menu.addEventListener('click',e=>{e.stopPropagation();closeGroups();closeSection();setMenu(!nav.classList.contains('open'))});
+groups.forEach((g,index)=>{
+  const b=g.querySelector('.nav-trigger');
+  const panel=g.querySelector('.nav-dropdown');panel.id='stannet-category-'+index;b.setAttribute('aria-controls',panel.id);
+  const open=()=>{closeSection();closeGroups();g.classList.add('open');b.setAttribute('aria-expanded','true')};
+  b.addEventListener('click',e=>{e.stopPropagation();const was=g.classList.contains('open');closeGroups();closeSection();if(!was)open()});
+  b.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();open();panel.querySelector('a')?.focus()}});
+  g.addEventListener('focusout',e=>{if(!g.contains(e.relatedTarget)){g.classList.remove('open');b.setAttribute('aria-expanded','false')}});
 });
 document.addEventListener('click',e=>{
-  if(!header.contains(e.target)){groups.forEach(g=>g.classList.remove('open'));nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}
+  if(!header.contains(e.target)){closeGroups();setMenu(false)}
+  if(!sectionNav?.contains(e.target))closeSection();
 });
-header.querySelectorAll('.nav-dropdown a,.site-nav>a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}));
+const onEscape=e=>{
+  if(e.key!=='Escape')return;
+  const group=groups.find(g=>g.classList.contains('open'));
+  const sectionOpen=sectionMore?.classList.contains('open');
+  closeGroups();closeSection();
+  if(group)group.querySelector('button').focus();
+  else if(sectionOpen)sectionMore.querySelector('button').focus();
+  else if(nav.classList.contains('open')){setMenu(false);menu.focus()}
+};
+header.addEventListener('keydown',onEscape);
+sectionNav?.addEventListener('keydown',onEscape);
+[header,sectionNav].filter(Boolean).forEach(container=>container.addEventListener('click',e=>{if(e.target.closest('a')){closeGroups();closeSection();setMenu(false)}}));
+window.matchMedia('(max-width:850px)').addEventListener('change',()=>{closeGroups();closeSection();setMenu(false)});
 
 /* Warm only a small number of same-origin documents after clear menu intent. */
 const connection=navigator.connection;

@@ -1,0 +1,34 @@
+name: Hierarchical navigation browser checks
+on:
+  pull_request:
+    paths:
+      - stannet-global-nav.js
+      - tests/hierarchical-nav-browser.cjs
+      - .github/workflows/hierarchical-navigation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix /tmp/stannet-navigation --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Check shared branding and two-level navigation
+        env:
+          NODE_PATH: /tmp/stannet-navigation/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-nav-server.log 2>&1 &
+          node tests/global-nav-brand-browser.cjs
+          node tests/hierarchical-nav-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hierarchical-navigation-screenshots
+          path: output/navigation/
+          if-no-files-found: ignore
