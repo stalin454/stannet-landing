@@ -21,15 +21,16 @@ function clearAudio(){
   preview.hidden=true;download.removeAttribute('href');update();
 }
 async function loadPlaylists(){
-  const version=sessionVersion,loadId=++playlistLoadId,selected=playlist.value;
+  const version=sessionVersion,loadId=++playlistLoadId,selected=playlist.value,selectedName=playlist.selectedOptions[0]?.textContent;
   loadingPlaylists=true;update();
   try{
     const response=await authFetch('/api/radio/admin/playlists',{headers:{accept:'application/json'}});
     const data=await response.json();if(!response.ok)throw new Error(data.error||'No se pudieron cargar las playlists.');
     if(version!==sessionVersion||loadId!==playlistLoadId)return;
     playlist.replaceChildren(new Option('Selecciona una playlist…',''));
-    for(const item of data.items||[])playlist.add(new Option(item.name,String(item.id)));
-    if(selected&&[...playlist.options].some(option=>option.value===selected))playlist.value=selected;
+    for(const item of data.items||[])playlist.add(new Option(item.name,item.id?String(item.id):'section:'+item.section));
+    const previous=selected&&[...playlist.options].find(option=>option.value===selected||option.textContent.toLowerCase()===selectedName?.toLowerCase());
+    if(previous)playlist.value=previous.value;
     else playlist.value=[...playlist.options].find(option=>/podcast/i.test(option.textContent))?.value||'';
   }catch(error){if(version===sessionVersion&&loadId===playlistLoadId)message(error.message)}
   finally{if(loadId===playlistLoadId){loadingPlaylists=false;update()}}
@@ -78,7 +79,9 @@ form.addEventListener('submit',async event=>{
 upload.addEventListener('click',async()=>{
   if(busy||!mp3||!playlist.value||savedToLibrary)return;
   const selected=playlist.value,playlistName=playlist.selectedOptions[0].textContent,version=sessionVersion;
-  const body=new FormData();body.append('file',new File([mp3],filename(),{type:'audio/mpeg'}));body.append('playlists',JSON.stringify([Number(selected)]));
+  const body=new FormData();body.append('file',new File([mp3],filename(),{type:'audio/mpeg'}));
+  if(selected.startsWith('section:'))body.append('section',selected.slice(8));
+  else body.append('playlists',JSON.stringify([Number(selected)]));
   busy=true;update();message('Subiendo el episodio y verificando la playlist…');
   // Mark the MP3 before sending: a lost response may still mean it was saved.
   // Retry assignment from AzuraCast rather than risk uploading the file twice.
@@ -87,7 +90,7 @@ upload.addEventListener('click',async()=>{
     const response=await authFetch('/api/radio/admin/upload',{method:'POST',body});
     const data=await response.json();if(version!==sessionVersion)return;
     if(!response.ok){
-      if([400,401,403,413,503].includes(response.status))savedToLibrary=false;
+      if(data.uploaded===false||[400,401,403,413,503].includes(response.status))savedToLibrary=false;
       throw new Error(data.error||'No se pudo confirmar la subida.');
     }
     if(data.playlistAssigned===true)message('✓ Episodio incorporado a «'+playlistName+'». Asignación verificada.');

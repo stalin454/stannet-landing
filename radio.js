@@ -105,7 +105,7 @@ async function loadPlaylists(){
     const r=await authFetch("/api/radio/admin/playlists",{headers:{accept:"application/json"}});
     const data=await r.json();
     if(!r.ok)throw new Error(data.error||"No se pudieron cargar las listas.");
-    (data.items||[]).forEach(p=>{const o=document.createElement("option");o.value=String(p.id);o.textContent=p.name;uploadPlaylist.append(o)});
+    (data.items||[]).forEach(p=>{const o=document.createElement("option");o.value=p.id?String(p.id):"section:"+p.section;o.textContent=p.name;uploadPlaylist.append(o)});
     const preferred=[...uploadPlaylist.options].find(o=>/24\/7|stannet radio/i.test(o.textContent));
     if(preferred)uploadPlaylist.value=preferred.value;
   }catch(e){setAdminStatus(uploadStatus,e.message)}
@@ -142,7 +142,9 @@ uploadForm?.addEventListener("submit",async e=>{
   const selectedPlaylist=uploadPlaylist?.value||"";
   const playlistName=uploadPlaylist?.selectedOptions?.[0]?.textContent||"la playlist seleccionada";
   if(uploadButton)uploadButton.disabled=true;if(uploadProgress)uploadProgress.style.width="35%";setAdminStatus(uploadStatus,"Subiendo a AzuraCast…");
-  const fd=new FormData();fd.append("file",file);if(selectedPlaylist)fd.append("playlists",JSON.stringify([Number(selectedPlaylist)]));
+  const fd=new FormData();fd.append("file",file);
+  if(selectedPlaylist.startsWith("section:"))fd.append("section",selectedPlaylist.slice(8));
+  else if(selectedPlaylist)fd.append("playlists",JSON.stringify([Number(selectedPlaylist)]));
   try{
     const r=await authFetch("/api/radio/admin/upload",{method:"POST",body:fd});
     if(uploadProgress)uploadProgress.style.width="75%";
