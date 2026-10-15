@@ -1,0 +1,28 @@
+name: Denmark staffing directory browser QA
+on:
+  pull_request:
+    paths:
+      - pages/ruta-dinamarca.html
+      - pages/ett-dinamarca.html
+      - tests/denmark-ett-browser.cjs
+      - .github/workflows/denmark-ett-browser.yml
+permissions:
+  contents: read
+jobs:
+  directory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: npm install --prefix /tmp/denmark-ett --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Verify mobile and desktop directory and filters
+        env:
+          NODE_PATH: /tmp/denmark-ett/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/ett-http.log 2>&1 &
+          sleep 2
+          node tests/denmark-ett-browser.cjs
