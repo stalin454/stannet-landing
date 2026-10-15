@@ -12,6 +12,7 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
    const page=await browser.newPage();
    try{
     await page.setViewport({width,height:900,hasTouch:width<=768,isMobile:width<=768});
+    if(width===393)await page.evaluateOnNewDocument(()=>{if(location.pathname.endsWith('.html'))history.replaceState(null,'',location.pathname.slice(0,-5))});
     await page.setRequestInterception(true);
     page.on('request',req=>{const u=new URL(req.url());if(u.origin!==new URL(base).origin||u.pathname.startsWith('/api/'))req.abort();else req.continue()});
     const status=(await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'})).status();
