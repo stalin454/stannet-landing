@@ -52,3 +52,16 @@ test('Shortcuts Lab wrapper uses only same-origin executable assets and declares
  assert.doesNotMatch(html,/<script[^>]+src=["'](?:https?:)?\/\//);
  assert.ok(html.includes('id="shortcutList"')&&html.includes('id="labConsole"')&&html.includes('id="labKeyboard"'));
 });
+
+for(const name of ['cyber-curriculum.js','cyber-academy.js','cyber-network-lab.js','cyber-academy.css']){
+ test('Cybersecurity source preserved exactly: '+name,()=>{
+  assert.deepEqual(readFileSync(new URL('../../../'+name,import.meta.url)),readFileSync(new URL('../private/'+name,import.meta.url)));
+ });
+}
+test('Cybersecurity wrapper only references private Dev assets, no active Space services',()=>{
+ const html=readFileSync(new URL('../private/cybersecurity.html',import.meta.url),'utf8');
+ for(const name of ['cyber-curriculum.js','cyber-academy.js','cyber-network-lab.js','cyber-academy.css','cyber-dev.css'])assert.ok(html.includes('/apps/cybersecurity/'+name));
+ assert.match(html,/No hay transferencia del progreso desde Space/);
+ assert.doesNotMatch(html,/<script[^>]+src=["'](?:https?:)?\/\//);
+ assert.doesNotMatch(html,/href=["'](?:\.\.\/|cyber-lab\.html|password-security\.html)/);
+});

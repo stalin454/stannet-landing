@@ -23,7 +23,7 @@ $('#admin-panel').hidden=!(session.authenticated&&session.user.role==='admin');
  if(!$('#admin-panel').hidden&&!$('#migration-pilots')){
   const links=document.createElement('p');links.id='migration-pilots';links.className='notice';
   links.append('Academias en revisión privada: ');
-  for(const [path,label] of [['/apps/fp-study','FP Study Area'],['/apps/cs-foundations','CS Foundations'],['/apps/shortcuts','Atajos de teclado']]){
+  for(const [path,label] of [['/apps/fp-study','FP Study Area'],['/apps/cs-foundations','CS Foundations'],['/apps/shortcuts','Atajos de teclado'],['/apps/cybersecurity','Cybersecurity Academy']]){
    const link=document.createElement('a');link.href=path;link.textContent=label+' ↗';link.style.marginRight='1rem';links.append(link);
   }
   $('#admin-panel').prepend(links);
