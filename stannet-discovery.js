@@ -422,6 +422,7 @@ dialog.addEventListener('close',()=>{document.body.style.overflow=previousOverfl
 dialog.querySelector('.search-close').addEventListener('click',closeSearch);
 dialog.addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
 dialog.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeSearch();return}
  if(e.key!=='Tab')return;
  const items=[...dialog.querySelectorAll('button:not([disabled]),input:not([disabled]),a[href]:not([tabindex="-1"]),[tabindex="0"]')];
  const first=items[0],last=items[items.length-1];
