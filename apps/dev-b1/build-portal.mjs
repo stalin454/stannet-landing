@@ -1,6 +1,7 @@
 import {readFileSync,writeFileSync,mkdirSync,copyFileSync,rmSync} from 'node:fs';
 import {catalog} from './catalog.mjs';
 import {buildDenmark} from './denmark-open.mjs';
+import {buildProgramming,buildRadio} from './programming-radio-open.mjs';
 const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
@@ -65,15 +66,23 @@ let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.me
 artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
 writeFileSync(new URL('index.html',artistPageDir),artistHtml);
 buildDenmark(destination);
-const openURLs={denmark:'/open/denmark/',programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
+buildProgramming(destination);
+buildRadio(destination);
+const openURLs={music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/denmark/','/open/denmark/cv/'];
+const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
-writeFileSync(new URL('_headers',destination),`/*
+writeFileSync(new URL('_headers',destination),`/open/programming/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://jsonplaceholder.typicode.com; worker-src 'self' blob:; frame-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+
+/open/radio/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src https://radio.stannet.space; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
+
+/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY
@@ -81,4 +90,4 @@ writeFileSync(new URL('_headers',destination),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   Cache-Control: public, max-age=0, must-revalidate
 `);
-console.log('Built public portal, educational copies, STAN6IX and public Ruta Dinamarca + CV. Auth, payments and private apps are not published.');
+console.log('Built public portal including independent Programming Academy and public Radio. Accounts, music admin, billing and private apps remain excluded.');
