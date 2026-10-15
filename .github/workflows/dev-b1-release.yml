@@ -9,6 +9,7 @@ on:
       - 'apps/dev-b1/portal-public/**'
       - 'apps/dev-b1/build-portal.mjs'
       - 'apps/dev-b1/denmark-open.mjs'
+      - 'apps/dev-b1/programming-radio-open.mjs'
       - 'apps/dev-b1/public/site.css'
       - 'apps/dev-b1/public/logo.png'
       - 'apps/dev-b1/public/orbitron*'
