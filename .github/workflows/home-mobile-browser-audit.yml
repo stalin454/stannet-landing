@@ -36,6 +36,13 @@ jobs:
           sleep 2
           STANNET_AUDIT_URL=http://127.0.0.1:8765/ node tests/home-mobile-live.cjs
 
+      - name: Compare shared header with homepage across sections and sizes
+        env:
+          NODE_PATH: /tmp/stannet-mobile-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: node tests/global-nav-brand-browser.cjs
+
       - name: Verify Context Bridge and agent mobile keyboard/scroll matrix
         env:
           NODE_PATH: /tmp/stannet-mobile-browser/node_modules
