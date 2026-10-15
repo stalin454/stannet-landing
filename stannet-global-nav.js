@@ -182,13 +182,10 @@ window.addEventListener('hashchange',updateCurrent);
 menu.addEventListener('click',e=>{e.stopPropagation();closeGroups();closeSection();setMenu(!nav.classList.contains('open'))});
 groups.forEach((g,index)=>{
   const b=g.querySelector('.nav-trigger');
-  let openedByHover=false;
   const panel=g.querySelector('.nav-dropdown');panel.id='stannet-category-'+index;b.setAttribute('aria-controls',panel.id);
   const open=()=>{closeSection();closeGroups();g.classList.add('open');b.setAttribute('aria-expanded','true')};
-  b.addEventListener('click',e=>{e.stopPropagation();const was=g.classList.contains('open');if(openedByHover&&was){openedByHover=false;return}openedByHover=false;closeGroups();closeSection();if(!was)open()});
+  b.addEventListener('click',e=>{e.stopPropagation();const was=g.classList.contains('open');closeGroups();closeSection();if(!was)open()});
   b.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();open();panel.querySelector('a')?.focus()}});
-  g.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&window.matchMedia('(min-width:851px) and (hover:hover)').matches){open();openedByHover=true}});
-  g.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&!g.contains(document.activeElement)){g.classList.remove('open');b.setAttribute('aria-expanded','false')}});
   g.addEventListener('focusout',e=>{if(!g.contains(e.relatedTarget)){g.classList.remove('open');b.setAttribute('aria-expanded','false')}});
 });
 document.addEventListener('click',e=>{
