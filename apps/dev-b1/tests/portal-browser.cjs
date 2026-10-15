@@ -30,10 +30,10 @@ const puppeteer=require('puppeteer-core');
      featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
      catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
     }));
-    if(counts.featured===5&&counts.catalog===4){consistent=true;break;}
+    if(counts.featured===6&&counts.catalog===5){consistent=true;break;}
     await new Promise(resolve=>setTimeout(resolve,1500));
    }
-   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (five public routes expected)');
+   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (six public routes expected)');
    await publishedVersion(page);
    const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
    await page.waitForSelector('.card');
@@ -48,16 +48,16 @@ const puppeteer=require('puppeteer-core');
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
    await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),9);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
-   assert.equal(links.filter(x=>x.startsWith('/open/')).length,4);
-   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,5);
+   assert.equal(links.filter(x=>x.startsWith('/open/')).length,5);
+   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,4);
    const openLabs=await page.$$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
-   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/artists/']);
+   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing']);
    if(width===390){
-    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card'};
+    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
