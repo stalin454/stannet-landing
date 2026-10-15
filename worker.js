@@ -1724,17 +1724,19 @@ async function handleRadioAdminUpload(request, env) {
   let playlists = [];
   const rawPlaylists = form.get('playlists');
   if (typeof rawPlaylists === 'string' && rawPlaylists.trim()) {
-    try { playlists = JSON.parse(rawPlaylists); } catch {}
+    try { playlists = JSON.parse(rawPlaylists); }
+    catch { return json({ error:'La selección de playlist no es válida.' }, 400); }
   }
-  playlists = Array.isArray(playlists) ? playlists.map(Number).filter(Number.isFinite) : [];
+  if (!Array.isArray(playlists) || playlists.some(id => !radioMediaId(id))) {
+    return json({ error:'La selección de playlist no es válida.' }, 400);
+  }
+  playlists = [...new Set(playlists.map(Number))];
   try {
     const buffer = await file.arrayBuffer();
-    const playlistObjects = playlists.map(id => ({ id }));
     const payload = {
       path: safeName,
       file: arrayBufferToBase64(buffer)
     };
-    if (playlistObjects.length) payload.playlists = playlistObjects;
     const upstream = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/files', {
       method:'POST',
       headers: azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' }),
@@ -1743,29 +1745,67 @@ async function handleRadioAdminUpload(request, env) {
     const data = await upstream.json().catch(() => ({}));
     if (!upstream.ok) return json({ error:data?.message || data?.error || 'AzuraCast rechazó la subida.', providerStatus:upstream.status }, 502);
 
-    let playlistAssigned = playlistObjects.length === 0;
-    let assignmentStatus = null;
-    const mediaId = Number(data?.song_id ?? data?.id);
-    if (playlistObjects.length && Number.isFinite(mediaId)) {
-      const assign = await fetch(cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/file/' + encodeURIComponent(String(mediaId)), {
-        method:'PUT',
-        headers: azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' }),
-        body: JSON.stringify({ playlists: playlistObjects })
-      });
-      assignmentStatus = assign.status;
-      playlistAssigned = assign.ok;
-    }
+    // song_id identifies a song by its hash; only id identifies this media file.
+    const mediaId = radioMediaId(data?.id);
+    // Assignment failures must not turn a completed upload into a failed upload:
+    // otherwise the administrator may upload the same file again.
+    const assignment = playlists.length
+      ? await assignRadioMediaPlaylists(cfg, mediaId, playlists)
+      : { playlistAssigned:false, assignmentStatus:null, assignmentError:null };
 
     return json({
       ok:true,
-      file:{ name:safeName, size:file.size, id:Number.isFinite(mediaId) ? mediaId : null },
-      playlistAssigned,
-      assignmentStatus,
+      uploaded:true,
+      file:{ name:safeName, size:file.size, id:mediaId },
+      ...assignment,
       selectedPlaylists:playlists,
       azuracast:data
     }, 200, { 'Cache-Control':'no-store' });
   } catch {
     return json({ error:'No se pudo completar la subida a AzuraCast.' }, 502);
+  }
+}
+function radioMediaId(value) {
+  if (typeof value !== 'number' && !(typeof value === 'string' && /^\d+$/.test(value))) return null;
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+async function assignRadioMediaPlaylists(cfg, mediaId, selectedPlaylists) {
+  let assignmentStatus = null;
+  const unconfirmed = assignmentError => ({ playlistAssigned:false, assignmentStatus, assignmentError });
+  if (!mediaId) return unconfirmed('AzuraCast no devolvió el identificador del archivo procesado. Revisa su estado en la biblioteca.');
+  const fileUrl = cfg.base + '/api/station/' + encodeURIComponent(cfg.stationId) + '/file/' + mediaId;
+  const headers = azuraHeaders(cfg.apiKey, { 'Content-Type':'application/json' });
+  try {
+    const currentResponse = await fetch(fileUrl, { headers });
+    assignmentStatus = currentResponse.status;
+    if (!currentResponse.ok) return unconfirmed('No se pudieron consultar las playlists actuales del archivo.');
+    const current = await currentResponse.json();
+    if (radioMediaId(current?.id) !== mediaId || !Array.isArray(current.playlists)) {
+      return unconfirmed('AzuraCast no devolvió las playlists del archivo para poder conservarlas.');
+    }
+    const existingIds = current.playlists.map(p => radioMediaId(p?.id ?? p));
+    if (existingIds.some(id => !id)) return unconfirmed('No se pudieron interpretar las playlists actuales del archivo.');
+    const playlists = [...new Set([...existingIds, ...selectedPlaylists])];
+    if (!selectedPlaylists.every(id => existingIds.includes(id))) {
+      const assign = await fetch(fileUrl, {
+        method:'PUT', headers, body:JSON.stringify({ playlists })
+      });
+      assignmentStatus = assign.status;
+      if (!assign.ok) return unconfirmed('AzuraCast rechazó la asignación a la playlist (HTTP ' + assign.status + ').');
+    }
+    // A successful PUT is not sufficient: read back and confirm membership.
+    const verification = await fetch(fileUrl, { headers });
+    assignmentStatus = verification.status;
+    if (!verification.ok) return unconfirmed('No se pudo verificar la incorporación a la playlist.');
+    const saved = await verification.json();
+    const savedIds = Array.isArray(saved?.playlists) ? saved.playlists.map(p => radioMediaId(p?.id ?? p)) : [];
+    if (radioMediaId(saved?.id) !== mediaId || !playlists.every(id => savedIds.includes(id))) {
+      return unconfirmed('AzuraCast no confirmó la incorporación a la playlist.');
+    }
+    return { playlistAssigned:true, assignmentStatus, assignmentError:null };
+  } catch {
+    return unconfirmed('No se pudo confirmar la asignación por un problema de conexión con AzuraCast.');
   }
 }
 function arrayBufferToBase64(buffer) {

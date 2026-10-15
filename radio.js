@@ -138,13 +138,24 @@ adminLogout?.addEventListener("click",()=>{sessionStorage.removeItem(tokenKey);i
 uploadFile?.addEventListener("change",()=>{if(uploadFile.files?.[0])setAdminStatus(uploadStatus,uploadFile.files[0].name+" · "+Math.round(uploadFile.files[0].size/1024/1024*10)/10+" MB")});
 uploadForm?.addEventListener("submit",async e=>{
   e.preventDefault();const file=uploadFile?.files?.[0];if(!file)return;
+  const selectedPlaylist=uploadPlaylist?.value||"";
+  const playlistName=uploadPlaylist?.selectedOptions?.[0]?.textContent||"la playlist seleccionada";
   if(uploadButton)uploadButton.disabled=true;if(uploadProgress)uploadProgress.style.width="35%";setAdminStatus(uploadStatus,"Subiendo a AzuraCast…");
-  const fd=new FormData();fd.append("file",file);if(uploadPlaylist?.value)fd.append("playlists",JSON.stringify([Number(uploadPlaylist.value)]));
+  const fd=new FormData();fd.append("file",file);if(selectedPlaylist)fd.append("playlists",JSON.stringify([Number(selectedPlaylist)]));
   try{
     const r=await authFetch("/api/radio/admin/upload",{method:"POST",body:fd});
     if(uploadProgress)uploadProgress.style.width="75%";
     const data=await r.json();if(!r.ok)throw new Error(data.error||"No se pudo subir el archivo.");
-    if(uploadProgress)uploadProgress.style.width="100%";setAdminStatus(uploadStatus,"✓ "+data.file.name+" subida correctamente a StanNet Radio.");uploadForm.reset();await loadPlaylists();
+    if(uploadProgress)uploadProgress.style.width="100%";
+    const name=data.file?.name||file.name;
+    if(selectedPlaylist && data.playlistAssigned!==true){
+      setAdminStatus(uploadStatus,"⚠ "+name+" está guardada en la biblioteca, pero no se confirmó su incorporación a «"+playlistName+"». "+(data.assignmentError||"")+" No la vuelvas a subir: revisa el archivo y asígnalo desde AzuraCast.");
+    }else if(selectedPlaylist){
+      setAdminStatus(uploadStatus,"✓ "+name+" subida e incorporada a «"+playlistName+"». Asignación verificada.");
+    }else{
+      setAdminStatus(uploadStatus,"✓ "+name+" subida a la biblioteca, sin asignar a ninguna playlist.");
+    }
+    uploadForm.reset();if(uploadPlaylist)uploadPlaylist.value=selectedPlaylist;
   }catch(e){if(uploadProgress)uploadProgress.style.width="0%";setAdminStatus(uploadStatus,"Error: "+e.message)}
   finally{if(uploadButton)uploadButton.disabled=false;setTimeout(()=>{if(uploadProgress)uploadProgress.style.width="0%"},1800)}
 });
