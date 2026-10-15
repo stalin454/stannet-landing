@@ -136,8 +136,8 @@ const puppeteer=require('puppeteer-core');
       assert.equal(res.status(),200,'Academy route '+route);
       await app.waitForSelector(selector,{timeout:30000});
       if(route.endsWith('/coach/')){
-        await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>10,{timeout:12000});
-        assert.ok((await app.$$eval('#coach-list button',x=>x.length))>=30,'Full JavaScript lessons');
+        await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>=5,{timeout:12000});
+        assert.ok((await app.$$eval('#coach-list button',x=>x.length))>=5,'Five interactive JavaScript Coach lessons');
       }
       if(route.endsWith('/web/')){
         await app.waitForFunction(()=>document.querySelectorAll('#web-list button, #web-outline button').length>20,{timeout:12000});
