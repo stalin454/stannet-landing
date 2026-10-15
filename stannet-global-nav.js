@@ -72,6 +72,7 @@ style.textContent=`
 #stannet-section-nav .section-more.open .section-panel{display:grid}
 #stannet-section-nav .section-mobile{display:none}
 @media(max-width:1100px) and (min-width:851px){
+  #${NAV_ID} .site-nav{flex-wrap:wrap;justify-content:flex-start;gap:0 12px;min-width:0}
   #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:10px;padding:14px 5px}
 }
 @media(max-width:850px){
