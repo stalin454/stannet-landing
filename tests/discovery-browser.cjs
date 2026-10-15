@@ -14,6 +14,7 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
     await page.goto(base,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.StanNetDiscovery?.openSearch&&document.querySelector('link[href^="/stannet-discovery.css"]')?.sheet);
     const layout=await page.evaluate(()=>{const h=document.querySelector('#stannet-canonical-nav'),r=e=>e.getBoundingClientRect();return{overflow:document.documentElement.scrollWidth-innerWidth,brand:r(h.querySelector('.brand')).right,search:r(h.querySelector('.search-toggle')).toJSON(),menu:r(h.querySelector('.menu-toggle')).toJSON()}});
+    console.log('LAYOUT '+width+' '+JSON.stringify(layout));
     assert.ok(layout.overflow<=2,'homepage overflow @'+width);
     if(width<=850){assert.ok(layout.brand<=layout.search.left+2,'brand/search overlap @'+width);assert.ok(layout.search.right<=layout.menu.left+2,'search/menu overlap @'+width)}
     await page.click('#stannet-canonical-nav .search-toggle');
@@ -51,7 +52,7 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
     await page.click('[data-directory-reset]');
     if([393,1280].includes(width)){await page.$eval('#proyectos',e=>e.scrollIntoView());await page.screenshot({path:output+'/catalogue-'+width+'.png'})}
     console.log('PASS discovery @'+width+'px: search, keyboard, focus, filters, URL, empty/reset, mobile layout');
-   }finally{await page.close()}
+   }catch(error){await page.screenshot({path:output+'/failure-'+width+'.png'});throw error}finally{await page.close()}
   }
   // Search is available from internal pages without changing their content or starting audio.
   for(const path of ['/pages/programming.html','/pages/english.html','/pages/radio.html','/pages/ett-dinamarca.html']){

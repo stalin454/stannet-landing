@@ -47,6 +47,9 @@ style.textContent=`
   display:none;margin-left:auto;min-width:44px;min-height:44px;border:1px solid rgba(255,255,255,.15);background:#18181b;color:#fff!important;
   border-radius:11px;font-size:20px;cursor:pointer
 }
+#${NAV_ID} .search-toggle{display:flex;align-items:center;gap:10px;min-height:44px;width:min(360px,42vw);margin:0 0 14px auto;padding:10px 13px;border:1px solid #6ca7db;border-radius:10px;background:#171b24;color:#e7effc!important;text-decoration:none!important;font:500 13px/1.4 Inter,system-ui,sans-serif}
+#${NAV_ID} .search-toggle .search-symbol{font:26px/1 system-ui,sans-serif;color:#83e8f4}
+#${NAV_ID} .search-toggle kbd{margin-left:auto;padding:3px 6px;border:1px solid #47556b;border-radius:5px;background:#252c39;color:#dce6f7;font:11px/1.3 Inter,system-ui,sans-serif;white-space:nowrap}
 /* Keep the homepage's dark identity across Space; menus remain legible on light academies. */
 #${NAV_ID} :is(.site-nav a,.nav-trigger,.menu-toggle):focus-visible{outline:2px solid #53e5f5;outline-offset:3px}
 /* A dedicated category row keeps labels readable as the catalogue grows. */
@@ -77,6 +80,9 @@ style.textContent=`
   #${NAV_ID} .site-nav>a,#${NAV_ID} .nav-trigger{font-size:10px;padding:14px 5px}
 }
 @media(max-width:850px){
+  #${NAV_ID}.site-header{width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+  #${NAV_ID} .search-toggle{flex:0 0 44px;width:44px;height:44px;justify-content:center;gap:0;margin:0 0 0 auto;padding:0}
+  #${NAV_ID} .search-toggle .search-label,#${NAV_ID} .search-toggle kbd{display:none}
   #${NAV_ID}{min-height:68px!important;padding:0 14px!important;flex-wrap:nowrap;gap:8px}
   #${NAV_ID} .menu-toggle{display:block}
   #${NAV_ID} .site-nav{
@@ -96,6 +102,14 @@ style.textContent=`
   #stannet-section-nav .section-links>.section-direct,#stannet-section-nav .section-desktop{display:none}
   #stannet-section-nav .section-mobile{display:inline}
 }
+@media(max-width:400px){
+ #${NAV_ID} .brand{gap:5px}
+ #${NAV_ID} .brand>span{font-size:17px}
+ #${NAV_ID} .brand>i{font-size:10px}
+ #${NAV_ID} .brand-mark{width:38px!important;height:38px!important;max-height:38px!important}
+ #${NAV_ID}.site-header{gap:6px}
+}
+
 `;
 document.head.appendChild(style);
 
