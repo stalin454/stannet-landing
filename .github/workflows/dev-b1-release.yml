@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   changes:
-    if: github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/stannet-dev-b1-20261014'
+    if: github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015')
     runs-on: ubuntu-latest
     outputs:
       needed: ${{ steps.gate.outputs.needed }}
@@ -36,7 +36,7 @@ jobs:
         run: python3 apps/dev-b1/release-needed.py
   release:
     needs: changes
-    if: needs.changes.outputs.needed == 'true' && github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/stannet-dev-b1-20261014'
+    if: needs.changes.outputs.needed == 'true' && github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
