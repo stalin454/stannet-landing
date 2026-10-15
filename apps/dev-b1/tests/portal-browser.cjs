@@ -33,16 +33,16 @@ const puppeteer=require('puppeteer-core');
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
    await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),9);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
-   assert.equal(links.filter(x=>x.startsWith('/open/')).length,3);
-   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,6);
+   assert.equal(links.filter(x=>x.startsWith('/open/')).length,4);
+   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,5);
    const openLabs=await page.$$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
-   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/']);
+   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/artists/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists']);
    if(width===390){
-    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab'};
+    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
