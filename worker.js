@@ -11,7 +11,7 @@ export default {
     // Prevent workers.dev/preview traffic from bypassing stannet.space WAF
     // and triggering billable Polly synthesis on public preview URLs.
     if (pollySelected(env) &&
-        /^\/api\/(?:speech(?:\/test)?|radio\/(?:voice|jingle|program-audio))$/.test(url.pathname) &&
+        /^\/api\/(?:speech(?:\/test)?|radio\/(?:voice|jingle|program-audio|admin\/podcast))$/.test(url.pathname) &&
         !['stannet.space','www.stannet.space'].includes(url.hostname)) {
       return new Response(JSON.stringify({error:'Voz disponible solo desde stannet.space.'}), {
         status:403, headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}
@@ -36,6 +36,13 @@ export default {
       const admin = await requireAdmin(request, env);
       if (!admin.ok) return json({ error: admin.error }, admin.status);
       return handleRadioAdminPlaylists(env);
+    }
+
+    if (url.pathname === '/api/radio/admin/podcast') {
+      if (request.method !== 'POST') return json({ error: 'Método no permitido.' }, 405);
+      const admin = await requireAdmin(request, env);
+      if (!admin.ok) return json({ error: admin.error }, admin.status);
+      return handleRadioAdminPodcast(request, env);
     }
 
     if (url.pathname === '/api/radio/admin/upload') {
@@ -1708,6 +1715,26 @@ async function handleRadioAdminPlaylists(env) {
   } catch {
     return json({ error:'No se pudo conectar con AzuraCast.' }, 502);
   }
+}
+async function handleRadioAdminPodcast(request, env) {
+  if (!pollySelected(env) || !pollyConfigured(env)) {
+    return json({ error:'Amazon Polly no está disponible para generar podcasts.' }, 503, { 'Cache-Control':'no-store' });
+  }
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ error:'El guion no es válido.' }, 400); }
+  const text = typeof body?.text === 'string' ? body.text.trim() : '';
+  if (!text || text.length > 8500) return json({ error:'Escribe un guion de entre 1 y 8500 caracteres.' }, 400);
+  // An explicit admin action generates a private MP3. It never uploads or schedules it.
+  // Override only this request; the radio's existing voice setting stays in effect.
+  const result = await requestPollyRadio(text, env, { voice:'Lucia' });
+  if (!result.ok) return json({ error:result.error }, result.status, { 'Cache-Control':'no-store' });
+  return new Response(result.blob, { status:200, headers:{
+    'Content-Type':'audio/mpeg', 'Cache-Control':'private, no-store',
+    'Content-Disposition':'attachment; filename="stannet-tech-podcast.mp3"',
+    'X-Content-Type-Options':'nosniff', 'X-StanNet-Voice':result.voice,
+    'X-StanNet-Speech-Provider':'amazon-polly'
+  }});
 }
 async function handleRadioAdminUpload(request, env) {
   const cfg = azuraConfig(env);

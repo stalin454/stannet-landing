@@ -119,6 +119,7 @@ async function openAdmin(){
     if(adminLogin)adminLogin.hidden=true;if(adminPanel)adminPanel.hidden=false;
     setAdminStatus(adminLoginStatus,"");
     await loadPlaylists();
+    document.dispatchEvent(new CustomEvent("stannet:radio-admin",{detail:{authenticated:true}}));
   }catch(e){
     sessionStorage.removeItem(tokenKey);
     if(adminLogin)adminLogin.hidden=false;
@@ -134,7 +135,7 @@ adminLoginForm?.addEventListener("submit",async e=>{
     sessionStorage.setItem(tokenKey,data.access_token);adminPassword.value="";setAdminStatus(adminLoginStatus,"");await openAdmin();
   }catch(e){setAdminStatus(adminLoginStatus,e.message)}
 });
-adminLogout?.addEventListener("click",()=>{sessionStorage.removeItem(tokenKey);if(adminPanel)adminPanel.hidden=true;if(adminLogin)adminLogin.hidden=false});
+adminLogout?.addEventListener("click",()=>{sessionStorage.removeItem(tokenKey);if(adminPanel)adminPanel.hidden=true;if(adminLogin)adminLogin.hidden=false;document.dispatchEvent(new CustomEvent("stannet:radio-admin",{detail:{authenticated:false}}))});
 uploadFile?.addEventListener("change",()=>{if(uploadFile.files?.[0])setAdminStatus(uploadStatus,uploadFile.files[0].name+" · "+Math.round(uploadFile.files[0].size/1024/1024*10)/10+" MB")});
 uploadForm?.addEventListener("submit",async e=>{
   e.preventDefault();const file=uploadFile?.files?.[0];if(!file)return;

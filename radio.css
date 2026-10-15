@@ -109,3 +109,29 @@ body.radio-page.stannet-global.stannet-page-radio{--radio-cyan:#48f1ff;--radio-b
 .radio-upload-progress{height:5px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}.radio-upload-progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#48f1ff,#8a7dff,#ff67d7);transition:width .25s ease}
 .radio-admin-status{min-height:24px;margin:0}
 @media(max-width:760px){.radio-admin-login form,.radio-upload-meta{grid-template-columns:1fr}.radio-admin-head{align-items:flex-start;flex-direction:column}.radio-admin-head button{width:100%}}
+
+/* Private podcast editor */
+.radio-podcast{margin-top:32px;padding-top:28px;border-top:1px solid rgba(111,161,225,.3);min-width:0}
+.radio-podcast-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.radio-podcast h3{margin:6px 0;color:#f5f8ff;font:700 clamp(18px,3vw,25px) Orbitron,var(--font-main)}
+.radio-podcast-heading>span{padding:9px 12px;border:1px solid rgba(72,241,255,.35);border-radius:999px;color:#8ceafa;font:700 9px Orbitron,var(--font-main)}
+.radio-podcast p{color:#bfd0e5;line-height:1.6}
+.radio-podcast form{display:grid;gap:10px;min-width:0;margin:22px 0}
+.radio-podcast label{color:#d6e4f5;font-size:13px;font-weight:700}
+.radio-podcast input,.radio-podcast textarea{width:100%;min-width:0;box-sizing:border-box;padding:13px;border:1px solid #49658c;border-radius:12px;background:#091328;color:#f3f7ff;font:16px/1.65 var(--font-main),sans-serif}
+.radio-podcast textarea{resize:vertical;min-height:240px}
+.radio-podcast input:focus-visible,.radio-podcast textarea:focus-visible,.radio-podcast button:focus-visible,.radio-podcast a:focus-visible{outline:2px solid #72edff;outline-offset:3px}
+.radio-podcast-script-label{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.radio-podcast button,.radio-podcast-preview>a{min-height:44px;border:1px solid rgba(116,192,240,.55);border-radius:12px;padding:11px 16px;background:#132c48;color:#d7f5ff;font:700 10px/1.5 Orbitron,var(--font-main);cursor:pointer;text-align:center;text-decoration:none;overflow-wrap:anywhere}
+.radio-podcast #radioPodcastGenerate,.radio-podcast #radioPodcastUpload{background:linear-gradient(100deg,#48f1ff,#83b2ff 55%,#c58cff);color:#071526;border:0}
+.radio-podcast button:disabled{opacity:.5;cursor:default}
+.radio-podcast #radioPodcastCount,.radio-podcast #radioPodcastCost,.radio-podcast #radioPodcastPlaylistHelp{margin:3px 0;font-size:13px}
+.radio-podcast-preview{display:grid;gap:16px;margin-top:20px;padding:20px;border:1px solid rgba(72,241,255,.25);border-radius:16px;background:rgba(8,17,35,.65);min-width:0}
+.radio-podcast-preview[hidden]{display:none}
+.radio-podcast-preview h4{margin:0;color:#f3f7ff;font-size:17px;overflow-wrap:anywhere}
+.radio-podcast audio{width:100%;max-width:100%}
+.radio-podcast .radio-upload-meta{min-width:0}
+.radio-podcast select{width:100%;min-width:0;box-sizing:border-box}
+.radio-page.stannet-global .radio-podcast input,.radio-page.stannet-global .radio-podcast textarea,.radio-page.stannet-global .radio-podcast select{background:#091328!important;color:#f3f7ff!important;border-color:#49658c!important}
+.radio-page.stannet-global .radio-podcast input::placeholder,.radio-page.stannet-global .radio-podcast textarea::placeholder{color:#aebfd7!important;opacity:1}
+@media(max-width:620px){.radio-podcast-preview{padding:14px}.radio-podcast button,.radio-podcast-preview>a{width:100%;box-sizing:border-box}}
