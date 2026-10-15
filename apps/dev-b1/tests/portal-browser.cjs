@@ -84,7 +84,7 @@ const puppeteer=require('puppeteer-core');
      assert.ok(count>0,'Lab must render interactive content: '+url);
 
      if(url==='/open/programming/'){
-       assert.ok((await lab.$eval('#pa-tracks-container .pa-card',x=>x.length))>0);
+       assert.ok((await lab.$$eval('#pa-tracks-container .pa-card',x=>x.length))>0);
        const jsLink=await lab.$('a[href="/open/programming/coach/"]');
        assert.ok(jsLink,'Programming Academy links to JavaScript coach');
      }
@@ -137,7 +137,7 @@ const puppeteer=require('puppeteer-core');
       await app.waitForSelector(selector,{timeout:30000});
       if(route.endsWith('/coach/')){
         await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>10,{timeout:12000});
-        assert.ok((await app.$eval('#coach-list button',x=>x.length))>=30,'Full JavaScript lessons');
+        assert.ok((await app.$$eval('#coach-list button',x=>x.length))>=30,'Full JavaScript lessons');
       }
       if(route.endsWith('/web/')){
         await app.waitForFunction(()=>document.querySelectorAll('#web-list button, #web-outline button').length>20,{timeout:12000});
@@ -145,7 +145,7 @@ const puppeteer=require('puppeteer-core');
         await app.click('#preview-btn');
         assert.equal(await app.$eval('#web-preview',x=>Boolean(x.srcdoc)),true,'Web editor executes preview');
       }
-      if(route.endsWith('/python/'))assert.ok((await app.$eval('#lesson-list button',x=>x.length))>0,'Python lessons visible');
+      if(route.endsWith('/python/'))assert.ok((await app.$$eval('#lesson-list button',x=>x.length))>0,'Python lessons visible');
       if(route.endsWith('/course/'))await app.waitForFunction(()=>document.querySelectorAll('#cw-phases button').length>0,{timeout:12000});
       assert.deepEqual(appErrors,[],'No academy initialization errors at '+route);
       await app.close();
