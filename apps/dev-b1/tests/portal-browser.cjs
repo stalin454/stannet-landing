@@ -32,11 +32,28 @@ const puppeteer=require('puppeteer-core');
    await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),3);
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
    await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),9);
-   const links=await page.$$eval('.card-bottom a',items=>items.map(x=>x.getAttribute('href')));assert.ok(links.every(x=>x.startsWith('mailto:contacto@stannet.space?subject=')));
+   const links=await page.$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
+   assert.equal(links.filter(x=>x.startsWith('/open/')).length,3);
+   assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,6);
+   const openLabs=await page.$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
+   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity']);
+   if(width===390){
+    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-card','/open/cybersecurity/':'#cyber-network-lab'};
+    for(const url of openLabs){
+     const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
+     lab.on('pageerror',error=>labErrors.push(error.message));
+     const response=await lab.goto(base+url,{waitUntil:'networkidle0',timeout:45000});
+     assert.equal(response.status(),200,'Lab must load: '+url);
+     const count=await lab.$eval(selectors[url],nodes=>nodes.length);
+     assert.ok(count>0,'Lab must render interactive content: '+url);
+     assert.deepEqual(labErrors,[],'No script errors in '+url);
+     await lab.close();
+    }
+   }
    assert.deepEqual(errors,[]);
    results.push({width,status:'PASS',filter:true,keyboard_navigation:true,overflow:false,font:'Orbitron',commit:version.commit});await page.close();
   }
