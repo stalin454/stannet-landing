@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Avoid redeploying the public portal for documentation/private-backend-only PR updates."""
 import json,os,re,subprocess,urllib.request
-EXACT={'.github/workflows/dev-b1-release.yml','apps/dev-b1/release-needed.py','apps/dev-b1/cloudflare-inventory.py','apps/dev-b1/cloudflare-read.py','apps/dev-b1/release-guard.py','apps/dev-b1/build-portal.mjs','apps/dev-b1/denmark-open.mjs','apps/dev-b1/public/site.css','apps/dev-b1/public/logo.png','apps/dev-b1/tests/portal-browser.cjs'}
+EXACT={'.github/workflows/dev-b1-release.yml','apps/dev-b1/release-needed.py','apps/dev-b1/cloudflare-inventory.py','apps/dev-b1/cloudflare-read.py','apps/dev-b1/release-guard.py','apps/dev-b1/build-portal.mjs','apps/dev-b1/denmark-open.mjs','apps/dev-b1/programming-radio-open.mjs','apps/dev-b1/public/site.css','apps/dev-b1/public/logo.png','apps/dev-b1/tests/portal-browser.cjs'}
 def relevant(paths):
  return any(path in EXACT or path.startswith(('apps/dev-b1/portal-public/','apps/dev-b1/portal-','apps/dev-b1/public/orbitron')) for path in paths)
 def needed():
