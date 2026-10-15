@@ -30,10 +30,27 @@ for(const lab of openLabs){
  writeFileSync(new URL('index.html',dir),html);
  for(const file of lab.assets)copyFileSync(new URL('./private/'+file,import.meta.url),new URL(file,dir));
 }
-const openURLs={programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/'};
+const artistImageNames=['zay-rivers-20261010.webp','kai-chen-20261010.webp','juno-park-20261010.webp','ace-morgan-20261010.webp','noah-berg-20261010.webp','arjun-singh-20261010.webp','astrid-nova-20261010.webp'];
+const artistPageDir=new URL('open/artists/',destination);
+const artistImageDir=new URL('img/',artistPageDir);
+mkdirSync(artistImageDir,{recursive:true});
+for(const filename of artistImageNames)copyFileSync(new URL('../../assets/music/artists/'+filename,import.meta.url),new URL(filename,artistImageDir));
+let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.meta.url),'utf8')
+ .replaceAll('/assets/music/artists/','/open/artists/img/')
+ .replaceAll('/assets/brand/stannet-sn-cutout-32.png','/logo.png')
+ .replaceAll('/assets/brand/stannet-sn-cutout-180.png','/logo.png')
+ .replaceAll('/assets/brand/stannet-sn-cutout-20261005.png','/logo.png')
+ .replace('<link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">','')
+ .replace('<script src="/stannet-global-nav.js?v=20261004-perf1" defer></script>','')
+ .replaceAll('href="/pages/music.html"','href="https://stannet.space/pages/music.html"')
+ .replaceAll('href="/pages/radio.html"','href="https://stannet.space/pages/radio.html"')
+ .replace('StanNet Music</a><nav>','StanNet Dev · Music</a><nav>')
+ .replace('StanNet.Space</a></footer>','StanNet.Dev</a></footer>');
+writeFileSync(new URL('index.html',artistPageDir),artistHtml);
+const openURLs={programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:openLabs.map(x=>x.id)}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists']}));
 writeFileSync(new URL('_headers',destination),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
@@ -42,4 +59,4 @@ writeFileSync(new URL('_headers',destination),`/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   Cache-Control: public, max-age=0, must-revalidate
 `);
-console.log('Built public portal and four open educational copies. Auth, payments and private apps are not published.');
+console.log('Built public portal and four open educational copies and STAN6IX artist universe. Auth, payments and private apps are not published.');
