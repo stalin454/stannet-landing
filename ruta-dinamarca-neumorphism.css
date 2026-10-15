@@ -80,6 +80,16 @@ body.denmark-route-neumorphic .route-hero::after{
   content:"";position:absolute;left:8%;right:8%;bottom:0;height:5px;background:var(--dk-gradient);border-radius:999px;
 }
 body.denmark-route-neumorphic .route-kicker{color:var(--dk-red)!important}
+body.denmark-route-neumorphic .route-kicker{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+body.denmark-route-neumorphic .route-kicker-flag{display:inline-flex;flex:0 0 auto;align-items:center;font:normal 23px/1 sans-serif;letter-spacing:0}
+/* Size the long word from its actual column width, not the entire viewport. */
+body.denmark-route-neumorphic .route-hero>div:first-child{min-width:0;container-type:inline-size}
+body.denmark-route-neumorphic .route-hero h1 em{
+  display:block;max-width:100%;white-space:nowrap;font-size:clamp(28px,8vw,80px)!important;
+}
+@supports (width:1cqw){
+  body.denmark-route-neumorphic .route-hero h1 em{font-size:clamp(28px,14.5cqw,84px)!important}
+}
 body.denmark-route-neumorphic .route-hero h1{
   color:var(--nm-ink)!important;
   font-size:clamp(58px,7.4vw,118px)!important;
