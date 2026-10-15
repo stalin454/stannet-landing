@@ -35,7 +35,8 @@ style.textContent=`
   background:#18181b!important;border:1px solid rgba(255,255,255,.15)!important;
   border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.35)!important
 }
-#${NAV_ID} .nav-group.open>.nav-dropdown{display:grid}
+#${NAV_ID} .nav-group.open>.nav-dropdown{display:grid!important}
+#${NAV_ID} .nav-group:not(.open)>.nav-dropdown{display:none!important}
 #${NAV_ID} .nav-dropdown a{padding:10px 11px;border-radius:9px;color:#dedee5!important;text-decoration:none!important;font:500 12px Inter,system-ui,sans-serif}
 #${NAV_ID} .nav-dropdown a:hover,#${NAV_ID} .nav-dropdown a.active{background:#25252b!important;color:#53e5f5!important}
 #${NAV_ID} .site-nav>a.nav-cta{

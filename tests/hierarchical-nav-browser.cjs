@@ -37,6 +37,7 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
     assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'true');
     await page.keyboard.press('Escape');
     assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'false');
+    assert.equal(await page.$eval(trigger,e=>getComputedStyle(e.nextElementSibling).display),'none','Escape must hide the panel while focus remains on its trigger');
     await page.focus(trigger);await page.keyboard.press('ArrowDown');
     assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'true');
     await page.keyboard.press('Escape');
