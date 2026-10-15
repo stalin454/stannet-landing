@@ -42,7 +42,7 @@ const puppeteer=require('puppeteer-core');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity']);
    if(width===390){
-    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-card','/open/cybersecurity/':'#cyber-network-lab'};
+    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
