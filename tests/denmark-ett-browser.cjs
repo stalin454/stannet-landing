@@ -21,7 +21,7 @@ assert.ok(!/https?:\/\/[^"']+\/api\/password/i.test(directory),'Never expose pas
   });await p.setRequestInterception(true);
   const errors=[];p.on('pageerror',e=>errors.push(e.message));
   const response=await p.goto(base+'/pages/ett-dinamarca.html',{waitUntil:'domcontentloaded',timeout:30000});
-  assert.equal(response.status(),200);
+  assert.ok([200,304].includes(response.status()),'Local HTTP response must be 200 or cache revalidation 304');
   await p.waitForSelector('.agency');
   const total=await p.$$eval('.agency',nodes=>nodes.length);assert.equal(total,15);
   let visible=await p.$$eval('.agency',nodes=>nodes.filter(x=>!x.hidden).length);assert.equal(visible,15);
