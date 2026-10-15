@@ -27,6 +27,7 @@ for(const lab of openLabs){
   .replaceAll('piloto privado','acceso abierto')
   .replaceAll('<meta name="robots" content="noindex,nofollow">','<meta name="robots" content="index,follow">');
  // Preserve truthful local-only progress notices. No access to Space localStorage is implied.
+ html=html.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/'+lab.id+'/" /></head>');
  writeFileSync(new URL('index.html',dir),html);
  for(const file of lab.assets)copyFileSync(new URL('./private/'+file,import.meta.url),new URL(file,dir));
 }
@@ -41,7 +42,7 @@ const typingMain=typingSource.slice(typingStart,typingEnd+'</main>'.length)
  .replaceAll('href="shortcuts.html"','href="/open/shortcuts/"')
  .replaceAll('href="language-typing.html"','href="https://stannet.space/pages/language-typing.html"')
  .replaceAll('href="programming.html"','href="/open/cs-foundations/"');
-writeFileSync(new URL('index.html',typingDir),`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Typing Lab de StanNet Dev: mecanografía y práctica de código en tu navegador."><title>Typing Lab · StanNet Dev</title><link rel="icon" href="/logo.png"><link rel="stylesheet" href="/open/typing/style.css"><link rel="stylesheet" href="/open/typing/typing.css"><link rel="stylesheet" href="/open/typing/dev-note.css"><link rel="stylesheet" href="/open/typing/ios-responsive.css"><link rel="stylesheet" href="/open/typing/stannet-global-theme.css"><link rel="stylesheet" href="/open/typing/navigation-performance.css"></head><body class="typing-page stannet-global stannet-page-typing" id="top"><header class="site-header"><a class="brand" href="/" aria-label="Volver a StanNet Dev">StanNet.Dev</a><nav class="site-nav" aria-label="Navegación"><a href="/open/shortcuts/">Atajos</a><a href="/open/cs-foundations/">Computer Science</a><a href="/">Portal Dev</a></nav></header><p class="typing-dev-notice">Acceso abierto y sin cuenta. Resultados guardados únicamente en este navegador, sin sincronización ni copia automática de Space.</p>${typingMain}<footer style="padding:20px;text-align:center"><a href="/">← StanNet Dev</a></footer><script src="/open/typing/code-typing-catalog.js"></script><script src="/open/typing/typing.js"></script></body></html>`);
+writeFileSync(new URL('index.html',typingDir),`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Typing Lab de StanNet Dev: mecanografía y práctica de código en tu navegador."><title>Typing Lab · StanNet Dev</title><link rel="canonical" href="https://stannet.dev/open/typing/"><link rel="icon" href="/logo.png"><link rel="stylesheet" href="/open/typing/style.css"><link rel="stylesheet" href="/open/typing/typing.css"><link rel="stylesheet" href="/open/typing/dev-note.css"><link rel="stylesheet" href="/open/typing/ios-responsive.css"><link rel="stylesheet" href="/open/typing/stannet-global-theme.css"><link rel="stylesheet" href="/open/typing/navigation-performance.css"></head><body class="typing-page stannet-global stannet-page-typing" id="top"><header class="site-header"><a class="brand" href="/" aria-label="Volver a StanNet Dev">StanNet.Dev</a><nav class="site-nav" aria-label="Navegación"><a href="/open/shortcuts/">Atajos</a><a href="/open/cs-foundations/">Computer Science</a><a href="/">Portal Dev</a></nav></header><p class="typing-dev-notice">Acceso abierto y sin cuenta. Resultados guardados únicamente en este navegador, sin sincronización ni copia automática de Space.</p>${typingMain}<footer style="padding:20px;text-align:center"><a href="/">← StanNet Dev</a></footer><script src="/open/typing/code-typing-catalog.js"></script><script src="/open/typing/typing.js"></script></body></html>`);
 for(const file of ['typing.js','code-typing-catalog.js','typing.css','style.css','ios-responsive.css','stannet-global-theme.css','navigation-performance.css'])copyFileSync(new URL('../../'+file,import.meta.url),new URL(file,typingDir));
 writeFileSync(new URL('dev-note.css',typingDir),'.typing-dev-notice{padding:12px 5vw;background:#091b29;color:#d9faff;text-align:center;font:500 14px system-ui}');
 const artistImageNames=['zay-rivers-20261010.webp','kai-chen-20261010.webp','juno-park-20261010.webp','ace-morgan-20261010.webp','noah-berg-20261010.webp','arjun-singh-20261010.webp','astrid-nova-20261010.webp'];
@@ -60,11 +61,16 @@ let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.me
  .replaceAll('href="/pages/radio.html"','href="https://stannet.space/pages/radio.html"')
  .replace('StanNet Music</a><nav>','StanNet Dev · Music</a><nav>')
  .replace('StanNet.Space</a></footer>','StanNet.Dev</a></footer>');
+artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
 writeFileSync(new URL('index.html',artistPageDir),artistHtml);
 const openURLs={programming:'/open/cs-foundations/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
 writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing']}));
+// Public-only discovery resources. Authentication paths are not indexed or published.
+const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/'];
+writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
+writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
 writeFileSync(new URL('_headers',destination),`/*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
