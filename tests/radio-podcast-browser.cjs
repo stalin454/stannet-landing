@@ -38,6 +38,7 @@ const episode=JSON.parse(fs.readFileSync('assets/radio/podcasts/stannet-tech-001
     await page.click('#radioPodcastExample');
     await page.waitForFunction(title=>document.querySelector('#radioPodcastTitle').value===title,{},episode.title);
     assert.equal(await page.$eval('#radioPodcastScript',e=>e.value),episode.text);
+    assert.equal(await page.$eval('#radioPodcastScript',e=>getComputedStyle(e).backgroundColor),'rgb(9, 19, 40)','Editor retains radio dark theme');
     assert.equal(calls.synthesis,0,'Loading the script must be free');
     await page.click('#radioPodcastGenerate');
     await page.waitForFunction(()=>!document.querySelector('#radioPodcastPreview').hidden);

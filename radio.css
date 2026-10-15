@@ -132,4 +132,6 @@ body.radio-page.stannet-global.stannet-page-radio{--radio-cyan:#48f1ff;--radio-b
 .radio-podcast audio{width:100%;max-width:100%}
 .radio-podcast .radio-upload-meta{min-width:0}
 .radio-podcast select{width:100%;min-width:0;box-sizing:border-box}
+.radio-page.stannet-global .radio-podcast input,.radio-page.stannet-global .radio-podcast textarea,.radio-page.stannet-global .radio-podcast select{background:#091328!important;color:#f3f7ff!important;border-color:#49658c!important}
+.radio-page.stannet-global .radio-podcast input::placeholder,.radio-page.stannet-global .radio-podcast textarea::placeholder{color:#aebfd7!important;opacity:1}
 @media(max-width:620px){.radio-podcast-preview{padding:14px}.radio-podcast button,.radio-podcast-preview>a{width:100%;box-sizing:border-box}}

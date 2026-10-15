@@ -4,15 +4,15 @@ if(!form)return;
 const title=document.querySelector('#radioPodcastTitle'),script=document.querySelector('#radioPodcastScript'),counter=document.querySelector('#radioPodcastCount'),generate=document.querySelector('#radioPodcastGenerate'),example=document.querySelector('#radioPodcastExample'),status=document.querySelector('#radioPodcastStatus'),preview=document.querySelector('#radioPodcastPreview'),previewTitle=document.querySelector('#radioPodcastPreviewTitle'),audio=document.querySelector('#radioPodcastAudio'),download=document.querySelector('#radioPodcastDownload'),playlist=document.querySelector('#radioPodcastPlaylist'),upload=document.querySelector('#radioPodcastUpload'),refresh=document.querySelector('#radioPodcastRefresh');
 const token=()=>sessionStorage.getItem('stannet_radio_admin_token')||'';
 const authFetch=(url,options={})=>fetch(url,{...options,headers:{...(options.headers||{}),Authorization:'Bearer '+token()}});
-let mp3=null,objectUrl='',generatedText='',generatedTitle='',savedToLibrary=false,busy=false,sessionVersion=0;
+let mp3=null,objectUrl='',generatedText='',generatedTitle='',savedToLibrary=false,busy=false,sessionVersion=0,playlistLoadId=0,loadingPlaylists=false;
 const message=text=>{status.textContent=text};
 const filename=()=>('stannet-tech-'+generatedTitle.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,110)+'.mp3');
 function update(){
   const words=script.value.trim().split(/\s+/).filter(Boolean).length;
   counter.textContent=script.value.length+' / 8500 caracteres'+(words?' · unos '+Math.max(1,Math.round(words/145))+' min':'');
   generate.disabled=busy;example.disabled=busy;title.disabled=busy;script.disabled=busy;
-  refresh.disabled=busy;playlist.disabled=busy;
-  upload.disabled=busy||!mp3||!playlist.value||savedToLibrary||script.value.trim()!==generatedText||title.value.trim()!==generatedTitle;
+  refresh.disabled=busy||loadingPlaylists;playlist.disabled=busy||loadingPlaylists;
+  upload.disabled=busy||loadingPlaylists||!mp3||!playlist.value||savedToLibrary||script.value.trim()!==generatedText||title.value.trim()!==generatedTitle;
 }
 function clearAudio(){
   audio.pause();audio.removeAttribute('src');audio.load();
@@ -21,17 +21,18 @@ function clearAudio(){
   preview.hidden=true;download.removeAttribute('href');update();
 }
 async function loadPlaylists(){
-  const version=sessionVersion,selected=playlist.value;
+  const version=sessionVersion,loadId=++playlistLoadId,selected=playlist.value;
+  loadingPlaylists=true;update();
   try{
     const response=await authFetch('/api/radio/admin/playlists',{headers:{accept:'application/json'}});
     const data=await response.json();if(!response.ok)throw new Error(data.error||'No se pudieron cargar las playlists.');
-    if(version!==sessionVersion)return;
+    if(version!==sessionVersion||loadId!==playlistLoadId)return;
     playlist.replaceChildren(new Option('Selecciona una playlist…',''));
     for(const item of data.items||[])playlist.add(new Option(item.name,String(item.id)));
     if(selected&&[...playlist.options].some(option=>option.value===selected))playlist.value=selected;
     else playlist.value=[...playlist.options].find(option=>/podcast/i.test(option.textContent))?.value||'';
-  }catch(error){if(version===sessionVersion)message(error.message)}
-  update();
+  }catch(error){if(version===sessionVersion&&loadId===playlistLoadId)message(error.message)}
+  finally{if(loadId===playlistLoadId){loadingPlaylists=false;update()}}
 }
 function edited(){
   if(mp3&&(script.value.trim()!==generatedText||title.value.trim()!==generatedTitle)){
