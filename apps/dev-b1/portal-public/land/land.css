@@ -22,3 +22,5 @@
 @media(max-width:580px){.listing-controls{grid-template-columns:1fr}.listing-status{flex-direction:column;align-items:flex-start}.listing-status button{margin-left:0}}
 
 .source-trace{margin:6px 0;border-left:2px solid var(--border);padding:8px 0 8px 13px;background:rgba(255,255,255,.015)}.source-trace p{margin:0 0 7px}.source-trace p:last-child{margin-bottom:0}.external-card:focus-within{border-color:var(--cyan)}
+
+.land-zone{font-size:11px!important;letter-spacing:.5px;color:var(--cyan)!important;font-weight:700!important;margin:3px 0!important}.external-card button:disabled{opacity:.7;color:var(--muted)}.listing-controls label[hidden]{display:none!important}
