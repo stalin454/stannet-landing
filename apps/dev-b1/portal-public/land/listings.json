@@ -12,7 +12,10 @@
       "region": "Panamá Oeste · La Chorrera",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/amplia-finca-de-560-000-m-de-terreno-56-hectareas-cp/32989101",
-      "note": "Oferta publicada, sin comprobación de finca, títulos ni cargas."
+      "note": "Oferta publicada, sin comprobación de finca, títulos ni cargas.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-PEDASI",
@@ -24,7 +27,10 @@
       "region": "Los Santos · Pedasí",
       "source": "Klassic Living",
       "source_url": "https://www.klassicliving.com/en/properties/terreno-en-or%C3%ADa-arriba%2C-pedas%C3%AD",
-      "note": "El anuncio cita $5.000/ha y $380.000 total para 78 ha: 78 × 5.000 = $390.000; existe una discrepancia a confirmar."
+      "note": "El anuncio cita $5.000/ha y $380.000 total para 78 ha: 78 × 5.000 = $390.000; existe una discrepancia a confirmar.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-JRH7784",
@@ -36,7 +42,10 @@
       "region": "Monte Plata · Don Juan",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/finca-de-15-tareas-agricolas-en-monte-plata-jrh7784",
-      "note": "El anuncio declara título deslindado, pero no hay comprobación registral independiente."
+      "note": "El anuncio declara título deslindado, pero no hay comprobación registral independiente.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-AWJ6EMM",
@@ -48,7 +57,10 @@
       "region": "Monte Plata · Don Juan",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/finca-de-53-tareas-en-monte-plata-awj6emm",
-      "note": "La referencia a título IAD requiere revisión jurídica independiente."
+      "note": "La referencia a título IAD requiere revisión jurídica independiente.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2489101",
@@ -60,7 +72,10 @@
       "region": "Central · Luque",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/terreno-en-luque-a-cuotas-2489101",
-      "note": "Precio y título declarados por anunciante; se desconoce disponibilidad y condiciones a cuotas."
+      "note": "Precio y título declarados por anunciante; se desconoce disponibilidad y condiciones a cuotas.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2151982",
@@ -72,7 +87,10 @@
       "region": "Caaguazú · San José de los Arroyos",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/propiedades-rurales/vendo-estancia-de-52-hectareas-en-san-jose-de-los-arroyos-2151982",
-      "note": "El anunciante indica 30.000.000 Gs. por hectárea, NO por toda la finca; total calculado como 52 × 30.000.000 Gs."
+      "note": "El anunciante indica 30.000.000 Gs. por hectárea, NO por toda la finca; total calculado como 52 × 30.000.000 Gs.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-22988032",
@@ -84,7 +102,10 @@
       "region": "Chiriquí · Bugaba",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/se-vende-terreno-chiriqui-san-isidro-graiche-acerrio/22988032",
-      "note": "El anuncio indica cercanía a Paso Canoas; revisar restricciones legales por cercanía fronteriza."
+      "note": "El anuncio indica cercanía a Paso Canoas; revisar restricciones legales por cercanía fronteriza.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-29737162",
@@ -96,7 +117,10 @@
       "region": "Chiriquí · Boquerón",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/finca-en-chiriqui-boqueron-6-5-hectareas-en-cordillera/29737162",
-      "note": "Se anuncia con construcciones; precio incluye más que suelo."
+      "note": "Se anuncia con construcciones; precio incluye más que suelo.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-32838177",
@@ -108,7 +132,10 @@
       "region": "Chiriquí · Bugaba",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/finca-en-chiriqui-bugaba-15-6-hectareas-en-camaron-arriba/32838177",
-      "note": "Acceso con último tramo recomendado para 4×4; comprobar servidumbres."
+      "note": "Acceso con último tramo recomendado para 4×4; comprobar servidumbres.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-29917322",
@@ -120,7 +147,10 @@
       "region": "Chiriquí · Volcán",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/se-vende-finca-en-volcan/29917322",
-      "note": "Precio reducido declarado por anunciante; no equivale a valoración independiente."
+      "note": "Precio reducido declarado por anunciante; no equivale a valoración independiente.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-32397393",
@@ -132,7 +162,10 @@
       "region": "Chiriquí · Puerto Armuelles",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/finca-43-000-1-8-hectareas-baco-berba-puerto-armuelles-transporte-derecho-posesorio/32397393",
-      "note": "ATENCIÓN: se anuncia como derecho posesorio, no como dominio pleno inscrito."
+      "note": "ATENCIÓN: se anuncia como derecho posesorio, no como dominio pleno inscrito.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-31228277",
@@ -144,7 +177,10 @@
       "region": "Chiriquí · Boquerón",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/finca-en-chiriqui-boqueron-10-9-hectareas-en-guayabal/31228277",
-      "note": "Hay que comprobar acceso por camino agrícola y quebrada."
+      "note": "Hay que comprobar acceso por camino agrícola y quebrada.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-31081361",
@@ -156,7 +192,10 @@
       "region": "Chiriquí · San Andrés",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/finca-en-chiriqui-san-andres-8-7-hectareas-en-quebrada-llana/31081361",
-      "note": "Acceso por camino agrícola; comprobar distancia y servicios."
+      "note": "Acceso por camino agrícola; comprobar distancia y servicios.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PA-32501609",
@@ -168,7 +207,10 @@
       "region": "Chiriquí · Volcán",
       "source": "Encuentra24",
       "source_url": "https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-fincas/10-hect-espectacular-finca-en-via-volcan-primavera-de-caisan-chiriqui/32501609",
-      "note": "Incluye casa según el anuncio; no comparar solo como precio de suelo."
+      "note": "Incluye casa según el anuncio; no comparar solo como precio de suelo.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-aze4b6q",
@@ -180,7 +222,10 @@
       "region": "Santo Domingo · Guerra",
       "source": "Corotos",
       "source_url": "https://ads.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/finca-agricola-o-ganadera-aze4b6q",
-      "note": "La descripción distingue superficies deslindadas y sin deslindar; revisar la mensura."
+      "note": "La descripción distingue superficies deslindadas y sin deslindar; revisar la mensura.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-8zaxbta",
@@ -192,7 +237,10 @@
       "region": "Santiago · San José de las Matas",
       "source": "Corotos",
       "source_url": "https://ads.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/finca-de-729-tareas-en-san-jose-de-las-matas-8zaxbta",
-      "note": "Incluye instalaciones ganaderas y edificaciones; revisar valor del suelo por separado."
+      "note": "Incluye instalaciones ganaderas y edificaciones; revisar valor del suelo por separado.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-v4gfasj",
@@ -204,7 +252,10 @@
       "region": "Puerto Plata · Camú",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/terreno-de-9-500-mts-para-proyecto-v4gfasj",
-      "note": "Anuncio para posible desarrollo; confirmar clasificación urbanística."
+      "note": "Anuncio para posible desarrollo; confirmar clasificación urbanística.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-9edkejc",
@@ -216,7 +267,10 @@
       "region": "Santiago · Don Pedro",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/terreno-en-santiago-prolongacion-don-pedro-9edkejc",
-      "note": "Oferta residencial/comercial declarada, no permiso confirmado."
+      "note": "Oferta residencial/comercial declarada, no permiso confirmado.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-c5rj5b3",
@@ -228,7 +282,10 @@
       "region": "Puerto Plata · San Marcos",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/solar-de-360-mts-en-san-marcos-pto-pta-c5rj5b3",
-      "note": "Solar pequeño urbano, no equivalente a una finca rural."
+      "note": "Solar pequeño urbano, no equivalente a una finca rural.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-z7qy0v8",
@@ -240,7 +297,10 @@
       "region": "Distrito Nacional · El Millón",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/solar-538-mts-en-el-millon-z7qy0v8",
-      "note": "Solar urbano de alta valoración; no comparar con fincas agrarias."
+      "note": "Solar urbano de alta valoración; no comparar con fincas agrarias.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-r46dh50",
@@ -252,7 +312,10 @@
       "region": "Santo Domingo · Ensanche Quisqueya",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/solar-917-mts-ensanche-quisqueya-r46dh50",
-      "note": "Uso potencial declarado por anunciante, no autorización urbanística."
+      "note": "Uso potencial declarado por anunciante, no autorización urbanística.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "DO-ytz3t45",
@@ -264,7 +327,10 @@
       "region": "Santiago · La Barranquita",
       "source": "Corotos",
       "source_url": "https://www.corotos.com.do/anuncio/inmuebles-en-venta/solares-terrenos/solares-21-000-mts-en-la-barranquita-santiago-de-ytz3t45",
-      "note": "Precio alto y carácter urbano/comercial; comparar solo con inmuebles afines."
+      "note": "Precio alto y carácter urbano/comercial; comparar solo con inmuebles afines.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2239725",
@@ -276,7 +342,10 @@
       "region": "Misiones · San Juan Bautista",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/propiedades-rurales/vendo-50-hectareas-en-san-juan-bautista-misiones-cod-v0253-2239725",
-      "note": "La mención de título listo para transferir proviene solo del anunciante."
+      "note": "La mención de título listo para transferir proviene solo del anunciante.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2896743",
@@ -289,7 +358,10 @@
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/propiedades-rurales/vendo-48-hectareas-arroyos-y-esteros-2896743",
       "note": "AVISO: anuncio muestra Gs. 65 millones POR HECTÁREA; total calculado 48 × 65 millones.",
-      "price_derived": true
+      "price_derived": true,
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2935152",
@@ -301,7 +373,10 @@
       "region": "Presidente Hayes · Puerto Pinasco",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/propiedades-rurales/en-venta-propiedad-rural-con-5000-hectareas-2935152",
-      "note": "Propiedad de gran escala; el precio por ha oculta un desembolso total elevado."
+      "note": "Propiedad de gran escala; el precio por ha oculta un desembolso total elevado.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2846589",
@@ -313,7 +388,10 @@
       "region": "Central · Luque",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/terreno-en-venta-zona-residencial-de-luque-2846589",
-      "note": "Dimensiones 15 × 25 m declaradas en anuncio."
+      "note": "Dimensiones 15 × 25 m declaradas en anuncio.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2538975",
@@ -325,7 +403,10 @@
       "region": "Cordillera · San Bernardino",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/terreno-grande-en-san-bernardino-entrega-inicial-y-cuotas-por-este-mes-ya-2538975",
-      "note": "Anuncia financiación a cuotas; confirmar precio contado y condiciones."
+      "note": "Anuncia financiación a cuotas; confirmar precio contado y condiciones.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2555058",
@@ -337,7 +418,10 @@
       "region": "Central · Capiatá",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/venta-de-terreno-en-esquina-en-capiata-zona-posta-yby-cua-2555058",
-      "note": "La titularidad se afirma en el anuncio; sin consulta registral propia."
+      "note": "La titularidad se afirma en el anuncio; sin consulta registral propia.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-2689847",
@@ -349,7 +433,10 @@
       "region": "Paraguarí · Quiindy",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/quiindy-paraguari-10-has-prox-ruta-p-urbanizaciones-turistico-granja-quinta-etc-2689847",
-      "note": "Uso futuro sujeto a permisos. Anuncio dice inversión total de 110.000 USD."
+      "note": "Uso futuro sujeto a permisos. Anuncio dice inversión total de 110.000 USD.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     },
     {
       "id": "PY-1758589",
@@ -361,7 +448,10 @@
       "region": "Alto Paraná · Minga Guazú",
       "source": "Clasipar",
       "source_url": "https://clasipar.paraguay.com/inmuebles/terrenos/terreno-sobre-ruta-55-hectareas-mecanizadas-minga-550000-usd-1758589",
-      "note": "Metadatos muestran 5 ha, descripción especifica 54.500 m²; se toma área declarada en cuerpo."
+      "note": "Metadatos muestran 5 ha, descripción especifica 54.500 m²; se toma área declarada en cuerpo.",
+      "recorded_on": "2026-10-16",
+      "source_check": null,
+      "availability_confirmed_at": null
     }
   ],
   "searches": [
@@ -380,5 +470,11 @@
       "label": "Más terrenos anunciados en Paraguay",
       "url": "https://www.infocasas.com.py/venta/terrenos"
     }
-  ]
+  ],
+  "date_field_guide": {
+    "recorded_on": "Fecha en que la oferta se incorporó a la selección editorial de StanNet; no verifica que siga a la venta.",
+    "source_check_checked_at": "Momento de comprobación técnica del enlace, si existe. Un HTTP 200 no prueba disponibilidad.",
+    "availability_confirmed_at": "Solo si el anunciante o agente confirma expresamente que sigue disponible; ninguno confirmado todavía.",
+    "snapshot_date": "Fecha de la selección editorial; puede ser anterior a la consulta del visitante."
+  }
 }
