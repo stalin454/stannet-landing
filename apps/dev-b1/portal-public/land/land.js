@@ -1,0 +1,103 @@
+'use strict';
+const $ = selector => document.querySelector(selector);
+const countryNames={PA:'Panamá',DO:'República Dominicana',PY:'Paraguay'};
+const glossary={
+'Hectárea':'Unidad de superficie equivalente a 10.000 metros cuadrados (m²).',
+'Tarea dominicana':'Unidad de superficie que puede variar por uso local; en las fichas se toma la superficie en m² declarada por cada anuncio, no se presupone una conversión universal.',
+'Catastro':'Inventario e identificación territorial para fines administrativos o fiscales. No sustituye un título de propiedad.',
+'Registro de propiedad':'Organismo donde se inscriben derechos sobre bienes inmuebles y, según jurisdicción, cargas y limitaciones.',
+'Título de propiedad':'Documento que acredita derechos sobre el inmueble; su validez y alcance deben ser examinados por un profesional local.',
+'Deslinde':'Determinación y delimitación formal de los linderos de un inmueble conforme a las reglas del país.',
+'Finca registral':'Unidad inmobiliaria inscrita que puede no coincidir con una referencia catastral o un anuncio.',
+'Servidumbre':'Derecho que grava un inmueble en favor de otra persona o finca, por ejemplo, el paso.',
+'Zonificación':'Clasificación normativa que determina los usos y edificaciones permitidos en un terreno.',
+'Plusvalía':'Incremento del valor de un inmueble; no equivale a una ganancia realizada hasta vender, descontando costes.',
+'Liquidez inmobiliaria':'Facilidad para vender una propiedad en un plazo razonable sin rebajar significativamente el precio.',
+'Escritura pública':'Instrumento otorgado ante autoridad competente para formalizar actos según la jurisdicción.',
+'Gravamen':'Carga o derecho de terceros que puede afectar el inmueble, como una hipoteca o embargo.',
+'Predio':'Parcela de tierra identificada jurídica o físicamente según la terminología local.',
+'Derecho posesorio':'Situación de posesión que no siempre equivale a propiedad plena inscrita. Requiere especial diligencia.',
+'Precio por hectárea':'Precio total dividido entre hectáreas. Solo comparable con otras propiedades considerando calidad, localización y acceso.',
+'Debida diligencia':'Investigación jurídica, técnica y económica previa a una inversión o compra.',
+'Rentabilidad neta':'Resultado descontando los gastos e impuestos aplicables, comparado con lo invertido.',
+'Riesgo de inundación':'Posibilidad de afectación del terreno por crecidas o precipitaciones; requiere fuentes técnicas y revisión local.',
+'Tipo de cambio':'Relación de conversión entre divisas. En este piloto se introduce manualmente, nunca se inventa una cotización en vivo.',
+'Costo de transacción':'Impuestos, honorarios, aranceles y otros pagos necesarios para realizar una compraventa.'
+};
+function fmt(num,currency){return new Intl.NumberFormat('es-ES',{style:'currency',currency,maximumFractionDigits:currency==='PYG'?0:2}).format(num);}
+function dec(num,max=2){return new Intl.NumberFormat('es-ES',{maximumFractionDigits:max}).format(num);}
+function node(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
+function showGlossary(){const query=$('#glossary-search').value.trim().toLocaleLowerCase('es');const results=$('#glossary-results');results.replaceChildren();let count=0;
+for(const [term,description] of Object.entries(glossary)){if(!((term+' '+description).toLocaleLowerCase('es').includes(query)))continue;const d=node('dl','glossary-item');d.append(node('dt','',term),node('dd','',description));results.append(d);count++;}
+if(!count)results.append(node('p','note','No hay resultados para este término.')); }
+$('#glossary-search').addEventListener('input',showGlossary);showGlossary();
+
+let scenarios=[];
+const form=$('#parcel-form');
+const inputs=form.elements;
+function getValue(name){return inputs.namedItem(name).value;}
+function refreshTable(){
+ const t=$('#results');t.replaceChildren();
+ if(!scenarios.length){const tr=node('tr');const td=node('td','', 'Sin terrenos cargados. Añade tu primer escenario.');td.colSpan=7;tr.append(td);t.append(tr);return;}
+ for(const [index,x] of scenarios.entries()){
+   const tr=node('tr');const label=node('td','',x.label);label.append(node('small','',countryNames[x.country]+' · escenario introducido'));
+   tr.append(label,node('td','',dec(x.area,4)+' ha'),node('td','',fmt(x.price/x.area,x.currency)),node('td','',fmt(x.price*(1+x.extras/100),x.currency)),
+     node('td','',x.fx?fmt(x.price/x.area*x.fx,'EUR'):'Sin cambio EUR'),
+     node('td','',x.checked+'/5 (declaradas; sin verificar)'));
+   const td=node('td');const remove=node('button','', 'Quitar');remove.type='button';remove.addEventListener('click',()=>{scenarios.splice(index,1);refreshTable();});td.append(remove);tr.append(td);t.append(tr);
+ }
+}
+form.addEventListener('submit',event=>{
+ event.preventDefault(); const message=$('#form-message');message.textContent='';
+ const label=getValue('label').trim(),area=Number(getValue('area')),price=Number(getValue('price')),
+ extras=Number(getValue('extras')),fxstr=getValue('fx').trim(),fx=fxstr?Number(fxstr):null;
+ const currency=getValue('currency'),country=getValue('country');
+ if(!label||!['PA','DO','PY'].includes(country)||!['EUR','USD','DOP','PYG'].includes(currency)
+   ||!Number.isFinite(area)||area<0.0001||area>1e7||!Number.isFinite(price)||price<0||price>1e12
+   ||!Number.isFinite(extras)||extras<0||extras>200||(fxstr&&(!Number.isFinite(fx)||fx<=0||fx>10000))){
+   message.textContent='Revisa nombre, superficie, precio, costes y tipo de cambio.';return;
+ }
+ if(scenarios.length>=100){message.textContent='Límite de 100 escenarios por sesión. Exporta el CSV o borra uno.';return;}
+ const checked=['title','cadastre','use','access','risk'].filter(k=>inputs.namedItem(k).checked).length;
+ scenarios.push({label,country,area,price,extras,fx,currency,checked});refreshTable();form.reset();
+ message.textContent='Escenario añadido. Ningún registro ni título ha sido comprobado por StanNet.';$('#results').closest('section').scrollIntoView({block:'start',behavior:'smooth'});
+});
+$('#clear-data').addEventListener('click',()=>{scenarios=[];refreshTable();$('#compare-status').textContent='Escenarios eliminados de esta sesión.';});
+function csvCell(value){const s=String(value??'');const safe=/^[=+@\-\t\r]/.test(s)?'\''+s:s;return '"'+safe.replaceAll('"','""')+'"';}
+$('#export-csv').addEventListener('click',()=>{
+ if(!scenarios.length){$('#compare-status').textContent='No hay escenarios para exportar.';return;}
+ const head=['Escenario','País','Hectáreas','Precio total','Moneda','Costes adicionales %','EUR por moneda','Comprobaciones declaradas (máx 5)'];
+ const rows=[head,...scenarios.map(x=>[x.label,countryNames[x.country],x.area,x.price,x.currency,x.extras,x.fx??'',x.checked])];
+ const file=new Blob(['\ufeff'+rows.map(row=>row.map(csvCell).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(file);const link=document.createElement('a');link.href=url;link.download='stannet-land-escenarios.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ $('#compare-status').textContent='CSV exportado. Los datos no se han enviado a un servidor.';
+});refreshTable();
+
+const browse=$('#browse-results');let externalListings=[];
+function makeExternal(url,label){const a=node('a','external-link',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
+function renderListings(){
+ const filter=$('#listing-country').value;browse.replaceChildren();const matches=externalListings.filter(x=>filter==='all'||x.country===filter);
+ $('#listing-count').textContent=matches.length+' anuncios de referencia · corte 16/10/2026 (no disponibilidad en vivo)';
+ for(const x of matches){
+  const a=node('article','panel external-card');a.append(node('span','eyebrow',countryNames[x.country]+' · '+x.source));
+  a.append(node('h3','',x.name),node('p','',x.region));
+  const area=x.area_m2/10000;a.append(node('strong','external-price',fmt(x.price,x.currency)),node('p','',dec(area,4)+' ha · '+fmt(x.price/area,x.currency)+'/ha'));
+  a.append(node('p','note',x.note),node('p','note','Precio de anuncio; disponibilidad y documentación pendientes de comprobar.'));
+  const actions=node('div','listing-actions');actions.append(makeExternal(x.source_url,'Ver anuncio y contactar ↗'));
+  const compare=node('button','button secondary','Analizar en el simulador');compare.type='button';
+  compare.addEventListener('click',()=>{
+   inputs.namedItem('label').value=x.name.slice(0,70);inputs.namedItem('country').value=x.country;
+   inputs.namedItem('currency').value=x.currency;inputs.namedItem('area').value=area;
+   inputs.namedItem('price').value=x.price;inputs.namedItem('extras').value=10;
+   inputs.namedItem('fx').value='';for(const k of ['title','cadastre','use','access','risk'])inputs.namedItem(k).checked=false;
+   $('#comparador').scrollIntoView({behavior:'smooth'});$('#form-message').textContent='Datos copiados del anuncio; todos los documentos siguen sin verificar. Revisa las cifras antes de añadir.';
+  });
+  actions.append(compare);a.append(actions);browse.append(a);
+ }
+}
+$('#listing-country').addEventListener('change',renderListings);
+fetch('/land/listings.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('No hay catálogo de anuncios');return r.json();}).then(data=>{
+ externalListings=Array.isArray(data.listings)?data.listings:[];renderListings();
+ const box=$('#listing-sources');box.replaceChildren();
+ for(const search of data.searches||[])box.append(makeExternal(search.url,search.label+' ↗'));
+}).catch(()=>{browse.replaceChildren(node('p','note','No se pudo recuperar la selección de anuncios. Utiliza los portales enlazados en cada ficha de país.'));});
