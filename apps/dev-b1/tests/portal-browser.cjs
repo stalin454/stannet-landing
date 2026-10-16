@@ -41,17 +41,19 @@ const puppeteer=require('puppeteer-core');
    const landResponse=await page.goto(base+'/land/',{waitUntil:'networkidle0',timeout:45000});
    assert.equal(landResponse.status(),200,'Land page must be publicly reachable');
    await page.waitForSelector('.external-card',{timeout:15000});
-   assert.equal(await page.evaluate(()=>document.querySelectorAll('.external-card').length),30,'Expected 30 listing references');
+   assert.equal(await page.evaluate(()=>document.querySelectorAll('.external-card').length),6,'Six correctly localized offers for Panama under USD 100,000');
    assert.equal(await page.$eval('#listing-sort',node=>node.value),'price','Cheapest-first should be default');
-   const countrySamples=await page.evaluate(()=>Array.from(document.querySelectorAll('.external-card')).slice(0,10).map(x=>x.querySelector('.eyebrow')?.textContent));
-   assert.ok(countrySamples.every(x=>x.includes('República Dominicana')),'First price-sorted country should be Dominican Republic');
+   const landZones=await page.evaluate(()=>Array.from(document.querySelectorAll('.external-card')).map(x=>x.querySelector('.land-zone')?.textContent));
+   assert.deepEqual(landZones.map(x=>x?.split(' ')[0]),['ZONA','ZONA','ZONA','ZONA','ZONA','ZONA']);
+   assert.ok(landZones[0].includes('TORTÍ'),'Tortí should appear first');
+   assert.ok(landZones.at(-1).includes('DARIÉN'),'Darién should follow Chepo');
    await page.select('#listing-country','PY');
    assert.equal(await page.evaluate(()=>document.querySelectorAll('.external-card').length),10,'Paraguay must have ten listings');
    const landLayout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily}));
    assert.equal(landLayout.overflow,false,'Land horizontal overflow '+width);
    assert.ok(landLayout.brandFont.includes('Orbitron'));
    assert.deepEqual(errors,[]);
-   results.push({width,status:'PASS',filter:true,land:true,landListings:30,keyboard_navigation:true,overflow:false,font:'Orbitron',commit:version.commit});await page.close();
+   results.push({width,status:'PASS',filter:true,land:true,landListings:6,keyboard_navigation:true,overflow:false,font:'Orbitron',commit:version.commit});await page.close();
   }
   console.log(JSON.stringify({base,browser:'Chromium',checks:results}));
  }finally{await browser.close();}

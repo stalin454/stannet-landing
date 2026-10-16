@@ -103,13 +103,15 @@ function sourceTrace(x){
  return summary;
 }
 function renderListings(){
- const country=$('#listing-country').value,query=$('#listing-query').value.trim().toLocaleLowerCase('es');
+ const country=$('#listing-country').value,areaFilter=$('#listing-area').value,query=$('#listing-query').value.trim().toLocaleLowerCase('es');
  const currency=$('#listing-currency').value;
  const maxStr=$('#listing-max-price').value.trim(),maxPrice=maxStr?Number(maxStr):null;
  const minStr=$('#listing-min-area').value.trim(),minArea=minStr?Number(minStr):null;
  const sort=$('#listing-sort').value;
  const matches=externalListings.filter(x=>{
+   if(x.country==='PA'&&!['Torti','Chepo','Darien'].includes(x.panama_zone))return false;
    if(country!=='all'&&x.country!==country)return false;
+   if(x.country==='PA'&&areaFilter!=='all'&&x.panama_zone!==areaFilter)return false;
    if(query&&!((x.name+' '+x.region+' '+x.note).toLocaleLowerCase('es').includes(query)))return false;
    if(currency!=='all'&&x.currency!==currency)return false;
    if(maxPrice!==null&&(currency==='all'||!(x.price<=maxPrice)))return false;
@@ -118,7 +120,11 @@ function renderListings(){
  });
  // A price is only comparable with prices in the same country and currency.
  // Default: lowest total advertised price first within each country/currency group.
- const comparableGroup=(a,b)=>a.country.localeCompare(b.country)||a.currency.localeCompare(b.currency);
+ const panamaOrder={Torti:0,Chepo:1,Darien:2};
+ const comparableGroup=(a,b)=>
+   a.country.localeCompare(b.country)||
+   (a.country==='PA'?(panamaOrder[a.panama_zone]??99)-(panamaOrder[b.panama_zone]??99):0)||
+   a.currency.localeCompare(b.currency);
  matches.sort((a,b)=>{
   if(sort==='area')return b.area_m2-a.area_m2||comparableGroup(a,b);
   if(sort==='price')return comparableGroup(a,b)||a.price-b.price||a.name.localeCompare(b.name);
@@ -132,20 +138,23 @@ function renderListings(){
  const snapshot=snapshotDate?new Date(snapshotDate+'T12:00:00Z').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}):'desconocida';
  $('#listing-updated').textContent='Catálogo publicado: '+snapshot+' · consulta local: '+lastPublishedRefresh+' · disponibilidad SIN verificar en directo';
  if(maxPrice!==null&&currency==='all')browse.append(node('p','note filter-warning','Selecciona una moneda para filtrar precio máximo. No comparamos cantidades en monedas distintas sin conversión.'));
- if(['price','price_desc','unit'].includes(sort)&&currency==='all')browse.append(node('p','note filter-warning','Precios ordenados dentro de cada país y moneda; sin conversión a una moneda común no existe un orden global fiable.'));
+ if(['price','price_desc','unit'].includes(sort)&&currency==='all')browse.append(node('p','note filter-warning','Precios ordenados dentro de cada país y moneda. Panamá: Tortí primero, después Chepo y Darién, cada zona por precio.'));
  if(!matches.length)browse.append(node('p','note','No hay anuncios que coincidan. Cambia los filtros o abre los portales originales para ampliar la búsqueda.'));
  for(const x of matches){
   const a=node('article','panel external-card');
   a.append(node('span','eyebrow',countryNames[x.country]+' · '+x.source));
   a.append(node('h3','',x.name),node('p','',x.region));
+  if(x.country==='PA')a.append(node('p','land-zone','ZONA PRIORITARIA · '+({Torti:'01 TORTÍ',Chepo:'02 CHEPO',Darien:'03 DARIÉN'}[x.panama_zone])));
+  if(x.property_kind&&x.property_kind!=='finca rural')a.append(node('p','note','Tipo de anuncio: '+x.property_kind+'.'));
   const area=x.area_m2/10000;
   a.append(node('strong','external-price',fmt(x.price,x.currency)),
-    node('p','',dec(area,4)+' ha · '+fmt(x.price/area,x.currency)+'/ha'));
+    node('p','',x.area_unverified?('Superficie anunciada: '+dec(area,4)+' ha · pendiente de aclarar'):(dec(area,4)+' ha · '+fmt(x.price/area,x.currency)+'/ha')));
   if(x.price_derived)a.append(node('p','note','⚠ Precio total CALCULADO a partir del precio por hectárea del anunciante, no precio total confirmado.'));
   a.append(node('p','note',x.note));
   a.append(sourceTrace(x));
   const actions=node('div','listing-actions');actions.append(makeExternal(x.source_url,'Ver anuncio original actualizado ↗'));
-  const compare=node('button','button secondary','Analizar en el simulador');compare.type='button';
+  const compare=node('button','button secondary',x.area_unverified?'Superficie por verificar':'Analizar en el simulador');compare.type='button';
+  if(x.area_unverified){compare.disabled=true;compare.title='La superficie anunciada es contradictoria o no identifica de forma fiable el terreno.';}
   compare.addEventListener('click',()=>{
    inputs.namedItem('label').value=x.name.slice(0,70);inputs.namedItem('country').value=x.country;
    inputs.namedItem('currency').value=x.currency;inputs.namedItem('area').value=area;
@@ -177,8 +186,22 @@ async function refreshLandCatalog(){
   $('#listing-updated').textContent='Error consultando la última versión publicada: '+e.message;
  }finally{refreshing=false;button.disabled=false;}
 }
-for(const id of ['listing-country','listing-currency','listing-sort','listing-query','listing-max-price','listing-min-area'])
+for(const id of ['listing-country','listing-area','listing-currency','listing-sort','listing-query','listing-max-price','listing-min-area'])
  $('#'+id).addEventListener('input',renderListings);
+$('#listing-country').addEventListener('change',()=>{
+ const selected=$('#listing-country').value;
+ const geo=$('#listing-area').closest('label');
+ geo.hidden=selected!=='PA';
+ if(selected==='PA'){
+  $('#listing-currency').value='USD';
+  $('#listing-max-price').value='100000';
+ }else{
+  $('#listing-currency').value='all';
+  $('#listing-max-price').value='';
+ }
+ $('#listing-area').value='all';
+ renderListings();
+});
 $('#listing-refresh').addEventListener('click',refreshLandCatalog);
 refreshLandCatalog();
 setInterval(()=>{if(!document.hidden)refreshLandCatalog();},300000);
