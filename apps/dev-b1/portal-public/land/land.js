@@ -76,6 +76,32 @@ $('#export-csv').addEventListener('click',()=>{
 const browse=$('#browse-results');
 let externalListings=[],snapshotDate='',lastPublishedRefresh='';
 function makeExternal(url,label){const a=node('a','external-link',label);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a;}
+function formatRecordedDate(value){
+ if(typeof value!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value))return 'Sin fecha documentada';
+ const d=new Date(value+'T12:00:00Z');
+ return Number.isNaN(d.valueOf())?'Sin fecha documentada':new Intl.DateTimeFormat('es-ES',{timeZone:'UTC',day:'2-digit',month:'2-digit',year:'numeric'}).format(d);
+}
+function formatCheckTime(value){
+ const d=typeof value==='string'?new Date(value):new Date(NaN);
+ return Number.isNaN(d.valueOf())?'Sin comprobación técnica registrada':new Intl.DateTimeFormat('es-ES',{timeZone:'Europe/Madrid',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'}).format(d);
+}
+function sourceTrace(x){
+ const summary=node('div','source-trace');
+ const editorial=node('p','note','Incorporado al catálogo: '+formatRecordedDate(x.recorded_on||snapshotDate));
+ summary.append(editorial);
+ const check=x.source_check;
+ if(check?.availability==='unavailable'){
+  summary.append(node('p','note','Última comprobación técnica del enlace: '+formatCheckTime(check.checked_at)+' · enlace no disponible (404/410).'));
+ }else if(check?.availability==='feed_reported'){
+  summary.append(node('p','note','Última recepción de datos del proveedor: '+formatCheckTime(check.checked_at)+'. No confirma una venta disponible.'));
+ }else if(check?.checked_at){
+  summary.append(node('p','note','Última comprobación técnica del enlace: '+formatCheckTime(check.checked_at)+'. No prueba disponibilidad del terreno.'));
+ }else{
+  summary.append(node('p','note','Última comprobación técnica del enlace: sin realizar.'));
+ }
+ summary.append(node('p','note','Disponibilidad confirmada con anunciante: '+(x.availability_confirmed_at?formatCheckTime(x.availability_confirmed_at):'NO · consultar al vendedor.')));
+ return summary;
+}
 function renderListings(){
  const country=$('#listing-country').value,query=$('#listing-query').value.trim().toLocaleLowerCase('es');
  const currency=$('#listing-currency').value;
@@ -114,9 +140,7 @@ function renderListings(){
     node('p','',dec(area,4)+' ha · '+fmt(x.price/area,x.currency)+'/ha'));
   if(x.price_derived)a.append(node('p','note','⚠ Precio total CALCULADO a partir del precio por hectárea del anunciante, no precio total confirmado.'));
   a.append(node('p','note',x.note));
-  const check=x.source_check;
-  const sourceStatus=check?.availability==='unavailable'?'El enlace original informó no disponible o 404/410 en la última consulta.':check?.availability==='unconfirmed'?'No es posible confirmar la disponibilidad automáticamente.':'Disponibilidad no confirmada.';
-  a.append(node('p','note',sourceStatus+' '+(check?.checked_at?'Comprobación técnica: '+new Date(check.checked_at).toLocaleString('es-ES')+'.':'No hay validación técnica reciente.')));
+  a.append(sourceTrace(x));
   const actions=node('div','listing-actions');actions.append(makeExternal(x.source_url,'Ver anuncio original actualizado ↗'));
   const compare=node('button','button secondary','Analizar en el simulador');compare.type='button';
   compare.addEventListener('click',()=>{
