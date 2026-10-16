@@ -1,0 +1,1 @@
+{"name":"stannet-dev-b1","private":true,"type":"module","engines":{"node":">=24"},"scripts":{"dev":"node server.mjs","test":"node --test tests/*.test.mjs","build:preview":"node prepare-preview.mjs","admin":"node admin.mjs"}}

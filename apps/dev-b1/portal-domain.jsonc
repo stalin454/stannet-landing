@@ -1,0 +1,7 @@
+{
+  "name":"stannet-dev-portal",
+  "compatibility_date":"2026-10-14",
+  "workers_dev":true,
+  "assets":{"directory":"./site-build"},
+  "routes":[{"pattern":"stannet.dev","custom_domain":true}]
+}

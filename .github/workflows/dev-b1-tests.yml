@@ -1,0 +1,62 @@
+name: StanNet Dev B1 isolated tests
+on:
+  pull_request:
+    paths:
+      - 'apps/dev-b1/**'
+      - 'dev-b1-preview/**'
+      - 'docs/dev-b1/**'
+      - '.assetsignore'
+      - '.github/workflows/dev-b1-tests.yml'
+permissions:
+  contents: read
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify original source and recovery
+        run: python3 docs/dev-b1/verify-isolation.py
+      - name: Real local authentication, HTTP and security tests
+        working-directory: apps/dev-b1
+        run: npm test
+      - name: Prepare pinned Cloudflare runtime tools (tests only)
+        run: npm install --prefix /tmp/dev-b1-runtime --no-save --no-audit --no-fund miniflare@4.20260730.0 wrangler@4.139.0
+      - name: Worker, D1 persistence, isolation and real migration rollback
+        env:
+          NODE_PATH: /tmp/dev-b1-runtime/node_modules
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          node apps/dev-b1/runtime-tests/cloudflare.cjs
+          node apps/dev-b1/runtime-tests/migrations.cjs
+          node apps/dev-b1/prepare-preview.mjs
+          /tmp/dev-b1-runtime/node_modules/.bin/wrangler deploy --dry-run --config apps/dev-b1/worker.example.jsonc --name stannet-dev-auth-build-test --outdir /tmp/dev-b1-worker-build
+      - name: Verify deterministic preview packaging
+        working-directory: apps/dev-b1
+        run: |
+          npm run build:preview
+          git diff --exit-code -- ../../dev-b1-preview
+      - name: Prepare isolated real-browser QA
+        run: npm install --prefix /tmp/dev-b1-auth-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Real browser with TLS Worker, D1, secure cookies and Typing
+        env:
+          NODE_PATH: /tmp/dev-b1-auth-browser/node_modules:/tmp/dev-b1-runtime/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node apps/dev-b1/runtime-tests/browser.cjs
+      - name: Real browser registration, reset, typing keyboard and admin UI
+        env:
+          NODE_PATH: /tmp/dev-b1-auth-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          node apps/dev-b1/server.mjs >/tmp/dev-b1-auth-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in 1 2 3 4 5; do
+            curl -fsS http://127.0.0.1:8789/api/health >/dev/null && break
+            sleep 1
+          done
+          node apps/dev-b1/tests/auth-browser.cjs

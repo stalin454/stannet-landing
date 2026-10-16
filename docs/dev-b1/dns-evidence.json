@@ -1,0 +1,61 @@
+{
+  "observed_at_utc": "2026-10-14T15:52:54Z",
+  "checks": [
+    {
+      "provider": "google",
+      "url": "https://dns.google/resolve?name=stannet.dev&type=A",
+      "status": 0,
+      "answers": [],
+      "authority": [
+        {
+          "name": "stannet.dev.",
+          "type": 6,
+          "TTL": 992,
+          "data": "abby.ns.cloudflare.com. dns.cloudflare.com. 2417393754 10000 2400 604800 1800"
+        }
+      ]
+    },
+    {
+      "provider": "google",
+      "url": "https://dns.google/resolve?name=stannet.dev&type=AAAA",
+      "status": 0,
+      "answers": [],
+      "authority": [
+        {
+          "name": "stannet.dev.",
+          "type": 6,
+          "TTL": 1800,
+          "data": "abby.ns.cloudflare.com. dns.cloudflare.com. 2417393754 10000 2400 604800 1800"
+        }
+      ]
+    },
+    {
+      "provider": "cloudflare",
+      "url": "https://cloudflare-dns.com/dns-query?name=stannet.dev&type=A",
+      "status": 0,
+      "answers": [],
+      "authority": [
+        {
+          "name": "stannet.dev",
+          "type": 6,
+          "TTL": 1800,
+          "data": "abby.ns.cloudflare.com. dns.cloudflare.com. 2417393754 10000 2400 604800 1800"
+        }
+      ]
+    },
+    {
+      "provider": "cloudflare",
+      "url": "https://cloudflare-dns.com/dns-query?name=stannet.dev&type=AAAA",
+      "status": 0,
+      "answers": [],
+      "authority": [
+        {
+          "name": "stannet.dev",
+          "type": 6,
+          "TTL": 1800,
+          "data": "abby.ns.cloudflare.com. dns.cloudflare.com. 2417393754 10000 2400 604800 1800"
+        }
+      ]
+    }
+  ]
+}
