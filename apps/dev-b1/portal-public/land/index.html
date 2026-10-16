@@ -40,9 +40,17 @@
 <div class="glossary panel"><h3>Diccionario territorial</h3><label for="glossary-search">Busca un concepto</label><input id="glossary-search" type="search" placeholder="Ej.: deslinde, hectárea, servidumbre" autocomplete="off"><div id="glossary-results" class="glossary-grid" aria-live="polite"></div></div>
 </section>
 <section id="anuncios"><div class="section-heading"><div><p class="eyebrow">TERRENOS ANUNCIADOS EN INTERNET</p><h2>Explora terrenos que se ofrecen a la venta.</h2></div><p>Selección editorial de anuncios externos. Visita la publicación original para ver fotos, comprobar disponibilidad y hablar con el vendedor.</p></div>
-<div class="listing-controls"><label for="listing-country">Filtrar por país<select id="listing-country"><option value="all">Los tres países</option><option value="PA">Panamá</option><option value="DO">República Dominicana</option><option value="PY">Paraguay</option></select></label><p id="listing-count" class="note">Cargando anuncios de referencia…</p></div>
+<div class="listing-controls">
+<label for="listing-country">País<select id="listing-country"><option value="all">Los tres países</option><option value="PA">Panamá</option><option value="DO">República Dominicana</option><option value="PY">Paraguay</option></select></label>
+<label for="listing-query">Buscar por lugar o nombre<input id="listing-query" type="search" placeholder="Ej.: Chiriquí, rural, Luque"></label>
+<label for="listing-currency">Moneda<select id="listing-currency"><option value="all">Cualquier moneda</option><option value="USD">USD</option><option value="DOP">DOP</option><option value="PYG">PYG</option></select></label>
+<label for="listing-max-price">Precio total máximo (moneda elegida)<input id="listing-max-price" type="number" min="0" step="any" placeholder="Ej.: 50000"></label>
+<label for="listing-min-area">Superficie mínima (ha)<input id="listing-min-area" type="number" min="0" step="any" placeholder="Ej.: 1"></label>
+<label for="listing-sort">Orden<select id="listing-sort"><option value="country">País y localidad</option><option value="area">Mayor superficie primero</option><option value="price">Precio más bajo (por moneda)</option><option value="unit">Precio por hectárea (por moneda)</option></select></label>
+<div class="listing-status"><p id="listing-count" class="note" role="status">Cargando anuncios…</p><p id="listing-updated" class="note"></p><button id="listing-refresh" class="button secondary" type="button">Comprobar catálogo ahora ↻</button></div>
+</div>
 <div id="browse-results" class="browse-grid" aria-live="polite"></div>
-<div class="panel listing-footer"><h3>Buscar anuncios más recientes en los portales originales</h3><div id="listing-sources" class="sources"></div><p class="note">El catálogo anterior es una fotografía editorial consultada el 16/10/2026, no un feed de disponibilidad en vivo. No tenemos acuerdos de inventario, actualización automática ni pasarela de compra; los anuncios podrían cambiar, retirarse o venderse. Comprueba siempre el título con un profesional independiente antes de entregar dinero.</p></div>
+<div class="panel listing-footer"><h3>Buscar anuncios más recientes en los portales originales</h3><div id="listing-sources" class="sources"></div><p class="note">La actualización del catálogo se consulta al servidor cada cinco minutos mientras la página está abierta, pero eso no convierte los anuncios en inventario en tiempo real. Sin una API o feed autorizado del portal original no podemos confirmar que un terreno siga libre o que haya cambiado de precio. Abre siempre el anuncio original para ver su situación actual. No hay pasarela de compra.</p></div>
 </section>
 <section id="comparador"><div class="section-heading"><div><p class="eyebrow">SIMULADOR EDUCATIVO</p><h2>Comparador de parcelas.</h2></div><p>Introduce escenarios de los tres países. Sin anuncios inventados, sin cuentas y sin guardar información en un servidor.</p></div>
 <div class="compare-layout">
