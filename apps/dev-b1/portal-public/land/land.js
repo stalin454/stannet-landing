@@ -116,11 +116,14 @@ function renderListings(){
    if(minArea!==null&&!(x.area_m2/10000>=minArea))return false;
    return true;
  });
- const group=(x,y)=>x.currency.localeCompare(y.currency);
+ // A price is only comparable with prices in the same country and currency.
+ // Default: lowest total advertised price first within each country/currency group.
+ const comparableGroup=(a,b)=>a.country.localeCompare(b.country)||a.currency.localeCompare(b.currency);
  matches.sort((a,b)=>{
-  if(sort==='area')return b.area_m2-a.area_m2;
-  if(sort==='price')return group(a,b)||a.price-b.price;
-  if(sort==='unit')return group(a,b)||(a.price/a.area_m2-b.price/b.area_m2);
+  if(sort==='area')return b.area_m2-a.area_m2||comparableGroup(a,b);
+  if(sort==='price')return comparableGroup(a,b)||a.price-b.price||a.name.localeCompare(b.name);
+  if(sort==='price_desc')return comparableGroup(a,b)||b.price-a.price||a.name.localeCompare(b.name);
+  if(sort==='unit')return comparableGroup(a,b)||(a.price/a.area_m2-b.price/b.area_m2)||a.name.localeCompare(b.name);
   return a.country.localeCompare(b.country)||a.region.localeCompare(b.region)||a.name.localeCompare(b.name);
  });
  browse.replaceChildren();
@@ -129,7 +132,7 @@ function renderListings(){
  const snapshot=snapshotDate?new Date(snapshotDate+'T12:00:00Z').toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}):'desconocida';
  $('#listing-updated').textContent='Catálogo publicado: '+snapshot+' · consulta local: '+lastPublishedRefresh+' · disponibilidad SIN verificar en directo';
  if(maxPrice!==null&&currency==='all')browse.append(node('p','note filter-warning','Selecciona una moneda para filtrar precio máximo. No comparamos cantidades en monedas distintas sin conversión.'));
- if((sort==='price'||sort==='unit')&&currency==='all')browse.append(node('p','note filter-warning','Orden de precios agrupado por moneda para evitar comparar directamente USD, DOP y PYG.'));
+ if(['price','price_desc','unit'].includes(sort)&&currency==='all')browse.append(node('p','note filter-warning','Precios ordenados dentro de cada país y moneda; sin conversión a una moneda común no existe un orden global fiable.'));
  if(!matches.length)browse.append(node('p','note','No hay anuncios que coincidan. Cambia los filtros o abre los portales originales para ampliar la búsqueda.'));
  for(const x of matches){
   const a=node('article','panel external-card');
