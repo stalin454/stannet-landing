@@ -20,7 +20,7 @@ test('Land Intelligence has valid browser JS and DOM targets',()=>{
 test('Curated listings keep verified sources distinct from unverified offers',()=>{
  const data=JSON.parse(read('land/listings.json'));
  assert.equal(data.snapshot_date,'2026-10-16');
- assert.ok(data.listings.length>=6);
+ assert.ok(data.listings.length>=30);\n for(const country of ['PA','DO','PY'])assert.ok(data.listings.filter(x=>x.country===country).length>=10, country+' has fewer than 10 offers');
  assert.deepEqual([...new Set(data.listings.map(x=>x.country))].sort(),['DO','PA','PY']);
  assert.equal(new Set(data.listings.map(x=>x.id)).size,data.listings.length);
  for(const item of data.listings){
@@ -28,10 +28,10 @@ test('Curated listings keep verified sources distinct from unverified offers',()
   assert.ok(item.price>0&&Number.isFinite(item.price));
   assert.ok(['PYG','DOP','USD','EUR'].includes(item.currency));
   assert.match(item.source_url,/^https:\/\//);
-  assert.ok(item.note.length>12);
+  assert.ok(item.note.length>12);\n  assert.match(item.recorded_on,/^\\d{4}-\\d{2}-\\d{2}$/);\n  assert.equal(item.source_check,null);\n  assert.equal(item.availability_confirmed_at,null);
   assert.ok(['DO','PA','PY'].includes(item.country));
  }
- assert.ok(data.searches.every(x=>x.url.startsWith('https://')));
+ assert.ok(data.searches.every(x=>x.url.startsWith('https://')));\n assert.match(read('land/land.js'),/function sourceTrace/);\n assert.match(read('land/land.js'),/Última comprobación técnica/);
 });
 test('Public build and catalog include land without payments or private app routes',()=>{
  const build=readFileSync(new URL('../build-portal.mjs',import.meta.url),'utf8');
