@@ -44,7 +44,7 @@ const puppeteer=require('puppeteer-core');
    assert.equal(await page.$eval('.external-card',nodes=>nodes.length),30,'Expected 30 listing references');
    assert.equal(await page.$eval('#listing-sort',node=>node.value),'price','Cheapest-first should be default');
    const countrySamples=await page.$eval('.external-card',cards=>cards.slice(0,10).map(x=>x.querySelector('.eyebrow')?.textContent));
-   assert.ok(countrySamples.every(x=>x.includes('Panamá')),'First price-sorted country must be Panama');
+   assert.ok(countrySamples.every(x=>x.includes('República Dominicana')),'First price-sorted country should be Dominican Republic');
    await page.select('#listing-country','PY');
    assert.equal(await page.$eval('.external-card',nodes=>nodes.length),10,'Paraguay must have ten listings');
    const landLayout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily}));
