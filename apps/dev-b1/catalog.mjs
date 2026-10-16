@@ -7,5 +7,6 @@ export const catalog=[
  ['music','Producción musical','Creatividad','Studio, Vocal Lab y StanNet Radio.','♫'],
  ['dj','DJ Studio','Creatividad','Mezcla, crea y graba tus sesiones.','◎'],
  ['artists','STAN6IX · Artist Universe','Creatividad','Música original y universo artístico StanNet.','6'],
+ ['land','StanNet Land Intelligence','Educación','Academia de tierras, anuncios reales, comparador y verificación territorial.','◇'],
  ['labs','Aplicaciones y laboratorios','Herramientas','Descubre las próximas herramientas de la plataforma.','⬡']
 ].map(([id,name,category,description,icon])=>({id,name,category,description,icon,status:id==='typing'?'pilot':'pending'}));
