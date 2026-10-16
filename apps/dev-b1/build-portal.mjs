@@ -3,6 +3,8 @@ import {catalog} from './catalog.mjs';
 const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
+mkdirSync(new URL('land/',destination),{recursive:true});
+for(const file of ['land/index.html','land/land.css','land/land.js','land/listings.json'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
 for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copyFileSync(new URL('./public/'+file,import.meta.url),new URL(file,destination));
 writeFileSync(new URL('site.css',destination),readFileSync(new URL('./public/site.css',import.meta.url),'utf8').replaceAll('/assets/orbitron.ttf','/orbitron.ttf'));
 const commit=process.env.SOURCE_COMMIT||'local';
