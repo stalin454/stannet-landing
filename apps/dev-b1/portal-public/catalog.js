@@ -9,8 +9,8 @@ function render(category='all'){
   const title=document.createElement('h3');title.textContent=item.name;
   const description=document.createElement('p');description.textContent=item.description;
   const bottom=document.createElement('div');bottom.className='card-bottom';
-  const badge=document.createElement('span');badge.className='badge';badge.textContent='EN PREPARACIÓN';
-  const link=document.createElement('a');link.href='mailto:contacto@stannet.space?subject='+encodeURIComponent('StanNet Dev · '+item.name);link.textContent='Me interesa ↗';
+  const badge=document.createElement('span');badge.className='badge';badge.textContent=item.id==='land'?'PILOTO EDUCATIVO':'EN PREPARACIÓN';
+  const link=document.createElement('a');link.href=item.id==='land'?'/land/':'mailto:contacto@stannet.space?subject='+encodeURIComponent('StanNet Dev · '+item.name);link.textContent=item.id==='land'?'Explorar terrenos ↗':'Me interesa ↗';
   bottom.append(badge,link);article.append(icon,title,description,bottom);container.append(article);
  }
 }
