@@ -27,3 +27,6 @@ Rama: \`feat/academy-guided-learning-20261017\`, derivada de \`main\` en \`04cd1
 \`node --check programming-lab.js\`, \`node --check programming-web-lab.js\`, \`node --check programming-python-worker.js\`, \`python3 -m py_compile programming-python-evaluator.py\`, \`node tests/programming-python-evaluator.test.cjs\`, \`npm run test:ci\`.
 
 Caso crítico: rechazar \`print(Python listo para ciberseguridad)\` y aceptar solamente \`print("Python listo para ciberseguridad")\` si la salida coincide exactamente.
+
+## Prueba de navegador
+El workflow ejecuta `tests/programming-guided-browser.cjs` con Chromium y servidor HTTP local sin tocar producción. Comprueba error de sintaxis, corrección válida, persistencia y salida de consola JavaScript en viewport móvil. Requiere acceso temporal de CI a jsDelivr para cargar Pyodide.
