@@ -1,4 +1,17 @@
 {
-  "astrid-nova": [],
-  "stan6ix": []
+  "astrid-nova": [
+    {
+      "youtubeId": "d-6NN9f1pUM",
+      "title": "ASTRID NOVA – LOUDER THAN FEAR (Official Music Video)",
+      "description": "Louder Than Fear by Astrid Nova · StanNet Music. A cinematic pop anthem about courage, resilience and finding your voice."
+    }
+  ],
+  "stan6ix": [],
+  "pendingReview": [
+    {
+      "youtubeId": "wui2whuiuXw",
+      "url": "https://youtu.be/wui2whuiuXw",
+      "note": "User shared this video; artist, exact title and upload date require confirmation. Do not publish or mark up until verified."
+    }
+  ]
 }
