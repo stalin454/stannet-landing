@@ -47,9 +47,9 @@ if mode=='before':
  before={'protected':protected,'dev_previous':target,'domain_before':root_before,'zone_id':zone['id'],'root_dns_ids':[x['id'] for x in dns] if dns is not None else None,'root_dns_fingerprint':fingerprint(dns) if dns is not None else None,'domain_allowed':dns is not None}
  open('/tmp/dev-b1-before.json','w').write(json.dumps(before))
  with open(os.environ['GITHUB_ENV'],'a') as f:
-  f.write('DEV_CANDIDATE_URL=https://stannet-dev-portal.'+subdomain['subdomain']+'.workers.dev\n')
+  f.write('DEV_CANDIDATE_URL=https://stannet-dev-artists-preview.'+subdomain['subdomain']+'.workers.dev\n')
   f.write('DEV_DOMAIN_ALLOWED='+('true' if before['domain_allowed'] else 'false')+'\n')
-  f.write('DEV_CANDIDATE_CONFIG=apps/dev-b1/'+('portal-domain.jsonc' if root_before else 'portal-worker.jsonc')+'\n')
+  f.write('DEV_CANDIDATE_CONFIG=apps/dev-b1/portal-preview.jsonc\n')
  print(json.dumps({'protected_snapshot':protected,'root_domain_previously_bound':bool(before['domain_before']),'zone_confirmed':True,'target':'stannet-dev-portal'}))
 elif mode=='bind-check':
  before=json.load(open('/tmp/dev-b1-before.json'))

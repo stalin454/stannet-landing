@@ -59,3 +59,17 @@ npm test
 ```
 
 Existing release workflows are gated to explicitly named branches; this feature branch is **not authorized for automatic deployment**. The user must separately authorize the Dev release after reviewing the PR.
+
+## Final release preparation — 2026-10-17
+
+The owner explicitly authorized implementation, tests and deployment solely to Dev. No merge to main is authorized. Original source restoration point: `d909e7ba4fa00afdf40eff0795b05b65fc42a244`; verified local Git bundle `artists-pre-final.bundle`.
+
+Hero source: Library original `Portal Cósmico de Luz Dorada.png` (`libfile_68ff2413dcac8191a59eb17fbf36a9ce`), 1672 × 941. Converted without creative changes to WebP quality 88, 282786 bytes. Text is real HTML.
+
+YouTube oEmbed verified both IDs, titles, and author StanNet / @StanNetSpace. No upload dates asserted. VideoObject rich results remain omitted until upload dates are verified. Artist identity schema and canonical metadata are included.
+
+A separate staging Worker `stannet-dev-artists-preview` is necessary because updating the already bound `stannet-dev-portal` also updates stannet.dev immediately. The release pipeline tests the preview first, checks root ownership/DNS read-only, then deploys the same build to the existing Dev portal. It snapshots and compares Space/academy deployment IDs and retains a Dev rollback snapshot as an Actions artifact. No database migrations or writes are included.
+
+### Google Search Console pending owner access
+
+Open Google Search Console using the owner's account, select the existing stannet.dev property or add a URL-prefix property `https://stannet.dev/`. For URL-prefix verification, provide Google's exact HTML verification filename/content or meta tag; do not invent a token. Domain-property verification requires an owner-managed DNS TXT record. No DNS changes are included in this release. After verification submit `https://stannet.dev/sitemap.xml` and inspect both artist URLs to request indexing. Google controls indexing and ranking.

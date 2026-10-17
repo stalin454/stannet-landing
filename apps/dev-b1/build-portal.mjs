@@ -4,7 +4,7 @@ import {buildDenmark} from './denmark-open.mjs';
 import {buildProgramming,buildRadio} from './programming-radio-open.mjs';
 const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
-for(const file of ['index.html','portal.css','catalog.js'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
+for(const file of ['index.html','portal.css','catalog.js','hero-approved.webp'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
 for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copyFileSync(new URL('./public/'+file,import.meta.url),new URL(file,destination));
 // Add two discoverable official artist links without changing existing catalogue counts.
 const homePath=new URL('index.html',destination);
@@ -116,7 +116,7 @@ writeFileSync(new URL('_headers',destination),`/artistas/*
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY
   Permissions-Policy: microphone=(), camera=(), payment=()
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
   Cache-Control: public, max-age=0, must-revalidate
 `);
 console.log('Built public portal including independent Programming Academy and public Radio. Accounts, music admin, billing and private apps remain excluded.');

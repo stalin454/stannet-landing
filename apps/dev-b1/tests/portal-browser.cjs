@@ -16,7 +16,7 @@ const puppeteer=require('puppeteer-core');
  }
 
  try{
-  for(const width of [320,390,1280]){
+  for(const width of [320,390,768,1280,1440]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    // Worker static assets may propagate at different moments across edges.
@@ -42,6 +42,9 @@ const puppeteer=require('puppeteer-core');
    assert.equal(await page.$$('form').then(x=>x.length),0,'Incomplete signup must not be exposed');
    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily,font:document.fonts.check('21px Orbitron'),image:document.querySelector('.brand-mark').naturalWidth>0}));
    assert.equal(layout.overflow,false,'Horizontal overflow '+width);assert.ok(layout.brandFont.includes('Orbitron'));assert.ok(layout.font);assert.ok(layout.image);
+   fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
+   await page.screenshot({path:'apps/dev-b1/qa-evidence/home-'+width+'.png',fullPage:true});
+   assert.ok(await page.$eval('.hero-approved',e=>getComputedStyle(e).backgroundImage.includes('hero-approved.webp')));
    await page.click('[data-filter="Software"]');assert.equal(await page.$$eval('.card',items=>items.length),2);
    assert.equal(await page.$eval('[data-filter="Software"]',e=>e.getAttribute('aria-pressed')),'true');
    await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),3);
@@ -73,7 +76,7 @@ const puppeteer=require('puppeteer-core');
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
-   if(width===390){
+   {
     // Both public artist profiles must be indexable, visually usable, and link to each other.
     for(const [slug,expectedPhotos] of [['astrid-nova',1],['stan6ix',6]]){
       const artist=await browser.newPage();
@@ -98,14 +101,22 @@ const puppeteer=require('puppeteer-core');
       assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink);
       assert.ok(state.robots.includes('index'));
       assert.equal(state.photos,expectedPhotos);
+      fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
+      await artist.screenshot({path:'apps/dev-b1/qa-evidence/'+slug+'-'+width+'.png',fullPage:true});
       if(slug==='astrid-nova'){
         const player=await artist.$('button[data-youtube-id="d-6NN9f1pUM"]');
         assert.ok(player,'Astrid Nova official YouTube link is present');
         assert.equal(await artist.$('iframe'),null,'YouTube iframe must not load before consent');
+        for(const id of ['d-6NN9f1pUM','wui2whuiuXw']){
+          await artist.click('button[data-youtube-id="'+id+'"]');
+          assert.ok(await artist.$('iframe[src*="'+id+'"]'),'Player created for '+id);
+        }
       }
       assert.deepEqual(errors,[]);
       await artist.close();
     }
+   }
+   if(width===390){
     const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
