@@ -76,7 +76,9 @@ test('typing completion is real and persistent; IDOR, forged answers and Premium
   assert.equal((await s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},b)).status,400);
   assert.equal((await s.request('/api/typing/complete',{attempt:started.attempt,text:'forged'},a)).status,400);
   const answers=await Promise.all([s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},a),s.request('/api/typing/complete',{attempt:started.attempt,text:started.exercise.text},a)]);
-  assert.ok(answers.some(r=>r.status===200));assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(a.user.id).attempts,1);
+  assert.equal(answers.filter(r=>r.status===200).length,1,'only one concurrent completion may succeed');
+  assert.ok([400,409].includes(answers.find(r=>r.status!==200)?.status),'the other completion must be rejected');
+  assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(a.user.id).attempts,1);
   const progress=await (await s.request('/api/typing/progress?userId='+a.user.id,undefined,b)).json();assert.equal(progress.progress.length,0);
  }finally{s.db.close();}
 });
@@ -182,4 +184,101 @@ test('mail provider failure does not reveal known accounts and leaves no usable 
   assert.deepEqual(events,['reset']);
   assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS n FROM dev_tokens WHERE purpose='reset'").get().n,0);
  }finally{s.db.close();}
+});
+
+test('a stale overlapping Typing completion cannot claim success after another request finishes',async()=>{
+ const s=setup();try{
+  const learner=await account(s);
+  const started=await (await s.request('/api/typing/start',{exercise:'javascript:fragment'},learner)).json();
+  const input={attempt:started.attempt,text:started.exercise.text};
+  const prepare=s.db.prepare.bind(s.db);let intercepted=false;
+  s.db.prepare=sql=>{
+   const statement=prepare(sql),original=statement.first.bind(statement);
+   if(sql.includes('FROM dev_attempts WHERE id=? AND user_id=? AND completed=0')){
+    statement.first=async()=>{
+     const row=await original();
+     if(row&&!intercepted){
+      intercepted=true;
+      const winner=await s.request('/api/typing/complete',input,learner);
+      assert.equal(winner.status,200,'nested request takes ownership before outer batch');
+     }
+     return row;
+    };
+   }
+   return statement;
+  };
+  const lost=await s.request('/api/typing/complete',input,learner);
+  assert.equal(lost.status,409);
+  assert.equal((await lost.json()).code,'ATTEMPT_USED');
+  assert.equal(s.db.raw.prepare('SELECT attempts FROM dev_progress WHERE user_id=?').get(learner.user.id).attempts,1);
+  assert.equal(s.db.raw.prepare("SELECT COUNT(*) AS total FROM dev_audit WHERE action='typing-complete'").get().total,1);
+ }finally{s.db.close();}
+});
+
+test('pilot backend cannot take over either StanNet domain or existing academy',async()=>{
+ for(const host of ['stannet.dev','www.stannet.dev','stannet.space','www.stannet.space','academy.stannet.dev']){
+  const db=database();try{
+   assert.throws(()=>application({...environment(db,'https://'+host),deployment:'isolated-dev'}),/Protected origins/);
+  }finally{db.close();}
+ }
+ const {default:worker}=await import('../worker.mjs');
+ for(const host of ['stannet.dev','stannet.space','academy.stannet.dev']){
+  let touched=false;
+  const fake={AUTH_RELEASE:'enabled',DEV_MAILER_AUTH:'fixture-secret',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',MODE:'sandbox',PUBLIC_ORIGIN:'https://'+host,
+   DEV_ENVIRONMENT_ID:'fixture',DEV_DB:{withSession(){touched=true;throw Error('protected database touched');}},
+   DEV_MAILER:{fetch(){touched=true;throw Error('mail touched');}},
+   DEV_ASSETS:{fetch(){touched=true;throw Error('assets touched');}}};
+  const response=await worker.fetch(new Request('https://'+host+'/apps/typing'),fake);
+  assert.equal(response.status,403,host);
+  assert.equal(touched,false,'deny protected origins before querying bindings');
+ }
+});
+
+test('registration defaults closed; invite allowlist cannot be bypassed by client role, plan or flags',async()=>{
+ const s=setup({registrationMode:'invite',registrationEmails:[hash('invited@example.test')]});try{
+  assert.equal((await s.request('/api/auth/signup',{email:'outsider@example.test',password:'Valid!long-passphrase',registrationMode:'fixture',invited:true})).status,403);
+  assert.equal(s.db.raw.prepare('SELECT COUNT(*) AS n FROM dev_users').get().n,0);
+  assert.equal((await s.request('/api/auth/signup',{email:'invited@example.test',password:'Valid!long-passphrase'})).status,200);
+  const closed=application({...s.env,registrationMode:undefined});assert.equal((await closed(new Request(origin+'/api/auth/signup',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({email:'nobody@example.test',password:'Valid!long-passphrase'})}))).status,403);
+ }finally{s.db.close();}
+});
+
+test('Typing draft resumes in another session; IDOR, stale revisions, wrong answers and revocation fail closed',async()=>{
+ const s=setup();try{
+  const a=await account(s),b=await account(s,'other@example.test');
+  const entry=await (await s.request('/api/typing/start',{exercise:'javascript:fragment'},a)).json();
+  const draft=entry.exercise.text.slice(0,17);
+  const checkpoint=await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:0},a);assert.equal(checkpoint.status,200);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:'attack',revision:1},b)).status,409);
+  assert.equal((await (await s.request('/api/typing/resume?userId='+a.user.id,undefined,b)).json()).resume,null);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:0},a)).status,409);
+  const secondLogin=await s.request('/api/auth/login',{email:a.user.email,password:'Valid!long-passphrase'}),cookie=secondLogin.headers.get('set-cookie').split(';')[0];
+  const second={...(await (await s.request('/api/session',undefined,{cookie})).json()),cookie};
+  const resume=(await (await s.request('/api/typing/resume',undefined,second)).json()).resume;assert.equal(resume.text,draft);assert.equal(resume.revision,1);assert.equal(resume.attempt,entry.attempt);
+  assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:draft},second)).status,400);
+  assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:entry.exercise.text},second)).status,200);
+  assert.equal((await (await s.request('/api/typing/resume',undefined,second)).json()).resume,null);
+  assert.equal((await s.request('/api/typing/checkpoint',{attempt:entry.attempt,text:draft,revision:1},second)).status,409);
+  s.db.raw.prepare('DELETE FROM dev_entitlements WHERE user_id=?').run(a.user.id);assert.equal((await s.request('/api/typing/resume',undefined,second)).status,403);
+ }finally{s.db.close();}
+});
+
+test('all 188 original code exercises reject altered answers, accept exact code and persist each result',async()=>{
+ const s=setup();try{
+  const a=await account(s);s.db.raw.prepare("UPDATE dev_entitlements SET plan='premium' WHERE user_id=?").run(a.user.id);
+  s.db.raw.prepare('UPDATE dev_sessions SET expires=? WHERE user_id=?').run(s.now()+31536000,a.user.id);
+  const {exercises}=await import('../exercises.mjs');assert.equal(exercises.length,188);assert.equal(new Set(exercises.map(x=>x.languageId)).size,47);
+  for(const item of exercises){s.setTime(s.now()+86401);const entry=await (await s.request('/api/typing/start',{exercise:item.id},a)).json();assert.equal(entry.exercise?.text,item.text,item.id);assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:item.text+'!'},a)).status,400,item.id);assert.equal((await s.request('/api/typing/complete',{attempt:entry.attempt,text:item.text},a)).status,200,item.id);}
+  const progress=(await (await s.request('/api/typing/progress',undefined,a)).json()).progress;assert.equal(progress.length,188);assert.ok(progress.every(x=>x.completed===1&&x.attempts===1));
+ }finally{s.db.close();}
+});
+
+test('Worker refuses Auth before database/mail/assets when CPU or mail delivery evidence is absent',async()=>{
+ const {default:worker}=await import('../worker.mjs');
+ for(const missing of ['HASH_CPU_VERIFIED','MAIL_DELIVERY_VERIFIED','DEV_MAILER_AUTH']){
+  let queried=false;
+  const env={MODE:'sandbox',AUTH_RELEASE:'enabled',PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'fixture',DEV_MAILER_AUTH:'fixture-secret',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',DEV_DB:{withSession(){queried=true;throw Error('must not query');}},DEV_MAILER:{fetch(){queried=true;}},DEV_ASSETS:{fetch(){queried=true;}},[missing]:undefined};
+  assert.equal((await worker.fetch(new Request(origin+'/api/auth/signup',{method:'POST'}),env)).status,503);
+  assert.equal(queried,false,missing);
+ }
 });

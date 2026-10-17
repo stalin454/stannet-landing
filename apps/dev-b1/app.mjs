@@ -7,7 +7,8 @@ export function application(options){
  const clock=options.clock||(()=>Math.floor(Date.now()/1000));
  const secure=new URL(origin).protocol==='https:';
  if(!secure&&!['127.0.0.1','localhost'].includes(new URL(origin).hostname))throw Error('HTTPS required');
- if(['stannet.space','www.stannet.space','academy.stannet.dev'].includes(new URL(origin).hostname)||new URL(origin).hostname==='stannet.dev'&&options.deployment!=='isolated-dev')throw Error('Protected origins forbidden in B1');
+ // The pilot must not replace the Dev public catalogue or any Space origin.
+ if(['stannet.space','www.stannet.space','stannet.dev','www.stannet.dev','academy.stannet.dev'].includes(new URL(origin).hostname))throw Error('Protected origins forbidden in B1');
  const cookieName=secure?'__Host-stannet_dev_b1':'stannet_dev_b1_local';
  const cookie=(value,age)=>cookieName+'='+value+'; Path=/; HttpOnly; SameSite=Strict; Max-Age='+age+(secure?'; Secure':'');
  const statement=(sql,...args)=>db.prepare(sql).bind(...args);
@@ -79,7 +80,7 @@ export function application(options){
    if(req.method==='POST'&&path==='/api/billing/webhook'){if(!db)fail(503,'DB','Entorno no conectado.');return await webhook(req);}
    if(!['GET','POST'].includes(req.method))fail(405,'METHOD','Método no permitido.');
    if(req.method==='GET'&&path==='/api/catalog')return json({catalog,plans:[{id:'free',name:'Free',description:'3 ejercicios de Typing, cuenta verificada.'},{id:'premium',name:'Premium',description:'Catálogo completo de Typing, autorización de prueba.'}],billing:'sandbox-disabled'});
-   if(req.method==='GET'&&path==='/api/health')return json({mode:'sandbox',databaseConfigured:Boolean(db),emailConfigured:Boolean(mail),billingConfigured:Boolean(options.stripeSecret&&options.stripeRead),production:false});
+   if(req.method==='GET'&&path==='/api/health')return json({mode:'sandbox',databaseConfigured:Boolean(db),emailConfigured:Boolean(mail),billingConfigured:Boolean(options.stripeSecret&&options.stripeRead),registrationMode:options.registrationMode||'closed',production:false});
    if(req.method==='GET'&&['/','/account','/auth/verify','/auth/reset'].includes(path))return await serve('index.html');
    if(req.method==='GET'&&['/assets/portal.js','/assets/site.css','/assets/logo.png','/assets/orbitron.ttf'].includes(path))return await serve(path.slice(8));
    if(!db)fail(503,'DB','El backend de este entorno aún no está conectado.');
@@ -99,6 +100,7 @@ export function application(options){
       await limit('auth-email:'+email,8,900);
      }
      if(path==='/api/auth/signup'){
+      if(options.registrationMode!=='fixture'&&!(options.registrationMode==='invite'&&options.registrationEmails?.includes(hash(email))))fail(403,'REGISTRATION_CLOSED','El registro está cerrado. Solo se admiten cuentas de prueba autorizadas.');
       if(!mail)fail(503,'EMAIL_UNAVAILABLE','Verificación de correo no conectada.');
       if(typeof data.password!=='string'||data.password.length<12||data.password.length>128)fail(400,'PASSWORD','Usa entre 12 y 128 caracteres.');
       const encoded=await passwordHash(data.password);
@@ -166,7 +168,19 @@ export function application(options){
      const id=crypto.randomUUID(),daily=ent.plan==='free'?10:100;
      const inserted=await one('INSERT INTO dev_attempts(id,user_id,exercise,created) SELECT ?,?,?,? WHERE (SELECT COUNT(*) FROM dev_attempts WHERE user_id=? AND created>=?)<? RETURNING id',id,user.id,exercise.id,clock(),user.id,Math.floor(clock()/86400)*86400,daily);
      if(!inserted)fail(429,'QUOTA','Has alcanzado el límite diario del entorno de pruebas.');
-     return json({attempt:id,exercise});
+     await run('INSERT INTO dev_typing_state(user_id,attempt,draft,revision,updated) VALUES(?,?,?,0,?) ON CONFLICT(user_id) DO UPDATE SET attempt=excluded.attempt,draft=excluded.draft,revision=0,updated=excluded.updated',user.id,id,'',clock());
+     return json({attempt:id,exercise,revision:0});
+    }
+    if(path==='/api/typing/checkpoint'){
+     const user=await member(req),ent=await entitlement(user);
+     const saved=await one('SELECT s.*,a.exercise,a.completed FROM dev_typing_state s JOIN dev_attempts a ON a.id=s.attempt WHERE s.user_id=? AND s.attempt=?',user.id,String(data.attempt||''));
+     const exercise=saved&&exercises.find(x=>x.id===saved.exercise);
+     if(!exercise||saved.completed||!permitted(exercise,ent))fail(409,'CHECKPOINT','El intento activo ha cambiado. Recarga para continuar.');
+     if(typeof data.text!=='string'||data.text.length>exercise.text.length+25||!Number.isSafeInteger(data.revision)||data.revision<0)fail(400,'CHECKPOINT','Borrador no válido.');
+     await limit('checkpoint:'+user.id,20,60);
+     const updated=await one('UPDATE dev_typing_state SET draft=?,revision=revision+1,updated=? WHERE user_id=? AND attempt=? AND revision=? AND EXISTS(SELECT 1 FROM dev_attempts WHERE id=? AND user_id=? AND completed=0) RETURNING revision',data.text,clock(),user.id,saved.attempt,data.revision,saved.attempt,user.id);
+     if(!updated)fail(409,'CHECKPOINT_CONFLICT','Otro dispositivo ha actualizado el ejercicio. Recarga para recuperar su versión.');
+     return json({ok:true,revision:updated.revision});
     }
     if(path==='/api/typing/complete'){
      const user=await member(req),ent=await entitlement(user);
@@ -176,9 +190,13 @@ export function application(options){
      const marker=crypto.randomUUID();
      await db.batch([
       statement('INSERT INTO dev_audit(id,actor,action,subject,created) SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM dev_attempts WHERE id=? AND user_id=? AND completed=0)',marker,user.id,'typing-complete',attempt.id,clock(),attempt.id,user.id),
-      statement('UPDATE dev_attempts SET completed=1 WHERE id=? AND user_id=?',attempt.id,user.id),
+      statement('UPDATE dev_attempts SET completed=1 WHERE id=? AND user_id=? AND completed=0 AND EXISTS(SELECT 1 FROM dev_audit WHERE id=?)',attempt.id,user.id,marker),
+      statement('DELETE FROM dev_typing_state WHERE user_id=? AND attempt=? AND EXISTS(SELECT 1 FROM dev_audit WHERE id=?)',user.id,attempt.id,marker),
       statement('INSERT INTO dev_progress(user_id,exercise,completed,attempts) SELECT ?,?,1,1 WHERE EXISTS(SELECT 1 FROM dev_audit WHERE id=?) ON CONFLICT(user_id,exercise) DO UPDATE SET completed=1,attempts=dev_progress.attempts+1',user.id,exercise.id,marker)
      ]);
+     // An overlapping request can lose the claim after its preliminary SELECT.
+     // Only the winner of the atomic batch may report a successful completion.
+     if(!await one('SELECT id FROM dev_audit WHERE id=?',marker))fail(409,'ATTEMPT_USED','El intento ya se completó.');
      return json({ok:true});
     }
     fail(404,'NOT_FOUND','Acción no disponible.');
@@ -186,6 +204,12 @@ export function application(options){
    if(path==='/api/typing/exercises'){
     const user=await member(req),ent=await entitlement(user);
     return json({plan:ent.plan,exercises:exercises.filter(x=>permitted(x,ent)).map(({text,...x})=>x)});
+   }
+   if(path==='/api/typing/resume'){
+    const user=await member(req),ent=await entitlement(user);
+    const saved=await one('SELECT s.attempt,s.draft,s.revision,a.exercise FROM dev_typing_state s JOIN dev_attempts a ON a.id=s.attempt WHERE s.user_id=? AND a.user_id=? AND a.completed=0',user.id,user.id);
+    const exercise=saved&&exercises.find(x=>x.id===saved.exercise);
+    return json({resume:exercise&&permitted(exercise,ent)?{attempt:saved.attempt,text:saved.draft,revision:saved.revision,exercise}:null});
    }
    if(path==='/api/typing/progress'){const user=await member(req);await entitlement(user);return json({progress:(await statement('SELECT exercise,completed,attempts FROM dev_progress WHERE user_id=?',user.id).all()).results});}
    if(path==='/api/admin/users'){

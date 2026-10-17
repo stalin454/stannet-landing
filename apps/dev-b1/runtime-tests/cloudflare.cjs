@@ -10,7 +10,7 @@ const mail=[];let runtime,db,cookie='',csrf='';
 const modules=['worker.mjs','app.mjs','security.mjs','catalog.mjs','exercises.mjs'].map(name=>({type:'ESModule',path:join(root,name)}));
 function start(directory=persist,overrides={}){
  return new Miniflare({modules,modulesRoot:root,compatibilityDate:'2026-08-06',compatibilityFlags:['nodejs_compat'],d1Databases:{DEV_DB:'runtime-fixture-only'},d1Persist:directory,
- bindings:{MODE:'sandbox',AUTH_RELEASE:'enabled',PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'runtime-fixture-only',...overrides},
+ bindings:{MODE:'sandbox',AUTH_RELEASE:'enabled',DEV_MAILER_AUTH:'fixture-secret-never-deployed-32-characters',HASH_CPU_VERIFIED:'yes',MAIL_DELIVERY_VERIFIED:'yes',REGISTRATION_MODE:'invite',REGISTRATION_EMAIL_HASHES:require('node:crypto').createHash('sha256').update('learner@example.test').digest('hex'),PUBLIC_ORIGIN:origin,DEV_ENVIRONMENT_ID:'runtime-fixture-only',...overrides},
  serviceBindings:{DEV_MAILER:async request=>{mail.push(await request.json());return new Response('accepted');},DEV_ASSETS:async request=>{
   const path=new URL(request.url).pathname;if(!/^\/(public|private)\/[a-z.-]+$/.test(path))return new Response('missing',{status:404});
   try{return new Response(readFileSync(join(root,path)),{headers:{'Content-Type':path.endsWith('.js')?'text/javascript':'text/html'}});}catch{return new Response('missing',{status:404});}
@@ -25,7 +25,7 @@ async function migrate(){
   const sql=readFileSync(join(root,'migrations',name),'utf8').split('\n').filter(x=>!x.trim().startsWith('--')).join('\n');
   await db.batch(sql.split(';').map(x=>x.trim()).filter(Boolean).map(x=>db.prepare(x)));
  }
- await db.prepare("INSERT INTO dev_environment VALUES(1,'stannet-dev-b1',?,2)").bind('runtime-fixture-only').run();
+ await db.prepare("INSERT INTO dev_environment(id,app,environment_id,schema_version) VALUES(1,'stannet-dev-b1',?,2)").bind('runtime-fixture-only').run();
 }
 async function main(){
  await boot(persist,{AUTH_RELEASE:'disabled'});await expect('/api/auth/signup',503,{email:'no@example.test',password:'Never!registered'});
@@ -72,6 +72,8 @@ async function main(){
  // Concurrent starts must not exceed the server's free quota of 10/day.
  const starts=await Promise.all(Array.from({length:14},()=>call('/api/typing/start',{exercise:'javascript:fragment'})));
  assert.equal(starts.filter(r=>r.status===200).length,9);assert.equal(starts.filter(r=>r.status===429).length,5);
+ const unfinished=(await (await expect('/api/typing/resume',200)).json()).resume;assert.ok(unfinished);
+ await expect('/api/typing/checkpoint',200,{attempt:unfinished.attempt,text:unfinished.exercise.text.slice(0,13),revision:unfinished.revision});
  // D1 batch rollback actually undoes earlier statements on later constraint failure.
  await assert.rejects(()=>db.batch([db.prepare("INSERT INTO dev_audit VALUES('rollback-fixture','fixture','test','fixture',1)"),db.prepare("INSERT INTO dev_users(id,email,password,role) VALUES('bad-fixture','bad@example.test','test','invalid-role')")]));
  assert.equal(await db.prepare("SELECT id FROM dev_audit WHERE id='rollback-fixture'").first(),null);
@@ -80,6 +82,7 @@ async function main(){
  assert.equal((await (await expect('/api/session',200)).json()).authenticated,true);
  assert.equal((await (await expect('/api/typing/progress',200)).json()).progress[0].completed,1);
  assert.equal((await db.prepare('PRAGMA quick_check').first()).quick_check,'ok');
+ assert.equal((await (await expect('/api/typing/resume',200)).json()).resume.text,unfinished.exercise.text.slice(0,13));
  // A reversible additive schema change leaves data available to the old code.
  await db.prepare('CREATE INDEX runtime_rollback_probe ON dev_users(verified)').run();await db.prepare('DROP INDEX runtime_rollback_probe').run();
  assert.equal((await db.prepare('SELECT COUNT(*) AS n FROM dev_users').first()).n,2);
@@ -88,6 +91,6 @@ async function main(){
  cookie='';csrf='';const login=await expect('/api/auth/login',200,{email,password:'Runtime!new-passphrase'});cookie=login.headers.get('set-cookie').split(';')[0];csrf=(await (await call('/api/session')).json()).csrf;
  await expect('/api/auth/logout',200,{});await expect('/apps/typing',401);
  await runtime.dispose();await boot(restored,{DEV_ENVIRONMENT_ID:'wrong-environment'});await expect('/api/session',503);
- console.log(JSON.stringify({runtime:'workerd',compatibility_date:'2026-08-06',database:'D1 local',migration_files:2,persistence_restart:true,backup_restore:true,integrity:'ok',atomic_rollback:true,auth:'fixture-mail-only',csrf:true,roles:true,quota:true,private_resources:true,isolation_guard:true,remote_deployment:false}));
+ console.log(JSON.stringify({runtime:'workerd',compatibility_date:'2026-08-06',database:'D1 local',migration_files:3,persistence_restart:true,backup_restore:true,integrity:'ok',atomic_rollback:true,auth:'fixture-mail-only',csrf:true,roles:true,quota:true,private_resources:true,isolation_guard:true,remote_deployment:false}));
 }
 main().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{if(runtime)await runtime.dispose();for(const dir of [persist,backup,restored])rmSync(dir,{recursive:true,force:true});});

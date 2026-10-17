@@ -5,7 +5,7 @@ export const token=()=>randomBytes(32).toString('base64url');
 export const hash=value=>createHash('sha256').update(value).digest('hex');
 export function equal(a,b){const x=Buffer.from(String(a)),y=Buffer.from(String(b));return x.length===y.length&&timingSafeEqual(x,y);}
 export async function passwordHash(password,salt=randomBytes(16).toString('hex')){return 'scrypt$'+salt+'$'+(await scrypt(password,salt,32,{N:32768,r:8,p:3,maxmem:64*1024*1024})).toString('hex');}
-export async function passwordMatches(password,encoded){const [,salt]=encoded.split('$');return equal(await passwordHash(password,salt),encoded);}
+export async function passwordMatches(password,encoded){if(typeof password!=='string'||typeof encoded!=='string'||!/^scrypt\$[a-f0-9]{32}\$[a-f0-9]{64}$/.test(encoded))return false;const [,salt]=encoded.split('$');return equal(await passwordHash(password,salt),encoded);}
 export function stripeSignature(raw,secret,now){
  const fields=secret.header.split(',').map(x=>x.split('='));
  const timestamps=fields.filter(x=>x[0]==='t');
