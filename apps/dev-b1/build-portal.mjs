@@ -81,11 +81,11 @@ for(const slug of ['astrid-nova','stan6ix']){
   if(!Array.isArray(videos[slug]))throw Error('Expected array of '+slug+' videos');
   const folder=new URL(slug+'/',profileRoot);mkdirSync(folder,{recursive:true});
   let page=readFileSync(new URL('./artist-public/'+slug+'.html',import.meta.url),'utf8');
-  const accepted=videos[slug].filter(v=>v&&/^[A-Za-z0-9_-]{11}$/.test(v.youtubeId)&&typeof v.title==='string'&&v.title.trim().length>0&&v.title.length<=140&&/^\d{4}-\d{2}-\d{2}$/.test(v.uploadDate||''));
+  const accepted=videos[slug].filter(v=>v&&/^[A-Za-z0-9_-]{11}$/.test(v.youtubeId)&&typeof v.title==='string'&&v.title.trim().length>0&&v.title.length<=140&&(v.uploadDate===undefined||/^\d{4}-\d{2}-\d{2}$/.test(v.uploadDate)));
   const videoMarkup=accepted.map(v=>'<article class="video-card"><div class="video-stage" data-video-stage><button type="button" data-youtube-id="'+v.youtubeId+'" data-video-title="'+escapeHtml(v.title)+'" aria-label="Play '+escapeHtml(v.title)+'">▶ Play video</button></div><div class="video-copy"><h3>'+escapeHtml(v.title)+'</h3><p>'+escapeHtml(String(v.description||'Official StanNet Music video').slice(0,300))+'</p><a href="https://www.youtube.com/watch?v='+v.youtubeId+'" target="_blank" rel="noopener noreferrer">Watch on YouTube ↗</a></div></article>').join('\n');
   const empty='<div class="empty-video"><p>Official videos will appear here when their verified YouTube links are added.</p><a href="https://www.youtube.com/@StanNetSpace" target="_blank" rel="noopener noreferrer">Visit StanNet on YouTube ↗</a></div>';
   page=page.replace('<!-- STANNET_VIDEO_CATALOG -->',videoMarkup||empty);
-  const structuredVideos=accepted.map(v=>({'@context':'https://schema.org','@type':'VideoObject',name:v.title,description:String(v.description||'Official StanNet Music video').slice(0,300),uploadDate:v.uploadDate,thumbnailUrl:'https://i.ytimg.com/vi/'+v.youtubeId+'/hqdefault.jpg',embedUrl:'https://www.youtube-nocookie.com/embed/'+v.youtubeId,url:'https://www.youtube.com/watch?v='+v.youtubeId}));
+  const structuredVideos=accepted.filter(v=>typeof v.uploadDate==='string').map(v=>({'@context':'https://schema.org','@type':'VideoObject',name:v.title,description:String(v.description||'Official StanNet Music video').slice(0,300),uploadDate:v.uploadDate,thumbnailUrl:'https://i.ytimg.com/vi/'+v.youtubeId+'/hqdefault.jpg',embedUrl:'https://www.youtube-nocookie.com/embed/'+v.youtubeId,url:'https://www.youtube.com/watch?v='+v.youtubeId}));
   if(structuredVideos.length)page=page.replace('</head>','<script type="application/ld+json">'+JSON.stringify(structuredVideos).replaceAll('<','\\u003c')+'</script></head>');
   writeFileSync(new URL('index.html',folder),page);
 }
