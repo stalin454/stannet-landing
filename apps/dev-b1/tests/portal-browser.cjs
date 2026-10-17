@@ -79,7 +79,7 @@ const puppeteer=require('puppeteer-core');
    {
     // Both public artist profiles must be indexable, visually usable, and link to each other.
     for(const [slug,expectedPhotos] of [['astrid-nova',1],['stan6ix',6]]){
-      const artist=await browser.newPage();
+      const artist=await browser.newPage();await artist.setCacheEnabled(false);
       await artist.setViewport({width,height:900});
       const errors=[];artist.on('pageerror',e=>errors.push(e.message));
       const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
