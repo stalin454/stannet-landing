@@ -84,6 +84,12 @@ const puppeteer=require('puppeteer-core');
       const errors=[];artist.on('pageerror',e=>errors.push(e.message));
       const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
       assert.equal(res.status(),200,'Artist profile published: '+slug);
+      await artist.evaluate(async()=>{
+        const images=[...document.images];
+        for(const img of images)img.loading='eager';
+        await Promise.all(images.map(img=>img.decode()));
+        if(images.some(img=>!img.naturalWidth))throw Error('Artist gallery image did not decode');
+      });
       const state=await artist.evaluate(()=>{
         const meta=document.querySelector('script[type="application/ld+json"]');
         return {canonical:document.querySelector('link[rel="canonical"]')?.href,
