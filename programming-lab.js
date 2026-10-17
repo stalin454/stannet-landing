@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('code-editor').addEventListener('scroll',()=>{$('code-highlight').scrollTop=$('code-editor').scrollTop;$('code-highlight').scrollLeft=$('code-editor').scrollLeft});
   $('code-editor').addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();evaluate('run')}});
   document.querySelectorAll('[data-py-step]').forEach(b=>b.addEventListener('click',()=>{const i=current+(b.dataset.pyStep==='next'?1:-1);if(i>=0&&i<lessons.length)load(i)}));
-  if(window.matchMedia('(max-width:850px)').matches)$('py-lessons').open=false;
+  if(typeof window.matchMedia==='function'&&window.matchMedia('(max-width:850px)').matches&&$('py-lessons'))$('py-lessons').open=false;
   renderProgress();load(0);
   window.addEventListener('pagehide',discardWorker);
 });
