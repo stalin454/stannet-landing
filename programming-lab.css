@@ -17,3 +17,45 @@
 .pa-web-navigation button{font-size:.88rem;line-height:1.35;max-width:min(100%,320px);white-space:normal;text-align:left}
 .pa-web-navigation button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:620px){.pa-web-navigation>div{width:100%}.pa-web-navigation button{flex:1 1 130px;min-width:0}}
+
+/* StanNet Python Lab: guided, keyboard-friendly editor and compact mobile classroom. */
+.stannet-page-programming-lab .pa-lab{gap:1.2rem}
+.stannet-page-programming-lab .pa-lab-main{min-width:0}
+.stannet-page-programming-lab .pa-lab-sidebar details>summary{cursor:pointer;padding:.5rem 0;color:var(--ink);font-weight:650}
+.stannet-page-programming-lab .pa-lesson-btn:focus-visible,
+.stannet-page-programming-lab .pa-lab button:focus-visible,
+.stannet-page-programming-lab .pa-code-editor:focus-visible{outline:3px solid #248ccb;outline-offset:2px}
+.stannet-page-programming-lab .pa-editor-label{display:flex;align-items:baseline;flex-wrap:wrap;gap:1rem;font-weight:700;margin:.8rem 0}
+.stannet-page-programming-lab .pa-editor-label small{color:var(--muted);font-weight:400}
+.stannet-page-programming-lab .pa-editor-wrap{position:relative;overflow:hidden;border:1px solid #9fb7cf;border-radius:12px;background:#fff;color:#14263b;min-width:0}
+.stannet-page-programming-lab .pa-editor-highlight,
+.stannet-page-programming-lab textarea.pa-code-editor{font:400 16px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace!important;letter-spacing:0!important;tab-size:4;white-space:pre-wrap;overflow-wrap:anywhere;padding:1rem!important;margin:0!important;box-sizing:border-box!important;width:100%;min-height:250px;line-break:normal}
+.stannet-page-programming-lab .pa-editor-highlight{position:absolute;inset:0;border:0!important;pointer-events:none;overflow:hidden;background:transparent!important;color:#14263b!important}
+.stannet-page-programming-lab .pa-editor-highlight code{font:inherit;color:inherit!important;background:transparent}
+.stannet-page-programming-lab textarea.pa-code-editor{position:relative;display:block;resize:vertical;background:transparent!important;color:transparent!important;-webkit-text-fill-color:transparent!important;caret-color:#14263b;border:0!important;border-radius:0}
+.stannet-page-programming-lab textarea.pa-code-editor::selection{background:rgba(40,135,214,.24)}
+.stannet-page-programming-lab .pa-token-comment{color:#598168}
+.stannet-page-programming-lab .pa-token-string{color:#b34d36}
+.stannet-page-programming-lab .pa-token-number{color:#7b49b6}
+.stannet-page-programming-lab .pa-token-builtin{color:#0866ad}
+.stannet-page-programming-lab .pa-token-keyword{color:#9131a2;font-weight:600}
+.stannet-page-programming-lab .pa-lab-actions{flex-wrap:wrap}
+.stannet-page-programming-lab .pa-lab-actions button{min-height:46px;border-radius:10px;flex:1 1 135px}
+.stannet-page-programming-lab .pa-lab button:disabled{opacity:.55;cursor:not-allowed}
+.stannet-page-programming-lab .pa-lab-guidance{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin:1rem 0}
+.stannet-page-programming-lab .pa-lab-guidance small{color:var(--muted)}
+.stannet-page-programming-lab .pa-guide{border:1px solid #9fb7cf;border-left:4px solid #1782ad;border-radius:10px;padding:.8rem 1rem;margin:1rem 0;line-height:1.55}
+.stannet-page-programming-lab .pa-guide[data-kind="success"]{border-left-color:#248759}
+.stannet-page-programming-lab .pa-guide[data-kind="warning"]{border-left-color:#b77b24}
+.stannet-page-programming-lab .pa-guide[data-kind="hint"]{border-left-color:#7251b5}
+.stannet-page-programming-lab .pa-guide h3{margin:.1rem 0 .4rem;font-size:1.1rem}
+.stannet-page-programming-lab .pa-guide p{margin:0;color:var(--ink)}
+.stannet-page-programming-lab .pa-guide details{margin-top:.6rem}
+.stannet-page-programming-lab .pa-guide details summary{cursor:pointer}
+.stannet-page-programming-lab .pa-guide pre{overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px}
+.stannet-page-programming-lab .pa-output{min-height:70px;overflow-wrap:anywhere;white-space:pre-wrap;color:#8ef0fd!important}
+.stannet-page-programming-lab .pa-web-navigation{display:flex;gap:.7rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.stannet-page-programming-lab .pa-web-navigation div{display:flex;gap:.5rem;flex-wrap:wrap}
+@media(max-width:850px){.stannet-page-programming-lab .pa-lab-sidebar{position:static}.stannet-page-programming-lab .pa-lab-main{min-height:0}}
+@media(max-width:620px){.stannet-page-programming-lab .pa-editor-highlight,.stannet-page-programming-lab textarea.pa-code-editor{min-height:190px;height:225px}.stannet-page-programming-lab .pa-lab-actions button{font-size:.9rem;padding:.7rem .6rem}.stannet-page-programming-lab .pa-web-navigation div{width:100%}.stannet-page-programming-lab .pa-web-navigation button{flex:1 1 120px}}
+@media(prefers-reduced-motion:reduce){.stannet-page-programming-lab .pa-progress>div{transition:none}}
