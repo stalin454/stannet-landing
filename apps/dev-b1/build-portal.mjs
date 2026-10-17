@@ -69,6 +69,15 @@ let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.me
  .replaceAll('href="/pages/radio.html"','href="https://stannet.space/pages/radio.html"')
  .replace('StanNet Music</a><nav>','StanNet Dev · Music</a><nav>')
  .replace('StanNet.Space</a></footer>','StanNet.Dev</a></footer>');
+// Externalize the source styles for Dev's strict style-src 'self'. Never edit Space.
+const artistStyles=[];
+artistHtml=artistHtml.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(_,css)=>{artistStyles.push(css);return '';});
+if(!artistStyles.length||!artistStyles.every(css=>css.trim()))throw Error('Artist Universe source styles missing');
+const artistCss=artistStyles.join('\n')+'\n'+readFileSync(new URL('./artist-public/universe.css',import.meta.url),'utf8');
+writeFileSync(new URL('artist-universe.css',artistPageDir),artistCss);
+artistHtml=artistHtml.replace('</head>','<link rel="stylesheet" href="/open/artists/artist-universe.css"></head>')
+ .replace('<nav>','<nav aria-label="Music navigation">')
+ .replace('href="https://stannet.space/pages/radio.html"','href="/open/radio/"');
 artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
 
 /* Public search-friendly artist biographies and opt-in YouTube galleries. */
@@ -89,7 +98,7 @@ for(const slug of ['astrid-nova','stan6ix']){
   if(structuredVideos.length)page=page.replace('</head>','<script type="application/ld+json">'+JSON.stringify(structuredVideos).replaceAll('<','\\u003c')+'</script></head>');
   writeFileSync(new URL('index.html',folder),page);
 }
-artistHtml=artistHtml.replace('</main>','<section class="section" aria-label="Official artist profiles"><h2>Official biographies, photos & videos</h2><p><a href="/artistas/astrid-nova/">Astrid Nova · Official profile ↗</a> &nbsp; <a href="/artistas/stan6ix/">STAN6IX · Official profile ↗</a></p></section></main>');
+artistHtml=artistHtml.replace('</main>','<section class="section" aria-label="Official artist profiles"><h2>Official biographies, photos & videos</h2><p class="profile-links"><a href="/artistas/astrid-nova/">Astrid Nova · Official profile ↗</a><a href="/artistas/stan6ix/">STAN6IX · Official profile ↗</a></p></section></main>');
 writeFileSync(new URL('index.html',artistPageDir),artistHtml);
 buildDenmark(destination);
 buildProgramming(destination);

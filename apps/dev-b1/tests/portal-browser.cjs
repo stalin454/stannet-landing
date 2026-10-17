@@ -16,6 +16,7 @@ const puppeteer=require('puppeteer-core');
  }
 
  try{
+  await require('./artist-universe-browser.cjs').checkArtistUniverse(browser,base);
   for(const width of [320,390,768,1280,1440]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -99,6 +100,8 @@ const puppeteer=require('puppeteer-core');
           image:document.querySelector('.cover img')?.naturalWidth>0,
           overflow:document.documentElement.scrollWidth>innerWidth+1,
           artist:JSON.parse(meta.textContent)['@type'],
+          background:getComputedStyle(document.body).backgroundColor,
+          styled:[...document.styleSheets].some(s=>s.href?.endsWith('/artistas/artists.css')),
           hasVideoSection:Boolean(document.querySelector('#videos .video-grid')),
           robots:document.querySelector('meta[name="robots"]')?.content,
           crossLink:Boolean(document.querySelector('nav a[href*="/artistas/"]'))
@@ -106,6 +109,9 @@ const puppeteer=require('puppeteer-core');
       });
       assert.equal(state.canonical,'https://stannet.dev/artistas/'+slug+'/');
       assert.equal(state.artist,'MusicGroup');
+      assert.ok(state.styled,'Official profile stylesheet must apply');
+      assert.notEqual(state.background,'rgba(0, 0, 0, 0)');
+      assert.notEqual(state.background,'rgb(255, 255, 255)');
       assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink,JSON.stringify({slug,width,...state}));
       assert.ok(state.robots.includes('index'));
       assert.equal(state.photos,expectedPhotos);

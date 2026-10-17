@@ -1,7 +1,7 @@
 name: Dev B1 isolated release
 on:
   pull_request:
-    branches: [main, feat/stannet-dev-open-learning-20261015]
+    branches: [main, feat/stannet-dev-open-learning-20261015, feat/stannet-dev-artists-seo-20261017]
     types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/dev-b1-release.yml'
@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   changes:
-    if: github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015' || github.head_ref == 'feat/stannet-dev-artists-seo-20261017')
+    if: github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'fix/dev-artist-universe-csp-20261017' || github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015' || github.head_ref == 'feat/stannet-dev-artists-seo-20261017')
     runs-on: ubuntu-latest
     outputs:
       needed: ${{ steps.gate.outputs.needed }}
@@ -40,7 +40,7 @@ jobs:
         run: python3 apps/dev-b1/release-needed.py
   release:
     needs: changes
-    if: needs.changes.outputs.needed == 'true' && github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015' || github.head_ref == 'feat/stannet-dev-artists-seo-20261017')
+    if: needs.changes.outputs.needed == 'true' && github.repository == 'stalin454/stannet-landing' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'fix/dev-artist-universe-csp-20261017' || github.head_ref == 'feat/stannet-dev-b1-20261014' || github.head_ref == 'feat/stannet-dev-open-learning-20261015' || github.head_ref == 'feat/stannet-dev-artists-seo-20261017')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +62,14 @@ jobs:
         run: node apps/dev-b1/build-portal.mjs
       - name: Prepare Chrome driver for QA (not a production dependency)
         run: npm install --prefix /tmp/dev-b1-browser --no-save --no-audit --no-fund puppeteer-core@24
-      - name: Browser QA before publication (320, 390, 1280)
+      - name: Capture current Artist Universe before repair
+        env:
+          NODE_PATH: /tmp/dev-b1-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          QA_BASE_URL: https://stannet.dev
+          QA_ARTISTS_BASELINE: '1'
+        run: node apps/dev-b1/tests/artist-universe-browser.cjs
+      - name: Browser QA before publication (320, 390, 768, 1280, 1440)
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
           NODE_PATH: /tmp/dev-b1-browser/node_modules
@@ -114,14 +121,14 @@ jobs:
           PY
           QA_BASE_URL="$DEV_CANDIDATE_URL" node apps/dev-b1/tests/portal-browser.cjs
       - name: Recheck apex snapshot immediately before binding
-        if: env.DEV_DOMAIN_ALLOWED == 'true'
+        if: env.DEV_DOMAIN_ALLOWED == 'true' && github.head_ref != 'fix/dev-artist-universe-csp-20261017'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_DEV_DNS_READ_TOKEN: ${{ secrets.CLOUDFLARE_DEV_DNS_READ_TOKEN }}
         run: python3 apps/dev-b1/release-guard.py bind-check
       - name: Bind verified portal exclusively to stannet.dev
-        if: env.DEV_DOMAIN_ALLOWED == 'true'
+        if: env.DEV_DOMAIN_ALLOWED == 'true' && github.head_ref != 'fix/dev-artist-universe-csp-20261017'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -129,7 +136,7 @@ jobs:
           wranglerVersion: '4.139.0'
           command: deploy --config apps/dev-b1/portal-domain.jsonc
       - name: Verify public domain HTTP and committed version
-        if: env.DEV_DOMAIN_ALLOWED == 'true'
+        if: env.DEV_DOMAIN_ALLOWED == 'true' && github.head_ref != 'fix/dev-artist-universe-csp-20261017'
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
@@ -146,8 +153,8 @@ jobs:
               if attempt==11:raise
               time.sleep(5)
           PY
-      - name: Verify published Dev in real Chrome (320, 390, 1280)
-        if: env.DEV_DOMAIN_ALLOWED == 'true'
+      - name: Verify published Dev in real Chrome (320, 390, 768, 1280, 1440)
+        if: env.DEV_DOMAIN_ALLOWED == 'true' && github.head_ref != 'fix/dev-artist-universe-csp-20261017'
         env:
           SOURCE_COMMIT: ${{ github.event.pull_request.head.sha }}
           NODE_PATH: /tmp/dev-b1-browser/node_modules
@@ -159,6 +166,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_DEV_DNS_READ_TOKEN: ${{ secrets.CLOUDFLARE_DEV_DNS_READ_TOKEN }}
+        if: github.head_ref != 'fix/dev-artist-universe-csp-20261017'
         run: python3 apps/dev-b1/release-guard.py after
       - name: Roll back Dev only if critical publication checks fail
         if: failure()
