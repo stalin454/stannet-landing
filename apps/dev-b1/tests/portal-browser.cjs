@@ -110,6 +110,19 @@ const puppeteer=require('puppeteer-core');
         for(const id of ['d-6NN9f1pUM','wui2whuiuXw']){
           await artist.click('button[data-youtube-id="'+id+'"]');
           assert.ok(await artist.$('iframe[src*="'+id+'"]'),'Player created for '+id);
+          if(width===390){
+            const handle=await artist.$('iframe[src*="'+id+'"]');
+            const frame=await handle.contentFrame();
+            let playback;
+            try{
+              await frame.waitForSelector('video, .ytp-error-content-wrap, .yt-playability-error-supported-renderers',{timeout:15000});
+              await new Promise(resolve=>setTimeout(resolve,4000));
+              playback=await frame.evaluate(()=>{const v=document.querySelector('video');return {readyState:v?.readyState,currentTime:v?.currentTime,paused:v?.paused,error:document.querySelector('.ytp-error-content-wrap, .yt-playability-error-supported-renderers')?.innerText||null};});
+            }catch(error){playback={verificationError:error.message};}
+            fs.writeFileSync('apps/dev-b1/qa-evidence/playback-'+id+'.json',JSON.stringify({base,id,...playback},null,2));
+            await artist.screenshot({path:'apps/dev-b1/qa-evidence/player-'+id+'.png',fullPage:false});
+          }
+
         }
       }
       assert.deepEqual(errors,[]);
