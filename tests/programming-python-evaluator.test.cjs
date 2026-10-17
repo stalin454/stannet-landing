@@ -37,7 +37,6 @@ assert check('with open("access.log","r") as f:\\n    logs=f.read()',"PY06-01")[
 assert check('import logging\\nlogging.warning("Intento sospechoso")',"PY07-02")["ok"]
 assert check('import pathlib\\nfrom datetime import datetime',"PY09-01")["ok"]
 assert check('eventos=[{"ip":"10.0.0.5","severity":"high"},{"ip":"10.0.0.8","severity":"low"}]\\nfor e in eventos:\\n    if e["severity"]=="high": print(e["ip"])',"PY12-01")["ok"]
-assert not check('while True:\\n    pass',"UNKNOWN")["ok"] if False else True
 print("PASS: Python runtime grading rejects false positives and accepts working solutions.")
 `;
 const result=spawnSync(process.env.PYTHON_BIN||'python3',['-c',python],{encoding:'utf8',timeout:15000});
