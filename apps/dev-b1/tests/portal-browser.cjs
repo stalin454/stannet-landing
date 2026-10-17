@@ -69,11 +69,38 @@ const puppeteer=require('puppeteer-core');
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,17);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
+   assert.equal(discovery.listed,19);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
    if(width===390){
+    // Both public artist profiles must be indexable, visually usable, and link to each other.
+    for(const [slug,expectedPhotos] of [['astrid-nova',1],['stan6ix',6]]){
+      const artist=await browser.newPage();
+      await artist.setViewport({width,height:900});
+      const errors=[];artist.on('pageerror',e=>errors.push(e.message));
+      const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
+      assert.equal(res.status(),200,'Artist profile published: '+slug);
+      const state=await artist.evaluate(()=>{
+        const meta=document.querySelector('script[type="application/ld+json"]');
+        return {canonical:document.querySelector('link[rel="canonical"]')?.href,
+          photos:document.querySelectorAll('.gallery .photo').length,
+          image:document.querySelector('.cover img')?.naturalWidth>0,
+          overflow:document.documentElement.scrollWidth>innerWidth+1,
+          artist:JSON.parse(meta.textContent)['@type'],
+          hasVideoSection:Boolean(document.querySelector('#videos .video-grid')),
+          robots:document.querySelector('meta[name="robots"]')?.content,
+          crossLink:Boolean(document.querySelector('nav a[href*="/artistas/"]'))
+        };
+      });
+      assert.equal(state.canonical,'https://stannet.dev/artistas/'+slug+'/');
+      assert.equal(state.artist,'MusicGroup');
+      assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink);
+      assert.ok(state.robots.includes('index'));
+      assert.equal(state.photos,expectedPhotos);
+      assert.deepEqual(errors,[]);
+      await artist.close();
+    }
     const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
