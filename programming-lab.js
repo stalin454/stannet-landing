@@ -7,7 +7,7 @@ let current=0,worker=null,requestId=0,busy=false,timeout=null,hintLevel=0,lastEr
 const read=(key)=>{try{return JSON.parse(localStorage.getItem(key)||'{}')||{}}catch{return {}}};
 let progress=read(PROGRESS),drafts=read(DRAFTS),attempts=read(ATTEMPTS);
 function store(key,data){try{localStorage.setItem(key,JSON.stringify(data));return true}catch{return false}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;'}[c]))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderProgress(){
   const done=lessons.filter(l=>progress[l.id]?.verified).length,pct=lessons.length?Math.round(done/lessons.length*100):0;
   $('progress-bar').style.width=pct+'%';$('progress-text').textContent=pct+'% verificado · '+done+'/'+lessons.length+' lecciones';
