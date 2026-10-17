@@ -1,0 +1,50 @@
+name: Academy guided learning quality (no deployment)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/academy-guided-quality.yml'
+      - 'pages/programming-lab.html'
+      - 'pages/programming-web-lab.html'
+      - 'programming-lab.js'
+      - 'programming-lab.css'
+      - 'programming-python-*.py'
+      - 'programming-python-worker.js'
+      - 'programming-web-lab.js'
+      - 'programming-web-lab-contrast.css'
+      - 'tests/programming-python-evaluator.test.cjs'
+      - 'tests/programming-guided-browser.cjs'
+      - 'package.json'
+
+permissions:
+  contents: read
+
+jobs:
+  guided-academy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Validate changed JavaScript and Python
+        run: |
+          node --check programming-lab.js
+          node --check programming-python-worker.js
+          node --check programming-web-lab.js
+          python3 -m py_compile programming-python-evaluator.py
+      - name: Full repository regressions (including new Python checks)
+        run: npm run test:ci
+      - name: Real Chromium mobile smoke (local server, never deploys)
+        shell: bash
+        env:
+          NODE_PATH: /tmp/stannet-academy-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          npm install --prefix /tmp/stannet-academy-browser --no-save --no-audit --no-fund puppeteer-core@24
+          node tests/programming-guided-browser.cjs
