@@ -38,7 +38,7 @@ async function checkArtistUniverse(browser,base,{baseline=false}={}){
     profiles:[...document.querySelectorAll('.profile-links a')].map(a=>a.getAttribute('href')),
     csp:window.artistCsp};
   });
-  const evidence={base,width,status:response.status(),cspHeader:response.headers()['content-security-policy'],...state,errors,blocked};
+  const evidence={base,width,status:response.status(),cspHeader:response.headers()['content-security-policy'],cacheControl:response.headers()['cache-control'],...state,errors,blocked};
   results.push(evidence);
   const prefix=baseline?'artists-before-':'artists-after-';
   await page.screenshot({path:'apps/dev-b1/qa-evidence/'+prefix+width+'.png',fullPage:true});
@@ -57,6 +57,7 @@ async function checkArtistUniverse(browser,base,{baseline=false}={}){
    assert.equal(state.inlineStyles,0);assert.deepEqual(state.csp,[]);assert.deepEqual(errors,[]);assert.deepEqual(blocked,[]);
    assert.deepEqual(state.profiles,['/artistas/astrid-nova/','/artistas/stan6ix/']);
    if(base.startsWith('https:')){
+    assert.match(evidence.cacheControl,/no-transform/,'Prevent edge injection on strict-CSP Artist Universe');
     assert.match(evidence.cspHeader,/style-src 'self';/);
     assert.ok(!evidence.cspHeader.includes('unsafe-inline'));
    }
