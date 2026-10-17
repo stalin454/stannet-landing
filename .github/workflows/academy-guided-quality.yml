@@ -14,6 +14,7 @@ on:
       - 'programming-web-lab.js'
       - 'programming-web-lab-contrast.css'
       - 'tests/programming-python-evaluator.test.cjs'
+      - 'tests/programming-guided-browser.cjs'
       - 'package.json'
 
 permissions:
@@ -39,3 +40,11 @@ jobs:
           python3 -m py_compile programming-python-evaluator.py
       - name: Full repository regressions (including new Python checks)
         run: npm run test:ci
+      - name: Real Chromium mobile smoke (local server, never deploys)
+        shell: bash
+        env:
+          NODE_PATH: /tmp/stannet-academy-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          npm install --prefix /tmp/stannet-academy-browser --no-save --no-audit --no-fund puppeteer-core@24
+          node tests/programming-guided-browser.cjs
