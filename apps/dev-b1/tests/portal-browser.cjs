@@ -98,7 +98,7 @@ const puppeteer=require('puppeteer-core');
       });
       assert.equal(state.canonical,'https://stannet.dev/artistas/'+slug+'/');
       assert.equal(state.artist,'MusicGroup');
-      assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink);
+      assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink,JSON.stringify({slug,width,...state}));
       assert.ok(state.robots.includes('index'));
       assert.equal(state.photos,expectedPhotos);
       fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
