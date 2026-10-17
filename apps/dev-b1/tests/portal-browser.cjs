@@ -156,6 +156,28 @@ const puppeteer=require('puppeteer-core');
        assert.ok(stream.schedule>12);
        assert.equal(stream.source,null,'Stream must not auto-play or connect before consent');
        assert.equal(stream.play,false);
+       // Simulate HTMLMediaElement at the UI boundary; never pretend this validates the live broadcast.
+       const playerQa=await browser.newPage();
+       await playerQa.evaluateOnNewDocument(()=>{
+         HTMLMediaElement.prototype.load=function(){};
+         HTMLMediaElement.prototype.play=function(){
+           const media=this;
+           const isPrimary=media.src.endsWith('/stannet.mp3');
+           queueMicrotask(()=>media.dispatchEvent(new Event(isPrimary?'error':'playing')));
+           return isPrimary?Promise.reject(new Error('Simulated primary failure')):Promise.resolve();
+         };
+       });
+       const qaRadio=await playerQa.goto(base+'/open/radio/',{waitUntil:'domcontentloaded'});
+       assert.equal(qaRadio.status(),200);
+       assert.equal(await playerQa.$eval('#radioAudio',el=>el.getAttribute('src')),null,'Dev must not autoplay the stream');
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='SIN SEÑAL');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/stannet.mp3')),'First attempt uses documented Icecast mount');
+       assert.match(await playerQa.$eval('#radioMessage',el=>el.textContent),/otra ruta/);
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/listen/stannet-radio/radio.mp3')),'Retry uses existing alternative mount');
+       await playerQa.close();
        assert.equal(await lab.$('#radioAdminLoginForm'),null,'Radio admin panel must not be bundled');
        assert.equal(await lab.$('script[src*="radio.js"]'),null,'Original admin JS must not be deployed');
      }
