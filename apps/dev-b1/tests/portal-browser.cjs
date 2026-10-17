@@ -16,7 +16,7 @@ const puppeteer=require('puppeteer-core');
  }
 
  try{
-  for(const width of [320,390,1280]){
+  for(const width of [320,390,768,1280,1440]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
    // Worker static assets may propagate at different moments across edges.
@@ -25,7 +25,7 @@ const puppeteer=require('puppeteer-core');
    let response=null,consistent=false;
    for(let attempt=0;attempt<24;attempt++){
     response=await page.goto(base+'/?qa='+encodeURIComponent(expected)+'-'+attempt,{waitUntil:'networkidle0',timeout:45000});
-    assert.equal(response.status(),200);
+    assert.ok([200,304].includes(response.status()),'Portal HTML status: '+response.status());
     const counts=await page.evaluate(()=>({
      featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
      catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
@@ -35,13 +35,18 @@ const puppeteer=require('puppeteer-core');
    }
    assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (nine featured routes expected)');
    await publishedVersion(page);
-   const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
+   // A conditional navigation can return HTTP 304 with a verified cached document.
+   // DOM, version and assets are asserted below; a 304 alone is never considered sufficient.
+   const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.ok([200,304].includes(current.status()),'Reloaded HTML status: '+current.status());
    await page.waitForSelector('.card');
    await page.evaluate(()=>document.fonts.ready);
    assert.equal(await page.$$eval('.card',items=>items.length),10);
    assert.equal(await page.$$('form').then(x=>x.length),0,'Incomplete signup must not be exposed');
    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily,font:document.fonts.check('21px Orbitron'),image:document.querySelector('.brand-mark').naturalWidth>0}));
    assert.equal(layout.overflow,false,'Horizontal overflow '+width);assert.ok(layout.brandFont.includes('Orbitron'));assert.ok(layout.font);assert.ok(layout.image);
+   fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
+   await page.screenshot({path:'apps/dev-b1/qa-evidence/home-'+width+'.png',fullPage:true});
+   assert.ok(await page.$eval('.hero-approved',e=>getComputedStyle(e).backgroundImage.includes('hero-approved.webp')));
    await page.click('[data-filter="Software"]');assert.equal(await page.$$eval('.card',items=>items.length),2);
    assert.equal(await page.$eval('[data-filter="Software"]',e=>e.getAttribute('aria-pressed')),'true');
    await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),3);
@@ -69,17 +74,76 @@ const puppeteer=require('puppeteer-core');
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,17);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
+   assert.equal(discovery.listed,19);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
+   {
+    // Both public artist profiles must be indexable, visually usable, and link to each other.
+    for(const [slug,expectedPhotos] of [['astrid-nova',1],['stan6ix',6]]){
+      const artist=await browser.newPage();await artist.setCacheEnabled(false);
+      await artist.setViewport({width,height:900});
+      const errors=[];artist.on('pageerror',e=>errors.push(e.message));
+      const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
+      assert.ok([200,304].includes(res.status()),'Artist HTML status: '+slug+' '+res.status());
+      await artist.evaluate(async()=>{
+        const images=[...document.images];
+        for(const img of images)img.loading='eager';
+        await Promise.all(images.map(img=>img.decode()));
+        if(images.some(img=>!img.naturalWidth))throw Error('Artist gallery image did not decode');
+      });
+      const state=await artist.evaluate(()=>{
+        const meta=document.querySelector('script[type="application/ld+json"]');
+        return {canonical:document.querySelector('link[rel="canonical"]')?.href,
+          photos:document.querySelectorAll('.gallery .photo').length,
+          image:document.querySelector('.cover img')?.naturalWidth>0,
+          overflow:document.documentElement.scrollWidth>innerWidth+1,
+          artist:JSON.parse(meta.textContent)['@type'],
+          hasVideoSection:Boolean(document.querySelector('#videos .video-grid')),
+          robots:document.querySelector('meta[name="robots"]')?.content,
+          crossLink:Boolean(document.querySelector('nav a[href*="/artistas/"]'))
+        };
+      });
+      assert.equal(state.canonical,'https://stannet.dev/artistas/'+slug+'/');
+      assert.equal(state.artist,'MusicGroup');
+      assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink,JSON.stringify({slug,width,...state}));
+      assert.ok(state.robots.includes('index'));
+      assert.equal(state.photos,expectedPhotos);
+      fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
+      await artist.screenshot({path:'apps/dev-b1/qa-evidence/'+slug+'-'+width+'.png',fullPage:true});
+      if(slug==='astrid-nova'){
+        const player=await artist.$('button[data-youtube-id="d-6NN9f1pUM"]');
+        assert.ok(player,'Astrid Nova official YouTube link is present');
+        assert.equal(await artist.$('iframe'),null,'YouTube iframe must not load before consent');
+        for(const id of ['d-6NN9f1pUM','wui2whuiuXw']){
+          await artist.click('button[data-youtube-id="'+id+'"]');
+          assert.ok(await artist.$('iframe[src*="'+id+'"]'),'Player created for '+id);
+          if(width===390){
+            const handle=await artist.$('iframe[src*="'+id+'"]');
+            const frame=await handle.contentFrame();
+            let playback;
+            try{
+              await frame.waitForSelector('video, .ytp-error-content-wrap, .yt-playability-error-supported-renderers',{timeout:15000});
+              await new Promise(resolve=>setTimeout(resolve,4000));
+              playback=await frame.evaluate(()=>{const v=document.querySelector('video');return {readyState:v?.readyState,currentTime:v?.currentTime,paused:v?.paused,error:document.querySelector('.ytp-error-content-wrap, .yt-playability-error-supported-renderers')?.innerText||null};});
+            }catch(error){playback={verificationError:error.message};}
+            fs.writeFileSync('apps/dev-b1/qa-evidence/playback-'+id+'.json',JSON.stringify({base,id,...playback},null,2));
+            await artist.screenshot({path:'apps/dev-b1/qa-evidence/player-'+id+'.png',fullPage:false});
+          }
+
+        }
+      }
+      assert.deepEqual(errors,[]);
+      await artist.close();
+    }
+   }
    if(width===390){
     const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
      const response=await lab.goto(base+url,{waitUntil:'networkidle0',timeout:45000});
-     assert.equal(response.status(),200,'Lab must load: '+url);
+     assert.ok([200,304].includes(response.status()),'Lab HTML status: '+url+' '+response.status());
      const count=await lab.$$eval(selectors[url],nodes=>nodes.length);
      assert.ok(count>0,'Lab must render interactive content: '+url);
 
@@ -89,11 +153,44 @@ const puppeteer=require('puppeteer-core');
        assert.ok(jsLink,'Programming Academy links to JavaScript coach');
      }
      if(url==='/open/radio/'){
-       const stream=await lab.evaluate(async()=>{const r=await fetch('/open/radio/schedule.json');return {ok:r.ok,schedule:(await r.json()).items.length,source:document.querySelector('#radioAudio').getAttribute('src'),play:document.querySelector('#radioPlay').disabled}});
+       const stream=await lab.evaluate(async()=>{
+         const r=await fetch('/open/radio/schedule.json'),audio=document.querySelector('#radioAudio');
+         return {ok:r.ok,schedule:(await r.json()).items.length,source:audio.getAttribute('src'),
+           preload:audio.getAttribute('preload'),native:audio.hasAttribute('controls'),paused:audio.paused,
+           play:document.querySelector('#radioPlay').disabled,
+           fallback:Boolean(document.querySelector('a[href="https://radio.stannet.space/listen/stannet-radio/radio.mp3"]'))};
+       });
        assert.equal(stream.ok,true);
        assert.ok(stream.schedule>12);
-       assert.equal(stream.source,null,'Stream must not auto-play or connect before consent');
+       assert.equal(stream.source,'https://radio.stannet.space/listen/stannet-radio/radio.mp3','Use listener-confirmed AzuraCast stream');
+       assert.equal(stream.preload,'none');
+       assert.equal(stream.native,true,'Native audio controls provide independent fallback');
+       assert.equal(stream.paused,true,'Must not autoplay the stream');
+       assert.equal(stream.fallback,true,'Provide a direct radio stream link');
        assert.equal(stream.play,false);
+       // UI mock checks playing/error handling. External live sound requires a real listening test.
+       const playerQa=await browser.newPage();
+       await playerQa.evaluateOnNewDocument(()=>{
+         HTMLMediaElement.prototype.load=function(){};
+         HTMLMediaElement.prototype.play=function(){
+           const media=this;
+           queueMicrotask(()=>media.dispatchEvent(new Event('playing')));
+           return Promise.resolve();
+         };
+       });
+       const qaRadio=await playerQa.goto(base+'/open/radio/',{waitUntil:'domcontentloaded'});
+       assert.ok([200,304].includes(qaRadio.status()),'Radio HTML status: '+qaRadio.status());
+       assert.equal(await playerQa.$eval('#radioAudio',el=>el.paused),true,'Radio is not autoplaying');
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/listen/stannet-radio/radio.mp3')),'First attempt uses confirmed stream');
+       await playerQa.$eval('#radioAudio',el=>el.dispatchEvent(new Event('error')));
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='SIN SEÑAL');
+       assert.match(await playerQa.$eval('#radioMessage',el=>el.textContent),/alternativa/);
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/stannet.mp3')),'Retry uses secondary legacy Icecast mount');
+       await playerQa.close();
        assert.equal(await lab.$('#radioAdminLoginForm'),null,'Radio admin panel must not be bundled');
        assert.equal(await lab.$('script[src*="radio.js"]'),null,'Original admin JS must not be deployed');
      }
@@ -111,7 +208,7 @@ const puppeteer=require('puppeteer-core');
     const cv=await browser.newPage(),cvErrors=[];
     cv.on('pageerror',error=>cvErrors.push(error.message));
     const cvResponse=await cv.goto(base+'/open/denmark/cv/',{waitUntil:'networkidle0',timeout:45000});
-    assert.equal(cvResponse.status(),200);
+    assert.ok([200,304].includes(cvResponse.status()),'CV HTML status: '+cvResponse.status());
     assert.equal(await cv.$eval('link[rel="canonical"]',x=>x.href),'https://stannet.dev/open/denmark/cv/');
     assert.equal(await cv.evaluate(()=>typeof window.pdfjsLib),'object','Local PDF.js library must load');
     await cv.type('#fullName','Persona de Prueba');
@@ -133,7 +230,7 @@ const puppeteer=require('puppeteer-core');
       const app=await browser.newPage(),appErrors=[];
       app.on('pageerror',error=>appErrors.push(error.message));
       const res=await app.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});
-      assert.equal(res.status(),200,'Academy route '+route);
+      assert.ok([200,304].includes(res.status()),'Academy HTML status: '+route+' '+res.status());
       await app.waitForSelector(selector,{timeout:30000});
       if(route.endsWith('/coach/')){
         await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>=5,{timeout:12000});
