@@ -85,6 +85,7 @@ const puppeteer=require('puppeteer-core');
       const artist=await browser.newPage();await artist.setCacheEnabled(false);
       await artist.setViewport({width,height:900});
       const errors=[];artist.on('pageerror',e=>errors.push(e.message));
+      await artist.evaluateOnNewDocument(()=>{window.artistCsp=[];document.addEventListener('securitypolicyviolation',e=>window.artistCsp.push({directive:e.effectiveDirective,blocked:e.blockedURI}));});
       const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
       assert.ok([200,304].includes(res.status()),'Artist HTML status: '+slug+' '+res.status());
       await artist.evaluate(async()=>{
@@ -101,6 +102,7 @@ const puppeteer=require('puppeteer-core');
           overflow:document.documentElement.scrollWidth>innerWidth+1,
           artist:JSON.parse(meta.textContent)['@type'],
           background:getComputedStyle(document.body).backgroundColor,
+          csp:window.artistCsp,
           styled:[...document.styleSheets].some(s=>s.href?.endsWith('/artistas/artists.css')),
           hasVideoSection:Boolean(document.querySelector('#videos .video-grid')),
           robots:document.querySelector('meta[name="robots"]')?.content,
@@ -110,6 +112,8 @@ const puppeteer=require('puppeteer-core');
       assert.equal(state.canonical,'https://stannet.dev/artistas/'+slug+'/');
       assert.equal(state.artist,'MusicGroup');
       assert.ok(state.styled,'Official profile stylesheet must apply');
+      assert.deepEqual(state.csp,[],'No CSP violations on official artist profile '+slug);
+      if(base.startsWith('https:'))assert.match(res.headers()['cache-control'],/no-transform/);
       assert.notEqual(state.background,'rgba(0, 0, 0, 0)');
       assert.notEqual(state.background,'rgb(255, 255, 255)');
       assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink,JSON.stringify({slug,width,...state}));

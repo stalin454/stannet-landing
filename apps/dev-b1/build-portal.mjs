@@ -116,6 +116,7 @@ writeFileSync(new URL('_headers',destination),`/open/artists/*
   Cache-Control: no-transform
 
 /artistas/*
+  Cache-Control: no-transform
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
 
 /open/programming/*

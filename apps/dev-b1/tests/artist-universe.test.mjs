@@ -18,6 +18,7 @@ test('Dev build externalizes every original Artist Universe style under strict C
  assert.match(css,/prefers-reduced-motion/);
  const headers=readFileSync(new URL('_headers',output),'utf8');
  assert.match(headers,/\/open\/artists\/\*\n  Cache-Control: no-transform/);
+ assert.match(headers,/\/artistas\/\*\n  Cache-Control: no-transform/);
  const policy=headers.split('/*\n').at(-1);
  assert.match(policy,/style-src 'self';/);assert.doesNotMatch(policy,/unsafe-inline/);
  for(const [,name] of original.matchAll(/\/assets\/music\/artists\/([^" ]+)/g))assert.ok(html.includes('/open/artists/img/'+name));
