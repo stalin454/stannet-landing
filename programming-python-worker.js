@@ -23,6 +23,7 @@ self.addEventListener('message',async(event)=>{
     py.globals.set('academy_source',String(code||''));
     py.globals.set('academy_lesson',String(lesson||''));
     py.globals.set('academy_mode',op);
+    self.postMessage({id,stage:'ready'});
     const json=py.runPython('import json\njson.dumps(evaluate(academy_source, academy_lesson, academy_mode), ensure_ascii=False)');
     self.postMessage({id,result:JSON.parse(json)});
   }catch(error){
