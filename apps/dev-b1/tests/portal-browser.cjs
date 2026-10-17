@@ -25,7 +25,7 @@ const puppeteer=require('puppeteer-core');
    let response=null,consistent=false;
    for(let attempt=0;attempt<24;attempt++){
     response=await page.goto(base+'/?qa='+encodeURIComponent(expected)+'-'+attempt,{waitUntil:'networkidle0',timeout:45000});
-    assert.equal(response.status(),200);
+    assert.ok([200,304].includes(response.status()),'Portal HTML status: '+response.status());
     const counts=await page.evaluate(()=>({
      featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
      catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
@@ -35,7 +35,9 @@ const puppeteer=require('puppeteer-core');
    }
    assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (nine featured routes expected)');
    await publishedVersion(page);
-   const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.equal(current.status(),200);
+   // A conditional navigation can return HTTP 304 with a verified cached document.
+   // DOM, version and assets are asserted below; a 304 alone is never considered sufficient.
+   const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.ok([200,304].includes(current.status()),'Reloaded HTML status: '+current.status());
    await page.waitForSelector('.card');
    await page.evaluate(()=>document.fonts.ready);
    assert.equal(await page.$$eval('.card',items=>items.length),10);
@@ -83,7 +85,7 @@ const puppeteer=require('puppeteer-core');
       await artist.setViewport({width,height:900});
       const errors=[];artist.on('pageerror',e=>errors.push(e.message));
       const res=await artist.goto(base+'/artistas/'+slug+'/',{waitUntil:'networkidle0',timeout:45000});
-      assert.equal(res.status(),200,'Artist profile published: '+slug);
+      assert.ok([200,304].includes(res.status()),'Artist HTML status: '+slug+' '+res.status());
       await artist.evaluate(async()=>{
         const images=[...document.images];
         for(const img of images)img.loading='eager';
@@ -141,7 +143,7 @@ const puppeteer=require('puppeteer-core');
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
      const response=await lab.goto(base+url,{waitUntil:'networkidle0',timeout:45000});
-     assert.equal(response.status(),200,'Lab must load: '+url);
+     assert.ok([200,304].includes(response.status()),'Lab HTML status: '+url+' '+response.status());
      const count=await lab.$$eval(selectors[url],nodes=>nodes.length);
      assert.ok(count>0,'Lab must render interactive content: '+url);
 
@@ -177,7 +179,7 @@ const puppeteer=require('puppeteer-core');
          };
        });
        const qaRadio=await playerQa.goto(base+'/open/radio/',{waitUntil:'domcontentloaded'});
-       assert.equal(qaRadio.status(),200);
+       assert.ok([200,304].includes(qaRadio.status()),'Radio HTML status: '+qaRadio.status());
        assert.equal(await playerQa.$eval('#radioAudio',el=>el.paused),true,'Radio is not autoplaying');
        await playerQa.click('#radioPlay');
        await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
@@ -206,7 +208,7 @@ const puppeteer=require('puppeteer-core');
     const cv=await browser.newPage(),cvErrors=[];
     cv.on('pageerror',error=>cvErrors.push(error.message));
     const cvResponse=await cv.goto(base+'/open/denmark/cv/',{waitUntil:'networkidle0',timeout:45000});
-    assert.equal(cvResponse.status(),200);
+    assert.ok([200,304].includes(cvResponse.status()),'CV HTML status: '+cvResponse.status());
     assert.equal(await cv.$eval('link[rel="canonical"]',x=>x.href),'https://stannet.dev/open/denmark/cv/');
     assert.equal(await cv.evaluate(()=>typeof window.pdfjsLib),'object','Local PDF.js library must load');
     await cv.type('#fullName','Persona de Prueba');
@@ -228,7 +230,7 @@ const puppeteer=require('puppeteer-core');
       const app=await browser.newPage(),appErrors=[];
       app.on('pageerror',error=>appErrors.push(error.message));
       const res=await app.goto(base+route,{waitUntil:'domcontentloaded',timeout:60000});
-      assert.equal(res.status(),200,'Academy route '+route);
+      assert.ok([200,304].includes(res.status()),'Academy HTML status: '+route+' '+res.status());
       await app.waitForSelector(selector,{timeout:30000});
       if(route.endsWith('/coach/')){
         await app.waitForFunction(()=>document.querySelectorAll('#coach-list button').length>=5,{timeout:12000});
