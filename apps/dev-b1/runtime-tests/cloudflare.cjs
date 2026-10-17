@@ -47,6 +47,7 @@ async function main(){
  await expect('/api/typing/start',403,{exercise:'javascript:fragment'},{'X-CSRF-Token':''});
  await expect('/api/typing/start',403,{exercise:'javascript:fragment'},{Origin:'https://attacker.example.test'});
  const entry=await (await expect('/api/typing/start',200,{exercise:'javascript:fragment'})).json();
+ const restoredAttempt=await (await expect('/api/typing/state',200)).json();assert.equal(restoredAttempt.active.attempt,entry.attempt);assert.equal(restoredAttempt.quota.remaining,9);
  await expect('/api/typing/complete',400,{attempt:entry.attempt,text:'forged'});
  await expect('/api/typing/complete',200,{attempt:entry.attempt,text:entry.exercise.text});
  assert.equal((await (await expect('/api/typing/progress',200)).json()).progress[0].attempts,1);
@@ -66,6 +67,7 @@ async function main(){
  const otherLogin=await expect('/api/auth/login',200,{email:'second@example.test',password},{Cookie:''});const otherCookie=otherLogin.headers.get('set-cookie').split(';')[0];
  const otherSession=await (await expect('/api/session',200,undefined,{Cookie:otherCookie})).json();
  const otherProgress=await (await expect('/api/typing/progress?userId='+session.user.id,200,undefined,{Cookie:otherCookie})).json();assert.deepEqual(otherProgress.progress,[]);
+ const otherState=await (await expect('/api/typing/state?userId='+session.user.id,200,undefined,{Cookie:otherCookie})).json();assert.equal(otherState.active,null);assert.equal(otherState.quota.used,0);
  const otherStart=await (await expect('/api/typing/start',200,{exercise:'javascript:fragment'},{Cookie:otherCookie,'X-CSRF-Token':otherSession.csrf})).json();
  await expect('/api/typing/complete',400,{attempt:otherStart.attempt,text:otherStart.exercise.text});
  assert.equal((await db.prepare('SELECT completed FROM dev_attempts WHERE id=?').bind(otherStart.attempt).first()).completed,0);

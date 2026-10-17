@@ -1,0 +1,86 @@
+{
+  "source_commit": "f13d0bf461e00b0f0a8117cd9954814b239648b4",
+  "run_url": "https://github.com/stalin454/stannet-landing/actions/runs/38646036001",
+  "access": {
+    "checked_at": "2026-10-14T22:12:50.885330+00:00",
+    "mode": "GET-only",
+    "credentials_exported": false,
+    "d1_credential_configured": false,
+    "dns_credential_configured": true,
+    "plan_confirmed": false,
+    "writes_performed": false,
+    "databases": {
+      "readable": false,
+      "reason": "Cloudflare metadata read blocked: HTTP 401"
+    },
+    "domains": {
+      "readable": true,
+      "dev": [
+        {
+          "hostname": "stannet.dev",
+          "service": "stannet-dev-portal"
+        }
+      ]
+    },
+    "dns": {
+      "readable": true,
+      "apex_records": [
+        {
+          "type": "AAAA",
+          "name": "stannet.dev",
+          "content": "100::"
+        }
+      ]
+    }
+  },
+  "public_preview": [
+    {
+      "origin": "https://stannet.dev",
+      "/": {
+        "status": 200,
+        "content_type": "text/html"
+      },
+      "/version.json": {
+        "status": 200,
+        "content_type": "application/json",
+        "version": {
+          "commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
+          "module": "public-portal",
+          "auth": false,
+          "typing": false,
+          "payments": false
+        }
+      },
+      "/apps/typing": {
+        "status": 404
+      },
+      "/private/typing.js": {
+        "status": 404
+      }
+    },
+    {
+      "origin": "https://stannet-dev-portal.stalin454.workers.dev",
+      "/": {
+        "status": 200,
+        "content_type": "text/html"
+      },
+      "/version.json": {
+        "status": 200,
+        "content_type": "application/json",
+        "version": {
+          "commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
+          "module": "public-portal",
+          "auth": false,
+          "typing": false,
+          "payments": false
+        }
+      },
+      "/apps/typing": {
+        "status": 404
+      },
+      "/private/typing.js": {
+        "status": 404
+      }
+    }
+  ]
+}

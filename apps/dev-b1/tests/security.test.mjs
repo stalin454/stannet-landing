@@ -43,7 +43,7 @@ test('unverified registration cannot sign in; generic recovery/signup do not enu
 });
 test('URL and private resources require login; no path/alias bypass or cross-user cache',async()=>{
  const s=setup();try{
-  for(const path of ['/apps/typing','/apps/typing/','/apps/typing/index.html','/apps/typing/typing.js','/api/typing/exercises','/api/typing/progress']){const r=await s.request(path);assert.equal(r.status,401,path);assert.equal(r.headers.get('Cache-Control'),'private, no-store');}
+  for(const path of ['/apps/typing','/apps/typing/','/apps/typing/index.html','/apps/typing/typing.js','/api/typing/exercises','/api/typing/progress','/api/typing/state']){const r=await s.request(path);assert.equal(r.status,401,path);assert.equal(r.headers.get('Cache-Control'),'private, no-store');}
   for(const path of ['/private/typing.js','/private/typing.html','/schema.sql','/server.mjs','/exercises.mjs','/apps/typing/other.js'])assert.equal((await s.request(path)).status,404,path);
   const user=await account(s);const page=await s.request('/apps/typing',undefined,user);assert.equal(page.status,200);assert.equal(page.headers.get('Vary'),'Cookie');assert.ok(page.headers.get('Content-Security-Policy').includes("frame-ancestors 'none'"));
   assert.equal((await s.request('/apps/typing?cookie='+user.cookie)).status,401);
@@ -88,6 +88,29 @@ test('atomic daily quota stops concurrent starts; Premium rights expire',async()
   assert.equal((await (await s.request('/api/typing/exercises',undefined,a)).json()).exercises.length,188);
   s.db.raw.prepare('UPDATE dev_entitlements SET expires=? WHERE user_id=?').run(s.now()-1,a.user.id);
   assert.equal((await s.request('/apps/typing',undefined,a)).status,403);
+ }finally{s.db.close();}
+});
+test('reload resumes only an authorized own attempt without consuming quota; reset follows UTC day',async()=>{
+ const s=setup();try{
+  const a=await account(s),b=await account(s,'resume@example.test');
+  const state=async(user=a)=>(await s.request('/api/typing/state?userId='+a.user.id,undefined,user)).json();
+  assert.deepEqual((await state()).quota,{limit:10,used:0,remaining:10,resetsAt:Math.floor(s.now()/86400)*86400+86400});
+  const first=await (await s.request('/api/typing/start',{exercise:'javascript:fragment'},a)).json();
+  const resumed=await state();assert.equal(resumed.active.attempt,first.attempt);assert.equal(resumed.active.exercise.text,first.exercise.text);
+  for(let i=0;i<3;i++)assert.equal((await state()).quota.used,1);
+  assert.equal((await state(b)).active,null);assert.equal((await state(b)).quota.used,0);
+  await s.request('/api/typing/complete',{attempt:first.attempt,text:first.exercise.text},a);
+  assert.equal((await state()).active,null);assert.equal((await state()).quota.remaining,9);
+  s.db.raw.prepare("UPDATE dev_entitlements SET plan='premium' WHERE user_id=?").run(a.user.id);
+  await s.request('/api/typing/start',{exercise:'python:project'},a);assert.equal((await state()).quota.limit,100);
+  s.db.raw.prepare("UPDATE dev_entitlements SET plan='free' WHERE user_id=?").run(a.user.id);
+  assert.equal((await state()).active,null,'A downgraded account cannot restore Premium content');
+  s.setTime(Math.floor(s.now()/86400)*86400+86400);
+  // Renew only the fixture session so the test can inspect the next quota day.
+  s.db.raw.prepare('UPDATE dev_sessions SET expires=?').run(s.now()+3600);
+  assert.equal((await state()).quota.remaining,10);assert.equal((await state()).active,null);
+  s.db.raw.prepare('DELETE FROM dev_entitlements WHERE user_id=?').run(a.user.id);
+  assert.equal((await s.request('/api/typing/state',undefined,a)).status,403);
  }finally{s.db.close();}
 });
 test('password reset tokens are single-use, all previous reset tokens and sessions revoked',async()=>{
