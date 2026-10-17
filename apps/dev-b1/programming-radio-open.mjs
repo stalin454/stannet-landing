@@ -106,7 +106,8 @@ export function buildRadio(destination){
  const hero=radio.slice(radio.indexOf('<section class="radio-hero">'),radio.indexOf('<section class="section radio-section radio-admin-section"'));
  if(!hero.startsWith('<section')||!hero.includes('id="radioAudio"'))throw Error('Source radio deck changed');
  const player=hero.replaceAll('../assets/radio/stannet-radio-console.jpg','/open/radio/console.jpg')
-  .replace('ETAPA 7 · MUSIC LIBRARY + STREAM SERVER','TRANSMISIÓN STANNET RADIO');
+  .replace('ETAPA 7 · MUSIC LIBRARY + STREAM SERVER','TRANSMISIÓN STANNET RADIO')
+  .replace('<audio id="radioAudio" preload="none"></audio>','<audio id="radioAudio" controls preload="none" src="https://radio.stannet.space/listen/stannet-radio/radio.mp3" aria-label="Reproductor de audio accesible de StanNet Radio"></audio><p class="radio-direct-link">¿Sin sonido? <a href="https://radio.stannet.space/listen/stannet-radio/radio.mp3" target="_blank" rel="noopener noreferrer">Abrir señal de AzuraCast ↗</a></p>');
  const html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="StanNet Radio en directo: electrónica, guitarra, noticias de IA, ciberseguridad y programación."><title>StanNet Radio · StanNet.Dev</title><link rel="canonical" href="https://stannet.dev/open/radio/"><link rel="icon" href="/logo.png"><link rel="stylesheet" href="/open/programming/assets/style.css"><link rel="stylesheet" href="/open/radio/radio.css"><link rel="stylesheet" href="/open/radio/radio-dev.css"></head><body class="radio-page stannet-page-radio" id="top">'+
  '<header class="site-header radio-dev-header"><a href="/" class="brand">Stan<span>Net</span>.dev</a><nav><a href="/">Portal Dev</a><a href="/open/artists/">STAN6IX</a><a href="/open/programming/">Academia</a></nav></header>'+
  '<main>'+player+
@@ -124,8 +125,8 @@ export function buildRadio(destination){
  "if(!audio||!button||!message||!badge||!state)return;",
  "// Only publicly documented StanNet station endpoints. Never send credentials or proxy audio.",
  "const sources=Object.freeze([",
- " 'https://radio.stannet.space/stannet.mp3',",
- " 'https://radio.stannet.space/listen/stannet-radio/radio.mp3'",
+ " 'https://radio.stannet.space/listen/stannet-radio/radio.mp3',",
+ " 'https://radio.stannet.space/stannet.mp3'",
  "]);",
  "let sourceIndex=0,activeIndex=-1,connecting=false,confirmed=false,watchdog=null;",
  "const clearWatchdog=()=>{if(watchdog!==null){clearTimeout(watchdog);watchdog=null;}};",
@@ -138,7 +139,7 @@ export function buildRadio(destination){
  " clearWatchdog();connecting=false;confirmed=false;",
  " audio.pause();",
  " sourceIndex=(activeIndex+1)%sources.length;",
- " idle('SIN SEÑAL','No hemos recibido audio. Pulsa Play otra vez para probar la otra ruta de la emisora. Si ambas fallan, comprueba que el servidor está emitiendo.');",
+ " idle('SIN SEÑAL','No hemos recibido audio en esta ruta. Pulsa Play para probar una fuente alternativa o utiliza el enlace directo a AzuraCast.');",
  "}",
  "button.setAttribute('aria-label','Reproducir StanNet Radio');",
  "state.textContent='EMISIÓN ORIGINAL · STANNET RADIO';",
@@ -147,7 +148,7 @@ export function buildRadio(destination){
  "audio.volume=Number(vol?.value||.8);",
  "vol?.addEventListener('input',()=>{audio.volume=Number(vol.value)});",
  "async function toggle(){",
- " if(confirmed&&!audio.paused){",
+ " if(!audio.paused){",
  "  clearWatchdog();audio.pause();confirmed=false;connecting=false;",
  "  idle('PAUSA','Radio en pausa. Pulsa Play para volver a escuchar.');return;",
  " }",
@@ -157,7 +158,7 @@ export function buildRadio(destination){
  " }",
  " clearWatchdog();connecting=true;confirmed=false;activeIndex=sourceIndex;",
  " // Do not await a network request before play(): Android requires a user gesture.",
- " audio.pause();audio.removeAttribute('src');audio.load();audio.src=sources[activeIndex];",
+ " if(audio.src!==sources[activeIndex])audio.src=sources[activeIndex];",
  " button.textContent='■';button.setAttribute('aria-label','Cancelar conexión');",
  " badge.textContent='CONECTANDO';message.textContent='Buscando audio en directo…';",
  " watchdog=setTimeout(failed,12000);",
@@ -165,12 +166,14 @@ export function buildRadio(destination){
  "}",
  "button.addEventListener('click',toggle);",
  "audio.addEventListener('playing',()=>{",
- " if(!connecting)return;",
- " clearWatchdog();connecting=false;confirmed=true;sourceIndex=activeIndex;",
+ " clearWatchdog();connecting=false;confirmed=true;",
+ " const actual=sources.indexOf(audio.currentSrc||audio.src);",
+ " if(actual>=0){activeIndex=actual;sourceIndex=actual;}",
  " button.textContent='❚❚';button.setAttribute('aria-label','Pausar radio');",
  " badge.textContent='ESCUCHANDO';message.textContent='Reproduciendo la señal en directo.';",
  "});",
- "audio.addEventListener('error',failed);",
+ "audio.addEventListener('pause',()=>{if(!connecting&&confirmed){confirmed=false;idle('PAUSA','Radio en pausa. Pulsa Play para volver a escuchar.')}});",
+ "audio.addEventListener('error',()=>{if(connecting||confirmed)failed();else idle('SIN SEÑAL','Se ha perdido la señal. También puedes abrir el enlace directo a AzuraCast.');});",
  "audio.addEventListener('waiting',()=>{if(confirmed)message.textContent='Reconectando audio…'});",
  "audio.addEventListener('stalled',()=>{if(confirmed)message.textContent='La señal se ha interrumpido temporalmente.'});",
  "fetch('/open/radio/schedule.json').then(r=>{if(!r.ok)throw Error('schedule');return r.json()}).then(({items})=>{",
@@ -205,6 +208,7 @@ export function buildRadio(destination){
  '.radio-dev-header .brand{font-family:Orbitron,sans-serif;font-size:20px;color:#fff}.radio-dev-header .brand span{color:#65daf8}',
  '.radio-dev-header nav{display:flex;gap:20px;flex-wrap:wrap}.radio-dev-header nav a{color:#e7f8ff;font:600 12px Inter,sans-serif}',
  '.radio-dev-header nav a:hover{color:#63dcf0}.radio-console .radio-play{cursor:pointer}.radio-message{color:#dbf4fc}',
+ '.radio-console audio#radioAudio{display:block;width:100%;margin:14px 0 6px;min-height:40px}.radio-console .radio-direct-link{margin:4px 0 8px;font:500 13px/1.5 system-ui,sans-serif;color:#d9f5ff}.radio-console .radio-direct-link a{color:#8ceaff;text-decoration:underline;text-underline-offset:3px}',
  '@media(max-width:570px){.radio-dev-header nav{gap:14px}.radio-dev-header nav a{font-size:12px}}'
  ].join('\n');
  writeFileSync(new URL('radio-dev.css',dir),css);
