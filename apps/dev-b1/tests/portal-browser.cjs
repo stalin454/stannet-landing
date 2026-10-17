@@ -98,6 +98,11 @@ const puppeteer=require('puppeteer-core');
       assert.ok(state.image&&!state.overflow&&state.hasVideoSection&&state.crossLink);
       assert.ok(state.robots.includes('index'));
       assert.equal(state.photos,expectedPhotos);
+      if(slug==='astrid-nova'){
+        const player=await artist.$('button[data-youtube-id="d-6NN9f1pUM"]');
+        assert.ok(player,'Astrid Nova official YouTube link is present');
+        assert.equal(await artist.$('iframe'),null,'YouTube iframe must not load before consent');
+      }
       assert.deepEqual(errors,[]);
       await artist.close();
     }
