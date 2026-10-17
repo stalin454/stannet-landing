@@ -151,11 +151,44 @@ const puppeteer=require('puppeteer-core');
        assert.ok(jsLink,'Programming Academy links to JavaScript coach');
      }
      if(url==='/open/radio/'){
-       const stream=await lab.evaluate(async()=>{const r=await fetch('/open/radio/schedule.json');return {ok:r.ok,schedule:(await r.json()).items.length,source:document.querySelector('#radioAudio').getAttribute('src'),play:document.querySelector('#radioPlay').disabled}});
+       const stream=await lab.evaluate(async()=>{
+         const r=await fetch('/open/radio/schedule.json'),audio=document.querySelector('#radioAudio');
+         return {ok:r.ok,schedule:(await r.json()).items.length,source:audio.getAttribute('src'),
+           preload:audio.getAttribute('preload'),native:audio.hasAttribute('controls'),paused:audio.paused,
+           play:document.querySelector('#radioPlay').disabled,
+           fallback:Boolean(document.querySelector('a[href="https://radio.stannet.space/listen/stannet-radio/radio.mp3"]'))};
+       });
        assert.equal(stream.ok,true);
        assert.ok(stream.schedule>12);
-       assert.equal(stream.source,null,'Stream must not auto-play or connect before consent');
+       assert.equal(stream.source,'https://radio.stannet.space/listen/stannet-radio/radio.mp3','Use listener-confirmed AzuraCast stream');
+       assert.equal(stream.preload,'none');
+       assert.equal(stream.native,true,'Native audio controls provide independent fallback');
+       assert.equal(stream.paused,true,'Must not autoplay the stream');
+       assert.equal(stream.fallback,true,'Provide a direct radio stream link');
        assert.equal(stream.play,false);
+       // UI mock checks playing/error handling. External live sound requires a real listening test.
+       const playerQa=await browser.newPage();
+       await playerQa.evaluateOnNewDocument(()=>{
+         HTMLMediaElement.prototype.load=function(){};
+         HTMLMediaElement.prototype.play=function(){
+           const media=this;
+           queueMicrotask(()=>media.dispatchEvent(new Event('playing')));
+           return Promise.resolve();
+         };
+       });
+       const qaRadio=await playerQa.goto(base+'/open/radio/',{waitUntil:'domcontentloaded'});
+       assert.equal(qaRadio.status(),200);
+       assert.equal(await playerQa.$eval('#radioAudio',el=>el.paused),true,'Radio is not autoplaying');
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/listen/stannet-radio/radio.mp3')),'First attempt uses confirmed stream');
+       await playerQa.$eval('#radioAudio',el=>el.dispatchEvent(new Event('error')));
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='SIN SEÑAL');
+       assert.match(await playerQa.$eval('#radioMessage',el=>el.textContent),/alternativa/);
+       await playerQa.click('#radioPlay');
+       await playerQa.waitForFunction(()=>document.querySelector('#liveBadge').textContent==='ESCUCHANDO');
+       assert.ok(await playerQa.$eval('#radioAudio',el=>el.src.endsWith('/stannet.mp3')),'Retry uses secondary legacy Icecast mount');
+       await playerQa.close();
        assert.equal(await lab.$('#radioAdminLoginForm'),null,'Radio admin panel must not be bundled');
        assert.equal(await lab.$('script[src*="radio.js"]'),null,'Original admin JS must not be deployed');
      }
