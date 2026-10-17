@@ -7,7 +7,7 @@ async function python() {
     pyodidePromise=(async()=>{
       importScripts('https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js');
       const py=await loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.29.0/full/'});
-      const res=await fetch('./programming-python-evaluator.py',{credentials:'omit'});
+      const res=await fetch('./programming-python-evaluator.txt',{credentials:'omit'});
       if(!res.ok) throw new Error('No se pudo cargar el evaluador de la academia.');
       await py.runPythonAsync(await res.text());
       return py;
