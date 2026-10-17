@@ -26,17 +26,17 @@ assert not check('print(Python listo para ciberseguridad)')["ok"], "must reject 
 assert check('print(Python listo para ciberseguridad)')["kind"]=="syntax"
 assert not check('Print("Python listo para ciberseguridad")')["ok"], "must reject wrong case"
 assert check('Print("Python listo para ciberseguridad")')["kind"]=="runtime"
-assert not check('print("Hola")\\n# Python listo para ciberseguridad')["ok"], "comments must not count"
+assert not check('print("Hola")\n# Python listo para ciberseguridad')["ok"], "comments must not count"
 assert not check('print("Hola, SkyNet")')["ok"], "valid program can still fail objective"
 assert check('print("Python listo para ciberseguridad")')["ok"]
-assert check('print("Inicio")\\nprint("Analizando red")\\nprint("Fin")',"PY01-02")["ok"]
-assert not check('def es_web(puerto):\\n    return True',"PY05-01")["ok"]
-assert check('def es_web(puerto):\\n    return puerto in (80,443)',"PY05-01")["ok"]
-assert check('ips = ["192.168.1.2","8.8.8.8","192.168.1.3"]\\nprivadas=[ip for ip in ips if ip.startswith("192.168.")]',"PY04-04")["ok"]
-assert check('with open("access.log","r") as f:\\n    logs=f.read()',"PY06-01")["ok"]
-assert check('import logging\\nlogging.warning("Intento sospechoso")',"PY07-02")["ok"]
-assert check('import pathlib\\nfrom datetime import datetime',"PY09-01")["ok"]
-assert check('eventos=[{"ip":"10.0.0.5","severity":"high"},{"ip":"10.0.0.8","severity":"low"}]\\nfor e in eventos:\\n    if e["severity"]=="high": print(e["ip"])',"PY12-01")["ok"]
+assert check('print("Inicio")\nprint("Analizando red")\nprint("Fin")',"PY01-02")["ok"]
+assert not check('def es_web(puerto):\n    return True',"PY05-01")["ok"]
+assert check('def es_web(puerto):\n    return puerto in (80,443)',"PY05-01")["ok"]
+assert check('ips = ["192.168.1.2","8.8.8.8","192.168.1.3"]\nprivadas=[ip for ip in ips if ip.startswith("192.168.")]',"PY04-04")["ok"]
+assert check('with open("access.log","r") as f:\n    logs=f.read()',"PY06-01")["ok"]
+assert check('import logging\nlogging.warning("Intento sospechoso")',"PY07-02")["ok"]
+assert check('import pathlib\nfrom datetime import datetime',"PY09-01")["ok"]
+assert check('eventos=[{"ip":"10.0.0.5","severity":"high"},{"ip":"10.0.0.8","severity":"low"}]\nfor e in eventos:\n    if e["severity"]=="high": print(e["ip"])',"PY12-01")["ok"]
 print("PASS: Python runtime grading rejects false positives and accepts working solutions.")
 `;
 const result=spawnSync(process.env.PYTHON_BIN||'python3',['-c',python],{encoding:'utf8',timeout:15000});
