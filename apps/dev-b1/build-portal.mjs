@@ -82,6 +82,9 @@ artistHtml=artistHtml.replace('</head>','<link rel="stylesheet" href="/open/arti
  .replace('<nav>','<nav aria-label="Music navigation">')
  .replace('href="https://stannet.space/pages/radio.html"','href="/open/radio/"');
 artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
+// Deep-link to Astrid from the Artist Universe header; preserve protected Space source.
+if(!artistHtml.includes('href="#astrid-nova">Astrid Nova</a>'))throw Error('Astrid nav source changed');
+artistHtml=artistHtml.replace('href="#astrid-nova">Astrid Nova</a>','href="/artistas/astrid-nova/">Astrid Nova ↗</a>');
 
 /* Public search-friendly artist biographies and opt-in YouTube galleries. */
 const profileRoot=new URL('artistas/',destination);
