@@ -1,0 +1,227 @@
+/* StanNet.Space / catalogue premium refresh 2026-10-18.
+   Isolated homepage surface, no catalogue JS/navigation changes. */
+body.home-refresh #proyectos{
+ --sn-premium-navy:#0e2142;
+ --sn-premium-line:#d8e4f1;
+}
+#proyectos .directory-grid{gap:18px}
+#proyectos .directory-card{
+ --sn-accent:#285ed4;
+ --sn-tint:#e8f0ff;
+ --sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E");
+ position:relative;
+ isolation:isolate;
+ display:grid;
+ grid-template-columns:54px minmax(0,1fr);
+ grid-template-rows:auto auto minmax(0,1fr) auto;
+ gap:8px 16px;
+ align-content:stretch;
+ min-height:218px;
+ padding:23px 22px;
+ border:1px solid var(--sn-premium-line);
+ border-radius:22px;
+ background:linear-gradient(145deg,#fff 0%,#fbfdff 57%,#f3f8ff 100%);
+ box-shadow:0 4px 9px rgba(30,69,114,.025),0 18px 42px rgba(28,62,109,.065);
+ color:#10213d;
+ text-decoration:none;
+ transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+ overflow:hidden;
+}
+#proyectos .directory-card::before{
+ content:"";position:absolute;z-index:-1;pointer-events:none;
+ width:240px;height:240px;top:-126px;right:-106px;
+ background:radial-gradient(circle,var(--sn-tint),transparent 68%);opacity:.86;
+}
+#proyectos .directory-card::after{
+ content:"↗";position:absolute;top:20px;right:20px;
+ width:30px;height:30px;display:grid;place-items:center;
+ border:1px solid rgba(42,80,131,.12);border-radius:10px;
+ color:#42648d;background:rgba(255,255,255,.78);
+ font:700 17px/1 Inter,system-ui,sans-serif;
+ transition:transform .22s ease,border-color .22s ease,color .22s ease;
+}
+#proyectos .directory-card:is(:hover,:focus-visible){
+ transform:translateY(-4px);
+ border-color:#a8c8ea;
+ box-shadow:0 14px 45px rgba(31,70,131,.13),0 1px 6px rgba(31,70,131,.06);
+}
+#proyectos .directory-card:is(:hover,:focus-visible)::after{transform:translate(2px,-2px);color:var(--sn-accent);border-color:currentColor}
+#proyectos .directory-card[data-resource-type="lab"]{--sn-accent:#7941d2;--sn-tint:#f0eaff}
+#proyectos .directory-card[data-resource-type="herramienta"]{--sn-accent:#08799b;--sn-tint:#e5f7fb}
+#proyectos .directory-card[data-resource-type="recurso"]{--sn-accent:#305d9a;--sn-tint:#e9f4ff}
+#proyectos .directory-card[data-area="idiomas"]{--sn-accent:#00827f;--sn-tint:#e6f8f3}
+#proyectos .directory-card[data-area="musica"]{--sn-accent:#8a42bd;--sn-tint:#f5ebfc}
+#proyectos .directory-card[data-area="seguridad"]{--sn-accent:#2261a1;--sn-tint:#eaf4fe}
+#proyectos .directory-card[data-area="dinamarca"]{--sn-accent:#bb4260;--sn-tint:#fff0f3}
+#proyectos .resource-icon,
+#proyectos .directory-card[data-area="musica"] .resource-icon,
+#proyectos .directory-card[data-area="idiomas"] .resource-icon{
+ grid-column:1;grid-row:1 / span 3;
+ display:grid;place-items:center;
+ width:54px;height:54px;
+ font-size:0!important;
+ color:var(--sn-accent)!important;
+ background:var(--sn-tint)!important;
+ border:1px solid rgba(98,117,155,.12);
+ border-radius:16px;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+#proyectos .resource-icon::before{
+ content:"";
+ width:29px;height:29px;
+ background:currentColor;
+ -webkit-mask:var(--sn-icon) center / contain no-repeat;
+ mask:var(--sn-icon) center / contain no-repeat;
+}
+#proyectos .resource-type{
+ grid-column:2;grid-row:1;justify-self:start;align-self:center;
+ max-width:calc(100% - 30px);
+ margin:1px 0 3px;padding:5px 11px;
+ background:var(--sn-tint)!important;
+ color:var(--sn-accent)!important;
+ border:1px solid rgba(54,85,139,.06);
+ border-radius:999px;
+ font:650 11px/1.35 Inter,system-ui,sans-serif;
+ letter-spacing:.005em;
+}
+#proyectos .directory-card strong{
+ grid-column:2;grid-row:2;
+ margin:0;color:#111f38;
+ font:750 clamp(16px,1.45vw,20px)/1.25 Inter,system-ui,sans-serif;
+ letter-spacing:-.025em;
+ overflow-wrap:anywhere;
+}
+#proyectos .directory-card small{
+ grid-column:2;grid-row:3;
+ margin:0 0 9px;
+ font:400 13px/1.6 Inter,system-ui,sans-serif;
+ color:#586b83;
+}
+#proyectos .resource-open{
+ grid-column:2;grid-row:4;align-self:end;
+ display:inline-flex;justify-self:start;align-items:center;
+ gap:11px;margin-top:10px;
+ color:var(--sn-accent);
+ font:700 12px/1.45 Inter,system-ui,sans-serif;
+}
+#proyectos .resource-open span{font-size:17px;transition:transform .22s ease}
+#proyectos .directory-card:is(:hover,:focus-visible) .resource-open span{transform:translateX(4px)}
+#proyectos .directory-filters button,
+#proyectos .directory-types button{
+ border-radius:999px;
+ border-color:#d5e1ef;
+ background:linear-gradient(180deg,#fff,#fbfdff);
+ box-shadow:0 3px 11px rgba(41,77,123,.04);
+ transition:border-color .2s ease,box-shadow .2s ease;
+}
+#proyectos .directory-filters button:hover,
+#proyectos .directory-types button:hover{border-color:#91b8e0;box-shadow:0 4px 14px rgba(41,77,123,.10)}
+#proyectos .directory-filters button>span{
+ display:inline-grid;place-items:center;
+ min-width:25px;height:22px;padding:1px 7px;
+ color:#416080;border-radius:999px;background:#ecf3fa;
+ font:700 11px/1 Inter,system-ui,sans-serif;
+}
+#proyectos .directory-filters button[aria-pressed="true"]>span{color:#0c4160;background:rgba(255,255,255,.7)}
+#proyectos .directory-query-label{position:relative}
+#proyectos .directory-query-label input{
+ padding-left:44px;padding-right:78px;
+ border-radius:13px;border-color:#c5d6e9;
+ background-color:#fff;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2210.8%22%20cy%3D%2210.8%22%20r%3D%226.8%22%2F%3E%3Cpath%20d%3D%22m16%2016%205%205%22%2F%3E%3C%2Fsvg%3E");
+ background-size:19px 19px;background-position:14px center;background-repeat:no-repeat;
+ box-shadow:inset 0 1px 2px rgba(28,62,109,.03),0 5px 17px rgba(40,79,119,.06);
+ transition:border-color .2s ease,box-shadow .2s ease;
+}
+#proyectos .directory-query-label input:focus{
+ outline:none;border-color:#37a9db;
+ box-shadow:0 0 0 3px rgba(56,189,248,.20),0 9px 25px rgba(25,100,151,.08);
+}
+#proyectos .directory-query-label::after{
+ content:"Ctrl K";position:absolute;bottom:12px;right:12px;
+ padding:3px 6px;border:1px solid #d9e4f1;border-radius:5px;
+ color:#69829e;background:#f5f8fc;
+ font:600 10px/1.35 Inter,system-ui,sans-serif;pointer-events:none;
+}
+body.home-refresh .home-hero-split .home-hero-actions .home-btn.primary{
+ background:linear-gradient(110deg,#0f234d 0%,#194fbb 65%,#553ab9)!important;
+ color:#fff!important;
+ border:1px solid rgba(255,255,255,.13);
+ box-shadow:0 12px 30px rgba(25,74,158,.24),0 3px 10px rgba(9,26,63,.10);
+}
+body.home-refresh .home-hero-split .home-hero-actions .home-btn.primary:hover{
+ box-shadow:0 16px 38px rgba(36,76,171,.34);
+}
+body.home-refresh .home-hero-split:before{
+ background-image:
+ radial-gradient(rgba(15,71,136,.18) 1px,transparent 1px),
+ linear-gradient(rgba(40,120,255,.05) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(40,120,255,.05) 1px,transparent 1px);
+ background-size:24px 24px,48px 48px,48px 48px;
+ opacity:.24;
+}
+@media(max-width:1000px){#proyectos .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){
+ #proyectos .directory-grid{grid-template-columns:1fr;gap:15px}
+ #proyectos .directory-card{min-height:186px;padding:19px;grid-template-columns:52px minmax(0,1fr);column-gap:14px;border-radius:20px}
+ #proyectos .resource-icon,#proyectos .directory-card[data-area="musica"] .resource-icon,#proyectos .directory-card[data-area="idiomas"] .resource-icon{width:52px;height:52px}
+ #proyectos .directory-card::after{top:17px;right:16px;width:28px;height:28px}
+ #proyectos .directory-card strong{font-size:18px}
+ #proyectos .directory-card small{font-size:13px}
+ #proyectos .resource-open{margin-top:8px}
+ #proyectos .directory-query-label::after{display:none}
+ #proyectos .directory-query-label input{padding-right:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ #proyectos .directory-card,#proyectos .directory-card::after,#proyectos .resource-open span{transition:none!important}
+ #proyectos .directory-card:is(:hover,:focus-visible){transform:none}
+}
+#proyectos .directory-card[data-area="desarrollo"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="idiomas"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-5%204.8-5%2013.2%200%2018M12%203c5%204.8%205%2013.2%200%2018%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="musica"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2018V5l12-2v13M9%206l12-2%22%2F%3E%3Cellipse%20cx%3D%225.5%22%20cy%3D%2218%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3Cellipse%20cx%3D%2217.5%22%20cy%3D%2216%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="seguridad"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="apps"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%202.2%207.8L22%2012l-7.8%202.2L12%2022l-2.2-7.8L2%2012l7.8-2.2L12%202ZM19%202v4M17%204h4%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="dinamarca"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-area="stannet"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%202h8l5%205v14a1%201%200%200%201-1%201H6a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2Zm8%200v5h5M8%2012h8m-8%204h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="web-development"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-fullstack"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-fullstack-course"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-web-lab"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m8%208-4%204%204%204m8-8%204%204-4%204M14%204l-4%2016%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-coach"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Ctext%20x%3D%2212%22%20y%3D%2216%22%20fill%3D%22black%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2213%22%20font-weight%3D%22900%22%20text-anchor%3D%22middle%22%3EJS%3C%2Ftext%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-lab"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22black%22%3E%3Cpath%20d%3D%22M12%202.2c-5.2%200-5.1%202.5-5.1%204.6v2.1h6.8v1.8H5.2c-2.1%200-3.2%201.3-3.2%204.1s1.5%204.2%203.8%204.2h2.1v-3c0-2.3%201.9-4.2%204.2-4.2h4.1c1.6%200%202.8-1.2%202.8-2.8V6.8c0-2.7-2-4.6-7-4.6ZM9.6%205.3a1.1%201.1%200%201%201%200%202.2%201.1%201.1%200%200%201%200-2.2Z%22%2F%3E%3Cpath%20d%3D%22M11.9%2021.8c5.2%200%205.1-2.5%205.1-4.6v-2.1h-6.8v-1.8h8.5c2.1%200%203.2-1.3%203.2-4.1S20.5%205%2018.2%205h-2.1v3c0%202.3-1.9%204.2-4.2%204.2H7.8C6.2%2012.2%205%2013.4%205%2015v2.2c0%202.7%202%204.6%206.9%204.6Zm2.3-3.1a1.1%201.1%200%201%201%200-2.2%201.1%201.1%200%200%201%200%202.2Z%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="programming-cs-lab"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Ctext%20x%3D%2212%22%20y%3D%2216%22%20fill%3D%22black%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20font-weight%3D%22900%22%20text-anchor%3D%22middle%22%3EC%2B%2B%3C%2Ftext%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="typing"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22M6%209h.01M10%209h.01M14%209h.01M18%209h.01M6%2012h.01M10%2012h.01M14%2012h.01M18%2012h.01M7%2015.5h10%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="shortcuts"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22M6%209h.01M10%209h.01M14%209h.01M18%209h.01M6%2012h.01M10%2012h.01M14%2012h.01M18%2012h.01M7%2015.5h10%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="language-typing"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22M6%209h.01M10%209h.01M14%209h.01M18%209h.01M6%2012h.01M10%2012h.01M14%2012h.01M18%2012h.01M7%2015.5h10%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="fp-study"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m2%209%2010-5%2010%205-10%205L2%209Zm4%202v5c4%203%208%203%2012%200v-5M22%209v7%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="sanacion"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%202v2m0%2016v2M2%2012h2m16%200h2M5%205l1.5%201.5M17.5%2017.5%2019%2019M5%2019l1.5-1.5M17.5%206.5%2019%205%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="english"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-5%204.8-5%2013.2%200%2018M12%203c5%204.8%205%2013.2%200%2018%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="danish"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-5%204.8-5%2013.2%200%2018M12%203c5%204.8%205%2013.2%200%2018%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="callan"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%222%22%20width%3D%226%22%20height%3D%2213%22%20rx%3D%223%22%2F%3E%3Cpath%20d%3D%22M6%2011a6%206%200%200%200%2012%200M12%2017v5m-4%200h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="vocal-studio"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%229%22%20y%3D%222%22%20width%3D%226%22%20height%3D%2213%22%20rx%3D%223%22%2F%3E%3Cpath%20d%3D%22M6%2011a6%206%200%200%200%2012%200M12%2017v5m-4%200h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="language-music"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2018V5l12-2v13M9%206l12-2%22%2F%3E%3Cellipse%20cx%3D%225.5%22%20cy%3D%2218%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3Cellipse%20cx%3D%2217.5%22%20cy%3D%2216%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="music"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2018V5l12-2v13M9%206l12-2%22%2F%3E%3Cellipse%20cx%3D%225.5%22%20cy%3D%2218%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3Cellipse%20cx%3D%2217.5%22%20cy%3D%2216%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="artist-universe"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2018V5l12-2v13M9%206l12-2%22%2F%3E%3Cellipse%20cx%3D%225.5%22%20cy%3D%2218%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3Cellipse%20cx%3D%2217.5%22%20cy%3D%2216%22%20rx%3D%223.5%22%20ry%3D%222.5%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="guitar"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m16%203%205%205-3%203-5-5%203-3ZM13%208l-4%204a5%205%200%201%200%203%203l4-4M7%2017l2-2M17%204l3%203%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="radio"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%228%22%20width%3D%2218%22%20height%3D%2212%22%20rx%3D%223%22%2F%3E%3Cpath%20d%3D%22m6%208%2012-5M7%2012h10M7%2016h.01%22%2F%3E%3Ccircle%20cx%3D%2217%22%20cy%3D%2216%22%20r%3D%221.5%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="dj-studio"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2014v-3a9%209%200%200%201%2018%200v3M3%2014h4v7H6a3%203%200%200%201-3-3v-4Zm18%200h-4v7h1a3%203%200%200%200%203-3v-4Z%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="cybersecurity"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="cybersecurity-cyber-classroom"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="cyber-lab"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="sentinel"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="shield"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%209%204v5c0%206-4%209.5-9%2011-5-1.5-9-5-9-11V6l9-4Z%22%2F%3E%3Cpath%20d%3D%22m8%2012%203%203%205-6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="password-security"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%225%22%20y%3D%2211%22%20width%3D%2214%22%20height%3D%2211%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%2011V8a4%204%200%200%201%208%200v3M12%2015v3%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="ai"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%227%22%20width%3D%2218%22%20height%3D%2214%22%20rx%3D%224%22%2F%3E%3Cpath%20d%3D%22M12%203v4M9%203h6M7%2013h.01M17%2013h.01M9%2017h6%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="apps"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m12%202%202.2%207.8L22%2012l-7.8%202.2L12%2022l-2.2-7.8L2%2012l7.8-2.2L12%202ZM19%202v4M17%204h4%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="pdf-tutor"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%202h8l5%205v14a1%201%200%200%201-1%201H6a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2Zm8%200v5h5M8%2012h8m-8%204h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="education"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%202h8l5%205v14a1%201%200%200%201-1%201H6a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2Zm8%200v5h5M8%2012h8m-8%204h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="blog"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%202h8l5%205v14a1%201%200%200%201-1%201H6a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2Zm8%200v5h5M8%2012h8m-8%204h8%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="nutri-ia"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20.8%205.8a5%205%200%200%200-7.1%200L12%207.5l-1.7-1.7a5%205%200%200%200-7.1%207.1C5%2014.5%2012%2021%2012%2021s7-6.5%208.8-8.1a5%205%200%200%200%200-7.1Z%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="marketplace"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%227%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%207V5a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v2M2%2012c6%205%2014%205%2020%200m-10%202v3%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="cv"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%227%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%207V5a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v2M2%2012c6%205%2014%205%2020%200m-10%202v3%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="ett-dinamarca"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222%22%20y%3D%227%22%20width%3D%2220%22%20height%3D%2214%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%207V5a2%202%200%200%201%202-2h4a2%202%200%200%201%202%202v2M2%2012c6%205%2014%205%2020%200m-10%202v3%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="ruta-dinamarca"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="comunidad-dinamarca"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="denmark-cv"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
+#proyectos .directory-card[data-resource-id="stannet"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M4%2022v-2a8%208%200%200%201%2016%200v2%22%2F%3E%3C%2Fsvg%3E")}
