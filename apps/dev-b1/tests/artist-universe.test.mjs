@@ -23,3 +23,22 @@ test('Dev build externalizes every original Artist Universe style under strict C
  assert.match(policy,/style-src 'self';/);assert.doesNotMatch(policy,/unsafe-inline/);
  for(const [,name] of original.matchAll(/\/assets\/music\/artists\/([^" ]+)/g))assert.ok(html.includes('/open/artists/img/'+name));
 });
+
+
+test('Six real Astrid Nova photos and direct artist access publish in Dev',()=>{
+ execFileSync(process.execPath,[new URL('../build-portal.mjs',import.meta.url).pathname]);
+ const root=new URL('../site-build/',import.meta.url);
+ const profile=readFileSync(new URL('artistas/astrid-nova/index.html',root),'utf8');
+ const home=readFileSync(new URL('index.html',root),'utf8');
+ const universe=readFileSync(new URL('open/artists/index.html',root),'utf8');
+ assert.ok(home.includes('href="/artistas/astrid-nova/"'),'Dev homepage direct artist tab');
+ assert.ok(universe.includes('href="/artistas/astrid-nova/"'),'Dev Artist Universe direct link');
+ const names=['astrid-piano-studio.webp','astrid-stockholm-evening.webp','astrid-rainy-window.webp','astrid-live-performance.webp','astrid-stockholm-rain.webp','astrid-archipelago-sunset.webp'];
+ for(const name of names){
+  assert.ok(profile.includes('/open/artists/img/'+name),'profile photo '+name);
+  const data=readFileSync(new URL('open/artists/img/'+name,root));
+  assert.equal(data.toString('ascii',0,4),'RIFF','valid WEBP header '+name);
+  assert.ok(data.length>10000,'photo asset not truncated '+name);
+ }
+ assert.equal((profile.match(/class="photo"/g)||[]).length,7,'six new photos plus original portrait');
+});
