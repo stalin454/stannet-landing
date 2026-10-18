@@ -225,3 +225,168 @@ body.home-refresh .home-hero-split:before{
 #proyectos .directory-card[data-resource-id="comunidad-dinamarca"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
 #proyectos .directory-card[data-resource-id="denmark-cv"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%205%206-3%206%203%206-3v17l-6%203-6-3-6%203V5Zm6-3v17m6-14v17%22%2F%3E%3C%2Fsvg%3E")}
 #proyectos .directory-card[data-resource-id="stannet"]{--sn-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22%2F%3E%3Cpath%20d%3D%22M4%2022v-2a8%208%200%200%201%2016%200v2%22%2F%3E%3C%2Fsvg%3E")}
+
+
+/* ==========================================================
+   BENTO SaaS PRO · second pass · 2026-10-18
+   A single lower-right action, full-width editorial body,
+   inline SVG icons and curated descriptive metadata.
+   ========================================================== */
+#proyectos .directory-card{
+ --accent-start:#1a5aae;
+ --accent-end:#4385d2;
+ --accent-gradient:linear-gradient(125deg,var(--accent-start),var(--accent-end));
+ --icon-shadow:rgba(29,100,179,.22);
+ --mesh-glow:rgba(76,145,225,.15);
+ --badge-bg:#eaf3fd;
+ --accent-solid:#1e5b9f;
+ --accent-border:#9dc7eb;
+ --card-tint:#f2f8ff;
+ --card-border:#d5e3f1;
+ min-height:226px;
+ padding:23px 21px 19px;
+ grid-template-columns:56px minmax(0,1fr);
+ grid-template-rows:auto auto auto minmax(10px,1fr) auto;
+ column-gap:15px;
+ row-gap:8px;
+ border:1px solid var(--card-border);
+ border-radius:20px;
+ background:linear-gradient(90deg,var(--accent-start),var(--accent-end)) top / 100% 3px no-repeat,
+ linear-gradient(132deg,#fff 7%,#fefeff 65%,var(--card-tint));
+ box-shadow:0 2px 3px rgba(19,53,92,.025),0 13px 34px rgba(22,49,92,.065);
+}
+#proyectos .directory-card.palette-amber{
+ --accent-start:#87500d;--accent-end:#bf8722;
+ --icon-shadow:rgba(152,101,17,.25);--mesh-glow:rgba(233,181,66,.17);
+ --badge-bg:#fff3dc;--accent-solid:#86560d;--accent-border:#dfb970;
+ --card-tint:#fffbf2;--card-border:#e9dfc9;
+}
+#proyectos .directory-card.palette-ocean{
+ --accent-start:#1556a3;--accent-end:#3281cb;
+ --icon-shadow:rgba(25,92,180,.24);--mesh-glow:rgba(79,151,222,.17);
+ --badge-bg:#e9f4ff;--accent-solid:#145d9f;--accent-border:#93bee8;
+ --card-tint:#f2f8ff;--card-border:#d8e4f1;
+}
+#proyectos .directory-card.palette-cyber{
+ --accent-start:#4837a0;--accent-end:#7a59c4;
+ --icon-shadow:rgba(90,65,164,.23);--mesh-glow:rgba(155,123,233,.16);
+ --badge-bg:#f1ecff;--accent-solid:#6446a7;--accent-border:#b5a4e1;
+ --card-tint:#f9f7ff;--card-border:#e2ddef;
+}
+#proyectos .directory-card.palette-emerald{
+ --accent-start:#086d68;--accent-end:#11a18b;
+ --icon-shadow:rgba(10,132,121,.22);--mesh-glow:rgba(51,192,158,.15);
+ --badge-bg:#e6f8f1;--accent-solid:#08786d;--accent-border:#8dcfbc;
+ --card-tint:#f4fffa;--card-border:#d6eae3;
+}
+#proyectos .directory-card::after{content:none!important;display:none!important}
+#proyectos .directory-card::before{
+ z-index:-1;pointer-events:none;
+ width:220px;height:220px;top:-130px;right:-100px;
+ background:radial-gradient(circle,var(--mesh-glow),transparent 68%);
+ opacity:1;
+}
+#proyectos .directory-card:is(:hover,:focus-visible){
+ border-color:var(--accent-border);
+ transform:translateY(-3px);
+ box-shadow:0 6px 12px rgba(17,49,98,.05),0 20px 42px var(--icon-shadow);
+}
+#proyectos .resource-icon,
+#proyectos .directory-card[data-area="musica"] .resource-icon,
+#proyectos .directory-card[data-area="idiomas"] .resource-icon{
+ grid-column:1;grid-row:1 / 3;align-self:center;
+ display:grid;place-items:center;
+ width:56px;height:56px;border-radius:16px;
+ background:var(--accent-gradient)!important;
+ border:1px solid rgba(255,255,255,.22)!important;
+ color:#fff!important;
+ box-shadow:0 11px 23px var(--icon-shadow),inset 0 1px 0 rgba(255,255,255,.28);
+}
+#proyectos .resource-icon::before{content:none!important;display:none!important}
+#proyectos .resource-icon-svg{
+ display:block;width:30px;height:30px;flex:none;
+ color:#fff;overflow:visible;
+}
+#proyectos .directory-card[data-resource-id="programming-coach"] .resource-icon-svg{
+ width:34px;height:34px;color:#f7df1e;
+}
+#proyectos .directory-card[data-resource-id="programming-lab"] .resource-icon-svg{
+ color:#f2f8ff;
+}
+#proyectos .resource-type{
+ grid-column:2;grid-row:1;
+ justify-self:start;align-self:end;
+ padding:4px 9px;
+ max-width:100%;
+ background:var(--badge-bg)!important;
+ color:var(--accent-solid)!important;
+ font:650 10px/1.3 Inter,system-ui,sans-serif;
+}
+#proyectos .directory-card strong{
+ grid-column:2;grid-row:2;align-self:start;
+ margin:0;
+ color:#16243c;
+ font:750 clamp(16px,1.37vw,19px)/1.25 Inter,system-ui,sans-serif;
+ letter-spacing:-.025em;
+}
+#proyectos .directory-card small{
+ grid-column:1 / -1;grid-row:3;
+ margin:12px 0 0;
+ color:#586b80;
+ font:420 13px/1.6 Inter,system-ui,sans-serif;
+}
+#proyectos .resource-footer{
+ grid-column:1 / -1;grid-row:5;align-self:end;
+ display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+ padding-top:13px;
+ border-top:1px solid rgba(99,128,164,.13);
+}
+#proyectos .resource-tags{
+ display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:1 1 130px;
+}
+#proyectos .resource-tag{
+ display:inline-flex;align-items:center;white-space:nowrap;
+ padding:5px 8px;border:1px solid rgba(111,141,176,.09);
+ border-radius:6px;background:var(--badge-bg);
+ color:var(--accent-solid);
+ font:600 10px/1.2 Inter,system-ui,sans-serif;
+}
+#proyectos .resource-open{
+ grid-column:auto;grid-row:auto;
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ margin:0 0 0 auto;padding:9px 14px;
+ min-height:35px;
+ white-space:nowrap;border-radius:999px;
+ color:#fff;background:var(--accent-gradient);
+ border:1px solid rgba(255,255,255,.16);
+ box-shadow:0 5px 13px var(--icon-shadow);
+ font:700 12px/1 Inter,system-ui,sans-serif;
+ transition:box-shadow .2s ease;
+}
+#proyectos .resource-open span{font-size:15px}
+#proyectos .directory-card:is(:hover,:focus-visible) .resource-open{
+ box-shadow:0 8px 19px var(--icon-shadow);
+}
+@media(max-width:1000px){
+ #proyectos .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:580px){
+ #proyectos .directory-grid{grid-template-columns:minmax(0,1fr);gap:15px}
+ #proyectos .directory-card{min-height:210px;padding:19px 18px 16px;grid-template-columns:52px minmax(0,1fr);border-radius:19px}
+ #proyectos .resource-icon,
+ #proyectos .directory-card[data-area="musica"] .resource-icon,
+ #proyectos .directory-card[data-area="idiomas"] .resource-icon{width:52px;height:52px}
+ #proyectos .resource-icon-svg{width:27px;height:27px}
+ #proyectos .directory-card strong{font-size:18px}
+ #proyectos .directory-card small{margin-top:9px}
+}
+@media(max-width:360px){
+ #proyectos .resource-footer{gap:9px}
+ #proyectos .resource-tag{font-size:9px;padding:4px 6px}
+ #proyectos .resource-open{padding:9px 12px}
+}
+@media(prefers-reduced-motion:reduce){
+ #proyectos .directory-card{transition:none!important}
+ #proyectos .resource-open{transition:none!important}
+ #proyectos .directory-card:is(:hover,:focus-visible){transform:none}
+}
