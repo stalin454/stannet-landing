@@ -58,6 +58,9 @@ const artistPageDir=new URL('open/artists/',destination);
 const artistImageDir=new URL('img/',artistPageDir);
 mkdirSync(artistImageDir,{recursive:true});
 for(const filename of artistImageNames)copyFileSync(new URL('../../assets/music/artists/'+filename,import.meta.url),new URL(filename,artistImageDir));
+// Independent Dev-only licensed photos, never touching Space source assets.
+const astridGalleryNames=['astrid-piano-studio.webp','astrid-stockholm-evening.webp','astrid-rainy-window.webp','astrid-live-performance.webp','astrid-stockholm-rain.webp','astrid-archipelago-sunset.webp'];
+for(const filename of astridGalleryNames)copyFileSync(new URL('./artist-public/img/'+filename,import.meta.url),new URL(filename,artistImageDir));
 let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.meta.url),'utf8')
  .replaceAll('/assets/music/artists/','/open/artists/img/')
  .replaceAll('/assets/brand/stannet-sn-cutout-32.png','/logo.png')
