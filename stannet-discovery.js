@@ -175,6 +175,15 @@ const resources=[
     "keywords": "musica music creacion canciones suno"
   },
   {
+    "id": "astrid-nova",
+    "href": "/pages/astrid-nova.html",
+    "title": "Astrid Nova · Artista oficial",
+    "description": "Biografía bilingüe, galería de fotos y canciones de Astrid Nova.",
+    "area": "musica",
+    "type": "recurso",
+    "keywords": "astrid nova cantante virtual stannet music retratos fotos biografia i rise again louder than fear"
+  },
+  {
     "id": "artist-universe",
     "href": "/pages/artist-universe.html",
     "title": "Artistas · STAN6IX y Astrid Nova",
