@@ -6,3 +6,12 @@ main{max-width:1240px;margin:auto;padding:0 22px 90px}.eyebrow{font-size:12px;co
 
 /* Music profile bilingual and expandable song details */
 .tracks{display:grid;gap:16px}.track{border:1px solid var(--stroke);background:linear-gradient(130deg,#132238,#111a2b);border-radius:15px;overflow:hidden}.track-head{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.track-head h3{margin:0;font-size:21px;color:#fff}.track-head p{margin:3px 0 0;font-size:14px;color:var(--muted)}.track-head a{font-size:14px;font-weight:700}.lyrics-details{border-top:1px solid var(--stroke)}.lyrics-details summary{padding:13px 20px;cursor:pointer;color:#f8c46d;font-weight:700;min-height:48px}.lyrics-details summary:focus-visible{outline:3px solid var(--gold);outline-offset:-4px}.lyrics-body{padding:0 20px 17px}.lyrics-pending{font-size:13px;color:var(--muted)!important}.translation p{margin:10px 0 14px}.translation p:last-child{margin-bottom:3px}@media(max-width:530px){.track-head{padding:16px}.lyrics-details summary{padding:14px 16px}.lyrics-body{padding:0 16px 16px}}
+
+/* Astrid Nova: six full-portrait additions, optimized for mobile without cropping. */
+.gallery .photo img{aspect-ratio:857/1536;object-fit:contain;object-position:center;height:auto;background:#101b29}
+.gallery .photo a{display:block;overflow:hidden}
+.gallery .photo a img{transition:transform .22s ease}
+.gallery .photo a:hover img{transform:scale(1.025)}
+@media(max-width:530px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.gallery .photo figcaption{padding:10px 9px}}
+@media(max-width:350px){.gallery{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.gallery .photo a img{transition:none}}
