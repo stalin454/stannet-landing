@@ -31,8 +31,8 @@ test('Six real Astrid Nova photos and direct artist access publish in Dev',()=>{
  const profile=readFileSync(new URL('artistas/astrid-nova/index.html',root),'utf8');
  const home=readFileSync(new URL('index.html',root),'utf8');
  const universe=readFileSync(new URL('open/artists/index.html',root),'utf8');
- assert.match(home,/href="\\/artistas\\/astrid-nova\\/"/);
- assert.match(universe,/href="\\/artistas\\/astrid-nova\\/"/);
+ assert.ok(home.includes('href="/artistas/astrid-nova/"'),'Dev homepage direct artist tab');
+ assert.ok(universe.includes('href="/artistas/astrid-nova/"'),'Dev Artist Universe direct link');
  const names=['astrid-piano-studio.webp','astrid-stockholm-evening.webp','astrid-rainy-window.webp','astrid-live-performance.webp','astrid-stockholm-rain.webp','astrid-archipelago-sunset.webp'];
  for(const name of names){
   assert.ok(profile.includes('/open/artists/img/'+name),'profile photo '+name);
