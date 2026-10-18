@@ -81,7 +81,7 @@ const puppeteer=require('puppeteer-core');
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
    {
     // Both public artist profiles must be indexable, visually usable, and link to each other.
-    for(const [slug,expectedPhotos] of [['astrid-nova',1],['stan6ix',6]]){
+    for(const [slug,expectedPhotos] of [['astrid-nova',7],['stan6ix',6]]){
       const artist=await browser.newPage();await artist.setCacheEnabled(false);
       await artist.setViewport({width,height:900});
       const errors=[];artist.on('pageerror',e=>errors.push(e.message));
