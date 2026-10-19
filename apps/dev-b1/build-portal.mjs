@@ -6,6 +6,10 @@ const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js','hero-approved.webp'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
 for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copyFileSync(new URL('./public/'+file,import.meta.url),new URL(file,destination));
+// Dev-only introduction; protected lessons, accounts and Callan media stay on Space.
+const londonDir=new URL('open/london-english/',destination);mkdirSync(londonDir,{recursive:true});
+copyFileSync(new URL('./portal-public/london-english.html',import.meta.url),new URL('index.html',londonDir));
+copyFileSync(new URL('./portal-public/london-english.css',import.meta.url),new URL('london-english.css',londonDir));
 // Add two discoverable official artist links without changing existing catalogue counts.
 const homePath=new URL('index.html',destination);
 const homeHtml=readFileSync(homePath,'utf8');
@@ -109,12 +113,12 @@ writeFileSync(new URL('index.html',artistPageDir),artistHtml);
 buildDenmark(destination);
 buildProgramming(destination);
 buildRadio(destination);
-const openURLs={music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
+const openURLs={music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/','london-english':'/open/london-english/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/'];
+const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
 // Preserve this static page under strict CSP; prevent edge-injected analytics scripts.
