@@ -123,11 +123,11 @@ const resources=[
   {
     "id": "callan",
     "href": "/pages/callan.html",
-    "title": "Callan English Coach",
+    "title": "London English Academy",
     "description": "Pregunta, respuesta, escucha y repetición.",
     "area": "idiomas",
     "type": "curso",
-    "keywords": "ingles english callan speaking repeticion voz"
+    "keywords": "london english academy ingles britanico callan speaking repeticion voz"
   },
   {
     "id": "danish",
