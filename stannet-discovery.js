@@ -124,7 +124,7 @@ const resources=[
     "id": "callan",
     "href": "/pages/callan.html",
     "title": "London English Academy",
-    "description": "Pregunta, respuesta, escucha y repetición.",
+    "description": "Inglés conversacional · práctica basada en el método Callan.",
     "area": "idiomas",
     "type": "curso",
     "keywords": "london english academy ingles britanico callan speaking repeticion voz"
