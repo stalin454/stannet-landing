@@ -2,6 +2,7 @@ export const catalog=[
  ['programming','Programming Academy','Software','Aprende a leer, escribir y depurar código.','</>'],
  ['typing','Typing Academy','Software','Entrena con código real y sigue tu progreso.','⌨'],
  ['languages','Academias de idiomas','Educación','Inglés, danés y nuevas rutas de aprendizaje.','Aa'],
+ ['london-english','London English Academy','Educación','Academia de inglés con conversación, escucha y método Callan. Aula privada original en StanNet.Space.','🇬🇧'],
  ['denmark','Ruta Dinamarca','Educación','Guía de llegada, empleo, vivienda y CV danés.','🇩🇰'],
  ['ai','Inteligencia artificial','Herramientas','Herramientas educativas y asistentes de StanNet.','✦'],
  ['cyber','Ciberseguridad','Herramientas','Laboratorios y herramientas de defensa digital.','◇'],

@@ -6,6 +6,10 @@ const destination=new URL('./site-build/',import.meta.url);
 rmSync(destination,{recursive:true,force:true});mkdirSync(destination,{recursive:true});
 for(const file of ['index.html','portal.css','catalog.js','hero-approved.webp'])copyFileSync(new URL('./portal-public/'+file,import.meta.url),new URL(file,destination));
 for(const file of ['site.css','logo.png','orbitron.ttf','orbitron-OFL.txt'])copyFileSync(new URL('./public/'+file,import.meta.url),new URL(file,destination));
+// Dev-only introduction; protected lessons, accounts and Callan media stay on Space.
+const londonDir=new URL('open/london-english/',destination);mkdirSync(londonDir,{recursive:true});
+copyFileSync(new URL('./portal-public/london-english.html',import.meta.url),new URL('index.html',londonDir));
+copyFileSync(new URL('./portal-public/london-english.css',import.meta.url),new URL('london-english.css',londonDir));
 // Add two discoverable official artist links without changing existing catalogue counts.
 const homePath=new URL('index.html',destination);
 const homeHtml=readFileSync(homePath,'utf8');
@@ -58,6 +62,9 @@ const artistPageDir=new URL('open/artists/',destination);
 const artistImageDir=new URL('img/',artistPageDir);
 mkdirSync(artistImageDir,{recursive:true});
 for(const filename of artistImageNames)copyFileSync(new URL('../../assets/music/artists/'+filename,import.meta.url),new URL(filename,artistImageDir));
+// Independent Dev-only licensed photos, never touching Space source assets.
+const astridGalleryNames=['astrid-piano-studio.webp','astrid-stockholm-evening.webp','astrid-rainy-window.webp','astrid-live-performance.webp','astrid-stockholm-rain.webp','astrid-archipelago-sunset.webp'];
+for(const filename of astridGalleryNames)copyFileSync(new URL('./artist-public/img/'+filename,import.meta.url),new URL(filename,artistImageDir));
 let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.meta.url),'utf8')
  .replaceAll('/assets/music/artists/','/open/artists/img/')
  .replaceAll('/assets/brand/stannet-sn-cutout-32.png','/logo.png')
@@ -69,7 +76,19 @@ let artistHtml=readFileSync(new URL('../../pages/artist-universe.html',import.me
  .replaceAll('href="/pages/radio.html"','href="https://stannet.space/pages/radio.html"')
  .replace('StanNet Music</a><nav>','StanNet Dev · Music</a><nav>')
  .replace('StanNet.Space</a></footer>','StanNet.Dev</a></footer>');
+// Externalize the source styles for Dev's strict style-src 'self'. Never edit Space.
+const artistStyles=[];
+artistHtml=artistHtml.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(_,css)=>{artistStyles.push(css);return '';});
+if(!artistStyles.length||!artistStyles.every(css=>css.trim()))throw Error('Artist Universe source styles missing');
+const artistCss=artistStyles.join('\n')+'\n'+readFileSync(new URL('./artist-public/universe.css',import.meta.url),'utf8');
+writeFileSync(new URL('artist-universe.css',artistPageDir),artistCss);
+artistHtml=artistHtml.replace('</head>','<link rel="stylesheet" href="/open/artists/artist-universe.css"></head>')
+ .replace('<nav>','<nav aria-label="Music navigation">')
+ .replace('href="https://stannet.space/pages/radio.html"','href="/open/radio/"');
 artistHtml=artistHtml.replace('</head>','<link rel="canonical" href="https://stannet.dev/open/artists/"></head>');
+// Deep-link to Astrid from the Artist Universe header; preserve protected Space source.
+if(!artistHtml.includes('href="#astrid-nova">Astrid Nova</a>'))throw Error('Astrid nav source changed');
+artistHtml=artistHtml.replace('href="#astrid-nova">Astrid Nova</a>','href="/artistas/astrid-nova/">Astrid Nova ↗</a>');
 
 /* Public search-friendly artist biographies and opt-in YouTube galleries. */
 const profileRoot=new URL('artistas/',destination);
@@ -89,20 +108,25 @@ for(const slug of ['astrid-nova','stan6ix']){
   if(structuredVideos.length)page=page.replace('</head>','<script type="application/ld+json">'+JSON.stringify(structuredVideos).replaceAll('<','\\u003c')+'</script></head>');
   writeFileSync(new URL('index.html',folder),page);
 }
-artistHtml=artistHtml.replace('</main>','<section class="section" aria-label="Official artist profiles"><h2>Official biographies, photos & videos</h2><p><a href="/artistas/astrid-nova/">Astrid Nova · Official profile ↗</a> &nbsp; <a href="/artistas/stan6ix/">STAN6IX · Official profile ↗</a></p></section></main>');
+artistHtml=artistHtml.replace('</main>','<section class="section" aria-label="Official artist profiles"><h2>Official biographies, photos & videos</h2><p class="profile-links"><a href="/artistas/astrid-nova/">Astrid Nova · Official profile ↗</a><a href="/artistas/stan6ix/">STAN6IX · Official profile ↗</a></p></section></main>');
 writeFileSync(new URL('index.html',artistPageDir),artistHtml);
 buildDenmark(destination);
 buildProgramming(destination);
 buildRadio(destination);
-const openURLs={music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/'};
+const openURLs={music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/','london-english':'/open/london-english/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/'];
+const livePaths=['/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
-writeFileSync(new URL('_headers',destination),`/artistas/*
+// Preserve this static page under strict CSP; prevent edge-injected analytics scripts.
+writeFileSync(new URL('_headers',destination),`/open/artists/*
+  Cache-Control: no-transform
+
+/artistas/*
+  Cache-Control: no-transform
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
 
 /open/programming/*
