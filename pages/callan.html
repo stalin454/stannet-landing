@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Aula privada de ingles con IA basada en el metodo Callan, desde nivel inicial hasta avanzado.">
-<title>Callan English Coach | StanNet.Space</title>
+<meta name="description" content="London English Academy de StanNet: academia privada de inglés con práctica oral, escucha y lecciones inspiradas en el método Callan.">
+<title>London English Academy | StanNet.Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="../callan-dictionary.css">
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do 
 <nav class="site-nav home-nav" aria-label="Navegación principal">
 <a href="../index.html">Inicio</a>
 <div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Proyectos <span>⌄</span></button><div class="nav-dropdown"><a href="../index.html#proyectos">Todos los proyectos</a><a href="../sentinel/">StanNet Sentinel</a><a href="../nutri-ia/">Nutri IA</a><a href="music.html">Music Lab</a><a href="marketplace.html">Marketplace</a></div></div>
-<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button><div class="nav-dropdown"><a href="cybersecurity.html">Cybersecurity Academy</a><a href="programming.html">Programming Academy</a><a href="typing.html">Typing Lab · Mecanografía</a><a href="shortcuts.html">Atajos de teclado</a><a class="active" aria-current="page" href="callan.html">Callan English Coach</a><a href="language-music.html">Language Music Lab</a><a href="guitar.html">Guitar Academy</a></div></div>
+<div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Academias <span>⌄</span></button><div class="nav-dropdown"><a href="cybersecurity.html">Cybersecurity Academy</a><a href="programming.html">Programming Academy</a><a href="typing.html">Typing Lab · Mecanografía</a><a href="shortcuts.html">Atajos de teclado</a><a class="active" aria-current="page" href="callan.html">London English Academy</a><a href="language-music.html">Language Music Lab</a><a href="guitar.html">Guitar Academy</a></div></div>
 <div class="nav-group"><button class="nav-trigger" type="button" aria-expanded="false">Laboratorios <span>⌄</span></button><div class="nav-dropdown"><a href="cyber-lab.html">Cyber Defense Lab</a><a href="../sentinel/">Sentinel</a><a href="programming-fullstack.html">Full-Stack Lab</a><a href="vocal-studio.html">Vocal Studio</a></div></div>
 <a href="education.html">Formación</a>
 <a href="cv.html">Sobre mí</a>
@@ -52,9 +52,9 @@ document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do 
 </header>
 <div style="background:#0e293a;color:#e6fbff;text-align:center;padding:12px 18px;font:600 13px Inter,system-ui,sans-serif"><a style="color:#85e8f1" href="/pages/language-typing.html?lang=en">🎙️ Nuevo · Language Typing &amp; Shadowing Academy — practicar inglés escribiendo y hablando ↗</a></div><main>
 <section class="coach-hero">
-<p class="eyebrow">IA / AULA PRIVADA</p>
-<h1>English, paso a paso.<br><em>Con un profesor que te escucha.</em></h1>
-<p class="coach-copy">Un entrenador conversacional inspirado en el metodo Callan: pregunta, escucha, corrige y vuelve a practicar contigo desde el nivel inicial hasta el avanzado.</p>
+<p class="eyebrow">STANNET EDUCATION · AULA PRIVADA</p>
+<h1>London English Academy<br><em>Speak English. Build Confidence.</em></h1>
+<p class="coach-copy">Aprende inglés paso a paso, desde el nivel inicial hasta el avanzado, con escucha, conversación y corrección guiada. Incluye práctica inspirada en el método Callan.</p>
 </section>
 <section class="section">
 <div class="auth-card" id="authCard"><p class="eyebrow">ACCESO PRIVADO</p><h2>Entra en tu aula.</h2><div id="loginFields"><div class="auth-grid"><input id="authEmail" type="email" placeholder="Tu email"><input id="authPassword" type="password" placeholder="Contraseña"></div><div class="auth-actions"><button id="signIn" type="button">Iniciar sesión →</button><button id="signUp" class="secondary" type="button">Crear cuenta</button><button id="forgotPassword" class="secondary" type="button">¿Olvidaste tu contraseña?</button></div></div><div id="recoveryPanel" class="is-hidden"><p class="auth-status">Escribe una contraseña nueva para tu cuenta.</p><div class="auth-grid"><input id="newPassword" type="password" placeholder="Nueva contraseña"><input id="confirmPassword" type="password" placeholder="Repite la contraseña"></div><div class="auth-actions"><button id="updatePassword" type="button">Guardar nueva contraseña →</button><button id="cancelRecovery" class="secondary" type="button">Cancelar</button></div></div><p class="auth-status" id="authStatus">Solo usuarios autorizados pueden acceder al contenido de estudio.</p></div>
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do 
 <div class="lesson-top"><div><p class="eyebrow">LECCION 01 / PRESENT SIMPLE</p><h2>Responde en voz alta.</h2></div><span class="level-pill">A1 · INICIO</span></div>
 <div class="audio-panel"><h3>Audio original del curso</h3><div class="audio-controls"><div><label for="bookSelect">LIBRO</label><select id="bookSelect"></select></div><div><label for="lessonSelect">LECCION</label><select id="lessonSelect"></select></div><button class="audio-load" id="loadAudio" type="button">Cargar audio →</button></div><audio id="originalAudio" controls preload="none"></audio><p class="audio-status" id="audioStatus">Selecciona un libro y una leccion para reproducirla.</p><p class="aux-note">La practica escrita inferior es auxiliar. La leccion Callan se reproducira desde el audio original.</p></div>
 <div class="book-panel"><h3>Libro de la leccion</h3><button class="book-load" id="loadBook" type="button">Preparar PDF privado →</button><a class="book-open" id="bookOpen" target="_blank" rel="noopener" href="about:blank">Abrir libro en una pestaña nueva ↗</a><iframe class="book-viewer" id="bookViewer" title="Libro Callan privado"></iframe><p class="book-status" id="bookStatus">El PDF solo se mostrara despues de iniciar sesion.</p></div>
-<div class="teacher"><span class="teacher-mark">C</span><div><strong>Callan Coach</strong><span>Ritmo rapido · correccion amable</span></div></div>
+<div class="teacher"><span class="teacher-mark">C</span><div><strong>London English Coach</strong><span>Ritmo rapido · correccion amable</span></div></div>
 <div class="question" id="questionText">Do you live in Spain?</div>
 <div class="answer-row"><input id="answer" type="text" placeholder="Escribe tu respuesta en ingles"><button id="checkAnswer" type="button">Comprobar →</button></div>
 <div class="auth-actions"><button id="listenQuestion" class="secondary" type="button">Escuchar pregunta</button><button id="nextQuestion" class="secondary is-hidden" type="button">Siguiente pregunta →</button></div>
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded',()=>{const callanMemoryItems=[['Do 
 </div>
 </section>
 </main>
-<footer><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><p>© <span id="year"></span> · Aula privada de ingles</p><a href="#top">VOLVER ARRIBA ↑</a></footer>
+<footer><a class="brand" href="../index.html"><span>StanNet</span><i>.Space</i></a><p>© <span id="year"></span> · London English Academy</p><a href="#top">VOLVER ARRIBA ↑</a></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../script.js?v=20261014-voice2"></script><script src="../callan-dictionary.js" defer></script>
 <script>
 const questions=[{text:'Do you live in Spain?',example:'Yes, I live in Spain.',keywords:['live','spain']},{text:'Do you live in a city?',example:'Yes, I live in a city.',keywords:['live','city']},{text:'Is your city big?',example:'Yes, my city is big.',keywords:['city','big']}];let questionIndex=0;const answer=document.querySelector('#answer');const feedback=document.querySelector('#feedback');const questionText=document.querySelector('#questionText');const nextQuestion=document.querySelector('#nextQuestion');const lessonProgress=document.querySelector('#lessonProgress');const checkAnswer=()=>{const value=answer.value.trim().toLowerCase();feedback.classList.add('show');if(!value){feedback.innerHTML='<strong>Prueba a responder.</strong> Por ejemplo: '+questions[questionIndex].example;nextQuestion.classList.add('is-hidden');return}const correct=questions[questionIndex].keywords.every((word)=>value.includes(word));if(correct){feedback.innerHTML='<strong>Good answer.</strong> La estructura es correcta. Repite la frase una vez mas antes de continuar.';nextQuestion.classList.toggle('is-hidden',questionIndex===questions.length-1)}else{feedback.innerHTML='<strong>Let us try again.</strong> Responde con una frase completa. Ejemplo: '+questions[questionIndex].example;nextQuestion.classList.add('is-hidden')}};document.querySelector('#checkAnswer').addEventListener('click',checkAnswer);answer.addEventListener('keydown',(event)=>{if(event.key==='Enter')checkAnswer()});nextQuestion.addEventListener('click',()=>{questionIndex=(questionIndex+1)%questions.length;questionText.textContent=questions[questionIndex].text;lessonProgress.textContent=`Pregunta ${questionIndex+1} de ${questions.length} · modo conversacion`;answer.value='';feedback.classList.remove('show');nextQuestion.classList.add('is-hidden');answer.focus()});document.querySelector('#listenQuestion').addEventListener('click',()=>{if('speechSynthesis' in window){window.speechSynthesis.cancel();const speech=new SpeechSynthesisUtterance(questions[questionIndex].text);speech.lang='en-GB';speech.rate=1.15;window.speechSynthesis.speak(speech)}else{feedback.classList.add('show');feedback.innerHTML='<strong>Audio no disponible</strong> en este navegador.'}});
