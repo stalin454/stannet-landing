@@ -172,7 +172,7 @@ const puppeteer=require('puppeteer-core');
     }
    }
    if(width===390){
-    const selectors={'/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
+    const selectors={'/open/london-english/':'.london-hero','/open/fp-study/':'#subjects .subject','/open/cs-foundations/':'#cs-list button','/open/shortcuts/':'#shortcutList .shortcut-row','/open/cybersecurity/':'#cyber-network-lab','/open/artists/':'#stan6ix .card','/open/typing/':'#typingInput','/open/denmark/':'#dkCity','/open/programming/':'#pa-tracks-container .pa-card','/open/radio/':'#radioAudio'};
     for(const url of openLabs){
      const lab=await browser.newPage();await lab.setViewport({width,height:900});const labErrors=[];
      lab.on('pageerror',error=>labErrors.push(error.message));
