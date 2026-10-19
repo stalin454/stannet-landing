@@ -80,6 +80,29 @@ const puppeteer=require('puppeteer-core');
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english']);
+   // London English Academy is a public landing page; authentication remains in Space.
+   {
+     const london=await browser.newPage();
+     await london.setCacheEnabled(false);
+     await london.setViewport({width,height:900});
+     const landing=await london.goto(base+'/open/london-english/',{waitUntil:'networkidle0',timeout:45000});
+     assert.ok([200,304].includes(landing.status()),'London English Academy landing status '+landing.status());
+     const state=await london.evaluate(()=>({
+       title:document.querySelector('h1')?.textContent.trim(),
+       canonical:document.querySelector('link[rel="canonical"]')?.href,
+       classroom:[...document.querySelectorAll('a')].find(a=>a.textContent.includes('Entrar al aula privada'))?.href,
+       css:getComputedStyle(document.querySelector('.london-hero')).borderRadius,
+       overflow:document.documentElement.scrollWidth>innerWidth+1,
+       forms:document.querySelectorAll('form').length
+     }));
+     assert.match(state.title,/London English Academy/);
+     assert.equal(state.canonical,'https://stannet.dev/open/london-english/');
+     assert.equal(state.classroom,'https://stannet.space/pages/callan.html');
+     assert.notEqual(state.css,'0px','London English Academy stylesheet should load');
+     assert.equal(state.overflow,false,'London English Academy horizontal overflow at '+width);
+     assert.equal(state.forms,0,'Dev landing must not request credentials');
+     await london.close();
+   }
    {
     // Both public artist profiles must be indexable, visually usable, and link to each other.
     for(const [slug,expectedPhotos] of [['astrid-nova',7],['stan6ix',6]]){
