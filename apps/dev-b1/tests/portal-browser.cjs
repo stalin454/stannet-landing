@@ -31,17 +31,17 @@ const puppeteer=require('puppeteer-core');
      featured:document.querySelectorAll('#aulas a[href^="/open/"]').length,
      catalog:document.querySelectorAll('#cards .card-bottom a[href^="/open/"]').length
     }));
-    if(counts.featured===9&&counts.catalog===7){consistent=true;break;}
+    if(counts.featured===10&&counts.catalog===8){consistent=true;break;}
     await new Promise(resolve=>setTimeout(resolve,1500));
    }
-   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (nine featured routes expected)');
+   assert.ok(consistent,'Matching portal HTML and catalog did not propagate to the edge (ten featured routes expected)');
    await publishedVersion(page);
    // A conditional navigation can return HTTP 304 with a verified cached document.
    // DOM, version and assets are asserted below; a 304 alone is never considered sufficient.
    const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.ok([200,304].includes(current.status()),'Reloaded HTML status: '+current.status());
    await page.waitForSelector('.card');
    await page.evaluate(()=>document.fonts.ready);
-   assert.equal(await page.$$eval('.card',items=>items.length),10);
+   assert.equal(await page.$$eval('.card',items=>items.length),11);
    assert.equal(await page.$$('form').then(x=>x.length),0,'Incomplete signup must not be exposed');
    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily,font:document.fonts.check('21px Orbitron'),image:document.querySelector('.brand-mark').naturalWidth>0}));
    assert.equal(layout.overflow,false,'Horizontal overflow '+width);assert.ok(layout.brandFont.includes('Orbitron'));assert.ok(layout.font);assert.ok(layout.image);
@@ -52,12 +52,12 @@ const puppeteer=require('puppeteer-core');
    assert.equal(await page.$eval('[data-filter="Software"]',e=>e.getAttribute('aria-pressed')),'true');
    await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),3);
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
-   await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),10);
+   await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),11);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
-   assert.equal(links.filter(x=>x.startsWith('/open/')).length,7);
+   assert.equal(links.filter(x=>x.startsWith('/open/')).length,8);
    assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,3);
    const openLabs=await page.$$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
-   assert.deepEqual(openLabs,['/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/programming/','/open/radio/','/open/denmark/']);
+   assert.deepEqual(openLabs,['/open/london-english/','/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/programming/','/open/radio/','/open/denmark/']);
    await page.click('nav a[href="#contact"]');assert.equal(await page.evaluate(()=>location.hash),'#contact');
    await page.keyboard.press('Tab');const focus=await page.evaluate(()=>document.activeElement.tagName);assert.notEqual(focus,'BODY');
    const discovery=await page.evaluate(async()=>{
@@ -70,15 +70,16 @@ const puppeteer=require('puppeteer-core');
       denmark:sitemap.includes('https://stannet.dev/open/denmark/'),
       denmarkCv:sitemap.includes('https://stannet.dev/open/denmark/cv/'),
       programming:sitemap.includes('https://stannet.dev/open/programming/coach/'),
+      london:sitemap.includes('https://stannet.dev/open/london-english/'),
       radio:sitemap.includes('https://stannet.dev/open/radio/'),
       botMap:robots.includes('Sitemap: https://stannet.dev/sitemap.xml'),
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,19);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.radio&&discovery.botMap);
+   assert.equal(discovery.listed,20);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english']);
    {
     // Both public artist profiles must be indexable, visually usable, and link to each other.
     for(const [slug,expectedPhotos] of [['astrid-nova',7],['stan6ix',6]]){
