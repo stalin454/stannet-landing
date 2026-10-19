@@ -1,0 +1,57 @@
+{
+  "checked_at_utc": "2026-10-14T21:08:17.928306+00:00",
+  "checks": [
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/",
+      "status": 200,
+      "server": "cloudflare",
+      "final_url": "https://stannet-dev-portal.stalin454.workers.dev/"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/version.json",
+      "status": 200,
+      "server": "cloudflare",
+      "final_url": "https://stannet-dev-portal.stalin454.workers.dev/version.json",
+      "version": {
+        "commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
+        "module": "public-portal",
+        "auth": false,
+        "payments": false,
+        "typing": false
+      }
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/api/session",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/apps/typing",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet-dev-portal.stalin454.workers.dev/schema.sql",
+      "status": 404,
+      "server": "cloudflare"
+    },
+    {
+      "url": "https://stannet.dev/",
+      "status": 502,
+      "server": "mitmproxy 12.2.3"
+    },
+    {
+      "url": "https://stannet.space/",
+      "status": 200,
+      "server": "cloudflare",
+      "final_url": "https://stannet.space/"
+    },
+    {
+      "url": "https://academy.stannet.dev/pages/programming-coach.html",
+      "status": 200,
+      "server": "cloudflare",
+      "final_url": "https://academy.stannet.dev/pages/programming-coach"
+    }
+  ],
+  "note": "Root 502 received from environment proxy; administrative evidence confirms root binding still absent and DNS Read denied."
+}

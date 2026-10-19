@@ -1,0 +1,187 @@
+[
+  {
+    "url": "https://stannet.dev/",
+    "method": "GET",
+    "status": 502,
+    "error": "HTTP error"
+  },
+  {
+    "url": "https://academy.stannet.dev/pages/programming-coach.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://academy.stannet.dev/pages/programming-coach",
+    "content_type": "text/html",
+    "bytes_read": 5933,
+    "elapsed_ms": 8117
+  },
+  {
+    "url": "https://stannet.space/",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/",
+    "content_type": "text/html",
+    "bytes_read": 27970,
+    "elapsed_ms": 5755
+  },
+  {
+    "url": "https://stannet.space/pages/programming.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/programming",
+    "content_type": "text/html",
+    "bytes_read": 5223,
+    "elapsed_ms": 11670
+  },
+  {
+    "url": "https://stannet.space/pages/typing.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/typing",
+    "content_type": "text/html",
+    "bytes_read": 13995,
+    "elapsed_ms": 11677
+  },
+  {
+    "url": "https://stannet.space/pages/language-typing.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/language-typing",
+    "content_type": "text/html",
+    "bytes_read": 11562,
+    "elapsed_ms": 7641
+  },
+  {
+    "url": "https://stannet.space/pages/callan.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/callan",
+    "content_type": "text/html",
+    "bytes_read": 41725,
+    "elapsed_ms": 10858
+  },
+  {
+    "url": "https://stannet.space/pages/danish.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/danish",
+    "content_type": "text/html",
+    "bytes_read": 28972,
+    "elapsed_ms": 8496
+  },
+  {
+    "url": "https://stannet.space/dj-studio/",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/dj-studio/",
+    "content_type": "text/html",
+    "bytes_read": 1300,
+    "elapsed_ms": 4807
+  },
+  {
+    "url": "https://stannet.space/pages/vocal-studio.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/vocal-studio",
+    "content_type": "text/html",
+    "bytes_read": 6167,
+    "elapsed_ms": 9780
+  },
+  {
+    "url": "https://stannet.space/pages/radio.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/radio",
+    "content_type": "text/html",
+    "bytes_read": 12940,
+    "elapsed_ms": 9794
+  },
+  {
+    "url": "https://stannet.space/pages/artist-universe.html",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pages/artist-universe",
+    "content_type": "text/html",
+    "bytes_read": 8343,
+    "elapsed_ms": 10017
+  },
+  {
+    "url": "https://stannet.space/sentinel/",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/sentinel/",
+    "content_type": "text/html",
+    "bytes_read": 15331,
+    "elapsed_ms": 4927
+  },
+  {
+    "url": "https://stannet.space/shield/",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/shield/",
+    "content_type": "text/html",
+    "bytes_read": 5834,
+    "elapsed_ms": 4932
+  },
+  {
+    "url": "https://stannet.space/pdf-tutor/",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/pdf-tutor/",
+    "content_type": "text/html",
+    "bytes_read": 60117,
+    "elapsed_ms": 4942
+  },
+  {
+    "url": "https://stannet.space/api/speech/status",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/api/speech/status",
+    "content_type": "application/json; charset=utf-8",
+    "bytes_read": 134,
+    "elapsed_ms": 4870,
+    "metadata": {
+      "provider": "amazon-polly",
+      "region": "eu-south-2",
+      "configured": true,
+      "authRequired": true
+    }
+  },
+  {
+    "url": "https://stannet.space/api/language-premium/session",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/api/language-premium/session",
+    "content_type": "application/json; charset=utf-8",
+    "bytes_read": 47,
+    "elapsed_ms": 4786,
+    "metadata": {
+      "authenticated": false
+    }
+  },
+  {
+    "url": "https://stannet.space/api/ayudaencasa/v1/health",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/api/ayudaencasa/v1/health",
+    "content_type": "application/json; charset=utf-8",
+    "bytes_read": 77,
+    "elapsed_ms": 4756,
+    "metadata": {
+      "service": "AyudaEnCasa",
+      "version": "v1",
+      "databaseConfigured": false
+    }
+  },
+  {
+    "url": "https://stannet.space/api/radio/status",
+    "method": "GET",
+    "status": 200,
+    "final_url": "https://stannet.space/api/radio/status",
+    "content_type": "application/json; charset=utf-8",
+    "bytes_read": 4088,
+    "elapsed_ms": 4771,
+    "metadata": {
+      "station": "StanNet Radio"
+    }
+  }
+]

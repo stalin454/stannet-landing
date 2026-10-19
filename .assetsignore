@@ -13,3 +13,6 @@ package-lock.json
 docs/
 migrations/
 ayudaencasa-api.js
+
+# Isolated Dev B1 server, private lessons, tests and configuration
+apps/dev-b1/

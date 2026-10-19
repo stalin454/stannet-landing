@@ -1,0 +1,270 @@
+{
+  "baseline_commit": "44ee2b8fcd24f5ca04258f7d9662cc2b4cc4db1c",
+  "published_commit": "09703714349bba6f0f7cb8448939226ee1ff5432",
+  "files": [
+    {
+      "status": "M",
+      "path": ".assetsignore"
+    },
+    {
+      "status": "A",
+      "path": ".github/workflows/dev-b1-release.yml"
+    },
+    {
+      "status": "A",
+      "path": ".github/workflows/dev-b1-tests.yml"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/.gitignore"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/admin.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/app.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/build-catalog.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/build-portal.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/catalog.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/cloudflare-inventory.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/cloudflare-read.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/d1-bootstrap.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/exercises.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/migrations/0001_initial.sql"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/migrations/0002_environment_and_indexes.sql"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/package.json"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/portal-domain.jsonc"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/portal-public/catalog.js"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/portal-public/index.html"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/portal-public/portal.css"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/portal-worker.jsonc"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/prepare-preview.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/private/typing.html"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/private/typing.js"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/index.html"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/logo.png"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/orbitron-OFL.txt"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/orbitron.ttf"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/portal.js"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/public/site.css"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/release-guard.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/release-needed.py"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/runtime-tests/browser.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/runtime-tests/cloudflare.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/runtime-tests/migrations.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/schema.sql"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/security.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/server.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/sqlite.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/auth-browser.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/cloudflare-read.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/d1-bootstrap.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/http.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/portal-browser.cjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/release-needed.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/tests/security.test.mjs"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/worker.example.jsonc"
+    },
+    {
+      "status": "A",
+      "path": "apps/dev-b1/worker.mjs"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/_headers"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/catalog.json"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/index.html"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/logo.png"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/orbitron.ttf"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/portal.js"
+    },
+    {
+      "status": "A",
+      "path": "dev-b1-preview/site.css"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/README.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/architecture.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/changes.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/cloudflare-data.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/diagnosis.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/dns-evidence.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/http-verification.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/release-receipt.json"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/release.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/validation.md"
+    },
+    {
+      "status": "A",
+      "path": "docs/dev-b1/verify-isolation.py"
+    }
+  ]
+}

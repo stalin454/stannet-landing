@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>FP Study Area · StanNet Dev</title>
+<link rel="stylesheet" href="/apps/fp-study/fp-study.css">
+<script src="/apps/fp-study/fp-study-data.js" defer></script>
+<script src="/apps/fp-study/fp-study.js" defer></script>
+<script type="module" src="/apps/fp-study/fp-study-transfer.js"></script>
+</head>
+<body>
+<header class="top"><a class="brand" href="/account" aria-label="Volver a StanNet Dev">StanNet.Dev</a><div><strong>FP Study Area</strong><span>DAW · Piloto privado</span></div></header>
+<main>
+<section class="hero">
+<p class="eyebrow">STANNET DEV / MIGRACIÓN CONTROLADA</p>
+<h1>FP Grado Superior · DAW</h1>
+<p>Teoría, práctica, cuestionarios y simulacros recuperados de la versión original de StanNet.Space. Este piloto permanece privado mientras se comprueban las aplicaciones migradas.</p>
+<p class="muted">El progreso de este piloto se guarda solamente en este navegador. No se ha trasladado automáticamente el progreso de Space ni está sincronizado con D1. No contiene pagos ni llamadas a servicios de IA.</p>
+<div class="stats"><span><b id="subjectCount">6</b> áreas</span><span><b id="completed">0</b> respuestas correctas</span><span><b id="mistakes">0</b> errores para repasar</span></div>
+</section>
+<section><h2>Mis áreas</h2><div id="subjects" class="subjects"></div></section>
+<section id="workspace" class="workspace hidden"><button id="back" class="back" type="button">← Volver a mis áreas</button><div id="course"></div></section>
+<section id="fp-transfer" class="hero" aria-labelledby="fp-transfer-title">
+<h2 id="fp-transfer-title">Copia de mi progreso</h2>
+<p>Exporta una copia de este navegador o importa voluntariamente un archivo JSON de FP Study. El archivo se procesa aquí mismo: no se envía al servidor ni sustituye la futura sincronización de cuentas.</p>
+<p><button id="fp-export" type="button">Descargar copia local</button></p>
+<label for="fp-import-file">Seleccionar copia del progreso (.json)</label>
+<input id="fp-import-file" type="file" accept=".json,application/json">
+<p id="fp-import-preview" class="muted"></p>
+<label><input id="fp-overwrite" type="checkbox"> Acepto sustituir el progreso actual de este navegador por el del archivo.</label>
+<p><button id="fp-import" type="button" disabled>Importar copia seleccionada</button></p>
+<p id="fp-transfer-status" role="status" aria-live="polite"></p>
+</section>
+</main>
+</body></html>
