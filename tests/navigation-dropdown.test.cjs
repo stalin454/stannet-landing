@@ -5,11 +5,11 @@ const html = fs.readFileSync('index.html','utf8');
 const script = fs.readFileSync('script.js','utf8');
 const css = fs.readFileSync('style.css','utf8');
 
-const homeNav = html.match(/<nav\\b(?=[^>]*class="[^"]*\\bsite-nav\\b[^"]*")[^>]*>([\\s\\S]*?)<\\/nav>/)?.[1] || '';
+const homeNav = html.split('<nav class="site-nav home-nav"')[1]?.split('</nav>')[0] || '';
 for(const label of ['Inicio','Servicios','Proyectos','Recursos','Contacto']){
   assert.ok(homeNav.includes('>'+label+'</a>'), 'homepage primary link missing: '+label);
 }
-assert.equal((homeNav.match(/<a\\b/g)||[]).length,5,'homepage must give clients five clear navigation choices');
+assert.equal(homeNav.split('<a ').length-1,5,'homepage must give clients five clear navigation choices');
 assert.ok(!homeNav.includes('nav-group'), 'homepage does not force users into dropdowns');
 assert.ok(html.includes('href="/pages/ai.html"'), 'AI remains discoverable in curated projects');
 assert.ok(html.includes('href="/pages/radio.html"'), 'Radio remains accessible in the complete catalogue');
@@ -21,7 +21,6 @@ const sharedNav = require('node:fs').readFileSync('stannet-global-nav.js','utf8'
 assert.ok(/data-group="\/pages\/guitar"[\s\S]*?href="\/pages\/radio\.html">StanNet Radio<\/a>/.test(sharedNav), 'Canonical Music dropdown must include Radio');
 assert.ok(!sharedNav.includes('data-nav="/pages/radio"'), 'No duplicate standalone Radio link');
 assert.equal((sharedNav.match(/href="\/pages\/radio\.html">StanNet Radio<\/a>/g)||[]).length,1);
-assert.ok(sharedNav.includes('Desarrollo <span>⌄</span></button>'));
 assert.ok(sharedNav.includes('Desarrollo <span>⌄</span></button>'));
 assert.equal((sharedNav.match(/Cybersecurity Academy/g)||[]).length,1);
 assert.equal((sharedNav.match(/Cyber Defense Lab/g)||[]).length,1);
