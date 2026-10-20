@@ -5,6 +5,10 @@ on:
       - 'language-typing*.js'
       - 'language-typing.css'
       - 'pages/language-typing.html'
+      - 'pages/typing-stories.html'
+      - 'typing-stories*.js'
+      - 'typing-stories.css'
+      - 'tests/typing-stories*.cjs'
       - 'pages/typing.html'
       - 'tests/language-typing*.cjs'
       - '.github/workflows/language-typing-browser.yml'
@@ -35,6 +39,7 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-language.log 2>&1 &
           sleep 2
           node tests/language-typing-browser.cjs
+          node tests/typing-stories-browser.cjs
       - name: Screenshots and QA report
         uses: actions/upload-artifact@v4
         if: always()
