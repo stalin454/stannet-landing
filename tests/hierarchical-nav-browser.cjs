@@ -31,6 +31,12 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
     for(const href of check.links){const url=new URL(href,base);const file='.'+(url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname);assert.ok(fs.existsSync(file),'missing destination '+href)}
     if(width<=850){assert.ok(check.brand<=check.toggle+2,'brand overlap');await page.click('#stannet-canonical-nav .menu-toggle')}
     else assert.ok(check.navWidth<=check.navBox+2,'category row overflow '+path+' '+width);
+    if(path==='/'){
+      const links=await page.$$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
+      assert.deepEqual(links,['Inicio','Servicios','Proyectos','Recursos','Contacto']);
+      // No dense dropdown on the corporate homepage; the full menu remains on inner pages.
+      if(width<=850)await page.click('#stannet-canonical-nav .menu-toggle');
+    } else {
     // Click twice, verify disclosure and ARIA always agree, even following pointer hover.
     const trigger='#stannet-canonical-nav [data-group="/pages/guitar"] .nav-trigger';
     await page.click(trigger);
@@ -42,6 +48,7 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
     assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'true');
     await page.keyboard.press('Escape');
     if(width<=850){await page.click('#stannet-canonical-nav .menu-toggle')}
+    }
     if(path!=='/'){
      assert.ok(await page.$('#stannet-section-nav a[aria-current="page"]'),'area current page');
      const more='#stannet-section-nav .section-more>button';
