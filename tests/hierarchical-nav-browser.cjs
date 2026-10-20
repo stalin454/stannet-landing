@@ -26,41 +26,16 @@ const paths=['/','/pages/programming.html','/pages/english.html','/pages/radio.h
       bg:getComputedStyle(h).backgroundColor,navWidth:nav.scrollWidth,navBox:nav.clientWidth,
       links:[...h.querySelectorAll('.nav-dropdown a')].map(a=>a.getAttribute('href'))};
     });
-    assert.equal(check.headers,1);assert.equal(check.section,path==='/'?0:1,path+' area row');
+    assert.equal(check.headers,1);assert.equal(check.section,0,path+' has one navigation system');
     assert.equal(check.bg,'rgba(10, 10, 12, 0.97)');
     for(const href of check.links){const url=new URL(href,base);const file='.'+(url.pathname.endsWith('/')?url.pathname+'index.html':url.pathname);assert.ok(fs.existsSync(file),'missing destination '+href)}
     if(width<=850){assert.ok(check.brand<=check.toggle+2,'brand overlap');await page.click('#stannet-canonical-nav .menu-toggle')}
     else assert.ok(check.navWidth<=check.navBox+2,'category row overflow '+path+' '+width);
-    if(path==='/'){
-      const links=await page.$$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
-      assert.deepEqual(links,['Inicio','Servicios','Proyectos','Recursos','Contacto']);
-      // No dense dropdown on the corporate homepage; the full menu remains on inner pages.
-      if(width<=850)await page.click('#stannet-canonical-nav .menu-toggle');
-    } else {
-    // Click twice, verify disclosure and ARIA always agree, even following pointer hover.
-    const trigger='#stannet-canonical-nav [data-group="/pages/guitar"] .nav-trigger';
-    await page.click(trigger);
-    assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'true');
-    await page.keyboard.press('Escape');
-    assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'false');
-    assert.equal(await page.$eval(trigger,e=>getComputedStyle(e.nextElementSibling).display),'none','Escape must hide the panel while focus remains on its trigger');
-    await page.focus(trigger);await page.keyboard.press('ArrowDown');
-    assert.equal(await page.$eval(trigger,e=>e.getAttribute('aria-expanded')),'true');
-    await page.keyboard.press('Escape');
-    if(width<=850){await page.click('#stannet-canonical-nav .menu-toggle')}
-    }
-    if(path!=='/'){
-     assert.ok(await page.$('#stannet-section-nav a[aria-current="page"]'),'area current page');
-     const more='#stannet-section-nav .section-more>button';
-     if(path==='/pages/radio.html'&&width===851){
-      await page.screenshot({path:'output/navigation/radio851-before.png'});
-      console.log('RADIO851',await page.$eval(more,e=>{const r=e.getBoundingClientRect();const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return JSON.stringify({rect:r.toJSON(),hit:hit?.outerHTML?.slice(0,500),header:document.querySelector('#stannet-canonical-nav').getBoundingClientRect().toJSON(),section:document.querySelector('#stannet-section-nav').getBoundingClientRect().toJSON()})}));
-     }
-     await page.click(more);assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'true');
-     const bounds=await page.$eval('#stannet-area-links',e=>{const r=e.getBoundingClientRect();return{left:r.left,right:r.right}});
-     assert.ok(bounds.left>=-1&&bounds.right<=width+1,'area dropdown off screen');
-     await page.keyboard.press('Escape');assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'false');
-     await page.click(more);await page.click('#stannet-canonical-nav',{offset:{x:2,y:2}});assert.equal(await page.$eval(more,e=>e.getAttribute('aria-expanded')),'false');
+    const links=await page.$$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
+    assert.deepEqual(links,['Inicio','Servicios','Proyectos y recursos','Sobre mí','Contacto']);
+    if(width<=850){
+      await page.keyboard.press('Escape');
+      assert.equal(await page.$eval('#stannet-canonical-nav .menu-toggle',e=>e.getAttribute('aria-expanded')),'false');
     }
     if([393,1280].includes(width)&&['/','/pages/programming.html','/pages/ett-dinamarca.html'].includes(path))await page.screenshot({path:'output/navigation/'+width+'-'+(path.split('/').pop()||'home')+'.png'});
     console.log('PASS hierarchical menu '+path+' @ '+width);

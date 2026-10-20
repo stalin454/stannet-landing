@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const areas={"desarrollo": "Desarrollo", "idiomas": "Idiomas", "musica": "Música", "seguridad": "Ciberseguridad", "apps": "Apps e IA", "dinamarca": "Dinamarca", "stannet": "StanNet"};
-const types={"curso": "Cursos", "lab": "Laboratorios", "herramienta": "Herramientas", "recurso": "Proyectos y recursos"};
+const areas={"desarrollo": "Programación", "idiomas": "Idiomas", "musica": "Música", "seguridad": "Ciberseguridad", "apps": "Apps e IA", "dinamarca": "Dinamarca", "stannet": "Sobre StanNet"};
+const types={"curso": "Cursos", "lab": "Laboratorios", "herramienta": "Herramientas", "recurso": "Proyectos"};
 const resources=[
   {
     "id": "web-development",
@@ -373,6 +373,12 @@ const resources=[
     "keywords": "blog noticias bitacora"
   }
 ];
+for(const resource of resources){
+ if(resource.id==='programming-cs-lab')resource.type='lab';
+ if(resource.id==='language-typing')resource.type='herramienta';
+}
+const areaOrder=Object.keys(areas),typeOrder=Object.keys(types);
+resources.sort((a,b)=>areaOrder.indexOf(a.area)-areaOrder.indexOf(b.area)||typeOrder.indexOf(a.type)-typeOrder.indexOf(b.type));
 resources.forEach(Object.freeze);Object.freeze(resources);Object.freeze(areas);Object.freeze(types);
 const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ø/g,'o').replace(/æ/g,'ae').replace(/[^a-z0-9+#]+/g,' ').trim();
 const index=resources.map(resource=>({resource,title:normalize(resource.title),text:normalize([resource.title,resource.description,resource.keywords,areas[resource.area],types[resource.type]].join(' '))}));
@@ -458,8 +464,8 @@ const catalogueInput=section.querySelector('#directory-query');const status=sect
 const state={area:'all',type:'all',query:''};
 function readLocation(){
  const params=new URLSearchParams(location.search);const area=params.get('area');const type=params.get('tipo');
- state.area=area==='solutions'||Object.hasOwn(areas,area)?area:'all';state.type=Object.hasOwn(types,type)?type:'all';state.query=(params.get('q')||'').slice(0,120);
- if(location.hash==='#soluciones'&&!params.has('area'))state.area='solutions';
+ state.area=area==='solutions'?'desarrollo':Object.hasOwn(areas,area)?area:'all';state.type=Object.hasOwn(types,type)?type:'all';state.query=(params.get('q')||'').slice(0,120);
+ if(location.hash==='#soluciones'&&!params.has('area'))state.area='desarrollo';
 }
 function applyFilter(writeURL=true){
   if(state.area!=='all'||state.type!=='all'||state.query)showCatalog();
@@ -469,15 +475,15 @@ function applyFilter(writeURL=true){
  typeButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.resourceTypeFilter===state.type)));
  catalogueInput.value=state.query;
  status.textContent=found.length+' '+(found.length===1?'recurso':'recursos')+' · '+(areas[state.area]||(state.area==='solutions'?'Soluciones tecnológicas':'Todas las áreas'))+' · '+(types[state.type]||'Todos los formatos');
- empty.hidden=found.length>0;reset.hidden=state.area==='all'&&state.type==='all'&&!state.query;
+ empty.hidden=found.length>0;empty.querySelector('h3').textContent=state.query?'Sin resultados para «'+state.query+'».':'No hay recursos con estos filtros.';reset.hidden=state.area==='all'&&state.type==='all'&&!state.query;
  if(writeURL){const url=new URL(location.href);for(const [key,value] of [['area',state.area],['tipo',state.type],['q',state.query]]){if(value&&value!=='all')url.searchParams.set(key,value);else url.searchParams.delete(key)}if(url.hash==='#soluciones'&&state.area!=='solutions')url.hash='proyectos';history.replaceState(null,'',url)}
 }
 areaButtons.forEach(button=>button.addEventListener('click',()=>{showCatalog();state.area=button.dataset.projectFilter;applyFilter()}));
 typeButtons.forEach(button=>button.addEventListener('click',()=>{showCatalog();state.type=button.dataset.resourceTypeFilter;applyFilter()}));
 catalogueInput.addEventListener('input',()=>{showCatalog();state.query=catalogueInput.value;applyFilter()});
 reset.addEventListener('click',()=>{state.area='all';state.type='all';state.query='';applyFilter()});
-function syncHash(){if(['#soluciones','#academias','#proyectos'].includes(location.hash))showCatalog();if(location.hash==='#soluciones'){state.area='solutions';state.type='all';state.query='';applyFilter()}else if(location.hash==='#proyectos'){state.area='all';applyFilter()}}
-document.querySelectorAll('a[href="#soluciones"]').forEach(link=>link.addEventListener('click',()=>{state.area='solutions';state.type='all';state.query='';applyFilter()}));
+function syncHash(){if(['#soluciones','#academias','#proyectos'].includes(location.hash))showCatalog();if(location.hash==='#soluciones'){state.area='desarrollo';state.type='all';state.query='';applyFilter()}else if(location.hash==='#proyectos'){state.area='all';applyFilter()}}
+document.querySelectorAll('a[href="#soluciones"]').forEach(link=>link.addEventListener('click',()=>{state.area='desarrollo';state.type='all';state.query='';applyFilter()}));
 window.addEventListener('hashchange',syncHash);window.addEventListener('popstate',()=>{readLocation();applyFilter(false)});
 readLocation();if(['#soluciones','#academias','#proyectos'].includes(location.hash)||location.searchParams)showCatalog();applyFilter(false);
 })();

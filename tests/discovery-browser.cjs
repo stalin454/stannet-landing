@@ -40,8 +40,8 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
     if([393,1280].includes(width)){await page.$eval('#stannet-search-input',e=>{e.value='Python';e.dispatchEvent(new Event('input',{bubbles:true}))});await page.screenshot({path:output+'/search-'+width+'.png'})}
     await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('#stannet-search-dialog').open);
     // The enterprise homepage now collapses the 41-item catalogue by default.
-    await page.click('#catalogo-completo > summary');
-    assert.equal(await page.$eval('#catalogo-completo',e=>e.open),true,'catalogue opens on demand');
+    await page.goto(new URL('/recursos/',base).href,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>window.StanNetDiscovery);
     await page.click('[data-project-filter="idiomas"]');await page.click('[data-resource-type-filter="curso"]');
     const visible=()=>page.$$eval('.directory-card:not([hidden])',els=>els.map(e=>({area:e.dataset.area,type:e.dataset.resourceType,href:e.getAttribute('href')})));
     let cards=await visible();assert.ok(cards.length>=3&&cards.every(c=>c.area==='idiomas'&&c.type==='curso'),'cross filters');
@@ -72,6 +72,6 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
    }finally{await page.close()}
   }
   // No-JS fallback remains a complete, navigable catalogue.
-  const page=await browser.newPage();await page.setRequestInterception(true);page.on('request',req=>new URL(req.url()).origin===new URL(base).origin?req.continue():req.abort());await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'domcontentloaded'});assert.equal(await page.$$eval('.directory-card[href]',els=>els.length),41);await page.close();
+  const page=await browser.newPage();await page.setRequestInterception(true);page.on('request',req=>new URL(req.url()).origin===new URL(base).origin?req.continue():req.abort());await page.setJavaScriptEnabled(false);await page.goto(new URL('/recursos/',base).href,{waitUntil:'domcontentloaded'});assert.equal(await page.$$eval('.directory-card[href]',els=>els.length),41);await page.close();
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
