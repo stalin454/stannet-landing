@@ -27,7 +27,98 @@ document.addEventListener('DOMContentLoaded', () => {
       try { danishFallbackAudio.pause(); } catch (error) {}
       danishFallbackAudio = null;
     }
+    if (window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (error) {}
+    }
   };
+
+  // Free device speech is the default: the premium server route deliberately
+  // requires an approved account and must never be called by public buttons.
+  const audioNotice = document.querySelector('#danishAudioNotice');
+  const freeVoiceButton = document.querySelector('#danishBrowserVoice');
+  const premiumVoiceButton = document.querySelector('#danishPremiumVoice');
+  let premiumVoiceEnabled = false;
+
+  const announceAudio = (message, feedback) => {
+    if (audioNotice) audioNotice.textContent = message;
+    if (feedback) feedback.textContent = message;
+  };
+
+  const playBrowserDanish = (text, options = {}) => {
+    const synth = window.speechSynthesis;
+    const Utterance = window.SpeechSynthesisUtterance;
+    if (!synth || !Utterance) {
+      announceAudio('Este navegador no tiene síntesis de voz. Activa las voces de texto a voz en tu dispositivo.', options.feedback);
+      return false;
+    }
+    const utterance = new Utterance(text);
+    utterance.lang = 'da-DK';
+    utterance.rate = 0.88;
+    utterance.pitch = 1;
+    const voices = typeof synth.getVoices === 'function' ? synth.getVoices() : [];
+    const danishVoice = voices.find((voice) => /^da(?:-|_)/i.test(voice.lang) || voice.lang.toLowerCase() === 'da');
+    if (danishVoice) utterance.voice = danishVoice;
+    utterance.onerror = (event) => {
+      if (event.error === 'canceled' || event.error === 'interrupted') return;
+      announceAudio('No se pudo escuchar el danés. Comprueba que tengas una voz danesa instalada en los ajustes de texto a voz.', options.feedback);
+    };
+    try {
+      synth.cancel();
+      // Speak synchronously from the tap: important for mobile autoplay policies.
+      synth.speak(utterance);
+      announceAudio(danishVoice
+        ? 'Reproduciendo pronunciación danesa con la voz de tu dispositivo.'
+        : 'Solicitando pronunciación danesa (da-DK). Si no suena, instala la voz danesa en tu dispositivo.', options.feedback);
+      return true;
+    } catch (error) {
+      announceAudio('No se pudo activar el audio. Comprueba la configuración de texto a voz del dispositivo.', options.feedback);
+      return false;
+    }
+  };
+
+  const markVoiceSelection = () => {
+    if (freeVoiceButton) freeVoiceButton.setAttribute('aria-pressed', premiumVoiceEnabled ? 'false' : 'true');
+    if (premiumVoiceButton) premiumVoiceButton.setAttribute('aria-pressed', premiumVoiceEnabled ? 'true' : 'false');
+  };
+
+  if (freeVoiceButton) freeVoiceButton.addEventListener('click', () => {
+    premiumVoiceEnabled = false;
+    stopDanishAudio();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    markVoiceSelection();
+    announceAudio('Voz gratuita del navegador activada. Pulsa Escuchar en cualquier lección.');
+  });
+
+  if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', async () => {
+    premiumVoiceButton.disabled = true;
+    announceAudio('Comprobando acceso a Sofie (Amazon Polly)…');
+    try {
+      const [statusResponse, sessionResponse] = await Promise.all([
+        fetch('/api/speech/status', {credentials:'same-origin',cache:'no-store'}),
+        fetch('/api/language-premium/session', {credentials:'same-origin',cache:'no-store'})
+      ]);
+      if (!statusResponse.ok || !sessionResponse.ok) throw new Error('No se pudo verificar el servicio de voz.');
+      const [status, session] = await Promise.all([statusResponse.json(), sessionResponse.json()]);
+      if (status.provider !== 'amazon-polly' || status.configured !== true) {
+        throw new Error('Amazon Polly no está disponible. Sigue funcionando la voz gratuita.');
+      }
+      if (!session.authenticated) {
+        throw new Error('Para usar Sofie, inicia sesión en Language Typing Academy. La voz gratuita no requiere cuenta.');
+      }
+      if (!session.premiumEnabled || Number(session.remaining) < 1) {
+        throw new Error('Esta cuenta no tiene acceso o cuota disponible para Sofie. Usa la voz gratuita.');
+      }
+      premiumVoiceEnabled = true;
+      markVoiceSelection();
+      announceAudio('Sofie activada. Cada pulsación de Escuchar consumirá una petición de tu cuota premium.');
+    } catch (error) {
+      premiumVoiceEnabled = false;
+      markVoiceSelection();
+      announceAudio(error.message || 'Sofie no está disponible. Utiliza la voz gratuita.');
+    } finally {
+      premiumVoiceButton.disabled = false;
+    }
+  });
 
   const playDanish = async (text, options = {}) => {
     const button = options.button || null;
@@ -46,8 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
       the Cloudflare/Azure request. The returned MP3 can then be decoded and
       played through the already-authorized AudioContext.
     */
-    const audioContext = unlockDanishAudio();
     stopDanishAudio();
+    // No login, no charge, and no network are needed for lesson audio.
+    // This path stays synchronous to preserve user activation on Android/iOS.
+    if (!premiumVoiceEnabled) return playBrowserDanish(text, options);
+    const audioContext = unlockDanishAudio();
 
     if (button) {
       button.classList.add('loading');
@@ -111,8 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     } catch (error) {
       const message = error && error.message ? error.message : 'No se pudo reproducir el audio.';
-      if (feedback) feedback.textContent = 'Audio danés: ' + message;
-      return false;
+      premiumVoiceEnabled = false;
+      markVoiceSelection();
+      announceAudio('Sofie no disponible (' + message + '). Usando la voz gratuita.', feedback);
+      return playBrowserDanish(text, options);
     } finally {
       if (button) {
         button.classList.remove('loading');
