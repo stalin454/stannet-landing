@@ -1,31 +1,26 @@
+import { fetchChannelVideos } from '../handlers/youtube-api.mjs';
+
+const TTL_SECONDS = 900;
+
+// This legacy serverless entry point is not the active Cloudflare Worker route.
 export default async function handler(request, response) {
+  if (request.method !== 'GET') {
+    response.setHeader('Cache-Control', 'no-store');
+    return response.status(405).json({ error: 'Método no permitido.' });
+  }
+  if (!process.env.YOUTUBE_API_KEY) {
+    response.setHeader('Cache-Control', 'no-store');
+    return response.status(503).json({ error: 'No está configurada la API de YouTube.' });
+  }
   try {
-    const channelPage = await fetch('https://www.youtube.com/@StanNetSpace');
-    const channelHtml = await channelPage.text();
-    const channelId = channelHtml.match(/"(?:channelId|externalId)":"(UC[a-zA-Z0-9_-]{22})/)?.[1];
-
-    if (!channelId) {
-      return response.status(502).json({ error: 'No se pudo identificar el canal de YouTube.' });
-    }
-
-    const feed = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
-    const xml = await feed.text();
-    const videos = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)].map((match) => {
-      const entry = match[1];
-      const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1];
-      const title = entry.match(/<title>([\s\S]*?)<\/title>/)?.[1];
-      const published = entry.match(/<published>([^<]+)<\/published>/)?.[1];
-
-      return id && {
-        id,
-        title: title ? title.replace(/&amp;/g, '&').replace(/&#39;/g, "'") : 'Vídeo de StanNet.Space',
-        published: published || null,
-        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-      };
-    }).filter(Boolean);
-
+    const videos = await fetchChannelVideos(
+      process.env.YOUTUBE_API_KEY,
+      process.env.YOUTUBE_CHANNEL_HANDLE || 'StanNetSpace'
+    );
+    response.setHeader('Cache-Control', `public, max-age=0, s-maxage=${TTL_SECONDS}, stale-while-revalidate=300`);
     return response.status(200).json({ videos });
-  } catch (error) {
-    return response.status(500).json({ error: 'No se pudieron cargar los vídeos.' });
+  } catch {
+    response.setHeader('Cache-Control', 'no-store');
+    return response.status(502).json({ error: 'No se pudieron cargar los vídeos.' });
   }
 }

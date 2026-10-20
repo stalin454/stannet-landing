@@ -1,3 +1,4 @@
+import { handleYoutubeVideos, handleYoutubeSearch } from './handlers/youtube-api.mjs';
 import {sanitizeContext,redactSecrets} from './stannet-ai-context-policy.mjs';
 import { handleAyudaEnCasaApi } from './ayudaencasa-api.js';
 import { pollySelected, pollyConfigured, requestPolly, requestPollyRadio } from './aws-polly.js';
@@ -330,83 +331,12 @@ export default {
       return response;
     }
 
-    if (url.pathname === '/api/videos') {
-      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
-      if (!env.YOUTUBE_API_KEY) return json({ error: 'Falta configurar YOUTUBE_API_KEY en Cloudflare.' }, 503);
-
-      const cache = typeof caches !== 'undefined' ? caches.default : null;
-      const cacheKey = new Request(url.origin + '/api/videos?v=3');
-      if (cache) {
-        try {
-          const hit = await cache.match(cacheKey);
-          if (hit) return hit;
-        } catch {}
-      }
-
-      try {
-        const handle = String(env.YOUTUBE_CHANNEL_HANDLE || 'StanNetSpace').replace(/^@/, '');
-        const channelUrl = 'https://www.googleapis.com/youtube/v3/channels?' + new URLSearchParams({
-          part: 'contentDetails',
-          forHandle: handle,
-          key: env.YOUTUBE_API_KEY
-        });
-        const channelResponse = await fetch(channelUrl);
-        const channelData = await channelResponse.json();
-        const uploads = channelData?.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
-        if (!channelResponse.ok || !uploads) {
-          return json({ error: 'No se pudo identificar el canal de YouTube.' }, 502);
-        }
-
-        const playlistUrl = 'https://www.googleapis.com/youtube/v3/playlistItems?' + new URLSearchParams({
-          part: 'snippet,contentDetails',
-          playlistId: uploads,
-          maxResults: '24',
-          key: env.YOUTUBE_API_KEY
-        });
-        const playlistResponse = await fetch(playlistUrl);
-        const playlistData = await playlistResponse.json();
-        if (!playlistResponse.ok) return json({ error: 'No se pudieron cargar los vídeos del canal.' }, 502);
-
-        const videos = (playlistData.items || []).map(item => {
-          const id = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId;
-          return id ? {
-            id,
-            title: item.snippet?.title || 'Vídeo de StanNet.Space',
-            published: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt || null,
-            thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
-          } : null;
-        }).filter(Boolean);
-
-        const response = json({ videos }, 200, { 'Cache-Control': 'public, max-age=900, s-maxage=3600' });
-        if (cache) {
-          try { await cache.put(cacheKey, response.clone()); } catch {}
-        }
-        return response;
-      } catch {
-        return json({ error: 'No se pudieron cargar los vídeos.' }, 502);
-      }
+if (url.pathname === '/api/videos') {
+      return handleYoutubeVideos(request, env);
     }
 
     if (url.pathname === '/api/youtube-search') {
-      if (request.method !== 'GET') return json({ error: 'Método no permitido.' }, 405);
-      const query = (url.searchParams.get('q') || '').trim().slice(0, 120);
-      if (!query) return json({ error: 'Escribe una canción o artista.' }, 400);
-      if (!env.YOUTUBE_API_KEY) return json({ error: 'Falta configurar YOUTUBE_API_KEY en Cloudflare.' }, 503);
-      try {
-        const apiUrl = 'https://www.googleapis.com/youtube/v3/search?' + new URLSearchParams({
-          part: 'snippet', q: query, type: 'video', videoEmbeddable: 'true',
-          maxResults: '8', safeSearch: 'moderate', key: env.YOUTUBE_API_KEY
-        });
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        if (!response.ok) return json({ error: 'YouTube no pudo realizar la búsqueda.' }, 502);
-        return json({ results: (data.items || []).map(item => ({
-          id: item.id.videoId, title: item.snippet.title, channel: item.snippet.channelTitle,
-          thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || ''
-        })) }, 200, { 'Cache-Control': 'public, max-age=300' });
-      } catch {
-        return json({ error: 'No se pudo conectar con YouTube ahora.' }, 502);
-      }
+      return handleYoutubeSearch(request, env, url);
     }
 
     if (url.pathname === '/api/lyrics') {
