@@ -135,6 +135,17 @@ header.innerHTML=`
 <div class="nav-group" data-group="/pages/cv"><button class="nav-trigger" type="button" aria-expanded="false">StanNet <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cv.html">Sobre mí · CV</a><a href="/pages/education.html">Formación y certificados</a><a href="/pages/blog.html">Blog StanNet</a></div></div>
 <a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
+// Corporate homepage: only five primary choices. Full section navigation stays
+// untouched on internal Space pages, with all existing routes preserved.
+if(path==='/'||path==='/index.html'){
+  header.querySelector('.site-nav').innerHTML=`
+<a data-nav="/" href="/">Inicio</a>
+<a href="/#servicios">Servicios</a>
+<a href="/#casos">Proyectos</a>
+<a href="/#proyectos">Recursos</a>
+<a class="nav-cta" href="/#contacto">Contacto</a>
+`;
+}
 
 const existing=document.querySelector('header.site-header');
 if(existing)existing.replaceWith(header);

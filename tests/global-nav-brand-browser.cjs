@@ -55,6 +55,12 @@ const expected = {
           const mobileBg=await page.$eval('#stannet-canonical-nav .site-nav',e=>getComputedStyle(e).backgroundColor);
           assert.equal(mobileBg,expected.mobile,path+' mobile menu');
         }
+        if(path==='/'){
+          const homeLinks=await page.$$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
+          assert.deepEqual(homeLinks,['Inicio','Servicios','Proyectos','Recursos','Contacto']);
+          console.log('PASS simple corporate navigation: '+path+' @ '+width+'px');
+          continue;
+        }
         await page.click('#stannet-canonical-nav .nav-group[data-group="/pages/guitar"] .nav-trigger');
         const dropdown=await page.evaluate(()=>{
           const group=document.querySelector('#stannet-canonical-nav .nav-group[data-group="/pages/guitar"]');

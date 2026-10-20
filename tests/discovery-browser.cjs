@@ -39,6 +39,9 @@ const output='output/discovery';fs.mkdirSync(output,{recursive:true});
     assert.ok((await page.$$eval('.search-result strong',els=>els.map(e=>e.textContent))).includes('Danish Academy'));
     if([393,1280].includes(width)){await page.$eval('#stannet-search-input',e=>{e.value='Python';e.dispatchEvent(new Event('input',{bubbles:true}))});await page.screenshot({path:output+'/search-'+width+'.png'})}
     await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('#stannet-search-dialog').open);
+    // The enterprise homepage now collapses the 41-item catalogue by default.
+    await page.click('#catalogo-completo > summary');
+    assert.equal(await page.$eval('#catalogo-completo',e=>e.open),true,'catalogue opens on demand');
     await page.click('[data-project-filter="idiomas"]');await page.click('[data-resource-type-filter="curso"]');
     const visible=()=>page.$$eval('.directory-card:not([hidden])',els=>els.map(e=>({area:e.dataset.area,type:e.dataset.resourceType,href:e.getAttribute('href')})));
     let cards=await visible();assert.ok(cards.length>=3&&cards.every(c=>c.area==='idiomas'&&c.type==='curso'),'cross filters');
