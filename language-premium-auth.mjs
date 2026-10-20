@@ -106,7 +106,8 @@ export async function handleLanguagePremiumAuth(request,env,url){
     try{
       const quota=await voiceRpc(env,session,'language_voice_status');
       return reply({ok:true,authenticated:true,email:session.user.email||'',premiumEnabled:quota.enabled===true,
-        remaining:Number(quota.remaining||0),used:Number(quota.used||0),globalRemaining:Number(quota.globalRemaining||0)},200,session.setCookies);
+        remaining:Number(quota.remaining||0),dailyLimit:Number(quota.dailyLimit)||20,
+        charsRemaining:Number(quota.charsRemaining||0),used:Number(quota.used||0),globalRemaining:Number(quota.globalRemaining||0)},200,session.setCookies);
     }catch{return reply({error:'El control de consumo no está disponible.'},503,session.setCookies);}
   }
   if(!validOrigin(request))return reply({error:'Acceso permitido solo desde StanNet.'},403);

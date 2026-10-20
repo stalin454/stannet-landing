@@ -38,7 +38,7 @@ function fakeRemote(scenario={}){
   }
   if(path.endsWith('/auth/v1/logout?scope=local'))return Response.json({});
   if(path.endsWith('/auth/v1/signup'))return Response.json({user:{id:'other-user'},session:null});
-  if(path.endsWith('/rest/v1/rpc/language_voice_status'))return Response.json({enabled:state.approvals,remaining:12,globalRemaining:40,used:8});
+  if(path.endsWith('/rest/v1/rpc/language_voice_status'))return Response.json({enabled:state.approvals,remaining:12,dailyLimit:80,globalRemaining:40,used:8,charsRemaining:5600});
   if(path.endsWith('/rest/v1/rpc/language_voice_reserve')){
     state.quota++;
     if(state.failQuota)return Response.json({error:'missing rpc'}, {status:500});
@@ -79,7 +79,7 @@ test('Premium login sets separate HttpOnly cookies, session reads quota and sign
   const signed=await handleLanguagePremiumAuth(req('/api/language-premium/session',{cookie:'stannet_la_access=valid-session'}),env,new URL(BASE+'/api/language-premium/session'));
   assert.equal(signed.status,200);
   const data=await signed.json();
-  assert.equal(data.premiumEnabled,true);assert.equal(data.remaining,12);
+  assert.equal(data.premiumEnabled,true);assert.equal(data.remaining,12);assert.equal(data.dailyLimit,80);assert.equal(data.charsRemaining,5600);
   assert.ok(!JSON.stringify(data).includes('valid-session'));
   const logout=await handleLanguagePremiumAuth(req('/api/language-premium/signout',{method:'POST',cookie:'stannet_la_access=valid-session',body:{}}),env,new URL(BASE+'/api/language-premium/signout'));
   assert.equal(logout.status,200);assert.match(logout.headers.get('set-cookie'),/Max-Age=0/);

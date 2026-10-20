@@ -27,7 +27,7 @@ const pollyVoices={
   'da-DK':[{id:'Sofie',label:'Sofie · danesa'}]
 };
 let pollyAbort=null,pollyAudio=null,pollyAvailable=null;
-let premiumSession={authenticated:false,premiumEnabled:false,remaining:0};
+let premiumSession={authenticated:false,premiumEnabled:false,remaining:0,dailyLimit:20};
 function premiumMessage(message){$('ltPremiumMessage').textContent=message;}
 function showPremium(){
   const visible=$('ltProvider').value==='polly';
@@ -36,7 +36,7 @@ function showPremium(){
   $('ltPremiumLoggedIn').hidden=!premiumSession.authenticated;
   $('ltPremiumIdentity').textContent=premiumSession.authenticated?'Cuenta: '+(premiumSession.email||'verificada'):'';
   $('ltPremiumRemaining').textContent=premiumSession.authenticated&&premiumSession.premiumEnabled
-    ?'Reproducciones disponibles: '+premiumSession.remaining+'/20':'';
+    ?'Reproducciones disponibles: '+premiumSession.remaining+'/'+premiumSession.dailyLimit:'';
 }
 async function refreshPremium(){
   try{
@@ -45,7 +45,7 @@ async function refreshPremium(){
     const data=await response.json();
     premiumSession={
       authenticated:data.authenticated===true,premiumEnabled:data.premiumEnabled===true,
-      remaining:Number(data.remaining)||0,email:data.email||''
+      remaining:Number(data.remaining)||0,dailyLimit:Number(data.dailyLimit)||20,email:data.email||''
     };
     showPremium();
     premiumMessage(!premiumSession.authenticated
@@ -55,7 +55,7 @@ async function refreshPremium(){
         :'Cuenta aprobada. Tu límite es 20 peticiones diarias y el límite de la plataforma es compartido.');
     return premiumSession.authenticated&&premiumSession.premiumEnabled;
   }catch{
-    premiumSession={authenticated:false,premiumEnabled:false,remaining:0};
+    premiumSession={authenticated:false,premiumEnabled:false,remaining:0,dailyLimit:20};
     showPremium();premiumMessage('No se pudo verificar el acceso. No realizaremos llamadas de pago.');
     return false;
   }
