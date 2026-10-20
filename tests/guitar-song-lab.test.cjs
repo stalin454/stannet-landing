@@ -4,6 +4,7 @@ const fs=require('node:fs');
 const html=fs.readFileSync('pages/guitar.html','utf8');
 const js=fs.readFileSync('guitar-academy.js','utf8');
 const worker=fs.readFileSync('worker.js','utf8');
+const youtube=fs.readFileSync('handlers/youtube-api.mjs','utf8');
 
 assert.ok(html.includes('id="song-lab"'));
 for(const id of ['guitarSongQuery','guitarSongResults','guitarSongPlayer','songPracticeRoot','songPracticeProgression','songPracticeTab']){
@@ -19,7 +20,8 @@ assert.ok(js.includes('playSongPractice'));
 assert.ok(js.includes('formatTabPositions(chooseCompactPositions'));
 
 assert.ok(worker.includes("url.pathname === '/api/youtube-search'"));
-assert.ok(worker.includes("videoEmbeddable: 'true'"));
-assert.ok(worker.includes("env.YOUTUBE_API_KEY"));
+assert.ok(worker.includes('handleYoutubeSearch(request, env, url)'));
+assert.ok(youtube.includes("videoEmbeddable: 'true'"));
+assert.ok(youtube.includes("env.YOUTUBE_API_KEY"));
 
 console.log('PASS: Guitar song search and interactive practice generator verified.');
