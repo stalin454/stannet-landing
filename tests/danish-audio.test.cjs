@@ -6,14 +6,15 @@ const vm = require('node:vm');
 // /api/speech call. Premium Polly is opt-in and account/allowance protected.
 const source = fs.readFileSync('danish-app.js', 'utf8');
 const html = fs.readFileSync('pages/danish.html', 'utf8');
-for (const id of ['danishBrowserVoice','danishPremiumVoice','danishAudioNotice']) {
+for (const id of ['danishBrowserVoice','danishPremiumVoice','danishAudioNotice','danishLoginForm','danishLoginEmail','danishLoginPassword','danishLoginSubmit','danishSignup','danishLoggedIn','danishPremiumIdentity','danishPremiumRemaining','danishSignout','danishLoginStatus']) {
   assert.ok(html.includes('id="' + id + '"'), id + ' missing from Danish UI');
 }
 
-function academy({approved=false,failAudio=false}={}) {
+function academy({approved=false,failAudio=false,grantOnLogin=false}={}) {
+  let loggedIn=approved;
   const actions=[],listeners={},voiceControls={};
   const element=(id)=>voiceControls[id] ||= {
-    textContent:'', disabled:false, attrs:{},
+    textContent:'', value:'', hidden:false, disabled:false, attrs:{},
     setAttribute(name,value){this.attrs[name]=value;},
     addEventListener(name,listener){(listeners[id+':'+name] ||= []).push(listener);}
   };
@@ -33,12 +34,23 @@ function academy({approved=false,failAudio=false}={}) {
         start(){actions.push({type:'polly-play'});}};
     }
   }
-  const api=async (url)=>{
-    actions.push({type:'fetch',url});
+  const api=async (url,options={})=>{
+    actions.push({type:'fetch',url,credentials:options.credentials||''});
     if (url==='/api/speech/status')
       return {ok:true,json:async()=>({provider:'amazon-polly',configured:true})};
     if (url==='/api/language-premium/session')
-      return {ok:true,json:async()=>({authenticated:approved,premiumEnabled:approved,remaining:approved?10:0})};
+      return {ok:true,json:async()=>({authenticated:loggedIn,premiumEnabled:loggedIn&&(approved||grantOnLogin),remaining:loggedIn?10:0,email:loggedIn?'learner@example.com':''})};
+    if (url==='/api/language-premium/signin') {
+      if (!grantOnLogin) return {ok:false,json:async()=>({error:'Credenciales incorrectas'})};
+      loggedIn=true;
+      return {ok:true,json:async()=>({ok:true,authenticated:true})};
+    }
+    if (url==='/api/language-premium/signup')
+      return {ok:true,json:async()=>({ok:true,requiresConfirmation:true})};
+    if (url==='/api/language-premium/signout') {
+      loggedIn=false;
+      return {ok:true,json:async()=>({ok:true})};
+    }
     if (url==='/api/speech') {
       if(failAudio)return {ok:false,status:401,json:async()=>({error:'Sesión caducada'})};
       return {ok:true,headers:{get:()=> 'audio/mpeg'},arrayBuffer:async()=>new ArrayBuffer(2048)};
@@ -50,19 +62,20 @@ function academy({approved=false,failAudio=false}={}) {
     addEventListener(type,cb){(listeners['document:'+type] ||= []).push(cb);},
     querySelector(selector){
       const id=selector.slice(1);
-      return ['danishBrowserVoice','danishPremiumVoice','danishAudioNotice'].includes(id)?element(id):null;
+      return ['danishBrowserVoice','danishPremiumVoice','danishAudioNotice','danishLoginForm','danishLoginEmail','danishLoginPassword','danishLoginSubmit','danishSignup','danishLoggedIn','danishPremiumIdentity','danishPremiumRemaining','danishSignout','danishLoginStatus'].includes(id)?element(id):null;
     }
   };
   vm.runInNewContext(source,{window:win,document:doc,fetch:api,console});
   for(const handler of listeners['document:DOMContentLoaded']||[])handler();
   return {window:win,actions,elements:voiceControls,
-    click:async id=>{for(const handler of listeners[id+':click']||[])await handler();}};
+    click:async id=>{for(const handler of listeners[id+':click']||[])await handler();},
+    submit:async id=>{for(const handler of listeners[id+':submit']||[])await handler({preventDefault(){}});}};
 }
 
 (async()=>{
   const publicAcademy=academy();
   assert.equal(await publicAcademy.window.stannetPlayDanish('Hej!'),true);
-  assert.deepEqual(publicAcademy.actions.filter(x=>x.type==='fetch'),[],'Free playback must not call Cloudflare');
+  assert.equal(publicAcademy.actions.some(x=>x.url==='/api/speech'),false,'Free playback must not call paid speech');
   assert.deepEqual(publicAcademy.actions.filter(x=>x.type==='native').map(x=>[x.lang,x.text]),
     [['da-DK','Hej!']]);
 
@@ -85,5 +98,33 @@ function academy({approved=false,failAudio=false}={}) {
   assert.equal(expired.elements.danishPremiumVoice.attrs['aria-pressed'],'false','Bad premium request reverts to free');
   assert.equal(expired.actions.some(x=>x.type==='native'&&x.lang==='da-DK'),true,'Failed premium audio attempts free fallback');
 
-  console.log('PASS: Danish browser speech, premium opt-in, auth gate and error fallback.');
+  const learner=academy({grantOnLogin:true});
+  assert.equal(learner.elements.danishLoginForm.hidden,false,'Unauthenticated login must be visible');
+  learner.elements.danishLoginEmail.value='learner@example.com';
+  learner.elements.danishLoginPassword.value='correcthorse123';
+  await learner.submit('danishLoginForm');
+  assert.equal(learner.elements.danishLoginPassword.value,'','Credentials must be cleared immediately');
+  assert.equal(learner.elements.danishLoginForm.hidden,true,'Logged-in form must be hidden');
+  assert.equal(learner.elements.danishLoggedIn.hidden,false,'Logged-in status must be visible');
+  assert.equal(learner.elements.danishPremiumVoice.attrs['aria-pressed'],'true','Successful approved sign-in selects Sofie');
+  assert.equal(learner.actions.some(x=>x.url==='/api/language-premium/signin'&&x.credentials==='same-origin'),true,'Sign-in uses same-origin cookies');
+  await learner.window.stannetPlayDanish('Jeg lærer dansk');
+  assert.equal(learner.actions.some(x=>x.url==='/api/speech'),true,'Approved learner can hear Sofie');
+  await learner.click('danishSignout');
+  assert.equal(learner.elements.danishLoginForm.hidden,false,'Sign-out reveals login again');
+  assert.equal(learner.elements.danishPremiumVoice.attrs['aria-pressed'],'false','Sign-out deactivates premium');
+  const oldCalls=learner.actions.filter(x=>x.url==='/api/speech').length;
+  await learner.window.stannetPlayDanish('Hej igen');
+  assert.equal(learner.actions.filter(x=>x.url==='/api/speech').length,oldCalls,'Sign-out restores free voice');
+
+  const signup=academy();
+  signup.elements.danishLoginEmail.value='new@example.com';
+  signup.elements.danishLoginPassword.value='securepassword123';
+  await signup.click('danishSignup');
+  assert.match(signup.elements.danishLoginStatus.textContent,/confirma tu correo/i);
+  assert.equal(signup.elements.danishLoginPassword.value,'');
+  assert.equal(signup.elements.danishLoginForm.hidden,false,'New account must not bypass confirmation');
+  assert.equal(signup.actions.some(x=>x.url==='/api/speech'),false,'Registration never synthesizes speech');
+
+  console.log('PASS: Danish browser speech, premium opt-in, auth, sign-in, sign-out, signup and error fallback.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
