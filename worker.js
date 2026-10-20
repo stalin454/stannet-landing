@@ -331,7 +331,7 @@ export default {
       return response;
     }
 
-if (url.pathname === '/api/videos') {
+    if (url.pathname === '/api/videos') {
       return handleYoutubeVideos(request, env);
     }
 
