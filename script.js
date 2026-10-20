@@ -32,7 +32,15 @@ if(form){
     const story=(document.querySelector('#tema') ? document.querySelector('#tema').value.trim() : '')||'una idea abierta';
     const result=document.querySelector('#resultado');
 
-    result.innerHTML=`<strong>Brief creado para ${name}.</strong><br>Género: ${genre}.<br>Concepto: ${story}.<br>La propuesta ya tiene dirección para convertirse en canción.`;
+    if(!result)return;
+    const heading=document.createElement('strong');
+    heading.textContent=`Brief creado para ${name}.`;
+    result.replaceChildren(
+      heading, document.createElement('br'),
+      document.createTextNode(`Género: ${genre}.`), document.createElement('br'),
+      document.createTextNode(`Concepto: ${story}.`), document.createElement('br'),
+      document.createTextNode('La propuesta ya tiene dirección para convertirse en canción.')
+    );
     result.classList.add('show');
     result.scrollIntoView({behavior:'smooth',block:'nearest'});
   });
