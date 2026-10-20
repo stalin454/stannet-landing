@@ -1,0 +1,1519 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "aacd5ff9d85f13ec47506d0076f57e8bdfbc1b7e",
+  "tracked_file_count": 540,
+  "method": "Git commit contents; direct HTML script/style references only. Dynamic JS/CSS imports require manual review; an HTML file is not proof of a published route.",
+  "entrypoints": [
+    {
+      "source": "apps/dj-studio/index.html",
+      "route": "/apps/dj-studio/",
+      "title": "StanNet DJ Studio Pro",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "apps/dj-studio/src/main.tsx"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "apps/dj-studio/qa.html",
+      "route": "/apps/dj-studio/qa.html",
+      "title": "StanNet DJ · pruebas nativas de audio",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "apps/dj-studio/src/native-qa.ts"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "apps/dj-studio/recording-qa.html",
+      "route": "/apps/dj-studio/recording-qa.html",
+      "title": "StanNet DJ · pruebas de grabación WAV",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "apps/dj-studio/src/recording-qa.ts"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "dj-studio/index.html",
+      "route": "/dj-studio/",
+      "title": "StanNet DJ Studio Pro",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "dj-studio/assets/engine-BA_3zc_w.js",
+        "dj-studio/assets/recorder-CZpHqBPT.js",
+        "dj-studio/assets/studio-4deck-512mb-20261010.js",
+        "dj-studio/assets/studio-BPqohRZj.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "dj-studio/qa.html",
+      "route": "/dj-studio/qa.html",
+      "title": "StanNet DJ · pruebas nativas de audio",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "dj-studio/assets/engine-BA_3zc_w.js",
+        "dj-studio/assets/qa-BspyY0Fa.js",
+        "dj-studio/assets/qa-msI-AcpS.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "dj-studio/recording-qa.html",
+      "route": "/dj-studio/recording-qa.html",
+      "title": "StanNet DJ · pruebas de grabación WAV",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "dj-studio/assets/engine-BA_3zc_w.js",
+        "dj-studio/assets/qa-msI-AcpS.css",
+        "dj-studio/assets/recorder-CZpHqBPT.js",
+        "dj-studio/assets/recordingQA-DjYWv52-.js"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "index.html",
+      "route": "/",
+      "title": "StanNet.Space | Aprende · Crea · Protege",
+      "recommended_destination": "space-corporate",
+      "direct_local_scripts_styles": [
+        "atom.css",
+        "contact-actions.js",
+        "contact-area.css",
+        "experience.css",
+        "experience.js",
+        "home-access-rail.js",
+        "home-ai-network.js",
+        "home-refresh.css",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "nutri-ia/index.html",
+      "route": "/nutri-ia/",
+      "title": "Nutri IA | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "nutri-ia.css",
+        "nutri-ia.js",
+        "nutri-plan.js",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/ai.html",
+      "route": "/pages/ai.html",
+      "title": "StanNet AI · Agente IA | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/apps.html",
+      "route": "/pages/apps.html",
+      "title": "Apps | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/artist-universe.html",
+      "route": "/pages/artist-universe.html",
+      "title": "The Artist Universe | StanNet Music",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "navigation-performance.css",
+        "stannet-global-nav.js"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/ayudaencasa-admin.html",
+      "route": "/pages/ayudaencasa-admin.html",
+      "title": "Moderación | AyudaEnCasa",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/ayudaencasa-aviso-legal.html",
+      "route": "/pages/ayudaencasa-aviso-legal.html",
+      "title": "Aviso legal | AyudaEnCasa",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/ayudaencasa-condiciones.html",
+      "route": "/pages/ayudaencasa-condiciones.html",
+      "title": "Condiciones | AyudaEnCasa",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/ayudaencasa-cookies.html",
+      "route": "/pages/ayudaencasa-cookies.html",
+      "title": "Cookies | AyudaEnCasa",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/ayudaencasa-privacidad.html",
+      "route": "/pages/ayudaencasa-privacidad.html",
+      "title": "Privacidad | AyudaEnCasa",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/blog.html",
+      "route": "/pages/blog.html",
+      "title": "Bitácora | StanNet.Space",
+      "recommended_destination": "space-corporate",
+      "direct_local_scripts_styles": [
+        "blog.css",
+        "blog.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/callan.html",
+      "route": "/pages/callan.html",
+      "title": "Callan English Coach | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "callan-contrast.css",
+        "callan-dictionary.css",
+        "callan-dictionary.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css",
+        "vendor/pdf.min.js"
+      ],
+      "external_dependency_hosts": [
+        "cdn.jsdelivr.net",
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/comunidad-dinamarca.html",
+      "route": "/pages/comunidad-dinamarca.html",
+      "title": "Comunidad Dinamarca | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "community-dinamarca/community.css",
+        "community-dinamarca/community.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/cv.html",
+      "route": "/pages/cv.html",
+      "title": "Sobre mí | StanNet.Space",
+      "recommended_destination": "space-corporate",
+      "direct_local_scripts_styles": [
+        "about.css",
+        "contact-actions.js",
+        "contact-area.css",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/cyber-lab.html",
+      "route": "/pages/cyber-lab.html",
+      "title": "Cyber Defense Lab | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "cyber-academy.css",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/cybersecurity.html",
+      "route": "/pages/cybersecurity.html",
+      "title": "Ciberseguridad | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "cyber-academy.css",
+        "cyber-academy.js",
+        "cyber-curriculum.js",
+        "cyber-network-lab.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/danish.html",
+      "route": "/pages/danish.html",
+      "title": "StanNet Danish Academy | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "danish-app.js",
+        "danish-course-content.js",
+        "danish-course.css",
+        "danish-course.js",
+        "danish-data.js",
+        "danish-expansion.js",
+        "danish-language-core-data.js",
+        "danish-language-core.css",
+        "danish-language-core.js",
+        "danish-neumorphism.css",
+        "danish-sentence-builder-data.js",
+        "danish-sentence-builder.css",
+        "danish-sentence-builder.js",
+        "danish-vip.css",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/denmark-cv.html",
+      "route": "/pages/denmark-cv.html",
+      "title": "CV danés | Ruta Dinamarca · StanNet",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "denmark-cv.css",
+        "denmark-cv.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css",
+        "vendor/pdf.min.js"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/education.html",
+      "route": "/pages/education.html",
+      "title": "Formación y Certificados | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "education.css",
+        "education.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "cdn.jsdelivr.net",
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/english.html",
+      "route": "/pages/english.html",
+      "title": "StanNet English Academy | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "english-a1-deep.css",
+        "english-a1-deep.js",
+        "english-core-data.js",
+        "english-core.js",
+        "english-curriculum-a1.js",
+        "english-curriculum-a2.js",
+        "english-curriculum-b1.js",
+        "english-curriculum-b2.js",
+        "english-curriculum-c1.js",
+        "english-curriculum-c2.js",
+        "english-engine.css",
+        "english-expansion.js",
+        "english-levels-data.js",
+        "english-levels.css",
+        "english-levels.js",
+        "english-master-curriculum-base.js",
+        "english-master-curriculum.css",
+        "english-master-curriculum.js",
+        "english-mastery-data.js",
+        "english-mastery.css",
+        "english-mastery.js",
+        "english-neumorphism.css",
+        "english-progress.css",
+        "english-progress.js",
+        "english-sentence-builder-data.js",
+        "english-sentence-builder.css",
+        "english-sentence-builder.js",
+        "english-speech.js",
+        "english.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/fp-study.html",
+      "route": "/pages/fp-study.html",
+      "title": "StanNet FP Study Area | Jobie DAW",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "fp-study-data.js",
+        "fp-study.css",
+        "fp-study.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/guitar.html",
+      "route": "/pages/guitar.html",
+      "title": "StanNet Guitar Academy | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "guitar-academy.css",
+        "guitar-academy.js",
+        "guitar-theory-data.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/language-music.html",
+      "route": "/pages/language-music.html",
+      "title": "Language Music Lab | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "music-dictionary-data.js",
+        "music-sync.css",
+        "music-sync.js",
+        "navigation-performance.css",
+        "script.js",
+        "songlab.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/language-typing.html",
+      "route": "/pages/language-typing.html",
+      "title": "Language Typing & Shadowing Academy | StanNet",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "language-typing-data.js",
+        "language-typing.css",
+        "language-typing.js",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/marketplace.html",
+      "route": "/pages/marketplace.html",
+      "title": "AyudaEnCasa | Servicios para tu hogar",
+      "recommended_destination": "independent-product-preserve",
+      "direct_local_scripts_styles": [
+        "ayudaencasa.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/music.html",
+      "route": "/pages/music.html",
+      "title": "Music Lab | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "radio.css",
+        "radio.js",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/nutri-ia.html",
+      "route": "/pages/nutri-ia.html",
+      "title": "Nutri IA | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/password-security.html",
+      "route": "/pages/password-security.html",
+      "title": "Password Security | StanNet Cybersecurity",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "password-security.css",
+        "password-security.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/programming-coach.html",
+      "route": "/pages/programming-coach.html",
+      "title": "Mi ruta JavaScript | StanNet Programming Academy",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-coach.css",
+        "programming-coach.js",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/programming-cs-lab.html",
+      "route": "/pages/programming-cs-lab.html",
+      "title": "StanNet CS Foundations",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-cs-lab.js",
+        "programming-cs-lessons.js",
+        "programming-lab.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/programming-fullstack-course.html",
+      "route": "/pages/programming-fullstack-course.html",
+      "title": "StanNet Full-Stack Courseware",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-campus.css",
+        "programming-campus.js",
+        "programming-fullstack-completion.js",
+        "programming-fullstack-courseware.js",
+        "programming-fullstack-deep-content.js",
+        "programming-fullstack-engine.js",
+        "programming-fullstack-foundations.js",
+        "programming-fullstack-fs01-chapters.js",
+        "programming-fullstack-fs02-fs03-chapters.js",
+        "programming-fullstack-fs04-fs05-chapters.js",
+        "programming-fullstack-textbook.js",
+        "programming-fullstack-theory-complete.js",
+        "programming-fullstack.js",
+        "programming-lab.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/programming-fullstack.html",
+      "route": "/pages/programming-fullstack.html",
+      "title": "Full-Stack Lab | StanNet Programming Academy",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-fullstack-lab.css",
+        "programming-fullstack-lab.js",
+        "programming-fullstack.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/programming-lab.html",
+      "route": "/pages/programming-lab.html",
+      "title": "StanNet Code Lab",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-lab.css",
+        "programming-lab.js",
+        "programming-python-lessons.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "cdn.jsdelivr.net"
+      ]
+    },
+    {
+      "source": "pages/programming-web-lab.html",
+      "route": "/pages/programming-web-lab.html",
+      "title": "StanNet Web Lab",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-html-css-deep-theory.js",
+        "programming-javascript-autograder.css",
+        "programming-javascript-autograder.js",
+        "programming-javascript-complete.js",
+        "programming-javascript-deep-theory.js",
+        "programming-javascript-mastery.js",
+        "programming-javascript-reference-gaps.js",
+        "programming-javascript-theory-v4.js",
+        "programming-lab.css",
+        "programming-web-lab-contrast.css",
+        "programming-web-lab.js",
+        "programming-web-lessons.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/programming.html",
+      "route": "/pages/programming.html",
+      "title": "StanNet Programming Academy",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "programming-academy.css",
+        "programming-academy.js",
+        "programming-curriculum.js",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/radio.html",
+      "route": "/pages/radio.html",
+      "title": "StanNet Radio | Music · Tech · Cyber · AI",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "radio.css",
+        "radio.js",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/ruta-dinamarca.html",
+      "route": "/pages/ruta-dinamarca.html",
+      "title": "Ruta Dinamarca | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "denmark-city-assistant.css",
+        "denmark-city-assistant.js",
+        "denmark-mobility-search.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "ruta-dinamarca-neumorphism.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/shortcuts.html",
+      "route": "/pages/shortcuts.html",
+      "title": "Atajos de teclado | StanNet Typing Lab",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "shortcuts-keyboard.js",
+        "shortcuts-lab.js",
+        "shortcuts.css",
+        "shortcuts.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/typing.html",
+      "route": "/pages/typing.html",
+      "title": "Typing Lab | StanNet Programming Academy",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "code-typing-catalog.js",
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css",
+        "typing.css",
+        "typing.js"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "pages/vocal-studio.html",
+      "route": "/pages/vocal-studio.html",
+      "title": "Vocal Studio | StanNet.Space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "script.js",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css",
+        "vocal-studio-local-v2.js",
+        "vocal-studio.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pages/web-development.html",
+      "route": "/pages/web-development.html",
+      "title": "Web Development | StanNet.Space",
+      "recommended_destination": "space-corporate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "navigation-performance.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css",
+        "style.css",
+        "web-development.css"
+      ],
+      "external_dependency_hosts": [
+        "fonts.googleapis.com"
+      ]
+    },
+    {
+      "source": "pdf-tutor/index.html",
+      "route": "/pdf-tutor/",
+      "title": "StanNet PDF Tutor",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "qa/context-bridge/index.html",
+      "route": "/qa/context-bridge/",
+      "title": "StanNet AI · Context Bridge Preview",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "qa/stannet-ai/fixture.html",
+      "route": "/qa/stannet-ai/fixture.html",
+      "title": "StanNet AI · Prueba aislada",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "atom.css",
+        "navigation-performance.css",
+        "script.js",
+        "style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "qa/stannet-ai/index.html",
+      "route": "/qa/stannet-ai/",
+      "title": "StanNet AI · QA de navegador",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "qa/stannet-ai/browser.mjs"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "sanacion/index.html",
+      "route": "/sanacion/",
+      "title": "Alfa y Omega | Bienestar integral",
+      "recommended_destination": "client-project-preserve",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "sanacion/responsive.css",
+        "stannet-global-nav.js"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "sentinel/index.html",
+      "route": "/sentinel/",
+      "title": "Sentinel · Análisis de archivos | StanNet.space",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "sentinel/app.mjs",
+        "sentinel/style.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "shield/desktop/ui/index.html",
+      "route": "/shield/desktop/ui/",
+      "title": "StanNet Shield",
+      "recommended_destination": "internal-qa-or-source",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "shield/desktop/ui/app.js",
+        "shield/desktop/ui/style.css"
+      ],
+      "external_dependency_hosts": []
+    },
+    {
+      "source": "shield/index.html",
+      "route": "/shield/",
+      "title": "StanNet Shield | Seguridad y limpieza",
+      "recommended_destination": "dev-candidate",
+      "direct_local_scripts_styles": [
+        "ios-responsive.css",
+        "shield/release.mjs",
+        "shield/scanner.mjs",
+        "shield/style.css",
+        "stannet-global-nav.js",
+        "stannet-global-theme.css"
+      ],
+      "external_dependency_hosts": []
+    }
+  ],
+  "shared_direct_dependencies": [
+    {
+      "path": "atom.css",
+      "entrypoints": [
+        "index.html",
+        "qa/stannet-ai/fixture.html"
+      ]
+    },
+    {
+      "path": "contact-actions.js",
+      "entrypoints": [
+        "index.html",
+        "pages/cv.html"
+      ]
+    },
+    {
+      "path": "contact-area.css",
+      "entrypoints": [
+        "index.html",
+        "pages/cv.html"
+      ]
+    },
+    {
+      "path": "cyber-academy.css",
+      "entrypoints": [
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html"
+      ]
+    },
+    {
+      "path": "dj-studio/assets/engine-BA_3zc_w.js",
+      "entrypoints": [
+        "dj-studio/index.html",
+        "dj-studio/qa.html",
+        "dj-studio/recording-qa.html"
+      ]
+    },
+    {
+      "path": "dj-studio/assets/qa-msI-AcpS.css",
+      "entrypoints": [
+        "dj-studio/qa.html",
+        "dj-studio/recording-qa.html"
+      ]
+    },
+    {
+      "path": "dj-studio/assets/recorder-CZpHqBPT.js",
+      "entrypoints": [
+        "dj-studio/index.html",
+        "dj-studio/recording-qa.html"
+      ]
+    },
+    {
+      "path": "ios-responsive.css",
+      "entrypoints": [
+        "index.html",
+        "nutri-ia/index.html",
+        "pages/ai.html",
+        "pages/apps.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/comunidad-dinamarca.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/denmark-cv.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/fp-study.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/marketplace.html",
+        "pages/music.html",
+        "pages/nutri-ia.html",
+        "pages/password-security.html",
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/ruta-dinamarca.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "pages/web-development.html",
+        "sanacion/index.html",
+        "sentinel/index.html",
+        "shield/desktop/ui/index.html",
+        "shield/index.html"
+      ]
+    },
+    {
+      "path": "navigation-performance.css",
+      "entrypoints": [
+        "index.html",
+        "pages/ai.html",
+        "pages/apps.html",
+        "pages/artist-universe.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/comunidad-dinamarca.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/denmark-cv.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/fp-study.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/language-typing.html",
+        "pages/marketplace.html",
+        "pages/music.html",
+        "pages/nutri-ia.html",
+        "pages/password-security.html",
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/ruta-dinamarca.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "pages/web-development.html",
+        "qa/stannet-ai/fixture.html"
+      ]
+    },
+    {
+      "path": "programming-academy.css",
+      "entrypoints": [
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html"
+      ]
+    },
+    {
+      "path": "programming-fullstack.js",
+      "entrypoints": [
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html"
+      ]
+    },
+    {
+      "path": "programming-lab.css",
+      "entrypoints": [
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html"
+      ]
+    },
+    {
+      "path": "radio.css",
+      "entrypoints": [
+        "pages/music.html",
+        "pages/radio.html"
+      ]
+    },
+    {
+      "path": "radio.js",
+      "entrypoints": [
+        "pages/music.html",
+        "pages/radio.html"
+      ]
+    },
+    {
+      "path": "script.js",
+      "entrypoints": [
+        "index.html",
+        "nutri-ia/index.html",
+        "pages/ai.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/language-typing.html",
+        "pages/music.html",
+        "pages/programming-coach.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "qa/stannet-ai/fixture.html"
+      ]
+    },
+    {
+      "path": "stannet-global-nav.js",
+      "entrypoints": [
+        "index.html",
+        "nutri-ia/index.html",
+        "pages/ai.html",
+        "pages/apps.html",
+        "pages/artist-universe.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/comunidad-dinamarca.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/denmark-cv.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/fp-study.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/language-typing.html",
+        "pages/marketplace.html",
+        "pages/music.html",
+        "pages/nutri-ia.html",
+        "pages/password-security.html",
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/ruta-dinamarca.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "pages/web-development.html",
+        "sanacion/index.html",
+        "sentinel/index.html",
+        "shield/index.html"
+      ]
+    },
+    {
+      "path": "stannet-global-theme.css",
+      "entrypoints": [
+        "nutri-ia/index.html",
+        "pages/ai.html",
+        "pages/apps.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/comunidad-dinamarca.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/denmark-cv.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/fp-study.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/language-typing.html",
+        "pages/marketplace.html",
+        "pages/music.html",
+        "pages/nutri-ia.html",
+        "pages/password-security.html",
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/ruta-dinamarca.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "pages/web-development.html",
+        "sentinel/index.html",
+        "shield/index.html"
+      ]
+    },
+    {
+      "path": "style.css",
+      "entrypoints": [
+        "index.html",
+        "nutri-ia/index.html",
+        "pages/ai.html",
+        "pages/apps.html",
+        "pages/blog.html",
+        "pages/callan.html",
+        "pages/comunidad-dinamarca.html",
+        "pages/cv.html",
+        "pages/cyber-lab.html",
+        "pages/cybersecurity.html",
+        "pages/danish.html",
+        "pages/denmark-cv.html",
+        "pages/education.html",
+        "pages/english.html",
+        "pages/guitar.html",
+        "pages/language-music.html",
+        "pages/language-typing.html",
+        "pages/music.html",
+        "pages/password-security.html",
+        "pages/programming-coach.html",
+        "pages/programming-cs-lab.html",
+        "pages/programming-fullstack-course.html",
+        "pages/programming-fullstack.html",
+        "pages/programming-lab.html",
+        "pages/programming-web-lab.html",
+        "pages/programming.html",
+        "pages/radio.html",
+        "pages/ruta-dinamarca.html",
+        "pages/shortcuts.html",
+        "pages/typing.html",
+        "pages/vocal-studio.html",
+        "pages/web-development.html",
+        "qa/stannet-ai/fixture.html"
+      ]
+    },
+    {
+      "path": "vendor/pdf.min.js",
+      "entrypoints": [
+        "pages/callan.html",
+        "pages/denmark-cv.html"
+      ]
+    }
+  ],
+  "missing_direct_dependencies": [],
+  "literal_api_routes_and_prefixes": [
+    {
+      "route_or_prefix": "/api/admin/certificates/",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/admin/session",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/ayudaencasa/v1",
+      "sources": [
+        "ayudaencasa-api.js",
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/ayudaencasa/v1/",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/community",
+      "sources": [
+        "community-dinamarca/api.mjs",
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/community/",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/english-coach",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/language-premium/",
+      "sources": [
+        "language-premium-auth.mjs",
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/language-premium/session",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/lyrics",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/music-dictionary",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/password-auth/",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/password-devices",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/password-vault",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/pdf-tutor",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/admin/playlists",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/admin/upload",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/bulletin",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/catalog",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/feed",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/jingle",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/playout",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/program",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/program-audio",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/status",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/radio/voice",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/sentinel-reputation",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/speech",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/speech/status",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/speech/test",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/stannet-ai",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/station/",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/videos",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/vocal-model",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/vocal-separate",
+      "sources": [
+        "worker.js"
+      ]
+    },
+    {
+      "route_or_prefix": "/api/youtube-search",
+      "sources": [
+        "worker.js"
+      ]
+    }
+  ],
+  "server_environment_variable_names_only": [
+    "ADMIN_EMAILS",
+    "AEC_EMAIL_ENDPOINT",
+    "AEC_EMAIL_TOKEN",
+    "AI_API_KEY",
+    "AI_API_URL",
+    "AI_MODEL",
+    "AI_VISION_MODEL",
+    "ALLOWED_ORIGIN",
+    "ASSETS",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_POLLY_REGION",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "AYUDA_DB",
+    "AZURACAST_API_KEY",
+    "AZURACAST_BASE_URL",
+    "AZURACAST_STATION_ID",
+    "AZURE_SPEECH_KEY",
+    "AZURE_SPEECH_REGION",
+    "COMMUNITY_SUPABASE_KEY",
+    "COMMUNITY_SUPABASE_URL",
+    "GITHUB_TOKEN",
+    "GROQ_API_KEY",
+    "GROQ_KEY",
+    "RADIO_AI_MODEL",
+    "RADIO_POLLY_VOICE",
+    "RADIO_STREAM_URL",
+    "RADIO_VOICE_NAME",
+    "REPLICATE_API_TOKEN",
+    "SPEECH_PROVIDER",
+    "VIRUSTOTAL_API_KEY",
+    "YOUTUBE_API_KEY",
+    "YOUTUBE_CHANNEL_HANDLE"
+  ]
+}
