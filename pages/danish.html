@@ -31,6 +31,22 @@
 .danish-voice-controls button:disabled{opacity:.6;cursor:wait}
 .danish-voice-controls a{color:#bdebf0}
 #danishAudioNotice{flex-basis:100%;margin:0;font-size:12px;color:#cde3ea}
+.danish-login-panel{padding:22px clamp(22px,8vw,130px) 28px;background:linear-gradient(110deg,#0c202a,#0c151f);border-bottom:1px solid rgba(189,235,240,.2);color:#e7f8fa;font-family:Inter,system-ui,sans-serif}
+.danish-login-panel .danish-login-heading{max-width:880px}
+.danish-login-panel h2{margin:0 0 8px;font:700 clamp(19px,2.5vw,27px)/1.3 Inter,system-ui,sans-serif;color:#fff}
+.danish-login-panel p{margin:0 0 12px;color:#cde3ea;font-size:13px;line-height:1.65}
+.danish-login-panel .danish-login-fields{display:flex;flex-wrap:wrap;align-items:end;gap:12px}
+.danish-login-panel label{display:grid;gap:6px;flex:1 1 180px;max-width:330px;font-size:13px;color:#e7f8fa}
+.danish-login-panel input{box-sizing:border-box;min-height:44px;width:100%;padding:10px 13px;border-radius:10px;border:1px solid #6795a8;background:#07131d;color:#fff;font:14px Inter,system-ui,sans-serif}
+.danish-login-panel .danish-login-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.danish-login-panel button{min-height:44px;padding:10px 16px;border:1px solid #88b6c9;border-radius:10px;background:#163848;color:#fff;font:600 13px Inter,system-ui,sans-serif;cursor:pointer}
+.danish-login-panel button[type="submit"]{background:#bdebf0;border-color:#bdebf0;color:#071c26}
+.danish-login-panel button:disabled{opacity:.6;cursor:wait}
+.danish-login-panel [hidden]{display:none!important}
+.danish-login-panel a{color:#bdebf0}
+.danish-login-panel #danishLoginStatus{margin-top:14px}
+.danish-login-panel #danishPremiumIdentity{color:#fff;font-size:14px;font-weight:600}
+@media(max-width:580px){.danish-login-panel .danish-login-fields{display:grid;grid-template-columns:1fr}.danish-login-panel label{max-width:none}.danish-login-panel .danish-login-actions{display:grid;grid-template-columns:1fr 1fr}.danish-login-panel button{width:100%}}
 </style>
 <link rel="stylesheet" href="../danish-course.css?v=20261001-1">
 <link rel="stylesheet" href="../danish-language-core.css?v=20261001-1">
@@ -78,8 +94,33 @@
 <strong>Pronunciación danesa</strong>
 <button type="button" id="danishBrowserVoice" aria-pressed="true">▶ Voz gratuita del dispositivo</button>
 <button type="button" id="danishPremiumVoice" aria-pressed="false">✦ Sofie · Amazon Polly</button>
-<a href="language-typing.html?lang=da">Acceso a voces premium ↗</a>
+<a href="#danishPremiumAccount">Iniciar sesión para Sofie ↓</a>
 <p id="danishAudioNotice" role="status" aria-live="polite">La voz gratuita funciona sin iniciar sesión. Sofie requiere una cuenta autorizada y consume cuota.</p>
+</section>
+<section class="danish-login-panel" id="danishPremiumAccount" aria-labelledby="danishLoginHeading">
+  <div class="danish-login-heading">
+    <h2 id="danishLoginHeading">🔐 Inicia sesión para escuchar a Sofie</h2>
+    <p>Voz danesa de Amazon Polly. Usa tu cuenta de Language Academy. Las cuentas nuevas necesitan confirmación del correo y aprobación para utilizar el audio premium.</p>
+  </div>
+  <form id="danishLoginForm" autocomplete="on">
+    <div class="danish-login-fields">
+      <label for="danishLoginEmail">Correo electrónico
+        <input id="danishLoginEmail" name="email" type="email" autocomplete="username" inputmode="email" maxlength="180" required>
+      </label>
+      <label for="danishLoginPassword">Contraseña
+        <input id="danishLoginPassword" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="256" required>
+      </label>
+    </div>
+    <div class="danish-login-actions">
+      <button id="danishLoginSubmit" type="submit">Iniciar sesión y activar Sofie</button>
+      <button id="danishSignup" type="button">Crear cuenta</button>
+    </div>
+  </form>
+  <div id="danishLoggedIn" hidden>
+    <p><span id="danishPremiumIdentity"></span> · <span id="danishPremiumRemaining"></span></p>
+    <button id="danishSignout" type="button">Cerrar sesión</button>
+  </div>
+  <p id="danishLoginStatus" role="status" aria-live="polite">Si no tienes cuenta, puedes crearla aquí. La voz gratuita sigue disponible sin iniciar sesión.</p>
 </section>
 <section class="section course-section" id="course-route"><div class="section-heading"><div><p class="eyebrow">01 / RUTA NÓRDICA A1+A2</p><h2>De cero a<br><em>A2 real.</em></h2></div><p>20 capítulos en progresión nórdica: situaciones reales, gramática asociada, audio con pronunciación danesa, traducción al español y misión práctica en cada etapa.</p></div><div class="course-layout"><aside class="course-index"><p class="signal-tag">PLAN DE ESTUDIO</p><h2>Elige nivel.</h2><select id="courseLevel"><option value="A1">A1 · Capítulos 01–10</option><option value="A2">A2 · Capítulos 11–20</option></select><div class="course-items" id="courseItems"></div></aside><article class="course-lesson"><p class="signal-tag" id="courseLabel">A1 · LECCION 01</p><h2 id="courseTitle">Presentarse</h2><p class="course-goal" id="courseGoal"></p><div class="course-phrases" id="coursePhrases"></div><div class="course-learning-grid"><div class="course-learning-card"><span>GRAMÁTICA CLAVE</span><p id="courseGrammar"></p></div><div class="course-learning-card mission"><span>MISIÓN DEL CAPÍTULO</span><p id="courseMission"></p></div></div><div class="course-foot"><span id="courseProgress"></span><span>ESCUCHA · REPITE · USA</span></div></article></div></section>
 <section class="section grammar-section" id="grammar-route"><div class="section-heading"><div><p class="eyebrow">02 / GRAMÁTICA DANESA</p><h2>La estructura<br><em>del idioma.</em></h2></div><p>17 capítulos en el mismo orden pedagógico de la gramática nórdica que usaste para estudiar sueco, pero reescritos para las reglas reales del danés.</p></div><div class="grammar-layout"><aside class="grammar-index"><p class="signal-tag">17 CAPÍTULOS</p><h2>De la oración al dominio.</h2><div class="grammar-items" id="grammarItems"></div></aside><article class="grammar-lesson"><p class="signal-tag" id="grammarLabel">GRAMÁTICA · CAPÍTULO 01</p><h2 id="grammarTitle">Introducción al danés</h2><p class="grammar-focus" id="grammarFocus"></p><div class="grammar-rule"><b>REGLA</b><p id="grammarRule"></p></div><div class="grammar-examples" id="grammarExamples"></div><div class="grammar-footer"><span id="grammarProgress"></span><span>ENTIENDE · ESCUCHA · APLICA</span></div></article></div><div id="grammarDeepContent"></div></section><section class="section core-language-section" id="language-core"><div class="section-heading"><div><p class="eyebrow">03 / DANISH CORE LAB</p><h2>Pronombres, verbos<br><em>y auxiliares.</em></h2></div><p>El núcleo que faltaba: pronombres escuchables uno por uno, conjugación completa de verbos frecuentes y auxiliares/modales con sus estructuras reales.</p></div><div id="danishCoreLab"></div></section><section class="section sentence-builder-section" id="sentence-builder"><div class="section-heading"><div><p class="eyebrow">04 / SENTENCE BUILDER</p><h2>Construye la frase<br><em>pieza a pieza.</em></h2></div><p>Elige pronombre, tipo de oración, tiempo verbal, verbo, complemento, lugar y momento. El sistema ordena la frase danesa, la reproduce y explica su estructura.</p></div><div id="danishSentenceBuilder"></div></section><section class="section memory-section" id="memory-lab"><div class="section-heading"><div><p class="eyebrow">05 / MEMORY LAB</p><h2>Escribe. Recuerda.<br><em>Habla.</em></h2></div><p>La memoria se activa cuando escuchas, ocultas la ayuda y construyes la frase con tus propias manos.</p></div><div class="memory-layout"><aside class="memory-menu"><p class="signal-tag">RUTA DE LECCIONES</p><h2>Elige una misión.</h2><label for="memoryTopic">BLOQUE</label><select id="memoryTopic"><option value="greetings">Saludos</option><option value="numbers">Numeros</option><option value="weekdays">Dias de la semana</option><option value="months">Meses del año</option><option value="phrases">Frases esenciales</option></select><div class="lesson-list" id="lessonList"></div></aside><article class="memory-card"><p class="signal-tag" id="memoryLabel">LECCION 01 · SALUDOS</p><h2 id="memoryTitle">Saludos formales e informales.</h2><div class="memory-prompt"><small>TRADUCE AL DANES</small><strong id="memoryPrompt">Hola</strong></div><label for="memoryAnswer">TU RESPUESTA ESCRITA</label><input id="memoryAnswer" autocomplete="off" placeholder="Escribe en danes..."><div class="memory-actions"><button class="memory-primary" id="checkMemory" type="button">Comprobar →</button><button id="revealMemory" type="button">Mostrar solución</button><button id="nextMemory" type="button">Siguiente</button></div><div class="memory-result" id="memoryResult" role="status">Escribe sin mirar. Cada intento cuenta.</div><div class="memory-score"><span id="memoryProgress">0 aciertos · 0 intentos</span><span>GUARDADO EN ESTE DISPOSITIVO</span></div></article></div></section>
@@ -92,7 +133,7 @@
 <script src="../danish-course-content.js?v=20261001-1"></script>
 <script src="../danish-language-core-data.js?v=20261001-1"></script>
 <script src="../danish-sentence-builder-data.js?v=20261001-1"></script>
-<script src="../danish-app.js?v=20261020-audio1"></script>
+<script src="../danish-app.js?v=20261020-audio2"></script>
 <script src="../danish-language-core.js?v=20261001-1"></script>
 <script src="../danish-sentence-builder.js?v=20261001-1"></script>
 <script src="../danish-course.js?v=20261001-1"></script>
