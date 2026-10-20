@@ -166,9 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', () => {
-    void activatePremiumVoice();
-  });
+  if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', () => activatePremiumVoice());
 
   const authAction = async (action) => {
     if (!loginForm || !loginEmail || !loginPassword) return;
@@ -225,11 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (loginForm) loginForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    void authAction('signin');
+    return authAction('signin');
   });
-  if (signupButton) signupButton.addEventListener('click', () => {
-    void authAction('signup');
-  });
+  if (signupButton) signupButton.addEventListener('click', () => authAction('signup'));
   if (signoutButton) signoutButton.addEventListener('click', async () => {
     signoutButton.disabled = true;
     try {
