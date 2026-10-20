@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let danishAudioContext = null;
   let danishSource = null;
   let danishFallbackAudio = null;
+  let premiumRequestController = null;
+  let playbackToken = 0;
 
   const unlockDanishAudio = () => {
     if (!AudioContextClass) return null;
@@ -18,6 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const stopDanishAudio = () => {
+    playbackToken++;
+    if (premiumRequestController) {
+      try { premiumRequestController.abort(); } catch (error) {}
+      premiumRequestController = null;
+    }
     if (danishSource) {
       try { danishSource.stop(0); } catch (error) {}
       try { danishSource.disconnect(); } catch (error) {}
@@ -38,6 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const freeVoiceButton = document.querySelector('#danishBrowserVoice');
   const premiumVoiceButton = document.querySelector('#danishPremiumVoice');
   let premiumVoiceEnabled = false;
+  // Audio is kept only in this page's RAM; never in localStorage, CacheStorage
+  // or a public CDN. It is cleared whenever the authenticated account changes.
+  const premiumAudioCache = new Map();
+  const premiumAudioCacheMaxEntries = 50;
+  let premiumAudioCacheOwner = '';
+  const clearPremiumAudioCache = () => premiumAudioCache.clear();
+  const rememberPremiumAudio = (key, bytes) => {
+    if (bytes.byteLength > 1500000) return;
+    if (premiumAudioCache.has(key)) premiumAudioCache.delete(key);
+    premiumAudioCache.set(key, bytes);
+    if (premiumAudioCache.size > premiumAudioCacheMaxEntries) {
+      premiumAudioCache.delete(premiumAudioCache.keys().next().value);
+    }
+  };
 
   const announceAudio = (message, feedback) => {
     if (audioNotice) audioNotice.textContent = message;
@@ -111,13 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
       authenticated:session.authenticated === true,
       premiumEnabled:session.premiumEnabled === true,
       remaining:Number(session.remaining) || 0,
+      dailyLimit:Number(session.dailyLimit) || 20,
       email:session.email || ''
     };
+    const account = premiumSession.authenticated ? premiumSession.email.trim().toLowerCase() : '';
+    if (account !== premiumAudioCacheOwner) {
+      clearPremiumAudioCache();
+      premiumAudioCacheOwner = account;
+    }
     if (loginForm) loginForm.hidden = premiumSession.authenticated;
     if (loggedInPanel) loggedInPanel.hidden = !premiumSession.authenticated;
     if (premiumIdentity) premiumIdentity.textContent = premiumSession.email ? 'Cuenta: ' + premiumSession.email : 'Cuenta verificada';
     if (premiumRemaining) premiumRemaining.textContent = premiumSession.premiumEnabled
-      ? premiumSession.remaining + ' reproducciones premium disponibles'
+      ? premiumSession.remaining + ' de ' + premiumSession.dailyLimit + ' reproducciones disponibles hoy (caché local sin consumo)'
       : 'Esperando aprobación de voz premium';
     if (!premiumSession.authenticated || !premiumSession.premiumEnabled || premiumSession.remaining < 1) {
       premiumVoiceEnabled = false;
@@ -239,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (!response.ok) throw new Error('No se pudo cerrar sesión.');
       stopDanishAudio();
+      clearPremiumAudioCache();
       premiumVoiceEnabled = false;
       markVoiceSelection();
       displaySession({authenticated:false,premiumEnabled:false,remaining:0});
@@ -287,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // This path stays synchronous to preserve user activation on Android/iOS.
     if (!premiumVoiceEnabled) return playBrowserDanish(text, options);
     const audioContext = unlockDanishAudio();
+    const thisPlayback = playbackToken;
+    const cacheKey = 'da-DK:Sofie:' + text;
+    const cachedBytes = premiumAudioCache.get(cacheKey);
 
     if (button) {
       button.classList.add('loading');
@@ -295,32 +326,44 @@ document.addEventListener('DOMContentLoaded', () => {
     if (feedback) feedback.textContent = loadingText;
 
     try {
-      const response = await fetch('/api/speech', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ text: text, lang: 'da-DK', purpose: 'danish-academy' }),
-        cache: 'no-store'
-      });
-
-      if (!response.ok) {
-        let detail = '';
-        try {
-          const payload = await response.json();
-          detail = payload && payload.error ? payload.error : '';
-        } catch (error) {}
-        throw new Error(detail || ('Speech HTTP ' + response.status));
+      let bytes = cachedBytes;
+      let freshResponse = null;
+      if (!bytes) {
+        if (premiumSession.remaining < 1) {
+          throw new Error('Has alcanzado tu límite diario. Las frases ya escuchadas siguen disponibles en esta pestaña.');
+        }
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        premiumRequestController = controller;
+        const response = await fetch('/api/speech', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ text: text, lang: 'da-DK', voice: 'Sofie', purpose: 'danish-academy' }),
+          cache: 'no-store',
+          ...(controller ? {signal:controller.signal} : {})
+        });
+        if (thisPlayback !== playbackToken) return false;
+        premiumRequestController = null;
+        if (!response.ok) {
+          let detail = '';
+          try {
+            const payload = await response.json();
+            detail = payload && payload.error ? payload.error : '';
+          } catch (error) {}
+          throw new Error(detail || ('Speech HTTP ' + response.status));
+        }
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.toLowerCase().includes('audio')) {
+          throw new Error('La API no devolvió audio.');
+        }
+        bytes = await response.arrayBuffer();
+        if (thisPlayback !== playbackToken) return false;
+        if (!bytes || bytes.byteLength < 1000 || bytes.byteLength > 1500000) {
+          throw new Error('El audio recibido está vacío o incompleto.');
+        }
+        freshResponse = response;
       }
 
-      const contentType = response.headers.get('content-type') || '';
-      if (!contentType.toLowerCase().includes('audio')) {
-        throw new Error('La API no devolvió audio.');
-      }
-
-      const bytes = await response.arrayBuffer();
-      if (!bytes || bytes.byteLength < 1000) {
-        throw new Error('El audio recibido está vacío o incompleto.');
-      }
 
       if (audioContext) {
         const bufferCopy = bytes.slice(0);
@@ -347,9 +390,24 @@ document.addEventListener('DOMContentLoaded', () => {
         await audio.play();
       }
 
+      if (thisPlayback !== playbackToken) return false;
+      if (freshResponse) {
+        rememberPremiumAudio(cacheKey, bytes);
+        const remainingHeader = freshResponse.headers.get('X-StanNet-Voice-Remaining');
+        if (remainingHeader !== null && /^[0-9]+$/.test(remainingHeader)) {
+          premiumSession.remaining = Number(remainingHeader);
+          if (premiumRemaining) premiumRemaining.textContent =
+            premiumSession.remaining + ' de ' + premiumSession.dailyLimit + ' reproducciones disponibles hoy (caché local sin consumo)';
+        }
+      }
+      announceAudio(cachedBytes
+        ? 'Sofie: audio recuperado de la memoria temporal, sin gastar otra reproducción.'
+        : 'Sofie: audio nuevo. Repite la frase para practicar sin gastar otra reproducción.');
       if (feedback) feedback.textContent = 'Escucha el ritmo y repite la frase completa en voz alta.';
       return true;
     } catch (error) {
+      if (thisPlayback !== playbackToken) return false;
+      premiumRequestController = null;
       const message = error && error.message ? error.message : 'No se pudo reproducir el audio.';
       premiumVoiceEnabled = false;
       markVoiceSelection();
@@ -364,6 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   window.stannetPlayDanish = playDanish;
+  // Scoped lifecycle cleanup for shared computers and mobile page navigation.
+  window.addEventListener('pagehide', () => {
+    stopDanishAudio();
+    clearPremiumAudioCache();
+  });
 
   const setupMastery = () => {
     const level = document.querySelector('#masteryLevel');
