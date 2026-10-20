@@ -89,36 +89,179 @@ document.addEventListener('DOMContentLoaded', () => {
     announceAudio('Voz gratuita del navegador activada. Pulsa Escuchar en cualquier lección.');
   });
 
-  if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', async () => {
-    premiumVoiceButton.disabled = true;
+  const loginForm = document.querySelector('#danishLoginForm');
+  const loginEmail = document.querySelector('#danishLoginEmail');
+  const loginPassword = document.querySelector('#danishLoginPassword');
+  const loginSubmit = document.querySelector('#danishLoginSubmit');
+  const signupButton = document.querySelector('#danishSignup');
+  const signoutButton = document.querySelector('#danishSignout');
+  const loggedInPanel = document.querySelector('#danishLoggedIn');
+  const premiumIdentity = document.querySelector('#danishPremiumIdentity');
+  const premiumRemaining = document.querySelector('#danishPremiumRemaining');
+  const loginStatus = document.querySelector('#danishLoginStatus');
+  let premiumSession = {authenticated:false,premiumEnabled:false,remaining:0};
+
+  const authNotice = (message) => {
+    if (loginStatus) loginStatus.textContent = message;
+  };
+
+  const displaySession = (session) => {
+    premiumSession = {
+      authenticated:session.authenticated === true,
+      premiumEnabled:session.premiumEnabled === true,
+      remaining:Number(session.remaining) || 0,
+      email:session.email || ''
+    };
+    if (loginForm) loginForm.hidden = premiumSession.authenticated;
+    if (loggedInPanel) loggedInPanel.hidden = !premiumSession.authenticated;
+    if (premiumIdentity) premiumIdentity.textContent = premiumSession.email ? 'Cuenta: ' + premiumSession.email : 'Cuenta verificada';
+    if (premiumRemaining) premiumRemaining.textContent = premiumSession.premiumEnabled
+      ? premiumSession.remaining + ' reproducciones premium disponibles'
+      : 'Esperando aprobación de voz premium';
+    if (!premiumSession.authenticated || !premiumSession.premiumEnabled || premiumSession.remaining < 1) {
+      premiumVoiceEnabled = false;
+      markVoiceSelection();
+    }
+  };
+
+  const refreshSession = async () => {
+    const response = await fetch('/api/language-premium/session', {credentials:'same-origin',cache:'no-store'});
+    if (!response.ok) throw new Error('No se pudo consultar la sesión. Usa la voz gratuita mientras tanto.');
+    const session = await response.json();
+    displaySession(session);
+    return premiumSession;
+  };
+
+  const activatePremiumVoice = async () => {
+    if (premiumVoiceButton) premiumVoiceButton.disabled = true;
     announceAudio('Comprobando acceso a Sofie (Amazon Polly)…');
     try {
-      const [statusResponse, sessionResponse] = await Promise.all([
+      const [statusResponse, session] = await Promise.all([
         fetch('/api/speech/status', {credentials:'same-origin',cache:'no-store'}),
-        fetch('/api/language-premium/session', {credentials:'same-origin',cache:'no-store'})
+        refreshSession()
       ]);
-      if (!statusResponse.ok || !sessionResponse.ok) throw new Error('No se pudo verificar el servicio de voz.');
-      const [status, session] = await Promise.all([statusResponse.json(), sessionResponse.json()]);
-      if (status.provider !== 'amazon-polly' || status.configured !== true) {
-        throw new Error('Amazon Polly no está disponible. Sigue funcionando la voz gratuita.');
-      }
-      if (!session.authenticated) {
-        throw new Error('Para usar Sofie, inicia sesión en Language Typing Academy. La voz gratuita no requiere cuenta.');
-      }
-      if (!session.premiumEnabled || Number(session.remaining) < 1) {
-        throw new Error('Esta cuenta no tiene acceso o cuota disponible para Sofie. Usa la voz gratuita.');
-      }
+      if (!statusResponse.ok) throw new Error('No se pudo verificar el servicio de voz.');
+      const status = await statusResponse.json();
+      if (status.provider !== 'amazon-polly' || status.configured !== true)
+        throw new Error('Sofie no está disponible en este momento. Usa la voz gratuita.');
+      if (!session.authenticated)
+        throw new Error('Inicia sesión en el formulario de Sofie que aparece debajo de estos botones.');
+      if (!session.premiumEnabled)
+        throw new Error('Sesión iniciada. Falta la aprobación del administrador para acceder a Sofie.');
+      if (session.remaining < 1)
+        throw new Error('Has alcanzado tu cuota de voz premium. Utiliza la voz gratuita.');
       premiumVoiceEnabled = true;
       markVoiceSelection();
-      announceAudio('Sofie activada. Cada pulsación de Escuchar consumirá una petición de tu cuota premium.');
+      announceAudio('Sofie activada. Pulsa Escuchar en una lección para usar una petición premium.');
+      authNotice('Cuenta autorizada. Sofie está lista para escuchar danés.');
+      return true;
     } catch (error) {
       premiumVoiceEnabled = false;
       markVoiceSelection();
-      announceAudio(error.message || 'Sofie no está disponible. Utiliza la voz gratuita.');
+      announceAudio(error.message || 'Sofie no está disponible. La voz gratuita sigue funcionando.');
+      authNotice(error.message || 'No se ha podido activar la voz premium.');
+      return false;
     } finally {
-      premiumVoiceButton.disabled = false;
+      if (premiumVoiceButton) premiumVoiceButton.disabled = false;
+    }
+  };
+
+  if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', () => {
+    void activatePremiumVoice();
+  });
+
+  const authAction = async (action) => {
+    if (!loginForm || !loginEmail || !loginPassword) return;
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+    if (!email || password.length < 10) {
+      authNotice('Introduce tu correo y una contraseña de al menos 10 caracteres.');
+      return;
+    }
+    if (loginSubmit) loginSubmit.disabled = true;
+    if (signupButton) signupButton.disabled = true;
+    authNotice(action === 'signup' ? 'Creando cuenta…' : 'Iniciando sesión…');
+    try {
+      const response = await fetch('/api/language-premium/' + action, {
+        method:'POST',
+        credentials:'same-origin',
+        cache:'no-store',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email,password})
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        authNotice(data.error || 'No se pudo iniciar sesión. Comprueba tus datos.');
+        return;
+      }
+      if (data.requiresConfirmation) {
+        authNotice('Cuenta creada. Confirma tu correo y vuelve para iniciar sesión. Las voces premium requieren aprobación.');
+        return;
+      }
+      const session = await refreshSession();
+      if (!session.authenticated) {
+        authNotice('Confirma tu correo antes de entrar.');
+        return;
+      }
+      if (!session.premiumEnabled) {
+        authNotice('Sesión iniciada. La cuenta necesita aprobación del administrador para escuchar a Sofie. Puedes usar la voz gratuita.');
+        return;
+      }
+      if (session.remaining < 1) {
+        authNotice('Sesión iniciada, pero has alcanzado tu cuota. Utiliza la voz gratuita.');
+        return;
+      }
+      // Signing in does not synthesize anything: playing a lesson requires a tap.
+      await activatePremiumVoice();
+    } catch (error) {
+      authNotice('Servicio de acceso no disponible. Puedes continuar con la voz gratuita.');
+    } finally {
+      // Never keep passwords or tokens in JS storage or the visible form.
+      loginPassword.value = '';
+      if (loginSubmit) loginSubmit.disabled = false;
+      if (signupButton) signupButton.disabled = false;
+    }
+  };
+
+  if (loginForm) loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    void authAction('signin');
+  });
+  if (signupButton) signupButton.addEventListener('click', () => {
+    void authAction('signup');
+  });
+  if (signoutButton) signoutButton.addEventListener('click', async () => {
+    signoutButton.disabled = true;
+    try {
+      const response = await fetch('/api/language-premium/signout', {
+        method:'POST',credentials:'same-origin',cache:'no-store',
+        headers:{'Content-Type':'application/json'},body:'{}'
+      });
+      if (!response.ok) throw new Error('No se pudo cerrar sesión.');
+      stopDanishAudio();
+      premiumVoiceEnabled = false;
+      markVoiceSelection();
+      displaySession({authenticated:false,premiumEnabled:false,remaining:0});
+      authNotice('Sesión cerrada. Puedes continuar usando la voz gratuita.');
+      announceAudio('Voz gratuita del navegador activada.');
+    } catch {
+      authNotice('No se pudo cerrar la sesión. Vuelve a intentarlo.');
+    } finally {
+      signoutButton.disabled = false;
     }
   });
+
+  if (loginForm) {
+    void refreshSession().then((session) => {
+      authNotice(!session.authenticated
+        ? 'Inicia sesión para utilizar Sofie. La voz gratuita está disponible sin cuenta.'
+        : session.premiumEnabled
+          ? 'Sesión activa. Pulsa Sofie para seleccionarla o inicia una lección con la voz gratuita.'
+          : 'Sesión activa; falta la aprobación del administrador para Sofie.');
+    }).catch(() => {
+      authNotice('No se pudo consultar tu sesión. Puedes usar la voz gratuita.');
+    });
+  }
 
   const playDanish = async (text, options = {}) => {
     const button = options.button || null;
@@ -134,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /*
       IMPORTANT FOR iOS/Safari:
       Resume/unlock Web Audio synchronously from the user's tap BEFORE awaiting
-      the Cloudflare/Azure request. The returned MP3 can then be decoded and
+      the Cloudflare/Polly request. The returned MP3 can then be decoded and
       played through the already-authorized AudioContext.
     */
     stopDanishAudio();
@@ -153,7 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch('/api/speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
-        body: JSON.stringify({ text: text, lang: 'da-DK' }),
+        credentials: 'same-origin',
+        body: JSON.stringify({ text: text, lang: 'da-DK', purpose: 'danish-academy' }),
         cache: 'no-store'
       });
 
