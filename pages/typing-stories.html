@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111e">
+<meta name="description" content="Typing Stories: escribe relatos largos, ciencia ficción, tecnología, viajes y recuerdos en cinco idiomas sin interrupciones.">
+<title>Historias continuas | StanNet Typing Academy</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/stannet-sn-cutout-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/stannet-sn-cutout-180.png">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/stannet-global-theme.css?v=20261002-1">
+<link rel="stylesheet" href="/navigation-performance.css?v=20261004-perf1">
+<link rel="stylesheet" href="/typing-stories.css?v=20261020-1">
+</head>
+<body class="ts-page stannet-global">
+<header class="site-header">
+<a class="brand brand-lockup" href="/index.html" aria-label="StanNet inicio"><img class="brand-mark" src="/assets/brand/stannet-sn-cutout-20261005.png" width="44" height="44" alt=""><span><b class="brand-stan">Stan</b><b class="brand-net">Net</b></span><i>.Space</i></a>
+<button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+<nav class="site-nav home-nav" aria-label="Navegación principal">
+<a href="/index.html">Inicio</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/language-typing.html">Idiomas</a><a href="/pages/programming.html">Programación</a>
+</nav>
+</header>
+<main class="ts-shell">
+<section class="ts-hero">
+<div class="ts-eyebrow">StanNet · Typing Academy · modalidad nueva</div>
+<h1>Historias para escribir <span>sin detenerte.</span></h1>
+<p>Novelas por capítulos, tecnología, ciencia ficción, viajes y recuerdos. El texto se desplaza dentro del lector mientras escribes: sin botones entre frases y sin perder el ritmo. Tus ejercicios clásicos de idiomas, dictado y shadowing siguen disponibles.</p>
+<a class="ts-back" href="/pages/language-typing.html">← Volver a frases, dictado y shadowing</a>
+</section>
+<section class="ts-panel" aria-label="Práctica de historias">
+<div class="ts-settings">
+<label>Idioma<select id="tsLanguage">
+<option value="en">🇬🇧 Inglés</option><option value="de">🇩🇪 Alemán</option><option value="fr">🇫🇷 Francés</option><option value="sv">🇸🇪 Sueco</option><option value="da">🇩🇰 Danés</option>
+</select></label>
+<label>Nivel<select id="tsLevel"><option value="all">Todos los niveles</option><option value="A1">A1 · Básico</option><option value="A2">A2 · Elemental</option><option value="B1">B1 · Intermedio</option><option value="B2">B2 · Intermedio alto</option></select></label>
+<label>Género<select id="tsGenre"><option value="all">Todos los géneros</option></select></label>
+<label>Historia<select id="tsSeries" aria-label="Selecciona una historia"></select></label>
+<label>Desde el capítulo<select id="tsChapter" aria-label="Capítulo inicial"></select></label>
+<label>Objetivo de palabras<select id="tsLength"><option value="300">≈ 300 palabras</option><option value="600">≈ 600 palabras</option><option value="1000">≈ 1.000 palabras</option></select></label>
+</div>
+<div class="ts-bookbar"><div><h2 id="tsTitle">Cargando biblioteca...</h2><p id="tsSubtitle">Elige un relato para empezar.</p></div><span id="tsResume" class="ts-resume">Preparando lectura</span></div>
+<div class="ts-reading-wrap"><div class="ts-reading-top"><span>LECTURA CONTINUA · sigue el carácter resaltado</span><span id="tsStarted">0 caracteres</span></div><div id="tsScroll" class="ts-reading"><p id="tsReading" class="ts-passage" aria-label="Texto objetivo para escribir">Cargando historia...</p></div></div>
+<p class="ts-caption">El área de lectura avanza automáticamente. Mantén el foco en el teclado y escribe sin hacer scroll manual.</p>
+<div class="ts-input-wrap">
+<label for="tsAnswer">Escribe aquí la historia (sin copiar y pegar)</label>
+<textarea id="tsAnswer" rows="4" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" placeholder="Empieza a escribir el texto que aparece arriba…" aria-describedby="tsFeedback"></textarea>
+<div class="ts-meter" aria-label="Progreso del texto"><span id="tsProgress"></span></div>
+<div class="ts-stats" aria-label="Estadísticas de mecanografía">
+<div class="ts-stat"><small>PALABRAS</small><strong id="tsWords">0 / 0</strong></div>
+<div class="ts-stat"><small>PRECISIÓN</small><strong id="tsAccuracy">100%</strong></div>
+<div class="ts-stat"><small>VELOCIDAD</small><strong id="tsWpm">0 PPM</strong></div>
+<div class="ts-stat"><small>TIEMPO</small><strong id="tsTime">00:00</strong></div>
+</div>
+<div class="ts-actions">
+<button id="tsListen" type="button">▶ Escuchar texto</button>
+<button id="tsStop" type="button">■ Detener audio</button>
+<button id="tsReset" type="button">↺ Repetir desde el principio</button>
+<button id="tsNext" class="ts-primary" type="button" hidden>Siguiente capítulo →</button>
+</div>
+<p id="tsFeedback" class="ts-feedback" aria-live="polite"></p>
+</div>
+</section>
+<section class="ts-private">
+<h2>📖 Tus recuerdos, tus propias historias</h2>
+<p>¿Quieres practicar escribiendo una historia sobre tus padres, un viaje o tu vida? Puedes añadir un texto propio. Se guarda únicamente en el almacenamiento de este navegador; no lo publicamos en GitHub ni lo enviamos al servidor.</p>
+<button id="tsCustomShow" class="ts-custom-toggle" type="button">+ Añadir mi texto privado</button>
+<div class="ts-custom" id="tsCustomPanel" hidden>
+<label>Título de mi historia<input id="tsCustomTitle" type="text" maxlength="80" placeholder="Un recuerdo de mi familia"></label>
+<label>Texto que quiero practicar<textarea id="tsCustomText" maxlength="20000" rows="6" placeholder="Escribe o pega aquí un texto propio para convertirlo en una sesión de mecanografía…"></textarea></label>
+<div class="ts-custom-actions"><button id="tsCustomSave" type="button">Guardar solo aquí</button><button id="tsCustomCancel" type="button">Cancelar</button></div>
+<p id="tsCustomStatus" aria-live="polite"></p>
+</div>
+</section>
+<p id="tsPrivacy" class="ts-note"><strong>Privacidad:</strong> tu progreso y los textos personalizados se guardan mediante almacenamiento local del dispositivo. En un navegador compartido, otros usuarios del mismo perfil podrían acceder a ellos. El audio usa las voces gratuitas del navegador y puede depender del servicio de voz de tu dispositivo; esta modalidad no llama a Amazon Polly. Algunos relatos están disponibles en un solo nivel y las sesiones muestran su longitud real.</p>
+</main>
+<footer class="ts-footer"><a href="/pages/typing.html">Typing Lab</a> · <a href="/pages/language-typing.html">Academia de idiomas</a> · StanNet</footer>
+<script src="/typing-stories-data.js?v=20261020-1"></script>
+<script src="/typing-stories.js?v=20261020-1"></script>
+<script src="/script.js?v=20261014-1" defer></script>
+<script src="/stannet-global-nav.js?v=20261020-nav2" defer></script>
+</body>
+</html>
