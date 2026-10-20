@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const html = fs.readFileSync('pages/danish.html', 'utf8');
 const data = fs.readFileSync('danish-data.js', 'utf8');
 const app = fs.readFileSync('danish-app.js', 'utf8');
+const expansion = fs.readFileSync('danish-expansion.js', 'utf8');
 const deep = fs.readFileSync('danish-course-content.js', 'utf8');
 const deepApp = fs.readFileSync('danish-course.js', 'utf8');
 const coreData = fs.readFileSync('danish-language-core-data.js', 'utf8');
@@ -29,6 +30,13 @@ assert.ok(!html.includes('\\n'), 'Literal \\n tokens leaked into Danish HTML');
 assert.ok(html.includes('id="danishSentenceBuilder"'), 'Sentence builder mount missing');
 assert.ok(html.includes('id="danishCoreLab"'), 'Danish Core Lab mount missing');
 assert.ok(html.includes('../danish-expansion.js'), 'Danish expansion bundle missing');
+assert.ok(!expansion.includes("guide.id='danish-cefr-guide'"), 'Redundant CEFR overview should not be inserted');
+assert.ok(!expansion.includes('06 / CEFR MAP'), 'The oversized CEFR map must stay removed');
+assert.ok(html.includes('id="course-route"'), 'A1+A2 course must stay accessible');
+assert.ok(html.includes('id="mastery-route"'), 'B1–C2 mastery course must stay accessible');
+assert.ok(html.includes('id="danishPremiumAccount"'), 'Sofie login must be preserved');
+assert.ok(html.includes('../danish-expansion.js?v=20261020-compact1'), 'Updated script cache version missing');
+
 
 const dataPos = html.indexOf('../danish-data.js');
 const deepDataPos = html.indexOf('../danish-course-content.js');
