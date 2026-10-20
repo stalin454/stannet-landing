@@ -10,6 +10,9 @@ const base=process.env.STANNET_AUDIT_URL||'http://127.0.0.1:8765/';
    page.on('pageerror',e=>errors.push(e.message));
    await page.setViewport({width,height:844,isMobile:width<600,hasTouch:width<600});
    await page.goto(new URL('pages/typing-stories.html',base).href,{waitUntil:'domcontentloaded'});
+   // Fresh local learner per viewport; previous viewport should not affect expectations.
+   await page.evaluate(()=>{localStorage.removeItem('stannet-typing-stories-v1');localStorage.removeItem('stannet-typing-stories-custom-v1');});
+   await page.reload({waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>document.querySelector('#tsTitle')?.textContent==='The Lighthouse Protocol',{timeout:10000});
    assert.equal(await page.evaluate(()=>window.StanNetTypingStories.length),9);
    assert.ok(!errors.length,'Runtime exceptions: '+errors);
