@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const premiumRemaining = document.querySelector('#danishPremiumRemaining');
   const loginStatus = document.querySelector('#danishLoginStatus');
   let premiumSession = {authenticated:false,premiumEnabled:false,remaining:0};
+  let authActionStarted = false;
 
   const authNotice = (message) => {
     if (loginStatus) loginStatus.textContent = message;
@@ -133,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const activatePremiumVoice = async () => {
+    authActionStarted = true;
     if (premiumVoiceButton) premiumVoiceButton.disabled = true;
     announceAudio('Comprobando acceso a Sofie (Amazon Polly)…');
     try {
@@ -169,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (premiumVoiceButton) premiumVoiceButton.addEventListener('click', () => activatePremiumVoice());
 
   const authAction = async (action) => {
+    authActionStarted = true;
     if (!loginForm || !loginEmail || !loginPassword) return;
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
@@ -227,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   if (signupButton) signupButton.addEventListener('click', () => authAction('signup'));
   if (signoutButton) signoutButton.addEventListener('click', async () => {
+    authActionStarted = true;
     signoutButton.disabled = true;
     try {
       const response = await fetch('/api/language-premium/signout', {
@@ -249,12 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (loginForm) {
     void refreshSession().then((session) => {
+      if (authActionStarted) return;
       authNotice(!session.authenticated
         ? 'Inicia sesión para utilizar Sofie. La voz gratuita está disponible sin cuenta.'
         : session.premiumEnabled
           ? 'Sesión activa. Pulsa Sofie para seleccionarla o inicia una lección con la voz gratuita.'
           : 'Sesión activa; falta la aprobación del administrador para Sofie.');
     }).catch(() => {
+      if (authActionStarted) return;
       authNotice('No se pudo consultar tu sesión. Puedes usar la voz gratuita.');
     });
   }
