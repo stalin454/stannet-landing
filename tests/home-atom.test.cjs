@@ -2,7 +2,7 @@
 const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');
 const {resources,areas,types,searchResources}=require('../stannet-discovery.js');
 const {render}=require('../scripts/build-resource-directory.cjs');
-const html=fs.readFileSync('index.html','utf8');
+const html=fs.readFileSync('recursos/index.html','utf8');
 assert.ok(resources.length>=35,'all existing resources must remain available');
 assert.equal(new Set(resources.map(r=>r.href)).size,resources.length,'resource destinations must be unique, including meaningful fragments');
 for(const resource of resources){

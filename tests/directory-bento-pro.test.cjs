@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {render}=require('../scripts/build-resource-directory.cjs');
 const root=path.join(__dirname,'..');
-const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const html=fs.readFileSync(path.join(root,'recursos/index.html'),'utf8');
 const css=fs.readFileSync(path.join(root,'stannet-cards-premium.css'),'utf8');
 const start='<!-- STANNET CATALOG START -->';
 const end='<!-- STANNET CATALOG END -->';
@@ -39,6 +39,6 @@ test('one CTA per card and four consistent color palettes',()=>{
 });
 test('homepage CSS order and protected AI scripts remain unchanged',()=>{
  assert.match(html,/stannet-discovery\.css[^\n]*\n<link rel="stylesheet" href="\/stannet-cards-premium\.css\?v=20261018-bento2">/);
- assert.match(html,/src="\/home-ai-network\.js/);
+ assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'),/src="\/home-ai-network\.js/);
  assert.match(html,/src="\/stannet-global-nav\.js/);
 });

@@ -111,7 +111,27 @@ style.textContent=`
 }
 
 `;
+style.textContent+=`
+#${NAV_ID}.site-header{position:sticky;top:0}
+@media(min-width:851px){
+ #${NAV_ID} .site-nav{display:flex!important;visibility:visible!important;opacity:1!important;transform:none!important}
+ #${NAV_ID} .menu-toggle{display:none!important}
+}
+.resource-breadcrumb{padding-top:24px}.resources-page #proyectos{padding-top:24px}
+.resources-page #directory-title{font-size:clamp(28px,4vw,48px)}
+.directory-card[hidden]{display:none!important}
+footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+:where(section[id]){scroll-margin-top:150px}
+`;
 document.head.appendChild(style);
+// Preserve bookmarked catalogue entry points after moving the directory.
+if((location.pathname==='/'||location.pathname==='/index.html')&&
+ (['#proyectos','#soluciones','#academias','#catalogo-completo'].includes(location.hash)||new URLSearchParams(location.search).has('area'))){
+ const target=new URL('/recursos/',location.origin);target.search=location.search;
+ if(location.hash==='#soluciones'&&!target.searchParams.has('area'))target.searchParams.set('area','desarrollo');
+ location.replace(target.href);
+}
+
 
 const path=(location.pathname||'/').replace(/\/$/,'')||'/';
 const is=(prefix)=>prefix==='/'?path==='/':path===prefix||path.startsWith(prefix+'/')||path.startsWith(prefix+'.');
@@ -126,26 +146,11 @@ header.innerHTML=`
 <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
 <nav class="site-nav home-nav" aria-label="Navegación principal">
 <a data-nav="/" href="/">Inicio</a>
-<div class="nav-group" data-group="/pages/web-development"><button class="nav-trigger" type="button" aria-expanded="false">Desarrollo <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/web-development.html">Web Development</a><a href="/pages/programming.html">Programming Academy</a><a href="/pages/programming-coach.html">JavaScript Coach</a><a href="/pages/programming-fullstack-course.html">Full-Stack Course</a><a href="/pages/programming-fullstack.html">Full-Stack Lab</a><a href="/pages/programming-web-lab.html">Web Programming Lab</a><a href="/pages/programming-lab.html">Programming Lab</a><a href="/pages/programming-cs-lab.html">C++ / C# Lab</a><a href="/pages/typing.html">Typing Lab</a><a href="/pages/shortcuts.html">Atajos de teclado</a><a href="/pages/fp-study.html">FP · DAW</a><a href="/sanacion/">Alfa y Omega</a></div></div>
-<div class="nav-group" data-group="/pages/english"><button class="nav-trigger" type="button" aria-expanded="false">Idiomas <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/english.html">English Academy</a><a href="/pages/callan.html">London English Academy</a><a href="/pages/danish.html">Danish Academy</a><a href="/pages/language-music.html">Language Music Lab</a><a href="/pages/language-typing.html">Typing de idiomas</a></div></div>
-<div class="nav-group" data-group="/pages/guitar"><button class="nav-trigger" type="button" aria-expanded="false">Música <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/guitar.html">Guitar Academy</a><a href="/pages/music.html">Music Lab</a><a href="/pages/artist-universe.html">Artistas · STAN6IX y Astrid Nova</a><a href="/pages/astrid-nova.html">★ Astrid Nova · Perfil oficial</a><a href="/pages/radio.html">StanNet Radio</a><a href="/pages/vocal-studio.html">Vocal Studio</a><a href="/dj-studio/">DJ Studio Pro</a></div></div>
-<div class="nav-group" data-group="/pages/cybersecurity"><button class="nav-trigger" type="button" aria-expanded="false">Ciberseguridad <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cybersecurity.html">Cybersecurity Hub</a><a href="/pages/cybersecurity.html#cyber-classroom">Cybersecurity Academy</a><a href="/pages/cyber-lab.html">Cyber Defense Lab</a><a href="/sentinel/">Sentinel</a><a href="/shield/">Shield</a><a href="/pages/password-security.html">Password Security</a></div></div>
-<div class="nav-group" data-group="/pages/ai"><button class="nav-trigger" type="button" aria-expanded="false">Apps e IA <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ai.html">StanNet AI</a><a href="/pages/apps.html">Aplicaciones y productos</a><a href="/pdf-tutor/">PDF Tutor · Study AI</a><a href="/nutri-ia/">Nutri IA</a><a href="/pages/marketplace.html">AyudaEnCasa</a></div></div>
-<div class="nav-group" data-group="/pages/ruta-dinamarca"><button class="nav-trigger" type="button" aria-expanded="false">Dinamarca <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/ruta-dinamarca.html">Ruta Dinamarca</a><a href="/pages/ett-dinamarca.html">ETT · Trabajo por regiones</a><a href="/pages/denmark-cv.html">CV Dinamarca</a><a href="/pages/comunidad-dinamarca.html">Comunidad Dinamarca</a></div></div>
-<div class="nav-group" data-group="/pages/cv"><button class="nav-trigger" type="button" aria-expanded="false">StanNet <span>⌄</span></button><div class="nav-dropdown"><a href="/pages/cv.html">Sobre mí · CV</a><a href="/pages/education.html">Formación y certificados</a><a href="/pages/blog.html">Blog StanNet</a></div></div>
+<a href="/#servicios">Servicios</a>
+<a href="/recursos/">Proyectos y recursos</a>
+<a href="/pages/cv.html">Sobre mí</a>
 <a class="nav-cta" href="/#contacto">Contacto</a>
 </nav>`;
-// Corporate homepage: only five primary choices. Full section navigation stays
-// untouched on internal Space pages, with all existing routes preserved.
-if(path==='/'||path==='/index.html'){
-  header.querySelector('.site-nav').innerHTML=`
-<a data-nav="/" href="/">Inicio</a>
-<a href="/#servicios">Servicios</a>
-<a href="/#casos">Proyectos</a>
-<a href="/#proyectos">Recursos</a>
-<a class="nav-cta" href="/#contacto">Contacto</a>
-`;
-}
 
 const existing=document.querySelector('header.site-header');
 if(existing)existing.replaceWith(header);
@@ -236,7 +241,7 @@ window.matchMedia('(max-width:850px)').addEventListener('change',()=>{closeGroup
 if(!document.querySelector('link[href^="/stannet-discovery.css"]')){
  const discoveryStyle=document.createElement('link');discoveryStyle.rel='stylesheet';discoveryStyle.href='/stannet-discovery.css?v=20261015-discovery1';document.head.appendChild(discoveryStyle);
 }
-const searchToggle=document.createElement('a');searchToggle.className='search-toggle';searchToggle.href='/#proyectos';searchToggle.setAttribute('aria-label','Buscar proyectos y recursos');searchToggle.setAttribute('aria-keyshortcuts','Control+K Meta+K');searchToggle.setAttribute('aria-haspopup','dialog');searchToggle.setAttribute('aria-controls','stannet-search-dialog');
+const searchToggle=document.createElement('a');searchToggle.className='search-toggle';searchToggle.href='/recursos/';searchToggle.setAttribute('aria-label','Buscar proyectos y recursos');searchToggle.setAttribute('aria-keyshortcuts','Control+K Meta+K');searchToggle.setAttribute('aria-haspopup','dialog');searchToggle.setAttribute('aria-controls','stannet-search-dialog');
 searchToggle.innerHTML='<span class="search-symbol" aria-hidden="true">⌕</span><span class="search-label">Buscar proyectos…</span><kbd aria-hidden="true">Ctrl K</kbd>';
 header.querySelector('.brand').after(searchToggle);
 let discoveryFailed=false;
@@ -246,7 +251,7 @@ searchToggle.addEventListener('click',e=>{
  if(window.StanNetDiscovery)window.StanNetDiscovery.openSearch();else window.__StanNetSearchRequested=true;
 });
 if(!window.StanNetDiscovery&&!document.getElementById('stannet-discovery-loader')){
- const discovery=document.createElement('script');discovery.id='stannet-discovery-loader';discovery.src='/stannet-discovery.js?v=20261015-discovery1';
+ const discovery=document.createElement('script');discovery.id='stannet-discovery-loader';discovery.src='/stannet-discovery.js?v=20261020-nav2';
  discovery.addEventListener('error',()=>{discoveryFailed=true;window.__StanNetSearchRequested=false;searchToggle.removeAttribute('aria-haspopup');searchToggle.removeAttribute('aria-controls');searchToggle.setAttribute('aria-label','Ver catálogo de proyectos')});
  document.body.appendChild(discovery);
 }
