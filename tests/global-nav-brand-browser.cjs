@@ -56,7 +56,7 @@ const expected = {
           assert.equal(mobileBg,expected.mobile,path+' mobile menu');
         }
         if(path==='/'){
-          const homeLinks=await page.$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
+          const homeLinks=await page.$$eval('#stannet-canonical-nav .site-nav>a',els=>els.map(a=>a.textContent.trim()));
           assert.deepEqual(homeLinks,['Inicio','Servicios','Proyectos','Recursos','Contacto']);
           console.log('PASS simple corporate navigation: '+path+' @ '+width+'px');
           continue;
