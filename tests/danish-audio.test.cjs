@@ -57,7 +57,7 @@ function academy({approved=false,failAudio=false,grantOnLogin=false}={}) {
     }
     throw Error('Unexpected request '+url);
   };
-  const win={stannetDanishData:{},speechSynthesis:speech,SpeechSynthesisUtterance,AudioContext};
+  const win={stannetDanishData:{},speechSynthesis:speech,SpeechSynthesisUtterance,AudioContext,addEventListener(){}};
   const doc={
     addEventListener(type,cb){(listeners['document:'+type] ||= []).push(cb);},
     querySelector(selector){
@@ -91,6 +91,10 @@ function academy({approved=false,failAudio=false,grantOnLogin=false}={}) {
   assert.equal(await premium.window.stannetPlayDanish('God morgen'),true);
   assert.equal(premium.actions.filter(x=>x.url==='/api/speech').length,1,'Approved opt-in calls protected endpoint');
   assert.equal(premium.actions.some(x=>x.type==='polly-play'),true,'Polly response plays');
+  await premium.window.stannetPlayDanish('God morgen');
+  assert.equal(premium.actions.filter(x=>x.url==='/api/speech').length,1,'Replaying a phrase uses RAM cache, never a second AWS call');
+  assert.match(premium.elements.danishAudioNotice.textContent,/sin gastar otra reproducción/i);
+
 
   const expired=academy({approved:true,failAudio:true});
   await expired.click('danishPremiumVoice');
@@ -110,6 +114,8 @@ function academy({approved=false,failAudio=false,grantOnLogin=false}={}) {
   assert.equal(learner.actions.some(x=>x.url==='/api/language-premium/signin'&&x.credentials==='same-origin'),true,'Sign-in uses same-origin cookies');
   await learner.window.stannetPlayDanish('Jeg lærer dansk');
   assert.equal(learner.actions.some(x=>x.url==='/api/speech'),true,'Approved learner can hear Sofie');
+  await learner.window.stannetPlayDanish('Jeg lærer dansk');
+  assert.equal(learner.actions.filter(x=>x.url==='/api/speech').length,1,'Authenticated cache saves repeat synthesis');
   await learner.click('danishSignout');
   assert.equal(learner.elements.danishLoginForm.hidden,false,'Sign-out reveals login again');
   assert.equal(learner.elements.danishPremiumVoice.attrs['aria-pressed'],'false','Sign-out deactivates premium');
