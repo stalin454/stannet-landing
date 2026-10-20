@@ -451,6 +451,8 @@ if(window.__StanNetSearchRequested){window.__StanNetSearchRequested=false;openSe
 const directory=document.querySelector('#proyectos .directory-grid');
 if(!directory)return;
 const section=document.getElementById('proyectos');const cards=[...directory.querySelectorAll('[data-resource-id]')];
+const disclosure=section.querySelector('#catalogo-completo');
+const showCatalog=()=>{if(disclosure&&!disclosure.open)disclosure.open=true;};
 const areaButtons=[...section.querySelectorAll('[data-project-filter]')];const typeButtons=[...section.querySelectorAll('[data-resource-type-filter]')];
 const catalogueInput=section.querySelector('#directory-query');const status=section.querySelector('.directory-status');const empty=section.querySelector('.directory-empty');const reset=section.querySelector('[data-directory-reset]');
 const state={area:'all',type:'all',query:''};
@@ -460,6 +462,7 @@ function readLocation(){
  if(location.hash==='#soluciones'&&!params.has('area'))state.area='solutions';
 }
 function applyFilter(writeURL=true){
+  if(state.area!=='all'||state.type!=='all'||state.query)showCatalog();
  const found=searchResources(state.query,{area:state.area,type:state.type});const ids=new Set(found.map(resource=>resource.id));
  cards.forEach(card=>{card.hidden=!ids.has(card.dataset.resourceId)});
  areaButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.projectFilter===state.area)));
@@ -469,12 +472,12 @@ function applyFilter(writeURL=true){
  empty.hidden=found.length>0;reset.hidden=state.area==='all'&&state.type==='all'&&!state.query;
  if(writeURL){const url=new URL(location.href);for(const [key,value] of [['area',state.area],['tipo',state.type],['q',state.query]]){if(value&&value!=='all')url.searchParams.set(key,value);else url.searchParams.delete(key)}if(url.hash==='#soluciones'&&state.area!=='solutions')url.hash='proyectos';history.replaceState(null,'',url)}
 }
-areaButtons.forEach(button=>button.addEventListener('click',()=>{state.area=button.dataset.projectFilter;applyFilter()}));
-typeButtons.forEach(button=>button.addEventListener('click',()=>{state.type=button.dataset.resourceTypeFilter;applyFilter()}));
-catalogueInput.addEventListener('input',()=>{state.query=catalogueInput.value;applyFilter()});
+areaButtons.forEach(button=>button.addEventListener('click',()=>{showCatalog();state.area=button.dataset.projectFilter;applyFilter()}));
+typeButtons.forEach(button=>button.addEventListener('click',()=>{showCatalog();state.type=button.dataset.resourceTypeFilter;applyFilter()}));
+catalogueInput.addEventListener('input',()=>{showCatalog();state.query=catalogueInput.value;applyFilter()});
 reset.addEventListener('click',()=>{state.area='all';state.type='all';state.query='';applyFilter()});
-function syncHash(){if(location.hash==='#soluciones'){state.area='solutions';state.type='all';state.query='';applyFilter()}else if(location.hash==='#proyectos'){state.area='all';applyFilter()}}
+function syncHash(){if(['#soluciones','#academias','#proyectos'].includes(location.hash))showCatalog();if(location.hash==='#soluciones'){state.area='solutions';state.type='all';state.query='';applyFilter()}else if(location.hash==='#proyectos'){state.area='all';applyFilter()}}
 document.querySelectorAll('a[href="#soluciones"]').forEach(link=>link.addEventListener('click',()=>{state.area='solutions';state.type='all';state.query='';applyFilter()}));
 window.addEventListener('hashchange',syncHash);window.addEventListener('popstate',()=>{readLocation();applyFilter(false)});
-readLocation();applyFilter(false);
+readLocation();if(['#soluciones','#academias','#proyectos'].includes(location.hash)||location.searchParams)showCatalog();applyFilter(false);
 })();
