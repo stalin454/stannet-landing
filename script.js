@@ -32,7 +32,7 @@ if(form){
     const story=(document.querySelector('#tema') ? document.querySelector('#tema').value.trim() : '')||'una idea abierta';
     const result=document.querySelector('#resultado');
 
-if(!result)return;
+    if(!result)return;
     const heading=document.createElement('strong');
     heading.textContent=`Brief creado para ${name}.`;
     result.replaceChildren(
