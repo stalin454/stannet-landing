@@ -2,6 +2,27 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 exports.checkInfinity=async(browser,base)=>{
  fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
+ // The actual Dev entry point must show Infinity without requiring a CTA click.
+ for(const width of [320,390,1280]){
+  const home=await browser.newPage();await home.setViewport({width,height:800});
+  const response=await home.goto(base+'/?home-qa='+width,{waitUntil:'networkidle0'});
+  assert.equal(response.status(),200,'Dev homepage must serve Infinity');
+  const result=await home.evaluate(()=>({
+   title:document.querySelector('h1')?.textContent.trim(),
+   canonical:document.querySelector('link[rel="canonical"]')?.href,
+   video:Boolean(document.querySelector('video source[data-src$=".mp4"]')),
+   canvas:Boolean(document.querySelector('canvas#universe')),
+   catalog:Boolean(document.querySelector('header a[href="/explorar/"]')),
+   overflow:document.documentElement.scrollWidth>innerWidth+1
+  }));
+  assert.equal(result.title,'INFINITY','Root is still old portal');
+  assert.equal(result.canonical,'https://stannet.dev/');
+  assert.ok(result.video&&result.canvas&&result.catalog&&!result.overflow,JSON.stringify({width,...result}));
+  assert.equal((await home.goto(base+'/explorar/',{waitUntil:'networkidle0'})).status(),200);
+  assert.ok(await home.$('#cards'),'Old portal must remain accessible at /explorar/');
+  await home.close();
+ }
+
  for(const width of [360,390,1280]){
   const page=await browser.newPage(),errors=[];await page.setCacheEnabled(false);
   await page.setViewport({width,height:800,isMobile:width<600,hasTouch:width<600});
