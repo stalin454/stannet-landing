@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="theme-color" content="#070e19">
+ <meta name="description" content="Ruta práctica Full Stack + AI Engineering de StanNet.Dev. Aprende JavaScript y programación real, usa agentes IA y verifica sus resultados.">
+ <title>Full Stack + AI Engineering | StanNet.Dev</title>
+ <link rel="canonical" href="https://stannet.dev/open/programming/ai-engineering/">
+ <link rel="icon" href="/logo.png">
+ <link rel="stylesheet" href="/open/programming/ai-engineering/ai-engineering.css">
+ <script src="/open/programming/ai-engineering/ai-engineering.js" defer></script>
+</head>
+<body>
+ <a class="skip" href="#main">Saltar al contenido</a>
+ <header class="topbar">
+   <a class="brand" href="/"><img src="/logo.png" width="34" height="34" alt=""> Stan<span>Net</span><small>.Dev</small></a>
+   <nav aria-label="Navegación de la academia">
+     <a href="/open/programming/">Programming Academy</a>
+     <a href="/open/programming/coach/">JavaScript Coach</a>
+     <a href="/open/programming/web/">Web Lab</a>
+     <a href="/open/programming/course/">Curso Full Stack</a>
+   </nav>
+ </header>
+ <main id="main">
+  <section class="hero">
+    <div class="hero-copy">
+     <p class="eyebrow">PROGRAMMING ACADEMY / NUEVA ESPECIALIZACIÓN</p>
+     <h1>FULL STACK <span>+</span><br>AI ENGINEERING</h1>
+     <p class="lead">Aprende a escribir código, comprenderlo y depurarlo. Después utiliza la IA para acelerar tu trabajo, nunca para sustituir tu criterio.</p>
+     <div class="hero-pills"><span>6 etapas orientativas</span><span>3 modos por desafío</span><span>Aprender haciendo</span></div>
+     <a class="primary-cta" href="#ruta">Empezar la ruta <span aria-hidden="true">↗</span></a>
+    </div>
+    <aside class="hero-panel" aria-labelledby="progressHeading">
+      <p class="eyebrow">TU AVANCE EN ESTE DISPOSITIVO</p>
+      <h2 id="progressHeading">Progreso de aprendizaje</h2>
+      <p id="progressLabel" class="progress-total" aria-live="polite">0 de 6 etapas verificadas</p>
+      <div class="track" role="progressbar" aria-label="Etapas completadas" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0" id="progressBar"><div id="progressFill"></div></div>
+      <p class="muted">Los resultados solo se guardan en este navegador de StanNet.Dev. No se copian datos desde Space, ni se envía tu código a servidores.</p>
+      <button id="resetProgress" class="ghost" type="button">Reiniciar mi progreso</button>
+    </aside>
+  </section>
+  <section id="ruta" class="workspace" aria-labelledby="routeHeading">
+    <div class="section-heading"><p class="eyebrow">01 / ITINERARIO GUIADO</p><h2 id="routeHeading">Seis etapas. Un objetivo: autonomía.</h2><p>Cada etapa combina código escrito por ti, pistas de un tutor y una revisión crítica del trabajo de un agente. Avanzas al superar una comprobación.</p></div>
+    <div class="learning-layout">
+      <aside class="sidebar" aria-label="Etapas de aprendizaje">
+        <h3>Tu itinerario</h3>
+        <div id="phaseTabs" class="phase-tabs" role="group" aria-label="Seleccionar etapa"></div>
+        <p class="sidebar-note">La planificación de 6 semanas es orientativa. Puedes tardar lo que necesites y volver a practicar.</p>
+      </aside>
+      <article class="lesson" aria-live="polite">
+        <div class="lesson-top"><p id="phaseEyebrow" class="eyebrow"></p><span id="phaseTiming" class="timing"></span></div>
+        <h3 id="phaseTitle"></h3>
+        <p id="phaseIntro" class="phase-intro"></p>
+        <h4>Lo que vas a dominar</h4>
+        <ul id="objectives"></ul>
+        <h4>Practica de tres formas</h4>
+        <div class="mode-tabs" role="group" aria-label="Seleccionar modalidad">
+         <button type="button" class="mode" data-mode="solo" aria-pressed="true">⌨ Código propio</button>
+         <button type="button" class="mode" data-mode="tutor" aria-pressed="false">✦ Tutor IA</button>
+         <button type="button" class="mode" data-mode="agent" aria-pressed="false">◇ AI Engineer</button>
+        </div>
+        <div class="exercise-panel"><p class="eyebrow" id="modeName"></p><h5 id="challengeTitle"></h5><p id="challengeBody"></p><p class="tip" id="challengeTip"></p></div>
+        <div class="practice-links"><a href="/open/programming/web/">Abrir Web Lab ↗</a><a href="/open/programming/coach/">Practicar JavaScript ↗</a><a href="/open/programming/course/">Curso completo ↗</a></div>
+        <section class="checkpoint" aria-labelledby="checkHeading">
+         <p class="eyebrow">COMPROBACIÓN DE APRENDIZAJE</p>
+         <h4 id="checkHeading">Comprueba que lo entiendes</h4>
+         <p id="questionText"></p>
+         <form id="quizForm"><div id="quizAnswers" class="answer-list"></div><button class="primary-cta" type="submit">Comprobar respuesta</button></form>
+         <p id="quizFeedback" role="status" aria-live="polite"></p>
+        </section>
+      </article>
+    </div>
+  </section>
+  <section class="principles" aria-labelledby="principlesTitle"><p class="eyebrow">02 / REGLAS DE INGENIERÍA</p><h2 id="principlesTitle">La IA propone. Tú verificas.</h2><div class="principles-grid"><article><span>01</span><h3>Piensa antes de pedir</h3><p>Define entradas, salidas y restricciones antes de escribir un prompt.</p></article><article><span>02</span><h3>Ejecuta pruebas</h3><p>No aceptes código solo porque parece correcto. Prueba casos normales, extremos y errores.</p></article><article><span>03</span><h3>Protege tus datos</h3><p>Nunca compartas claves, contraseñas ni datos personales con herramientas externas.</p></article></div></section>
+ </main>
+ <footer>StanNet.Dev · Formación práctica <a href="/open/programming/">Volver a Programming Academy ↑</a></footer>
+</body>
+</html>
