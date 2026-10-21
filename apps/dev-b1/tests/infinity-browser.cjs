@@ -3,7 +3,7 @@ const fs=require('node:fs');
 exports.checkInfinity=async(browser,base)=>{
  fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
  for(const width of [360,390,1280]){
-  const page=await browser.newPage(),errors=[];
+  const page=await browser.newPage(),errors=[];await page.setCacheEnabled(false);
   await page.setViewport({width,height:800,isMobile:width<600,hasTouch:width<600});
   if(width<600)await page.setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36');
   page.on('pageerror',e=>errors.push(e.message));
@@ -26,7 +26,7 @@ exports.checkInfinity=async(browser,base)=>{
   const links=await page.$$eval('.world',a=>a.map(x=>x.getAttribute('href')));
   assert.deepEqual(links,['/open/programming/coach/','/open/programming/','/open/artists/']);
   for(const path of [...links,'/infinity/infinity.css','/infinity/infinity.js','/infinity/stannet_infinity_web.mp4']){
-   const result=await page.evaluate(async path=>{const r=await fetch(path,{method:'HEAD'});return {status:r.status,type:r.headers.get('content-type')};},path);
+   const result=await page.evaluate(async path=>{const r=await fetch(path,{method:'HEAD',cache:'no-store'});return {status:r.status,type:r.headers.get('content-type')};},path);
    assert.equal(result.status,200,path);if(path.endsWith('.mp4'))assert.ok(result.type.includes('video/mp4'));
   }
   assert.deepEqual(errors,[],'Infinity console errors');await page.close();
