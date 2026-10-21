@@ -1,4 +1,5 @@
 export const catalog=[
+ ['infinity','StanNet Infinity','Creatividad','Cruza el portal: una experiencia cinematográfica interactiva.','∞'],
  ['programming','Programming Academy','Software','Aprende a leer, escribir y depurar código.','</>'],
  ['typing','Typing Academy','Software','Entrena con código real y sigue tu progreso.','⌨'],
  ['languages','Academias de idiomas','Educación','Inglés, danés y nuevas rutas de aprendizaje.','Aa'],

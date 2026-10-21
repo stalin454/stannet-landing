@@ -17,6 +17,7 @@ const puppeteer=require('puppeteer-core');
 
  try{
   await require('./artist-universe-browser.cjs').checkArtistUniverse(browser,base);
+  await require('./infinity-browser.cjs').checkInfinity(browser,base);
   for(const width of [320,390,768,1280,1440]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -41,7 +42,7 @@ const puppeteer=require('puppeteer-core');
    const current=await page.reload({waitUntil:'networkidle0',timeout:45000});assert.ok([200,304].includes(current.status()),'Reloaded HTML status: '+current.status());
    await page.waitForSelector('.card');
    await page.evaluate(()=>document.fonts.ready);
-   assert.equal(await page.$$eval('.card',items=>items.length),11);
+   assert.equal(await page.$$eval('.card',items=>items.length),12);
    assert.equal(await page.$$('form').then(x=>x.length),0,'Incomplete signup must not be exposed');
    const layout=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,brandFont:getComputedStyle(document.querySelector('.brand')).fontFamily,font:document.fonts.check('21px Orbitron'),image:document.querySelector('.brand-mark').naturalWidth>0}));
    assert.equal(layout.overflow,false,'Horizontal overflow '+width);assert.ok(layout.brandFont.includes('Orbitron'));assert.ok(layout.font);assert.ok(layout.image);
@@ -50,9 +51,9 @@ const puppeteer=require('puppeteer-core');
    assert.ok(await page.$eval('.hero-approved',e=>getComputedStyle(e).backgroundImage.includes('hero-approved.webp')));
    await page.click('[data-filter="Software"]');assert.equal(await page.$$eval('.card',items=>items.length),2);
    assert.equal(await page.$eval('[data-filter="Software"]',e=>e.getAttribute('aria-pressed')),'true');
-   await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),3);
+   await page.click('[data-filter="Creatividad"]');assert.equal(await page.$$eval('.card',items=>items.length),4);
    assert.ok(await page.$$eval('.card',items=>items.some(x=>x.textContent.includes('STAN6IX'))));
-   await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),11);
+   await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),12);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
    assert.equal(links.filter(x=>x.startsWith('/open/')).length,8);
    assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,3);
