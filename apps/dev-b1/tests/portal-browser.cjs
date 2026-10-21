@@ -71,12 +71,13 @@ const puppeteer=require('puppeteer-core');
       denmarkCv:sitemap.includes('https://stannet.dev/open/denmark/cv/'),
       programming:sitemap.includes('https://stannet.dev/open/programming/coach/'),
       london:sitemap.includes('https://stannet.dev/open/london-english/'),
+      aiEngineering:sitemap.includes('https://stannet.dev/open/programming/ai-engineering/'),
       radio:sitemap.includes('https://stannet.dev/open/radio/'),
       botMap:robots.includes('Sitemap: https://stannet.dev/sitemap.xml'),
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,20);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.radio&&discovery.botMap);
+   assert.equal(discovery.listed,21);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.aiEngineering&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
    assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english']);
