@@ -1,7 +1,7 @@
 name: Dev B1 isolated release
 on:
   pull_request:
-    branches: [main, feat/stannet-dev-open-learning-20261015, feat/stannet-dev-artists-seo-20261017]
+    branches: [feat/london-english-dev-20261019, main, feat/stannet-dev-open-learning-20261015, feat/stannet-dev-artists-seo-20261017]
     types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/dev-b1-release.yml'
