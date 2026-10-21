@@ -7,7 +7,16 @@ exports.checkInfinity=async(browser,base)=>{
   await page.setViewport({width,height:800,isMobile:width<600,hasTouch:width<600});
   if(width<600)await page.setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36');
   page.on('pageerror',e=>errors.push(e.message));
-  page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+  page.on('console',m=>{
+   if(m.type()!=='error')return;
+   const message=m.text();
+   // Apex Cloudflare Web Analytics is optional and intentionally blocked by strict self-only CSP.
+   // Keep the policy intact and reject every application error and all other CSP violations.
+   if(message.startsWith("Loading the script 'https://static.cloudflareinsights.com/beacon.min.js/")&&message.includes('violates the following Content Security Policy directive')&&message.includes("script-src 'self'")){
+    console.log('Optional Cloudflare analytics beacon blocked by strict CSP; application policy retained.');return;
+   }
+   errors.push(message);
+  });
   const response=await page.goto(base+'/infinity/',{waitUntil:'networkidle0'});assert.equal(response.status(),200);
   await page.waitForFunction(()=>{const v=document.querySelector('video');return v.readyState>=2&&v.currentTime>0&&!v.paused;},{timeout:30000});
   const initial=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,canvas:document.querySelector('canvas').toDataURL(),video:document.querySelector('video').currentTime}));
