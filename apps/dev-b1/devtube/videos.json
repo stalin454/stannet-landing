@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-10-22",
+  "source": "curated",
+  "notes": "Solo vídeos publicados verificados en los perfiles StanNet. Las otras dimensiones se completan sin inventar URLs ni transcripciones.",
+  "videos": [
+    {
+      "id": "astrid-louder",
+      "youtubeId": "d-6NN9f1pUM",
+      "title": "LOUDER THAN FEAR",
+      "creator": "ASTRID NOVA",
+      "universe": "astrid",
+      "format": "Videoclip oficial",
+      "description": "Un himno cinematográfico sobre valentía, resiliencia y encontrar tu voz. Una producción original de StanNet Music.",
+      "tags": ["Astrid Nova", "pop cinematográfico", "emoción", "StanNet Music"],
+      "chapters": [],
+      "transcript": [],
+      "lyrics": "",
+      "stylePrompt": ""
+    },
+    {
+      "id": "astrid-rise",
+      "youtubeId": "wui2whuiuXw",
+      "title": "I RISE AGAIN",
+      "creator": "ASTRID NOVA",
+      "universe": "astrid",
+      "format": "Videoclip oficial",
+      "description": "Pop emocional original sobre volver a levantarse, empezar de nuevo y seguir adelante.",
+      "tags": ["Astrid Nova", "resiliencia", "cinematic pop", "StanNet Music"],
+      "chapters": [],
+      "transcript": [],
+      "lyrics": "",
+      "stylePrompt": ""
+    }
+  ]
+}

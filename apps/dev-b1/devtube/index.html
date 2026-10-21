@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b15">
+<meta name="description" content="DevTube · Tu universo audiovisual StanNet. Tecnología, Astrid Nova, STAN6IX y producción musical en un estudio interactivo.">
+<link rel="canonical" href="https://stannet.dev/devtube/">
+<link rel="icon" href="/logo.png">
+<title>DevTube · StanNet Original Media Universe</title>
+<link rel="stylesheet" href="/devtube/devtube.css">
+<script src="/devtube/devtube.js" defer></script>
+</head>
+<body data-universe="all">
+<a class="skip" href="#library">Saltar al catálogo de vídeos</a>
+<div class="aura" aria-hidden="true"></div>
+<header class="topbar">
+ <a class="identity" href="/"><span class="mark">SN<span class="mark-dot">.</span></span><span class="identity-name">DEV<span>TUBE</span><small>by StanNet</small></span></a>
+ <nav aria-label="Navegación DevTube">
+  <a href="/">Infinity</a><a href="/explorar/">Ecosistema</a><a class="here" href="/devtube/" aria-current="page">DevTube</a>
+ </nav>
+ <div class="top-actions"><span class="live-pill"><span></span> MEDIA UNIVERSE</span><button type="button" class="outline-btn add-trigger">+ Añadir vídeo</button></div>
+</header>
+<main>
+ <section class="welcome" aria-labelledby="welcome-title">
+  <div class="welcome-copy"><p class="eyebrow"><span class="star">✦</span> STANNET ORIGINALS <span class="thin-line"></span> 001 / INFINITY NETWORK</p>
+   <h1 id="welcome-title">NO SOLO LOS VES.<br><em>VIVES CADA UNIVERSO.</em></h1>
+   <p>La tecnología se aprende. La música se siente. Las ideas se convierten en historias. Bienvenido a tu cine creativo, interactivo y personal.</p>
+   <div class="welcome-meta"><span>◈ CODE & CYBER</span><span>✧ ASTRID NOVA</span><span>◉ MUSIC LAB</span></div>
+  </div>
+  <div class="orbit-art" aria-hidden="true"><div class="orbit orbit-1"></div><div class="orbit orbit-2"></div><div class="orbit orbit-3"></div><strong>▶</strong><span>EXPLORE / CREATE / EVOLVE</span></div>
+ </section>
+ <section class="dimension-panel" aria-labelledby="dimension-title">
+  <div class="section-kicker"><span>01</span><div class="rule"></div><span id="dimension-title">SELECCIONA TU DIMENSIÓN</span></div>
+  <div class="dimension-tabs" role="group" aria-label="Universos de contenido">
+   <button class="dimension selected" type="button" data-filter="all" aria-pressed="true"><span class="dimension-icon">✦</span><span><strong>Todos</strong><small>Media Universe</small></span></button>
+   <button class="dimension" type="button" data-filter="code" aria-pressed="false"><span class="dimension-icon">&lt;/&gt;</span><span><strong>Code & Cyber</strong><small>Learn / Build</small></span></button>
+   <button class="dimension" type="button" data-filter="astrid" aria-pressed="false"><span class="dimension-icon">◇</span><span><strong>Astrid Nova</strong><small>Feel / Rise</small></span></button>
+   <button class="dimension" type="button" data-filter="music" aria-pressed="false"><span class="dimension-icon">♫</span><span><strong>Music Lab</strong><small>Create / Produce</small></span></button>
+  </div>
+ </section>
+ <section class="studio-section" aria-labelledby="studio-title">
+  <div class="section-kicker"><span>02</span><div class="rule"></div><span id="studio-title">THEATER STAGE</span><span class="special-tag">THE IMMERSIVE EXPERIENCE</span></div>
+  <div class="studio-layout">
+   <div class="theater" id="theater">
+    <div class="player-wrap" id="player-wrap"><div class="player-aura" aria-hidden="true"></div>
+      <div class="screen" id="screen"><div class="screen-placeholder" id="screen-placeholder">
+       <div class="screen-glow"></div><img id="spotlight-image" alt="" loading="eager"><span class="screen-tag">STANNET ORIGINAL</span>
+       <button id="hero-play" class="big-play" type="button" aria-label="Reproducir vídeo destacado">▶</button>
+       <span class="screen-hint">TU PRÓXIMA HISTORIA EMPIEZA AQUÍ</span>
+      </div></div>
+      <button id="float-close" class="float-close" type="button" hidden aria-label="Ocultar reproductor flotante">×</button>
+    </div>
+    <div class="now-playing"><div><span class="tiny-label">NOW ON DEVTUBE <span class="playing-led"></span></span><h2 id="current-title">Selecciona tu universo</h2><p id="current-creator">Dos estrenos originales de Astrid Nova para empezar.</p></div><div class="player-tools"><button id="add-queue" type="button" class="tool-btn">+ Cola</button><button id="next-video" type="button" class="tool-btn">Siguiente →</button></div></div>
+    <p class="playing-note" id="playing-note">Los vídeos de YouTube solo se cargan al pulsar Reproducir. El mini reproductor funciona mientras navegas por DevTube.</p>
+   </div>
+   <aside class="inspector" aria-labelledby="inspector-title">
+    <div class="inspector-top"><div><p class="tiny-label">INTERACTIVE SIDE PANEL</p><h2 id="inspector-title">STUDIO <span>INSPECTOR</span></h2></div><span class="scope">⌘ 01</span></div>
+    <div class="inspector-tabs" role="group" aria-label="Herramientas del vídeo">
+     <button class="on" type="button" data-panel="story" aria-pressed="true">Historia</button><button type="button" data-panel="chapters" aria-pressed="false">Capítulos</button><button type="button" data-panel="notes" aria-pressed="false">Studio Notes</button>
+    </div>
+    <div id="inspector-content" class="inspector-content" aria-live="polite"></div>
+    <div class="inspector-footer"><a id="youtube-link" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">Ver en YouTube ↗</a><span>NO AUTOPLAY · PRIVACIDAD</span></div>
+   </aside>
+  </div>
+ </section>
+ <section class="library-section" id="library" aria-labelledby="library-title">
+  <div class="section-kicker"><span>03</span><div class="rule"></div><span>THE COLLECTION</span></div>
+  <div class="library-heading"><div><h2 id="library-title">EXPLORA <em>EL CATÁLOGO</em></h2><p>Encuentra tus vídeos, añade favoritos y construye tu propia cola.</p></div>
+   <div class="catalog-tools"><label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Buscar vídeos, temas o capítulos</span><input id="video-search" type="search" placeholder="Buscar temas, artistas, minutos..." autocomplete="off"></label>
+    <button type="button" id="favorites-only" class="outline-btn" aria-pressed="false">♡ Favoritos</button>
+   </div>
+  </div>
+  <div class="catalog-meta"><span id="result-count" role="status">Cargando catálogo…</span><span>VÍDEOS OFICIALES · + TU BIBLIOTECA LOCAL</span></div>
+  <div class="video-grid" id="video-grid"></div>
+  <div id="empty-results" class="empty-results" hidden><strong>TODAVÍA SIN VÍDEOS EN ESTE UNIVERSO</strong><p>Puedes añadir uno de tus vídeos públicos con su enlace de YouTube. Se guardará solo en este navegador.</p><button type="button" class="outline-btn add-trigger">+ Añadir vídeo</button></div>
+ </section>
+ <section class="personal-section" aria-labelledby="personal-title"><div><p class="tiny-label">04 / YOUR CREATIVE SPACE</p><h2 id="personal-title">TU ESTUDIO.<br><em>TUS REGLAS.</em></h2><p>Organiza tu cola, recupera tus favoritos y añade vídeos propios. Todo sin cuentas ni claves expuestas.</p></div><div class="personal-actions"><button type="button" class="outline-btn add-trigger">+ Guardar un vídeo</button><button type="button" id="show-queue" class="solid-btn">Ver mi cola <span id="queue-number">0</span> ↗</button></div></section>
+</main>
+<footer><div><strong>DEV<span>TUBE</span></strong><small>AN ORIGINAL STANNET EXPERIENCE</small></div><p>Powered by YouTube · Diseño y curaduría StanNet</p><nav aria-label="Pie de página"><a href="/">Infinity</a><a href="/explorar/">Todas las apps</a><a href="/open/artists/">Artist Universe</a></nav></footer>
+<dialog id="add-dialog" aria-labelledby="add-title"><form id="add-form"><div class="dialog-head"><div><p class="tiny-label">TU BIBLIOTECA PERSONAL</p><h2 id="add-title">AÑADIR A DEVTUBE</h2></div><button type="button" id="close-dialog" aria-label="Cerrar">×</button></div><p>Introduce un vídeo público de YouTube. Solo se guardará en este navegador; no aparecerá para otros visitantes.</p>
+<label>Enlace de YouTube<input id="add-url" type="url" required placeholder="https://www.youtube.com/watch?v=…"></label>
+<label>Título<input id="add-title-input" type="text" maxlength="130" required placeholder="Mi nuevo vídeo"></label>
+<label>Universo<select id="add-universe"><option value="code">Code & Cyber</option><option value="astrid">Astrid Nova</option><option value="music">Music Lab</option></select></label>
+<label>Etiquetas / temas (separados por coma)<input id="add-tags" type="text" maxlength="250" placeholder="JavaScript, IA, tutorial"></label>
+<div class="dialog-actions"><button class="solid-btn" type="submit">Guardar vídeo ↗</button><span id="add-feedback" role="status"></span></div></form></dialog>
+<dialog id="queue-dialog" aria-labelledby="queue-title"><div class="dialog-head"><div><p class="tiny-label">PLAY NEXT</p><h2 id="queue-title">MI COLA</h2></div><button type="button" id="close-queue" aria-label="Cerrar">×</button></div><div id="queue-items"></div><button type="button" id="clear-queue" class="outline-btn">Vaciar cola</button></dialog>
+</body></html>

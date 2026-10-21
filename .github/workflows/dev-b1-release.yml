@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/dev-b1-release.yml'
       - 'infinity/**'
+      - 'apps/dev-b1/devtube/**'
+      - 'apps/dev-b1/tests/devtube-browser.cjs'
       - 'apps/dev-b1/catalog.mjs'
       - 'apps/dev-b1/tests/infinity-browser.cjs'
       - 'apps/dev-b1/cloudflare-inventory.py'
@@ -94,7 +96,7 @@ jobs:
           import json,os,urllib.request
           req=urllib.request.Request('https://stannet.dev/version.json',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
           with urllib.request.urlopen(req,timeout=25) as response: current=json.load(response)['commit']
-          assert current in ['f31145e7a206b10ca61194da825a2197204931d9','8f4d68f7fb4332f0933a45f0a7dc639cb2013e3c','7de882e006d3879a4aaced6bf7f13f307af52b50',os.environ['SOURCE_COMMIT']], 'Dev changed since last verified Infinity release; stop before publication'
+          assert current in ['f31145e7a206b10ca61194da825a2197204931d9','8f4d68f7fb4332f0933a45f0a7dc639cb2013e3c','7de882e006d3879a4aaced6bf7f13f307af52b50','0705afe510ba90d31ce99fc4c23eb1f4ff214126',os.environ['SOURCE_COMMIT']], 'Dev changed since last verified Infinity release; stop before publication'
           print('Current Dev matches the preserved baseline or this exact release.')
           PYCODE
       - name: Confirm destination and snapshot protected deployment metadata

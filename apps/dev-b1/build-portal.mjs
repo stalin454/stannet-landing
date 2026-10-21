@@ -116,6 +116,8 @@ buildRadio(destination);
 const infinityDir=new URL('infinity/',destination);
 mkdirSync(infinityDir,{recursive:true});
 for(const file of ['index.html','infinity.css','infinity.js','poster.webp','stannet_infinity_web.mp4'])copyFileSync(new URL('../../infinity/'+file,import.meta.url),new URL(file,infinityDir));
+const devtubeDir=new URL('devtube/',destination);mkdirSync(devtubeDir,{recursive:true});
+for(const file of ['index.html','devtube.css','devtube.js','videos.json'])copyFileSync(new URL('./devtube/'+file,import.meta.url),new URL(file,devtubeDir));
 // The original Dev portal is preserved, fully interactive, at /explorar/.
 // Infinity is the homepage, not just a link in the previous homepage.
 const catalogDir=new URL('explorar/',destination);mkdirSync(catalogDir,{recursive:true});
@@ -130,16 +132,20 @@ const infinityCanonical='<link rel="canonical" href="https://stannet.dev/infinit
 if(!infinityHome.includes(infinityCanonical)||!infinityHome.includes('href="/explorar/"'))throw Error('Infinity homepage links/canonical missing');
 infinityHome=infinityHome.replace(infinityCanonical,'<link rel="canonical" href="https://stannet.dev/">');
 writeFileSync(homePath,infinityHome);
-const openURLs={infinity:'/infinity/', music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/','london-english':'/open/london-english/'};
+const openURLs={infinity:'/infinity/',devtube:'/devtube/', music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/','london-english':'/open/london-english/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity','devtube']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/explorar/','/infinity/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
+const livePaths=['/','/explorar/','/infinity/','/devtube/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
 // Preserve this static page under strict CSP; prevent edge-injected analytics scripts.
-writeFileSync(new URL('_headers',destination),`/open/artists/*
+writeFileSync(new URL('_headers',destination),`/devtube/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://i.ytimg.com; font-src 'self'; connect-src 'self'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
+  Cache-Control: public, max-age=0, must-revalidate
+
+/open/artists/*
   Cache-Control: no-transform
 
 /artistas/*
