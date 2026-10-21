@@ -56,6 +56,7 @@ const puppeteer=require('puppeteer-core');
    await page.click('[data-filter="all"]');assert.equal(await page.$$eval('.card',items=>items.length),12);
    const links=await page.$$eval('#cards .card-bottom a',items=>items.map(x=>x.getAttribute('href')));
    assert.equal(links.filter(x=>x.startsWith('/open/')).length,8);
+   assert.equal(links.filter(x=>x==='/infinity/').length,1,'One Infinity catalog entry');
    assert.equal(links.filter(x=>x.startsWith('mailto:contacto@stannet.space?subject=')).length,3);
    const openLabs=await page.$$eval('#aulas a[href^="/open/"]',items=>items.map(x=>x.getAttribute('href')));
    assert.deepEqual(openLabs,['/open/london-english/','/open/cs-foundations/','/open/fp-study/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/open/programming/','/open/radio/','/open/denmark/']);
@@ -77,10 +78,10 @@ const puppeteer=require('puppeteer-core');
       canonical:document.querySelector('link[rel="canonical"]')?.href};
    });
    assert.equal(discovery.mapOk,true);assert.equal(discovery.botsOk,true);
-   assert.equal(discovery.listed,20);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.radio&&discovery.botMap);
+   assert.equal(discovery.listed,21);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity']);
    // London English Academy is a public landing page; authentication remains in Space.
    {
      const london=await browser.newPage();
