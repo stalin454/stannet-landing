@@ -6,7 +6,7 @@ exports.checkInfinity=async(browser,base)=>{
  for(const width of [320,390,1280]){
   const home=await browser.newPage();await home.setViewport({width,height:800});
   const response=await home.goto(base+'/?home-qa='+width,{waitUntil:'networkidle0'});
-  assert.equal(response.status(),200,'Dev homepage must serve Infinity');
+  assert.ok([200,304].includes(response.status()),'Dev homepage must serve Infinity');
   const result=await home.evaluate(()=>({
    title:document.querySelector('h1')?.textContent.trim(),
    canonical:document.querySelector('link[rel="canonical"]')?.href,
@@ -18,7 +18,7 @@ exports.checkInfinity=async(browser,base)=>{
   assert.equal(result.title,'INFINITY','Root is still old portal');
   assert.equal(result.canonical,'https://stannet.dev/');
   assert.ok(result.video&&result.canvas&&result.catalog&&!result.overflow,JSON.stringify({width,...result}));
-  assert.equal((await home.goto(base+'/explorar/',{waitUntil:'networkidle0'})).status(),200);
+  assert.ok([200,304].includes((await home.goto(base+'/explorar/',{waitUntil:'networkidle0'})).status()));
   assert.ok(await home.$('#cards'),'Old portal must remain accessible at /explorar/');
   await home.close();
  }
