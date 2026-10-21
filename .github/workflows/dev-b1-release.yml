@@ -92,7 +92,7 @@ jobs:
         run: |
           python3 - <<'PYCODE'
           import json,os,urllib.request
-          req=urllib.request.Request('https://stannet.dev/version.json',headers={'Cache-Control':'no-cache'})
+          req=urllib.request.Request('https://stannet.dev/version.json',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
           with urllib.request.urlopen(req,timeout=25) as response: current=json.load(response)['commit']
           assert current in ['f31145e7a206b10ca61194da825a2197204931d9',os.environ['SOURCE_COMMIT']], 'Dev changed since recovery baseline; stop before publication'
           print('Current Dev matches the preserved baseline or this exact release.')
