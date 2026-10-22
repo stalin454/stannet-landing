@@ -13,4 +13,5 @@ test('StanTube public and private client scripts compile and expose no user data
  const original=read('devtube.js');
  assert.ok(original.includes('if(!privateSession)personal=[]'),'Guest view must withhold old locally stored personal videos');
  assert.ok(original.includes('window.StanTubeBridge='));
+ assert.ok(original.includes("$$('.add-trigger').forEach"),'Every add-video trigger must use the multi-element selector');
 });
