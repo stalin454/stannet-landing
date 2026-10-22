@@ -20,7 +20,7 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.ok(state.css.includes('gradient'),'DevTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
 
-  // Search all YouTube from the dedicated interface (mock only inside this browser QA).
+  // Search results must stay on StanNet.Dev; save, move, persist and delete by universe.
   const liveSearch=await page.evaluate(async()=>{
    if(!location.protocol.startsWith('https'))return null;
    const res=await fetch('/api/devtube/search?q=x',{cache:'no-store'});
@@ -35,11 +35,43 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   });
   await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
   await page.waitForSelector('.youtube-result');
-  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'YouTube-wide search must show remote results');
-  assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'Searching must not preload YouTube player');
-  await page.click('.youtube-result-actions button:nth-child(2)');
-  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Search result can be saved to local DevTube');
-  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('stannet.devtube.v1.'))localStorage.removeItem(key)});
+  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
+  assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'No player before click');
+  assert.ok(new URL(page.url()).pathname.startsWith('/devtube/'),'Global search must not redirect to YouTube');
+  assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
+  await page.select('.youtube-result-actions select','astrid');
+  await page.click('.youtube-result-actions>button:last-child');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to DevTube');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
+  await page.click('[data-filter="astrid"]');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Saved result persisted in Astrid Nova tab');
+  await page.select('.video-card:nth-child(3) .video-category select','music');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Moved result leaves Astrid Nova');
+  await page.click('[data-filter="music"]');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in Music Lab');
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
+  await page.click('[data-filter="music"]');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Move persists after reload');
+  await page.click('.video-card button.remove-video');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'Delete personal video from its tab');
+  await page.click('[data-filter="all"]');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Official videos must survive personal deletion');
+  await page.evaluate(()=>{
+   const original=window.fetch.bind(window);
+   window.fetch=(input,options)=>String(input).startsWith('/api/devtube/search?q=')
+    ?Promise.resolve(new Response(JSON.stringify({code:'YOUTUBE_NOT_CONFIGURED'}),{status:503,headers:{'Content-Type':'application/json'}}))
+    :original(input,options);
+  });
+  await page.type('#youtube-query','Astrid');
+  await page.click('#youtube-find');
+  await page.waitForSelector('.youtube-result');
+  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),2,'Unavailable global API must show only true in-page library matches');
+  assert.equal(await page.$eval('#youtube-search-help',el=>el.hidden),false,'In-page save-by-URL fallback');
+  await page.click('#youtube-search-help button.add-trigger');
+  assert.equal(await page.$eval('#add-dialog',dialog=>dialog.open),true,'Fallback keeps user on DevTube');
+  await page.click('#close-dialog');
+  await page.evaluate(()=>{for(const k of Object.keys(localStorage))if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
   await page.click('[data-filter="code"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'No fictitious technology videos');

@@ -42,3 +42,19 @@ dialog{width:min(480px,calc(100vw - 30px));max-height:92vh;overflow:auto;border:
 .youtube-result-actions button:hover{border-color:var(--accent)}.youtube-result-actions button:disabled{opacity:.55;cursor:default}
 @media(max-width:950px){.youtube-search-layout{grid-template-columns:1fr}.youtube-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){.youtube-search-input{flex-wrap:wrap}.youtube-search-input input{width:calc(100% - 60px)}.youtube-search-input button{width:100%}.youtube-results{grid-template-columns:1fr}.youtube-discovery{margin-bottom:40px}}
+
+/* Results stay in DevTube. Saving, moving and deleting are browser-local actions. */
+.youtube-search-help{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:15px 0 0;padding:15px;border:1px dashed rgba(var(--accent-rgb),.3);background:rgba(var(--accent-rgb),.04);color:var(--muted);font-size:12px}
+.youtube-search-help>span{flex:1;min-width:200px;line-height:1.6}
+.youtube-source{display:inline-block;color:var(--accent);font:600 10px/1.5 Consolas,monospace;letter-spacing:.6px}
+.youtube-categorize{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.youtube-categorize label,.video-category label{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.youtube-categorize select,.video-category select{background:#0a1521;color:#eaf4ff;padding:8px 9px;min-height:36px;border:1px solid rgba(var(--accent-rgb),.36);border-radius:5px;max-width:100%}
+.youtube-result-actions{flex-direction:column;align-items:stretch}
+.youtube-result-actions>button{align-self:flex-start}
+.youtube-result-actions button.remove-video,.video-actions button.remove-video{border-color:rgba(255,141,149,.42);color:#ffb1b7}
+.youtube-result-actions button.remove-video:hover,.video-actions button.remove-video:hover{background:rgba(255,80,98,.1)}
+.video-info .video-category{margin-top:14px}
+.video-actions{flex-wrap:wrap}
+.library-local-note{display:block;margin-top:8px;color:#7c99a3;font-size:10px}
+@media(max-width:540px){.youtube-categorize label,.video-category label{align-items:stretch;flex-direction:column}.youtube-categorize select,.video-category select{width:100%}}
