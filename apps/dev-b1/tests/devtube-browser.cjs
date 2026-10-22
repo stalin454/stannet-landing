@@ -35,10 +35,10 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   });
   await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
   await page.waitForSelector('.youtube-result');
-  assert.equal(await page.$eval('.youtube-result',nodes=>nodes.length),1,'YouTube-wide search must show remote results');
-  assert.equal(await page.$eval('#screen iframe',nodes=>nodes.length),0,'Searching must not preload YouTube player');
+  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'YouTube-wide search must show remote results');
+  assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'Searching must not preload YouTube player');
   await page.click('.youtube-result-actions button:nth-child(2)');
-  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),3,'Search result can be saved to local DevTube');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Search result can be saved to local DevTube');
   await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('stannet.devtube.v1.'))localStorage.removeItem(key)});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
   await page.click('[data-filter="code"]');
