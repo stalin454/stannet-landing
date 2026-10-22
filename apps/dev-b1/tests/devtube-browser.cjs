@@ -35,7 +35,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   // The private bridge may render an empty library before the official JSON finishes.
   // Wait for the required real catalog, retaining the exact content assertion below.
   await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2,{timeout:20000});
-  assert.equal(await page.$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
+  assert.equal(await page.$$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
   const state=await page.evaluate(()=>({
    title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,
    hasIframe:Boolean(document.querySelector('iframe')),overflow:document.documentElement.scrollWidth>innerWidth+1,
