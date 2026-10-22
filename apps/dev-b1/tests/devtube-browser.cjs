@@ -97,7 +97,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
   await page.select('.youtube-result-actions select','astrid');
   await page.click('.youtube-result-actions>button:last-child');
-  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
   await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.length===1,{timeout:7000});
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
@@ -106,7 +106,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.select('.video-card:nth-child(3) .video-category select','stan6ix');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Moved result leaves Astrid Nova');
   await page.click('[data-filter="stan6ix"]');
-  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
   await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.[0]?.universe==='stan6ix',{timeout:7000});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
   await page.click('[data-filter="stan6ix"]');
