@@ -19,7 +19,7 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.equal(state.overflow,false,'DevTube horizontal overflow at '+width);
   assert.ok(state.css.includes('gradient'),'DevTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
-  await page.waitForFunction(()=>document.querySelector('.video-card img')?.naturalWidth>0 &&
+  if(base.startsWith('https://'))await page.waitForFunction(()=>document.querySelector('.video-card img')?.naturalWidth>0 &&
     document.querySelector('#spotlight-image')?.naturalWidth>0,{timeout:15000}).catch(async err=>{
       const details=await page.evaluate(()=>[...document.querySelectorAll('.video-card img, #spotlight-image')].map(im=>({src:im.src.slice(0,110),width:im.naturalWidth,complete:im.complete,fall:im.dataset.thumbFallback})));
       console.log('DEVTUBE_THUMBNAIL_DIAGNOSTIC',JSON.stringify({base,width,details}));

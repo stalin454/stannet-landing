@@ -15,6 +15,7 @@
  const noThumb='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#11263a"/><stop offset="1" stop-color="#080c17"/></linearGradient></defs><rect width="480" height="270" fill="url(#g)"/><circle cx="240" cy="120" r="52" fill="#18394b" stroke="#68e6e9" stroke-width="3"/><path d="M231 96 L264 120 L231 144Z" fill="#68e6e9"/><text x="240" y="207" font-size="21" fill="#d5f6ff" text-anchor="middle" font-family="Arial,sans-serif">DEVTUBE</text></svg>');
  function thumb(id){return '/api/devtube/thumbnail/'+id}
  function fallbackImage(img){if(img.dataset.thumbFallback)return;img.dataset.thumbFallback='true';img.src=noThumb}
+ function guardThumb(img){if(!img)return;img.addEventListener('error',()=>fallbackImage(img),{once:true});setTimeout(()=>{if(img.isConnected&&(!img.complete||!img.naturalWidth))fallbackImage(img)},7000)}
  function guessUniverse(v,q){
   const sample=[v.title,v.creator,q].join(' ');
   if(/astrid[\s_-]*nova/i.test(sample))return 'astrid';
@@ -22,7 +23,7 @@
   return filter==='all'?'code':filter;
  }
  function newEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=escText(txt);return e}
- function select(v){current=v;active=false;miniDismissed=false;$screen.innerHTML=$screenTemplate;$('#spotlight-image').src=thumb(v.youtubeId);$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';$note.textContent='Pulsa Reproducir para cargar YouTube. Mientras navegas por DevTube, el reproductor podrá flotar sin interrumpirse.';$('#theater').classList.remove('floating');$('#float-close').hidden=true;renderInspector()}
+ function select(v){current=v;active=false;miniDismissed=false;$screen.innerHTML=$screenTemplate;$('#spotlight-image').src=thumb(v.youtubeId);guardThumb($('#spotlight-image'));$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';$note.textContent='Pulsa Reproducir para cargar YouTube. Mientras navegas por DevTube, el reproductor podrá flotar sin interrumpirse.';$('#theater').classList.remove('floating');$('#float-close').hidden=true;renderInspector()}
  function play(v,seconds=0){if(!v)return;current=v;active=true;miniDismissed=false;$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';const frame=document.createElement('iframe');const origin=new URL(location.href).origin;frame.src='https://www.youtube-nocookie.com/embed/'+v.youtubeId+'?autoplay=1&playsinline=1&rel=0&start='+Math.max(0,Math.floor(seconds))+'&origin='+encodeURIComponent(origin);frame.title='YouTube · '+v.title;frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';$screen.replaceChildren(frame);$note.textContent='YouTube se ha cargado tras tu clic. Algunos propietarios no permiten incrustar sus vídeos. El minirreproductor funciona dentro de DevTube.';renderInspector();updateFloat()}
  function updateFloat(){const beyond=$('.studio-section').getBoundingClientRect().bottom<70;if(!beyond)miniDismissed=false;const floating=active&&beyond&&!miniDismissed;$('#theater').classList.toggle('floating',floating);$('#float-close').hidden=!floating}
  function addToQueue(id){if(!allVideos().some(v=>v.id===id))return;queue.push(id);queue=queue.slice(-40);save('queue',queue);updateQueueCount();showNotice('Guardado en tu cola de reproducción.')}
@@ -82,7 +83,7 @@
   for(const {v,hit} of items){
    const card=newEl('article','video-card'),poster=newEl('button','video-thumb');poster.type='button';
    poster.setAttribute('aria-label','Reproducir '+v.title);
-   const img=newEl('img');img.src=thumb(v.youtubeId);img.loading='lazy';img.alt='Miniatura de '+v.title;img.addEventListener('error',()=>fallbackImage(img));
+   const img=newEl('img');img.src=thumb(v.youtubeId);img.loading='lazy';img.alt='Miniatura de '+v.title;guardThumb(img);
    poster.append(img,newEl('span','video-type',v.format.toUpperCase()),newEl('span','play-chip',hit.seconds===null?'▶ REPRODUCIR':'▶ IR A '+formatTime(hit.seconds)));
    poster.addEventListener('click',()=>{play(v,hit.seconds||0);window.scrollTo({top:$('.studio-section').offsetTop-15,behavior:'smooth'})});
    const info=newEl('div','video-info');info.append(newEl('small',null,v.creator+' / '+universeNames[v.universe]),newEl('h3',null,v.title),newEl('p',null,v.description));
@@ -136,7 +137,7 @@
     creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||guessUniverse(original,lastDiscoveryQuery),
     format:source==='library'?'En mi biblioteca':'YouTube · Resultado'});
    const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
-   im.loading='lazy';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;im.addEventListener('error',()=>fallbackImage(im));
+   im.loading='lazy';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;guardThumb(im);
    thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+video.title);
    thumbButton.append(im,newEl('span',null,'▶ Ver dentro de DevTube'));
    const goPlay=()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})};
