@@ -52,7 +52,7 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   });
   await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
   await page.waitForSelector('.youtube-result');
-  assert.equal(await page.$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
+  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
   await page.waitForFunction(()=>document.querySelector('.youtube-result img')?.naturalWidth>0,{timeout:15000});
   assert.equal(await page.$eval('.youtube-result img',img=>new URL(img.src).pathname),'/api/devtube/thumbnail/M7lc1UVf-VE');
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'No player before click');
