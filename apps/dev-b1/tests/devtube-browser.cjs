@@ -19,7 +19,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   assert.equal(state.overflow,false,'StanTube horizontal overflow at '+width);
   assert.ok(state.css.includes('gradient'),'StanTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
-  assert.equal(await page.$eval('.dimension',items=>items.length),10,'StanTube includes the ten library universes');
+  assert.equal(await page.$$eval('.dimension',items=>items.length),10,'StanTube includes the ten library universes');
   assert.ok(await page.$('[data-filter="stan6ix"]'),'STAN6IX has its own tab');
   assert.ok(await page.$('.stantube-mark'),'StanTube has its own brand mark');
   assert.ok(await page.$('.tv-big-entry[href="#youtube-discovery"]'),'Television search has a prominent entry');
