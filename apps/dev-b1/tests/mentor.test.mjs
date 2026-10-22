@@ -57,7 +57,7 @@ test('La recuperación rechaza datos dañados y funciona si localStorage está b
 });
 
 // The teaching guide must cover real course lines, including closings and commands.
-import {lineGuide,compareLine} from '../mentor-public/line-tutor.mjs';
+import {lineGuide,compareLine,actionGuide,describeLine} from '../mentor-public/line-tutor.mjs';
 test('La guía explica cada línea del curso y conserva el código exacto',()=>{
  let total=0;
  for(const project of [{name:'Mi proyecto DAW'},{name:'Portfolio de Ana',os:'mac'}])for(const step of curriculum(project)){
@@ -83,4 +83,26 @@ test('La práctica tolera sangría, pero detecta cambios de símbolos, comillas 
  assert.equal(compareLine('mensaje.textContent = "hola mundo";','mensaje.textContent = "holamundo";').ok,false);
  assert.equal(compareLine('','<body>').ok,false);
  assert.equal(compareLine('<body>extra','<body>').ok,false);
+});
+
+test('HTML se disecciona en significado, efecto, errores y anatomía sin absolutismos falsos',()=>{
+ for(const step of steps.filter(s=>s.file==='index.html'))for(const line of lineGuide(step)){
+  assert.ok(line.effect.length>30);assert.ok(line.mistake.length>30);assert.ok(line.anatomy.length>=2);
+ }
+ assert.match(lineGuide(steps[5])[0].mistake,/Quirks Mode/);
+ assert.match(lineGuide(steps[5])[4].meaning,/píxeles CSS/);
+ assert.match(describeLine('<h1>Título</h1>',{file:'index.html'}).mistake,/no una regla/);
+ assert.match(describeLine('<script src="script.js" defer></script>',{file:'index.html'}).mistake,/no garantiza/);
+ const page=lineGuide({file:'index.html',mode:'replace',code:exampleAt(steps,11)['index.html']});
+ assert.ok(page.length>40);assert.equal(page[0].code,'<!doctype html>');
+});
+test('El acompañamiento continúa con acciones individuales hasta publicar en Pages',()=>{
+ const publication=actionGuide(steps[36]);assert.equal(publication.length,8);
+ assert.match(publication[0].instruction,/Settings/);assert.match(publication[1].instruction,/Pages/);
+ assert.match(publication[3].instruction,/main/);assert.match(publication[4].instruction,/root/);
+ assert.match(publication.at(-1).instruction,/URL/);
+ assert.equal(actionGuide(steps[4]).length,5);
+ for(const step of steps.filter(s=>!s.code))for(const action of actionGuide(step)){
+  assert.ok(action.instruction.length>5);assert.ok(action.why.length>15);
+ }
 });

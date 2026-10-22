@@ -26,6 +26,26 @@ async function checkMentor(browser,base){
    assert.equal(saved.reflections[0],answer,'Existing answer is retained');
    await page.reload({waitUntil:'networkidle0'});
    assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 02 DE 41','Progress survives reload');
+   await page.click('#start-writing');
+   assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 06 DE 41','Direct entry reaches literal line one');
+   assert.match(await page.$eval('#line-tutor-title',e=>e.textContent),/Línea 1: escribe exactamente/);
+   assert.equal(await page.$eval('#tutor-code',e=>e.textContent),'<!doctype html>');
+   assert.match(await page.$eval('.line-mistake',e=>e.textContent),/Quirks Mode/);
+   assert.equal(await page.$eval('#lab-example',e=>e.open),false,'Full file stays closed');
+   await page.click('#line-next');await page.reload({waitUntil:'networkidle0'});
+   assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 06 DE 41','Direct entry survives reload without false completion');
+   assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 2 de 11/);
+   const direct=await page.evaluate(()=>JSON.parse(localStorage.getItem('stannet-mentor-v1')));
+   assert.deepEqual(direct.completed,[0],'Skipped preparation is not reported as completed');
+   assert.equal(direct.preparationSkipped,true);
+   await page.click('[data-view="manual"]');
+   assert.match(await page.$eval('#manual-view',e=>e.textContent),/HyperText Markup Language/);
+   assert.ok(await page.$$eval('.manual-line',e=>e.length>40),'Manual dissects the complete HTML document');
+   assert.match(await page.$eval('#manual-view',e=>e.textContent),/píxeles CSS/);
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Manual fits desktop');
+   await page.click('#manual-return');
+   assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 2 de 11/,'Reading the manual preserves the writing position');
+
   }
   if(width===390){
    await page.click('#project-button');
@@ -51,7 +71,6 @@ async function checkMentor(browser,base){
      assert.equal(await page.$eval('#tutor-code',e=>e.textContent),'<!doctype html>','Only one line is shown by default');
      assert.equal(await page.$eval('.tutor-full',e=>e.open),false,'Full fragment stays optional');
      const draft=await page.$eval('#code-editor',e=>e.value);
-     await page.click('.tutor-practice summary');
      await page.type('#line-practice','<!doctype html');
      await page.click('#check-line');
      assert.match(await page.$eval('#line-feedback',e=>e.textContent),/«>»/,'Mistake points to missing symbol');
@@ -67,7 +86,18 @@ async function checkMentor(browser,base){
      await page.click('#line-previous');
      assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 1 de 11/);
      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Line guide fits mobile');
+     await page.click('[data-view="manual"]');
+     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Complete annotated manual fits mobile');
+     await page.click('#manual-return');
+     assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 1 de 11/);
+
      await page.screenshot({path:'apps/dev-b1/qa-evidence/mentor-line-guide-390.png',fullPage:true});
+    }
+    if(await page.$('#action-next')){
+     const count=Number((await page.$eval('#action-position',e=>e.textContent)).match(/de (\d+)/)[1]);
+     if(i===36){assert.equal(count,8,'Publishing is taught as eight individual actions');assert.match(await page.$eval('#action-instruction',e=>e.textContent),/Settings/);}
+     for(let action=0;action<count;action++)await page.click('#action-next');
+     assert.ok(await page.$('.action-tutor .tutor-finish'),'Screen actions have a result check');
     }
     if(await page.$('#line-next')){
      const count=Number((await page.$eval('#line-position',e=>e.textContent)).match(/de (\d+)/)[1]);
@@ -75,6 +105,7 @@ async function checkMentor(browser,base){
      assert.ok(await page.$('.tutor-finish'),'Every code fragment ends with a visible result check');
     }
     if(i===23){
+     await page.click('#lab-example summary');
      await page.click('#run-code');
      const frame=await (await page.$('#preview')).contentFrame();
      await frame.waitForSelector('#lista .card',{timeout:10000});

@@ -1,17 +1,18 @@
-import {lineGuide,compareLine} from './line-tutor.mjs';
+import {lineGuide,compareLine,actionGuide} from './line-tutor.mjs';
 import {stages,curriculum,slugify,exampleAt,applyChange,inspectCode} from './curriculum.mjs';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rich=value=>esc(value).replace(/`([^`]+)`/g,'<code>$1</code>');
 const KEY='stannet-mentor-v1';
-const empty=()=>({version:1,project:{name:'Mi proyecto DAW',idea:'',requirements:'',os:'windows',level:'beginner'},current:0,completed:[],confirmations:{},reflections:{},notes:{},drafts:{},deliverables:{},lineProgress:{},focus:false});
+const empty=()=>({version:1,project:{name:'Mi proyecto DAW',idea:'',requirements:'',os:'windows',level:'beginner'},current:0,completed:[],confirmations:{},reflections:{},notes:{},drafts:{},deliverables:{},lineProgress:{},actionProgress:{},preparationSkipped:false,focus:false});
 function validate(raw){
  if(!raw||raw.version!==1||typeof raw.project?.name!=='string')throw Error('No es una copia de StanNet Mentor v1.');
  const safe=empty();const p=raw.project;
  safe.project={name:p.name.slice(0,70)||'Mi proyecto DAW',idea:String(p.idea||'').slice(0,2500),requirements:String(p.requirements||'').slice(0,8000),os:['windows','mac','linux'].includes(p.os)?p.os:'windows',level:p.level==='some'?'some':'beginner'};
  const len=curriculum(safe.project).length;
  safe.completed=Array.isArray(raw.completed)?[...new Set(raw.completed.filter(x=>Number.isInteger(x)&&x>=0&&x<len))].sort((a,b)=>a-b):[];
- let contiguous=0;while(safe.completed.includes(contiguous))contiguous++;
+ safe.preparationSkipped=raw.preparationSkipped===true;
+ let contiguous=0;while(safe.completed.includes(contiguous)||(safe.preparationSkipped&&contiguous<5))contiguous++;
  safe.completed=safe.completed.filter(x=>x<contiguous);
  safe.current=Number.isInteger(raw.current)?Math.min(Math.max(0,raw.current),contiguous,len-1):0;
  for(const field of ['notes','reflections','confirmations','drafts'])for(let i=0;i<len;i++){
@@ -25,6 +26,10 @@ function validate(raw){
  for(let i=0;i<len;i++){
   const value=raw.lineProgress?.[i];const count=lineGuide(curriculum(safe.project)[i]).length;
   if(value&&count&&Number.isInteger(value.index))safe.lineProgress[i]={index:Math.min(Math.max(0,value.index),count-1),done:value.done===true&&value.index===count-1};
+ }
+ for(let i=0;i<len;i++){
+  const value=raw.actionProgress?.[i];const count=actionGuide(curriculum(safe.project)[i]).length;
+  if(value&&count&&Number.isInteger(value.index))safe.actionProgress[i]={index:Math.min(Math.max(0,value.index),count-1),done:value.done===true&&value.index===count-1};
  }
  safe.focus=raw.focus===true;return safe;
 }
@@ -45,14 +50,15 @@ function currentFiles(){
  }
  return state.drafts[state.current];
 }
-function frontier(){let n=0;while(state.completed.includes(n))n++;return Math.min(n,steps.length-1);}
+function frontier(){let n=0;while(state.completed.includes(n)||(state.preparationSkipped&&n<5))n++;return Math.min(n,steps.length-1);}
 function renderSidebar(){
  $('sidebar-project').textContent=state.project.name;
  $('project-title').textContent=state.project.idea?state.project.name:'De tu idea a tu primera web.';
  $('project-subtitle').textContent=state.project.idea?state.project.idea.slice(0,115):'Construye, comprende y hazlo tuyo.';
- const pct=Math.round(state.completed.length/steps.length*100);
+ const skipped=state.preparationSkipped?steps.slice(0,5).filter((s,i)=>!state.completed.includes(i)).length:0;
+ const pct=Math.round(state.completed.length/(steps.length-skipped)*100);
  $('progress').value=pct;$('progress-label').textContent=pct+'%';
- $('progress-copy').textContent=`${state.completed.length} de ${steps.length} pasos completados.`;
+ $('progress-copy').textContent=`${state.completed.length} de ${steps.length-skipped} pasos completados.${skipped?` ${skipped} preparativos omitidos; puedes retomarlos.`:''}`;
  $('phase-count').textContent=String(steps[state.current].stage+1).padStart(2,'0')+' / 08';
  $('stage-nav').replaceChildren();
  stages.forEach(([name,sub],i)=>{
@@ -77,7 +83,9 @@ function render(){
  $('step-position').textContent=`PASO ${String(state.current+1).padStart(2,'0')} DE ${steps.length}`;
  $('lesson-stage').textContent=String(s.stage+1).padStart(2,'0')+' · '+stages[s.stage][0].toUpperCase();
  $('lesson-duration').textContent=s.duration+' MIN APROX.';
- $('lesson-title').textContent=s.title;$('lesson-intro').textContent=s.intro;
+ $('lesson-title').textContent=s.title;$('lesson-intro').textContent=s.code?'Te digo exactamente qué escribir y por qué. Escribe una línea y pulsa «Ya la escribí» para ver la siguiente.':'Realiza una sola acción cada vez. Te explico por qué y tú decides cuándo avanzar.';
+ $('writing-entry').hidden=state.current>=5;
+ $('lesson-context').hidden=!s.code;
  $('lesson-actions').innerHTML=s.actions.map((a,i)=>`<div class="action"><span>${i+1}</span><p>${rich(a)}</p></div>`).join('');
  renderLineTutor(s);
  $('why-content').textContent=s.why;$('expected-copy').textContent=s.expected;
@@ -96,7 +104,7 @@ function render(){
 }
 function renderLineTutor(step){
  const guide=lineGuide(step);const container=$('snippet-container');
- if(!guide.length){container.replaceChildren();return;}
+ if(!guide.length){renderActionTutor(step);return;}
  const position=state.lineProgress[state.current]||{index:0,done:false};
  state.lineProgress[state.current]=position;
  const line=guide[position.index];
@@ -104,24 +112,53 @@ function renderLineTutor(step){
  const finishing=step.command&&!step.guideFile?'Has recorrido los comandos. Comprueba la salida de la terminal y el resultado indicado en la lección.':`Guarda ${line.target} con ${save}. `+(step.file==='index.html'?'Abre index.html con doble clic o actualiza su pestaña en el navegador. El texto de head no se muestra dentro de la página.':step.file==='style.css'?'Abre o actualiza index.html en el navegador para comprobar los estilos.':step.file==='script.js'?'Abre o actualiza index.html en el navegador. Si este fragmento solo define datos o una función, todavía no aparecerán cambios visibles.':'Vuelve a la terminal y usa git status para revisar los archivos antes de continuar.');
  container.innerHTML=`<section class="line-tutor" aria-labelledby="line-tutor-title">
  <div class="tutor-heading"><span class="pill">PASO A PASO · SIN PRISAS</span><span id="line-position">Línea ${position.index+1} de ${guide.length}</span></div>
- <h3 id="line-tutor-title" tabindex="-1">${position.done?'Has recorrido este fragmento.':'Vamos a escribir una sola línea.'}</h3>
- <p class="tutor-intro">Lee, escríbela y entiende para qué sirve. Tú decides cuándo seguir.</p>
+ <h3 id="line-tutor-title" tabindex="-1">${position.done?'Has recorrido este fragmento.':step.command&&!step.guideFile?`Comando ${position.index+1}: escribe lo siguiente.`:`Línea ${position.index+1}: escribe exactamente esto.`}</h3>
+ <p class="tutor-intro">${position.done?'Ya puedes guardar y comprobar el resultado.':`Abre ${esc(line.target)}. ${position.index===0?'Empieza en el lugar indicado abajo.':'Escribe debajo de la línea anterior.'}`}</p>
  ${position.done?`<div class="tutor-finish" role="status"><strong>Ahora guarda y comprueba.</strong><p>${esc(finishing)}</p><p>${esc(step.expected)}</p><p>Después marca la casilla de la lección y responde con tus palabras.</p></div>`:`
  <div class="tutor-location"><strong>1. Dónde escribir</strong><p>${esc(line.where)}</p>${position.index===0?'<p class="field-help">Si VS Code completa una etiqueta o un cierre por ti, comprueba que quede como el ejemplo; evita escribirlo dos veces.</p>':''}</div>
- <div class="tutor-write"><strong>2. Escribe esta línea</strong><div class="tutor-file">${esc(line.target)} · línea ${position.index+1} del fragmento</div><pre id="tutor-code"><code>${esc(line.code||' ')}</code></pre><p class="field-help">Respeta los signos y las comillas. Los espacios al principio ayudan a ver qué está dentro de qué.</p></div>
- <div class="tutor-explain"><strong>3. Entiende lo que escribiste</strong><p>${esc(line.meaning)}</p><ul>${line.pieces.map(piece=>`<li>${esc(piece)}</li>`).join('')}</ul><p class="tutor-purpose"><b>¿Por qué lo hacemos?</b> ${esc(line.why)}</p></div>
- <details class="tutor-practice"><summary>Quiero practicar esta línea aquí</summary><label for="line-practice">Escribe la línea del ejemplo</label><textarea id="line-practice" rows="2" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="line-practice-note"></textarea><p id="line-practice-note" class="field-help">Este espacio comprueba el texto; no modifica tu archivo ni el laboratorio.</p><button class="button secondary" id="check-line">Comprobar mi línea</button><p id="line-feedback" role="status"></p></details>
+ <div class="tutor-write"><strong id="literal-instruction">${step.command&&!step.guideFile?'En la terminal, escribe este comando:':`En ${esc(line.target)}, escribe esta línea tal como aparece:`}</strong><div class="tutor-file">${esc(line.target)} · línea ${position.index+1} del fragmento</div><pre id="tutor-code"><code>${esc(line.code||' ')}</code></pre><p class="field-help">Respeta los signos y las comillas. Los espacios al principio ayudan a ver qué está dentro de qué.</p></div>
+ <div class="tutor-explain"><strong>3. Entiende lo que escribiste</strong><p>${esc(line.meaning)}</p><ul>${line.pieces.map(piece=>`<li>${esc(piece)}</li>`).join('')}</ul><p class="tutor-purpose"><b>¿Por qué lo hacemos?</b> ${esc(line.why)}</p>${line.anatomy?`<div class="line-anatomy"><h4>Anatomía de esta línea</h4>${anatomyMarkup(line.anatomy)}</div>`:''}${line.effect?`<div class="line-effect"><h4>Qué ocurre en el navegador</h4><p>${esc(line.effect)}</p></div>`:''}${line.mistake?`<div class="line-mistake"><h4>Qué revisar y qué pasa si falta</h4><p>${esc(line.mistake)}</p></div>`:''}</div>
+ <details class="tutor-practice" open><summary>Practica escribiendo esta línea</summary><label for="line-practice">Escribe la línea del ejemplo</label><textarea id="line-practice" rows="2" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="line-practice-note"></textarea><p id="line-practice-note" class="field-help">Este espacio comprueba el texto; no modifica tu archivo ni el laboratorio.</p><button class="button secondary" id="check-line">Comprobar mi línea</button><p id="line-feedback" role="status"></p></details>
  <p class="tutor-after">${esc(line.after)}</p>`}
- <div class="tutor-controls"><button class="button subtle" id="line-previous" ${position.index===0&&!position.done?'disabled':''}>← ${position.done?'Repasar la última línea':'Línea anterior'}</button><button class="button primary" id="line-next">${position.done?'Volver a la primera línea':position.index===guide.length-1?'Ya la escribí · Comprobar resultado ✓':'Ya la escribí · Siguiente línea →'}</button></div>
+ <div class="tutor-controls"><button class="button subtle" id="line-previous" ${position.index===0&&!position.done?'disabled':''}>← ${position.done?'Repasar la última línea':'Línea anterior'}</button><button class="button primary" id="line-next">${position.done?'Volver a la primera línea':position.index===guide.length-1?'Ya la escribí · Guardar y comprobar ✓':`Ya la escribí · Ir a la ${step.command&&!step.guideFile?'instrucción':'línea'} ${position.index+2} →`}</button></div>
  <p class="field-help">Guardamos en qué línea vas. «Ya la escribí» confirma tu avance; el mentor no puede ver tu archivo de VS Code.</p>
- </section><details class="snippet tutor-full"><summary>Ver el fragmento completo (opcional)</summary><div class="snippet-head"><span>${esc(line.target)}</span><button class="icon-button" id="copy-snippet">Copiar fragmento</button></div><pre><code>${esc(step.code)}</code></pre></details>`;
+ </section><details class="snippet tutor-full"><summary>Ver el fragmento completo (opcional)</summary><div class="snippet-head"><span>${esc(line.target)}</span><button class="icon-button" id="copy-snippet">Copiar fragmento</button></div><pre><code>${esc(step.code)}</code></pre><div class="fragment-dissection"><h3>Disección del fragmento, línea por línea</h3>${guide.map((entry,i)=>`<article><h4>Línea ${i+1}</h4><pre><code>${esc(entry.code)}</code></pre><p>${esc(entry.meaning)}</p><p><strong>Por qué:</strong> ${esc(entry.why)}</p>${entry.effect?`<p><strong>En el navegador:</strong> ${esc(entry.effect)}</p>`:''}<ul>${entry.pieces.map(piece=>`<li>${esc(piece)}</li>`).join('')}</ul></article>`).join('')}</div></details>`;
  $('copy-snippet').addEventListener('click',()=>copy(step.code));
  $('check-line')?.addEventListener('click',()=>{const check=compareLine($('line-practice').value,line.code);$('line-feedback').textContent=check.message;$('line-feedback').className=check.ok?'feedback-good':'feedback-error';});
  const move=()=>{persist();renderLineTutor(step);$('line-tutor-title').focus({preventScroll:true});$('line-tutor-title').scrollIntoView({block:'nearest',behavior:'instant'});};
  $('line-next').addEventListener('click',()=>{if(position.done){position.index=0;position.done=false;}else if(position.index<guide.length-1)position.index++;else position.done=true;move();});
  $('line-previous').addEventListener('click',()=>{if(position.done)position.done=false;else position.index=Math.max(0,position.index-1);move();});
 }
-function showView(next){view=next;for(const v of ['learn','roadmap','brief'])$(v+'-view').hidden=v!==next;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));}
+function anatomyMarkup(parts){
+ return `<dl class="anatomy-list">${parts.map(([token,meaning])=>`<div><dt><code>${esc(token)}</code></dt><dd>${esc(meaning)}</dd></div>`).join('')}</dl>`;
+}
+function renderManual(){
+ const html=exampleAt(steps,11)['index.html'];
+ const guide=lineGuide({file:'index.html',mode:'replace',code:html});
+ $('manual-view').innerHTML=`<section class="page-panel manual-intro"><span class="pill">CÓDIGO + EXPLICACIÓN DETALLADA</span><h2>HTML: entiende cada línea de tu web.</h2><p>HTML significa HyperText Markup Language, lenguaje de marcado de hipertexto. Describe la estructura y el significado del contenido con etiquetas. CSS se ocupa de su aspecto y JavaScript de su comportamiento.</p><p>Este es el documento que construirás durante la etapa HTML. Puedes consultar la visión completa aquí o escribirlo acompañado, una línea cada vez.</p><div class="toolbar"><button id="manual-start" class="button primary">Escribir desde la línea 1 →</button><button id="manual-return" class="button subtle">Volver a mi paso actual</button></div><h3>El código base: index.html</h3><pre class="manual-code"><code>${esc(html)}</code></pre></section>
+ <section class="page-panel"><h2>Anatomía de una etiqueta</h2><p>Una etiqueta de apertura puede tener atributos. El contenido va entre la apertura y el cierre. Los elementos vacíos, como meta, link e input, no tienen contenido ni etiqueta de cierre.</p>${anatomyMarkup([['<a','Nombre del elemento en la apertura.'],['href="https://stannet.space"','Atributo: nombre href, signo = y valor entre comillas.'],['>Web Oficial','Fin de apertura y texto que se verá en el enlace.'],['</a>','Etiqueta de cierre del enlace.']])}<h3>Otro ejemplo: un enlace externo</h3><pre class="manual-code"><code>&lt;a href="https://stannet.space" target="_blank" rel="noopener noreferrer"&gt;Web Oficial&lt;/a&gt;</code></pre><p>target="_blank" pide abrir otro contexto, normalmente otra pestaña. noopener evita que la página nueva reciba acceso a window.opener; noreferrer evita enviar la información de referencia y también implica ese aislamiento. Los navegadores actuales ya aplican noopener implícitamente a muchos enlaces con _blank; escribirlo hace explícita la intención. No convierte cualquier destino en seguro.</p><p>Cuando veas &amp;copy; dentro del HTML, es una referencia de carácter que representa ©. No necesitas escribir una etiqueta para ese símbolo.</p></section>
+ <section class="page-panel"><h2>Disección exacta, línea por línea</h2><p>Las líneas coinciden con el documento de arriba. Explicamos también sus aperturas y cierres.</p><div class="manual-dissection">${guide.map((line,i)=>`<article class="manual-line"><span class="pill">LÍNEA ${i+1}</span><pre class="manual-code"><code>${esc(line.code)}</code></pre><h3>Qué significa</h3><p>${esc(line.meaning)}</p><h3>Por qué la escribimos</h3><p>${esc(line.why)}</p>${line.anatomy?anatomyMarkup(line.anatomy):''}${line.effect?`<h3>Qué ocurre en el navegador</h3><p>${esc(line.effect)}</p>`:''}${line.mistake?`<h3>Qué revisar</h3><p>${esc(line.mistake)}</p>`:''}</article>`).join('')}</div></section>
+ <section class="page-panel"><h2>Para profundizar</h2><p><a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax" target="_blank" rel="noopener noreferrer">Sintaxis HTML en MDN ↗</a></p><p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport" target="_blank" rel="noopener noreferrer">Viewport y píxeles CSS ↗</a></p><p><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script" target="_blank" rel="noopener noreferrer">Carga de JavaScript con script ↗</a></p></section>`;
+ $('manual-start').addEventListener('click',startWriting);
+ $('manual-return').addEventListener('click',()=>showView('learn'));
+}
+function renderActionTutor(step){
+ const guide=actionGuide(step),container=$('snippet-container');
+ const position=state.actionProgress[state.current]||{index:0,done:false};state.actionProgress[state.current]=position;
+ const action=guide[position.index];
+ container.innerHTML=`<section class="line-tutor action-tutor" aria-labelledby="action-tutor-title"><div class="tutor-heading"><span class="pill">UNA ACCIÓN CADA VEZ</span><span id="action-position">Acción ${position.index+1} de ${guide.length}</span></div><h3 id="action-tutor-title" tabindex="-1">${position.done?'Ahora comprueba el resultado.':'Haz esto ahora:'}</h3>${position.done?`<div class="tutor-finish"><p>${esc(step.expected)}</p><p>Cuando lo hayas comprobado, marca la casilla y responde con tus palabras para continuar.</p></div>`:`<p id="action-instruction" class="literal-action">${rich(action.instruction)}</p><div class="tutor-purpose"><b>¿Por qué?</b><p>${esc(action.why)}</p></div>`}<div class="tutor-controls"><button id="action-previous" class="button subtle" ${position.index===0&&!position.done?'disabled':''}>← Anterior</button><button id="action-next" class="button primary">${position.done?'Repasar estas acciones':position.index===guide.length-1?'Hecho · Comprobar resultado ✓':'Hecho · Siguiente acción →'}</button></div></section>`;
+ const move=()=>{persist();renderActionTutor(step);$('action-tutor-title').focus({preventScroll:true});};
+ $('action-next').addEventListener('click',()=>{if(position.done){position.index=0;position.done=false;}else if(position.index<guide.length-1)position.index++;else position.done=true;move();});
+ $('action-previous').addEventListener('click',()=>{if(position.done)position.done=false;else position.index=Math.max(0,position.index-1);move();});
+}
+function startWriting(){
+ if(state.current<5)state.preparationSkipped=true;
+ state.current=5;state.lineProgress[5]={index:0,done:false};
+ showView('learn');render();$('line-tutor-title').focus({preventScroll:true});$('line-tutor-title').scrollIntoView({block:'start',behavior:'instant'});
+}
+$('start-writing').addEventListener('click',startWriting);
+$('restart-writing').addEventListener('click',startWriting);
+function showView(next){view=next;if(next==='manual')renderManual();for(const v of ['learn','roadmap','brief','manual'])$(v+'-view').hidden=v!==next;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));}
 function showLab(panel){
  for(const p of ['code','preview','notes'])$(p+'-panel').hidden=p!==panel;
  document.querySelectorAll('[data-lab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.lab===panel)));
