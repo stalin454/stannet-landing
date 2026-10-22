@@ -12,6 +12,21 @@ async function checkMentor(browser,base){
   assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 01 DE 41');
   assert.equal(await page.$eval('#complete-button',e=>e.disabled),true,'No advance without confirmation and reflection');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mentor fits viewport '+width);
+  if(width===1280){
+   const answer='WEB PÚBLICA, necesito construir un portfolio.';
+   await page.$eval('#confirm-check',e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
+   await page.$eval('#challenge-answer',(e,value)=>{e.value=value;e.dispatchEvent(new Event('input'));},answer);
+   await page.reload({waitUntil:'networkidle0'});
+   assert.equal(await page.$eval('#complete-button',e=>e.disabled),false,'Existing reflection and confirmation restore the Continue button');
+   await page.click('#complete-button');
+   assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 02 DE 41','Advance without opening hidden project settings');
+   assert.equal(await page.$eval('#project-dialog',e=>e.open),false,'No unexpected project dialog blocks the first step');
+   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('stannet-mentor-v1')));
+   assert.equal(saved.project.idea,answer,'Reflection becomes the initial idea');
+   assert.equal(saved.reflections[0],answer,'Existing answer is retained');
+   await page.reload({waitUntil:'networkidle0'});
+   assert.equal(await page.$eval('#step-position',e=>e.textContent),'PASO 02 DE 41','Progress survives reload');
+  }
   if(width===390){
    await page.click('#project-button');
    await page.$eval('#project-name',e=>e.value='Mentor QA');

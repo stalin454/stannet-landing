@@ -11,10 +11,10 @@ const modifier=project.os==='mac'?'⌘':'Ctrl';
 const desktop=project.os==='mac'?'Finder':project.os==='linux'?'tu gestor de archivos':'el Explorador de archivos';
 return [
 step(0,'Dale forma a tu idea.',[
- 'Abre «Mi proyecto», arriba a la derecha. Escribe el nombre de tu web y explica en una o dos frases para quién es y qué problema resuelve.',
- 'Pega los requisitos del centro si los tienes. Si todavía no los tienes, podrás añadirlos después.',
- 'Para practicar, construiremos un catálogo con tarjetas, búsqueda y un formulario. Adapta sus textos y recursos a tu idea.'
-],'Definir el problema antes de programar evita construir funciones que no necesitas. Un catálogo sirve como primera base para practicar estructura, diseño, datos e interacción. No cubre por sí solo los requisitos de un proyecto DAW completo.','Tu idea y el nombre están guardados en «Mi proyecto». Puedes explicar quién utilizará la web.','¿Quién va a usar tu web y qué necesita conseguir?',{intro:'Todo buen proyecto empieza con una idea que puedes explicar con claridad.',hint:'Completa: «Mi web ayuda a ___ a conseguir ___».',error:'Si no sabes qué escribir, empieza por una necesidad concreta: organizar recursos para estudiar, mostrar productos o presentar servicios.'}),
+ 'En la respuesta de abajo, explica en una o dos frases qué web quieres crear y para quién será.',
+ 'Marca la casilla cuando lo tengas claro y pulsa «Lo he entendido. Continuar». Si aún no has configurado la idea, guardaremos tu respuesta como punto de partida.',
+ 'Puedes cambiar el nombre y añadir los requisitos del centro en «Mi proyecto» cuando quieras. La ruta actual practica una base de catálogo con tarjetas, búsqueda y formulario.'
+],'Definir el problema antes de programar evita construir funciones que no necesitas. Un catálogo sirve como primera base para practicar estructura, diseño, datos e interacción. No cubre por sí solo los requisitos de un proyecto DAW completo.','Has explicado qué quieres construir y quién utilizará la web. Puedes continuar y ajustar los detalles después.','¿Quién va a usar tu web y qué necesita conseguir?',{intro:'Todo buen proyecto empieza con una idea que puedes explicar con claridad.',hint:'Completa: «Mi web ayuda a ___ a conseguir ___».',error:'Si no sabes qué escribir, empieza por una necesidad concreta: organizar recursos para estudiar, mostrar productos o presentar servicios.'}),
 step(0,'Acota tu primera versión.',[
  'Abre «Requisitos y entregas» en el menú. Distingue lo obligatorio de lo que puedes dejar para después.',
  'En las notas de este paso escribe tres funciones iniciales: mostrar recursos, buscar recursos y añadir un recurso.',

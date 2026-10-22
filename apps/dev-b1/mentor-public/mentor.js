@@ -63,7 +63,8 @@ function renderSidebar(){
 }
 function updateContinue(){
  const reflection=$('challenge-answer').value.trim();
- $('complete-button').disabled=!$('confirm-check').checked||reflection.length<8;
+ $('complete-button').disabled=!$('confirm-check').checked||reflection.length===0;
+ const help=$('continue-help');if(help)help.textContent=!$('confirm-check').checked?'Marca la casilla cuando hayas realizado la acción.':!reflection?'Escribe tu respuesta para poder continuar.':state.current===0&&!state.project.idea.trim()?'Al continuar, tu respuesta se guardará como idea inicial. Puedes ajustar el nombre y los requisitos después en «Mi proyecto».':'Todo listo para continuar.';
 }
 function render(){
  const s=steps[state.current];renderSidebar();
@@ -160,7 +161,10 @@ $('run-code').addEventListener('click',preview);$('refresh-preview').addEventLis
 $('previous-button').addEventListener('click',()=>{if(state.current>0){state.current--;render();$('lesson-title').scrollIntoView({block:'start',behavior:'instant'});}});
 $('complete-button').addEventListener('click',()=>{
  if($('complete-button').disabled)return;
- if(state.current===0&&(!state.project.idea.trim()||state.project.name==='Mi proyecto DAW')){toast('Antes de avanzar, escribe tu idea y el nombre de tu proyecto.');openProject();return;}
+ if(state.current===0&&!state.project.idea.trim()){
+  state.project.idea=$('challenge-answer').value.trim().slice(0,2500);
+  steps=curriculum(state.project);
+ }
  const s=steps[state.current];const check=inspectCode(currentFiles(),s);
  if(!check.ok){$('step-feedback').textContent=check.message;return;}
  if(!state.completed.includes(state.current))state.completed.push(state.current);
