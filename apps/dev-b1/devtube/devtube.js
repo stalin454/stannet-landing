@@ -3,6 +3,7 @@
  const $=q=>document.querySelector(q),$$=q=>[...document.querySelectorAll(q)];
  const storePrefix='stannet.devtube.v1.',validId=/^[A-Za-z0-9_-]{11}$/,validDimensions=new Set(['code','astrid','music']);
  const $grid=$('#video-grid'),$screen=$('#screen'),$note=$('#playing-note'),$screenTemplate=$screen.innerHTML;
+ $screen.addEventListener('error',event=>{if(event.target instanceof HTMLImageElement)fallbackImage(event.target)},true);
  let catalog=[],personal=[],favorites=[],watched=[],queue=[],filter='all',current=null,panel='story',active=false,miniDismissed=false,onlyFavorites=false;
  const load=(key,fallback)=>{try{const value=JSON.parse(localStorage.getItem(storePrefix+key));return Array.isArray(value)?value:fallback}catch{return fallback}};
  const save=(key,value)=>{try{localStorage.setItem(storePrefix+key,JSON.stringify(value))}catch{/* storage unavailable: keep this tab functional */}};
@@ -11,7 +12,15 @@
  function videoOK(v){return v&&typeof v==='object'&&validId.test(v.youtubeId||'')&&validDimensions.has(v.universe)&&typeof v.title==='string'&&v.title.length>0&&v.title.length<=130}
  function normalize(v){return {id:escText(v.id),youtubeId:v.youtubeId,title:v.title,creator:escText(v.creator||'STANNET CREATOR'),universe:v.universe,format:escText(v.format||'Vídeo'),description:escText(v.description),tags:Array.isArray(v.tags)?v.tags.filter(x=>typeof x==='string').slice(0,16):[],chapters:Array.isArray(v.chapters)?v.chapters.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.title==='string').slice(0,100):[],transcript:Array.isArray(v.transcript)?v.transcript.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.text==='string').slice(0,300):[],lyrics:escText(v.lyrics),stylePrompt:escText(v.stylePrompt),code:escText(v.code)}}
  function allVideos(){const ids=new Set(catalog.map(v=>v.youtubeId));return [...catalog,...personal.filter(v=>!ids.has(v.youtubeId))]}
- function thumb(id){return 'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg'}
+ const noThumb='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#11263a"/><stop offset="1" stop-color="#080c17"/></linearGradient></defs><rect width="480" height="270" fill="url(#g)"/><circle cx="240" cy="120" r="52" fill="#18394b" stroke="#68e6e9" stroke-width="3"/><path d="M231 96 L264 120 L231 144Z" fill="#68e6e9"/><text x="240" y="207" font-size="21" fill="#d5f6ff" text-anchor="middle" font-family="Arial,sans-serif">DEVTUBE</text></svg>');
+ function thumb(id){return '/api/devtube/thumbnail/'+id}
+ function fallbackImage(img){if(img.dataset.thumbFallback)return;img.dataset.thumbFallback='true';img.src=noThumb}
+ function guessUniverse(v,q){
+  const sample=[v.title,v.creator,q].join(' ');
+  if(/astrid[\s_-]*nova/i.test(sample))return 'astrid';
+  if(/stan[\s_-]*6ix|suno|dj\s*studio|music\s*lab|hip[ -]?hop|producci[oó]n musical|musica|música/i.test(sample))return 'music';
+  return filter==='all'?'code':filter;
+ }
  function newEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=escText(txt);return e}
  function select(v){current=v;active=false;miniDismissed=false;$screen.innerHTML=$screenTemplate;$('#spotlight-image').src=thumb(v.youtubeId);$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';$note.textContent='Pulsa Reproducir para cargar YouTube. Mientras navegas por DevTube, el reproductor podrá flotar sin interrumpirse.';$('#theater').classList.remove('floating');$('#float-close').hidden=true;renderInspector()}
  function play(v,seconds=0){if(!v)return;current=v;active=true;miniDismissed=false;$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';const frame=document.createElement('iframe');const origin=new URL(location.href).origin;frame.src='https://www.youtube-nocookie.com/embed/'+v.youtubeId+'?autoplay=1&playsinline=1&rel=0&start='+Math.max(0,Math.floor(seconds))+'&origin='+encodeURIComponent(origin);frame.title='YouTube · '+v.title;frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';$screen.replaceChildren(frame);$note.textContent='YouTube se ha cargado tras tu clic. Algunos propietarios no permiten incrustar sus vídeos. El minirreproductor funciona dentro de DevTube.';renderInspector();updateFloat()}
@@ -73,7 +82,7 @@
   for(const {v,hit} of items){
    const card=newEl('article','video-card'),poster=newEl('button','video-thumb');poster.type='button';
    poster.setAttribute('aria-label','Reproducir '+v.title);
-   const img=newEl('img');img.src=thumb(v.youtubeId);img.loading='lazy';img.alt='Miniatura de '+v.title;img.addEventListener('error',()=>{img.style.display='none'});
+   const img=newEl('img');img.src=thumb(v.youtubeId);img.loading='lazy';img.alt='Miniatura de '+v.title;img.addEventListener('error',()=>fallbackImage(img));
    poster.append(img,newEl('span','video-type',v.format.toUpperCase()),newEl('span','play-chip',hit.seconds===null?'▶ REPRODUCIR':'▶ IR A '+formatTime(hit.seconds)));
    poster.addEventListener('click',()=>{play(v,hit.seconds||0);window.scrollTo({top:$('.studio-section').offsetTop-15,behavior:'smooth'})});
    const info=newEl('div','video-info');info.append(newEl('small',null,v.creator+' / '+universeNames[v.universe]),newEl('h3',null,v.title),newEl('p',null,v.description));
@@ -112,7 +121,7 @@
  // Search of public YouTube videos is separate from catalog-only filtering.
  // The server-owned API secret is never serialized to the client.
 
- let globalSearchSequence=0,latestDiscovered=[],latestSource='youtube';
+ let globalSearchSequence=0,latestDiscovered=[],latestSource='youtube',lastDiscoveryQuery='';
  const globalForm=$('#youtube-discover-form'),globalStatus=$('#youtube-search-status'),
   globalGrid=$('#youtube-search-results'),globalHelp=$('#youtube-search-help');
  function refreshDiscovery(){showDiscovered(latestDiscovered,latestSource)}
@@ -124,10 +133,10 @@
    if(!validId.test(original.youtubeId||'')||typeof original.title!=='string')continue;
    const saved=personalVideo(original.youtubeId),official=catalog.some(x=>x.youtubeId===original.youtubeId);
    const video=normalize({id:'discover-'+original.youtubeId,youtubeId:original.youtubeId,title:original.title.slice(0,130),
-    creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||'code',
+    creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||guessUniverse(original,lastDiscoveryQuery),
     format:source==='library'?'En mi biblioteca':'YouTube · Resultado'});
    const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
-   im.loading='lazy';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;
+   im.loading='lazy';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;im.addEventListener('error',()=>fallbackImage(im));
    thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+video.title);
    thumbButton.append(im,newEl('span',null,'▶ Ver dentro de DevTube'));
    const goPlay=()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})};
@@ -170,6 +179,7 @@
   event.preventDefault();
   const q=$('#youtube-query').value.trim().replace(/\s+/g,' ');
   if(q.length<2||q.length>100){globalStatus.textContent='Escribe entre 2 y 100 caracteres.';return}
+  lastDiscoveryQuery=q;
   const sequence=++globalSearchSequence,button=$('#youtube-find');
   globalGrid.replaceChildren();globalHelp.hidden=true;
   globalStatus.textContent='Buscando vídeos sin salir de StanNet.Dev…';button.disabled=true;

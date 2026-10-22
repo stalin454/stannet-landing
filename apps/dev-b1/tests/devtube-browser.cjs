@@ -19,6 +19,19 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.equal(state.overflow,false,'DevTube horizontal overflow at '+width);
   assert.ok(state.css.includes('gradient'),'DevTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
+  await page.waitForFunction(()=>document.querySelector('.video-card img')?.naturalWidth>0 &&
+    document.querySelector('#spotlight-image')?.naturalWidth>0,{timeout:15000});
+  assert.ok((await page.$eval('.video-card img',img=>new URL(img.src).origin))===new URL(base).origin,
+    'Video thumbnails must be served from stannet.dev rather than a third-party image CDN');
+  if(base.startsWith('https://')){
+   const proxyResponse=await page.evaluate(async()=>{
+    const r=await fetch('/api/devtube/thumbnail/M7lc1UVf-VE',{cache:'no-cache'});
+    return {status:r.status,contentType:r.headers.get('content-type'),bytes:(await r.arrayBuffer()).byteLength};
+   });
+   assert.equal(proxyResponse.status,200,'Same-origin thumbnail relay must serve an image');
+   assert.ok(/^image\/(jpeg|webp|svg\+xml)/.test(proxyResponse.contentType),'Relay must serve images only');
+   assert.ok(proxyResponse.bytes>100,'Relay image cannot be empty');
+  }
 
   // Search results must stay on StanNet.Dev; save, move, persist and delete by universe.
   const liveSearch=await page.evaluate(async()=>{
@@ -35,7 +48,9 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   });
   await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
   await page.waitForSelector('.youtube-result');
-  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
+  assert.equal(await page.$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
+  await page.waitForFunction(()=>document.querySelector('.youtube-result img')?.naturalWidth>0,{timeout:15000});
+  assert.equal(await page.$eval('.youtube-result img',img=>new URL(img.src).pathname),'/api/devtube/thumbnail/M7lc1UVf-VE');
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'No player before click');
   assert.ok(new URL(page.url()).pathname.startsWith('/devtube/'),'Global search must not redirect to YouTube');
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
@@ -57,6 +72,17 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'Delete personal video from its tab');
   await page.click('[data-filter="all"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Official videos must survive personal deletion');
+
+  await page.evaluate(()=>{
+   const original=window.fetch.bind(window);
+   window.fetch=(input,options)=>String(input).startsWith('/api/devtube/search?q=')
+    ?Promise.resolve(new Response(JSON.stringify({code:'OK',videos:[{youtubeId:'M7lc1UVf-VE',title:'ASTRID NOVA - new song',creator:'StanNet Music'}]}),{status:200,headers:{'Content-Type':'application/json'}}))
+    :original(input,options);
+  });
+  await page.type('#youtube-query','Astrid Nova');
+  await page.click('#youtube-find');await page.waitForSelector('.youtube-result');
+  assert.equal(await page.$eval('.youtube-result-actions select',e=>e.value),'astrid','Astrid search suggests Astrid Nova rather than Code & Cyber');
+  await page.$eval('#youtube-query',e=>{e.value='';});
   await page.evaluate(()=>{
    const original=window.fetch.bind(window);
    window.fetch=(input,options)=>String(input).startsWith('/api/devtube/search?q=')

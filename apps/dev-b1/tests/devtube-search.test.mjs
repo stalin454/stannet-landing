@@ -34,3 +34,37 @@ test('DevTube proxy returns safe video metadata without publishing the API key',
   assert.ok(!response.headers.get('cache-control').includes('no-store'));
  }finally{globalThis.fetch=old;globalThis.caches=previousCaches}
 });
+
+test('DevTube same-origin thumbnails: strictly validated IDs, no unsafe URL fetches, image-only response',async()=>{
+ const original=globalThis.fetch,oldCaches=globalThis.caches;
+ globalThis.caches=undefined;
+ const destinations=[];
+ globalThis.fetch=async url=>{
+  destinations.push(String(url));
+  return new Response(new Uint8Array(500).fill(123),{status:200,headers:{'Content-Type':'image/jpeg','Content-Length':'500'}});
+ };
+ const env={ASSETS:{fetch:async()=>new Response('asset')}};
+ try{
+  const valid=await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/M7lc1UVf-VE'),env);
+  assert.equal(valid.status,200);
+  assert.equal(valid.headers.get('content-type'),'image/jpeg');
+  assert.equal((await valid.arrayBuffer()).byteLength,500);
+  assert.deepEqual(destinations,['https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg']);
+  assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/https:%2f%2fevil.example'),env)).status,400);
+  assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/too-short'),env)).status,400);
+  assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/M7lc1UVf-VE',{method:'POST'}),env)).status,405);
+  assert.equal(destinations.length,1,'Invalid video IDs must never reach external hosts');
+ }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
+});
+test('DevTube returns a visible SVG when YouTube thumbnail providers are unavailable',async()=>{
+ const original=globalThis.fetch,oldCaches=globalThis.caches;
+ globalThis.caches=undefined;let requests=0;
+ globalThis.fetch=async()=>{requests++;return new Response('Unavailable',{status:403,headers:{'Content-Type':'text/html'}})};
+ try{
+  const response=await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/M7lc1UVf-VE'),{ASSETS:{fetch:async()=>new Response('asset')}});
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('content-type'),/image\/svg\+xml/);
+  assert.match(await response.text(),/<svg/);
+  assert.equal(requests,2,'Try two safe thumbnail hosts before local fallback');
+ }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
+});

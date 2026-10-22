@@ -1,11 +1,39 @@
 // DevTube discovery gateway. Keep YOUTUBE_API_KEY in Worker secrets, never in assets or GitHub.
 // Static routing remains asset-first; only /api/devtube/* invokes this script.
+// Strict same-origin thumbnail relay. Browsers on some networks cannot load i.ytimg.com.
+// Only canonical 11-character YouTube IDs are accepted; never accept arbitrary URLs.
+const thumbPattern=/^\/api\/devtube\/thumbnail\/([A-Za-z0-9_-]{11})$/;
+const fallbackSVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#11263a"/><stop offset="1" stop-color="#080c17"/></linearGradient></defs><rect width="480" height="270" fill="url(#g)"/><circle cx="240" cy="116" r="54" fill="#152d44" stroke="#64e7e9" stroke-width="3"/><path d="M230 91 L268 116 L230 141Z" fill="#64e7e9"/><text x="240" y="202" text-anchor="middle" fill="#a6dce8" font-size="18" font-family="Arial,sans-serif" letter-spacing="4">DEVTUBE</text><text x="240" y="226" text-anchor="middle" fill="#768aa2" font-size="11" font-family="Arial,sans-serif">Vista previa no disponible</text></svg>';
+function photo(body,contentType,age=3600){return new Response(body,{status:200,headers:{'Content-Type':contentType,'Cache-Control':'public, max-age='+age+', s-maxage='+age,'X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin'}})}
+async function thumbnail(id,request){
+ const cache=typeof caches!=='undefined'?caches.default:null;
+ const key=new Request(new URL('/api/devtube/thumbnail/'+id,request.url));
+ if(cache){try{const found=await cache.match(key);if(found)return found}catch{}}
+ for(const domain of ['i.ytimg.com','img.youtube.com']){
+  try{
+   const res=await fetch('https://'+domain+'/vi/'+id+'/hqdefault.jpg',{redirect:'error',signal:AbortSignal.timeout(4500)});
+   const size=Number(res.headers.get('content-length')||0);
+   if(!res.ok||!/^image\/(jpeg|jpg|webp)$/i.test(res.headers.get('content-type')||'')||size>1024*1024)continue;
+   const bytes=await res.arrayBuffer();
+   if(bytes.byteLength<100||bytes.byteLength>1024*1024)continue;
+   const result=photo(bytes,res.headers.get('content-type').split(';')[0],3600);
+   if(cache){try{await cache.put(key,result.clone())}catch{}}
+   return result;
+  }catch{}
+ }
+ const fallback=photo(fallbackSVG,'image/svg+xml; charset=utf-8',300);
+ if(cache){try{await cache.put(key,fallback.clone())}catch{}}
+ return fallback;
+}
 const JSON_HEADERS={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
 const VIDEO_ID=/^[A-Za-z0-9_-]{11}$/;
 const answer=(obj,status=200,cache='no-store')=>new Response(JSON.stringify(obj),{status,headers:{...JSON_HEADERS,'Cache-Control':cache,'Access-Control-Allow-Origin':'https://stannet.dev'}});
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
+  const thumb=url.pathname.match(thumbPattern);
+  if(thumb){if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED'},405);return thumbnail(thumb[1],request)}
+  if(url.pathname.startsWith('/api/devtube/thumbnail/'))return answer({code:'INVALID_VIDEO_ID'},400);
   if(url.pathname!=='/api/devtube/search')return env.ASSETS.fetch(request);
   if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED',error:'Utiliza GET.'},405);
   const q=(url.searchParams.get('q')||'').trim().replace(/\s+/g,' ');
