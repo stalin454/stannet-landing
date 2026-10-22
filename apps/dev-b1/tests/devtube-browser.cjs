@@ -97,18 +97,22 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
   await page.select('.youtube-result-actions select','astrid');
   await page.click('.youtube-result-actions>button:last-child');
+  console.log('ST_QA_STAGE_1_PRE_SAVE_ASSERT');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
   await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.length===1,{timeout:7000});
+  console.log('ST_QA_STAGE_2_INITIAL_SAVED');
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
   await page.click('[data-filter="astrid"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Saved result persisted in Astrid Nova tab');
+  console.log('ST_QA_STAGE_3_AFTER_RELOAD');
   await page.select('.video-card:nth-child(3) .video-category select','stan6ix');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Moved result leaves Astrid Nova');
   await page.click('[data-filter="stan6ix"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
   await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.[0]?.universe==='stan6ix',{timeout:7000});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
+  console.log('ST_QA_STAGE_4_MOVED_AND_RELOADED');
   await page.click('[data-filter="stan6ix"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Move persists after reload');
   await page.click('.video-card button.remove-video');
@@ -122,6 +126,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
     ?Promise.resolve(new Response(JSON.stringify({code:'OK',videos:[{youtubeId:'M7lc1UVf-VE',title:'ASTRID NOVA - new song',creator:'StanNet Music'}]}),{status:200,headers:{'Content-Type':'application/json'}}))
     :original(input,options);
   });
+  console.log('ST_QA_STAGE_5_AFTER_DELETE');
   await page.type('#youtube-query','Astrid Nova');
   await page.click('#youtube-find');await page.waitForSelector('.youtube-result');
   assert.equal(await page.$eval('.youtube-result-actions select',e=>e.value),'astrid','Astrid search suggests Astrid Nova rather than Code & Cyber');
@@ -142,6 +147,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.click('#close-dialog');
   await page.evaluate(()=>{sessionStorage.removeItem('stannet_qa_private_library');for(const k of Object.keys(localStorage))if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
+  console.log('ST_QA_STAGE_6_CATALOG_RESET');
   await page.click('[data-filter="code"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'No fictitious technology videos');
   assert.equal(await page.$eval('body',b=>b.dataset.universe),'code');
@@ -163,6 +169,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.waitForFunction(()=>document.querySelector('#theater').classList.contains('floating'),{timeout:5000});
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),1);
   await page.click('#float-close');assert.equal(await page.$eval('#theater',el=>el.classList.contains('floating')),false);
+  console.log('ST_QA_STAGE_7_PLAYER_AND_MINI');
   if(width===390){
    await page.click('.add-trigger');
    await page.type('#add-url','https://youtu.be/M7lc1UVf-VE');
@@ -170,6 +177,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
    await page.select('#add-universe','code');
    await page.click('#add-form button[type="submit"]');
    assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Personal import should be visible only locally');
+   console.log('ST_QA_STAGE_8_MOBILE_IMPORT');
    await page.waitForFunction(()=>document.querySelector('#account-status')?.textContent.includes('sincronizados')||document.querySelector('#account-status')?.textContent.includes('Sincroniz'));
    await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
    await page.evaluate(()=>{sessionStorage.removeItem('stannet_qa_private_library');for(const k of Object.keys(localStorage)){if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)}});
