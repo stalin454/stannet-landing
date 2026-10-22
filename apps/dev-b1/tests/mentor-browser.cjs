@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 async function checkMentor(browser,base){
- const results=[];
+ const results=[];fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
  for(const width of [390,1280]){
   const context=await browser.createBrowserContext();
   const page=await context.newPage();await page.setViewport({width,height:950});await page.setCacheEnabled(false);
@@ -46,6 +46,33 @@ async function checkMentor(browser,base){
      await page.click('[data-lab="notes"]');
      assert.equal(await page.$eval('#step-notes',e=>e.value),'Notas de prueba','Notes survive reload');
      await page.click('[data-lab="code"]');
+    }
+    if(i===5){
+     assert.equal(await page.$eval('#tutor-code',e=>e.textContent),'<!doctype html>','Only one line is shown by default');
+     assert.equal(await page.$eval('.tutor-full',e=>e.open),false,'Full fragment stays optional');
+     const draft=await page.$eval('#code-editor',e=>e.value);
+     await page.click('.tutor-practice summary');
+     await page.type('#line-practice','<!doctype html');
+     await page.click('#check-line');
+     assert.match(await page.$eval('#line-feedback',e=>e.textContent),/«>»/,'Mistake points to missing symbol');
+     assert.equal(await page.$eval('#code-editor',e=>e.value),draft,'Practice does not overwrite learner files');
+     await page.$eval('#line-practice',e=>e.value='<!doctype html>');await page.click('#check-line');
+     assert.match(await page.$eval('#line-feedback',e=>e.textContent),/Coincide/);
+     await page.click('#line-next');
+     await page.reload({waitUntil:'networkidle0'});
+     assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 2 de 11/,'Teaching position survives reload');
+     assert.equal(await page.$eval('#tutor-code',e=>e.textContent),'<html lang="es">');
+     const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('stannet-mentor-v1')));
+     assert.equal(saved.current,5);assert.equal(saved.lineProgress[5].index,1);
+     await page.click('#line-previous');
+     assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 1 de 11/);
+     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Line guide fits mobile');
+     await page.screenshot({path:'apps/dev-b1/qa-evidence/mentor-line-guide-390.png',fullPage:true});
+    }
+    if(await page.$('#line-next')){
+     const count=Number((await page.$eval('#line-position',e=>e.textContent)).match(/de (\d+)/)[1]);
+     for(let line=0;line<count;line++)await page.click('#line-next');
+     assert.ok(await page.$('.tutor-finish'),'Every code fragment ends with a visible result check');
     }
     if(i===23){
      await page.click('#run-code');

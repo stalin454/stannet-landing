@@ -37,7 +37,7 @@ step(0,'Crea tus tres archivos.',[
 ],'HTML define el contenido y su estructura. CSS controla su presentación. JavaScript añade comportamiento. Separarlos permite cambiar una parte sin mezclar responsabilidades.','Tu carpeta contiene exactamente index.html, style.css y script.js.','Explica con tus palabras qué función tendrá cada uno de los tres archivos.'),
 step(1,'Escribe el esqueleto HTML.',[
  'Abre `index.html` en VS Code.',
- 'Escribe el fragmento de abajo. La sangría no es obligatoria para el navegador, pero te ayudará a entender la estructura.',
+ 'Sigue la guía línea por línea. Escribe solo la línea que ves y pulsa «Ya la escribí» cuando quieras avanzar. La sangría es el espacio al principio de una línea: ayuda a ver qué está dentro de qué.',
  `Guarda el archivo con ${modifier}+S.`
 ],'El doctype activa el modo estándar de HTML. html contiene el documento; head contiene metadatos; body contiene lo visible. El idioma ayuda a lectores de pantalla y buscadores.','index.html contiene una estructura HTML completa, aunque todavía no muestra contenido.','¿Por qué el título de la pestaña va en head y el contenido visible en body?',{file:'index.html',mode:'replace',code:`<!doctype html>
 <html lang="es">
@@ -330,7 +330,7 @@ step(6,'Revisa lo que vas a versionar.',[
  'Crea un archivo README.md con el nombre, objetivo, tecnologías y pasos para abrir la web.',
  'Crea un archivo .gitignore y escribe las líneas indicadas abajo.',
  'Confirma que no has incluido contraseñas, tokens ni información privada en el código o las capturas.'
-],'README explica el proyecto a otra persona. .gitignore evita añadir ciertos archivos nuevos, pero no elimina secretos que ya estén en el historial. Una web estática publicada entrega sus archivos a los visitantes.','La carpeta incluye documentación y reglas para excluir configuraciones locales y dependencias.','¿Por qué una clave API nunca debe escribirse en script.js?',{command:true,code:'.env\n.env.*\nnode_modules/\n.DS_Store',lines:[['.env','Excluye archivos habituales de configuración local con secretos.'],['node_modules/','Las dependencias se reconstruyen; no se suben como parte del código fuente.']]}),
+],'README explica el proyecto a otra persona. .gitignore evita añadir ciertos archivos nuevos, pero no elimina secretos que ya estén en el historial. Una web estática publicada entrega sus archivos a los visitantes.','La carpeta incluye documentación y reglas para excluir configuraciones locales y dependencias.','¿Por qué una clave API nunca debe escribirse en script.js?',{command:true,guideFile:'.gitignore',code:'.env\n.env.*\nnode_modules/\n.DS_Store',lines:[['.env','Excluye archivos habituales de configuración local con secretos.'],['node_modules/','Las dependencias se reconstruyen; no se suben como parte del código fuente.']]}),
 step(6,'Crea tu primer commit.',[
  'En el terminal de VS Code ejecuta los comandos uno por uno, en el orden indicado.',
  'En git status revisa que solo aparecen los archivos de tu proyecto. Continúa con git add si es correcto.',

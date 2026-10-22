@@ -123,7 +123,7 @@ copyFileSync(new URL('./devtube/thumbnail-fallback.svg',import.meta.url),new URL
 const stanTubeDir=new URL('stantube/',destination);mkdirSync(stanTubeDir,{recursive:true});copyFileSync(new URL('./devtube/index.html',import.meta.url),new URL('index.html',stanTubeDir));
 // StanNet Mentor is published only in Dev. Its sandbox does not access account state.
 const mentorDir=new URL('mentor/',destination);mkdirSync(mentorDir,{recursive:true});
-for(const file of ['index.html','mentor.css','mentor.js','curriculum.mjs','favicon.svg'])copyFileSync(new URL('./mentor-public/'+file,import.meta.url),new URL(file,mentorDir));
+for(const file of ['index.html','mentor.css','mentor.js','curriculum.mjs','line-tutor.mjs','favicon.svg'])copyFileSync(new URL('./mentor-public/'+file,import.meta.url),new URL(file,mentorDir));
 // The original Dev portal is preserved, fully interactive, at /explorar/.
 // Infinity is the homepage, not just a link in the previous homepage.
 const catalogDir=new URL('explorar/',destination);mkdirSync(catalogDir,{recursive:true});

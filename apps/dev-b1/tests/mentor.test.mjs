@@ -55,3 +55,32 @@ test('La recuperación rechaza datos dañados y funciona si localStorage está b
  const saved=JSON.stringify([{nombre:'Guardado',descripcion:'Recurso persistido'}]);
  assert.equal(runtime(saved).elements.lista.children.length,1);
 });
+
+// The teaching guide must cover real course lines, including closings and commands.
+import {lineGuide,compareLine} from '../mentor-public/line-tutor.mjs';
+test('La guía explica cada línea del curso y conserva el código exacto',()=>{
+ let total=0;
+ for(const project of [{name:'Mi proyecto DAW'},{name:'Portfolio de Ana',os:'mac'}])for(const step of curriculum(project)){
+  const lines=lineGuide(step);if(!step.code){assert.equal(lines.length,0);continue;}
+  assert.equal(lines.map(line=>line.code).join('\n'),step.code);
+  for(const line of lines){assert.ok(line.meaning.length>10);assert.ok(line.why.length>20);assert.ok(line.pieces.length>0);assert.ok(line.where.includes(line.target)||line.target.includes('Terminal'));}
+  total+=lines.length;
+ }
+ assert.equal(total,410);
+ const html=lineGuide(steps[5]);
+ assert.match(html[2].meaning,/información/);assert.match(html[6].meaning,/Cerramos/);
+ assert.match(lineGuide(steps[6])[0].where,/antes.*<\/head>/);
+ assert.match(lineGuide(steps[7])[0].where,/sustitúyelo/);
+ assert.match(lineGuide(steps[13])[0].where,/final del archivo/);
+ const ignore=lineGuide(steps[32]);assert.equal(ignore[0].target,'.gitignore');assert.match(ignore[0].meaning,/No es un comando/);assert.doesNotMatch(ignore[0].after,/ejecutar/);
+ assert.match(lineGuide(steps[35])[0].pieces.join(' '),/Sustituye TU_USUARIO/);
+});
+test('La práctica tolera sangría, pero detecta cambios de símbolos, comillas y texto',()=>{
+ assert.equal(compareLine('    <body>  ','<body>').ok,true);
+ assert.equal(compareLine('<body','<body>').ok,false);
+ assert.match(compareLine('<body','<body>').message,/«>»/);
+ assert.equal(compareLine('const nombre = “Ana”;',"const nombre = 'Ana';").ok,false);
+ assert.equal(compareLine('mensaje.textContent = "hola mundo";','mensaje.textContent = "holamundo";').ok,false);
+ assert.equal(compareLine('','<body>').ok,false);
+ assert.equal(compareLine('<body>extra','<body>').ok,false);
+});
