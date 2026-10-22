@@ -278,6 +278,6 @@
   isAuthed:()=>privateSession
  };
  (async()=>{try{const response=await fetch('/devtube/videos.json',{cache:'no-cache'});if(!response.ok)throw Error('HTTP '+response.status);const data=await response.json();if(data.schemaVersion!==1||!Array.isArray(data.videos))throw Error('Esquema incorrecto');catalog=data.videos.filter(videoOK).map(normalize)}catch{$('#result-count').textContent='El catálogo oficial no está disponible';catalog=[]}
- personal=[]; // Legacy local videos are withheld until an authenticated, explicit import.
+ if(!privateSession)personal=[]; // Keep authenticated state when the public catalogue finishes loading.
  updateQueueCount();renderGrid();if(allVideos().length)select(allVideos()[0]);else{renderInspector();$('#current-title').textContent='Añade tu primer vídeo';$('#screen-placeholder').querySelector('.screen-hint').textContent='TU UNIVERSO ESTÁ POR CREARSE';$('#hero-play').disabled=true}})();
 })();
