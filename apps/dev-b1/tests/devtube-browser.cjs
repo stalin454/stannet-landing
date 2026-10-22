@@ -29,7 +29,8 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
 
   const response=await page.goto(base+'/stantube/?qa='+width,{waitUntil:'domcontentloaded',timeout:45000});
   assert.ok([200,304].includes(response.status()),'StanTube route unavailable at '+width);
-  await page.waitForFunction(()=>document.querySelector('#result-count').textContent.includes('DISPONIBLES')&&window.StanTubeBridge?.isAuthed(),{timeout:15000});
+  await page.waitForFunction(()=>document.querySelector('#result-count')?.textContent.includes('DISPONIBLES'),{timeout:15000});
+  await page.waitForFunction(()=>window.StanTubeBridge?.isAuthed(),{timeout:6500}).catch(async err=>{const diagnostic=await page.evaluate(()=>({ready:document.readyState,bridge:!!window.StanTubeBridge,logged:window.StanTubeBridge?.isAuthed(),status:document.querySelector('#account-status')?.textContent,privateScript:!!document.querySelector('script[src="/devtube/stantube-private.js"]'),cards:document.querySelectorAll('.video-card').length}));console.log('STANTUBE_LOGIN_DIAGNOSTIC',JSON.stringify({diagnostic,errors}));throw err});
   assert.ok(await page.$('#stantube-login'),'StanTube must offer private sign-in');
   assert.equal(await page.$$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
   const state=await page.evaluate(()=>({
