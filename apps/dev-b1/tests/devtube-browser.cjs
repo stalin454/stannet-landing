@@ -1,11 +1,11 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-module.exports.checkDevTube=async function checkDevTube(browser,base){
+module.exports.checkDevTube=async function checkStanTube(browser,base){
  for(const width of [390,1280]){
   const page=await browser.newPage();await page.setViewport({width,height:900});
   await page.setCacheEnabled(false);const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  const response=await page.goto(base+'/devtube/?qa='+width,{waitUntil:'domcontentloaded',timeout:45000});
-  assert.ok([200,304].includes(response.status()),'DevTube route unavailable at '+width);
+  const response=await page.goto(base+'/stantube/?qa='+width,{waitUntil:'domcontentloaded',timeout:45000});
+  assert.ok([200,304].includes(response.status()),'StanTube route unavailable at '+width);
   await page.waitForFunction(()=>document.querySelector('#result-count').textContent.includes('DISPONIBLES'),{timeout:15000});
   assert.equal(await page.$$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
   const state=await page.evaluate(()=>({
@@ -14,15 +14,27 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
    css:getComputedStyle(document.querySelector('.dimension.selected')).backgroundImage,
    videoLinks:[...document.querySelectorAll('.video-card .video-thumb')].map(x=>x.getAttribute('aria-label'))
   }));
-  assert.match(state.title,/DevTube/);assert.equal(state.canonical,'https://stannet.dev/devtube/');
+  assert.match(state.title,/StanTube/);assert.equal(state.canonical,'https://stannet.dev/stantube/');
   assert.equal(state.hasIframe,false,'YouTube must not load before a user click');
-  assert.equal(state.overflow,false,'DevTube horizontal overflow at '+width);
-  assert.ok(state.css.includes('gradient'),'DevTube design CSS must load');
+  assert.equal(state.overflow,false,'StanTube horizontal overflow at '+width);
+  assert.ok(state.css.includes('gradient'),'StanTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
+  assert.equal(await page.$eval('.dimension',items=>items.length),10,'StanTube includes the ten library universes');
+  assert.ok(await page.$('[data-filter="stan6ix"]'),'STAN6IX has its own tab');
+  assert.ok(await page.$('.stantube-mark'),'StanTube has its own brand mark');
+  assert.ok(await page.$('.tv-big-entry[href="#youtube-discovery"]'),'Television search has a prominent entry');
+  await page.click('#tv-toggle');
+  assert.equal(await page.$eval('body',body=>body.classList.contains('tv-mode')),true,'TV mode enabled');
+  assert.equal(await page.$eval('#tv-toggle',el=>el.getAttribute('aria-pressed')),'true');
+  await page.keyboard.press('ArrowRight');
+  assert.ok((await page.evaluate(()=>document.activeElement?.tagName))!=='BODY','TV remote arrow navigates to a focusable control');
+  await page.click('#tv-toggle');
+  assert.equal(await page.$eval('body',body=>body.classList.contains('tv-mode')),false,'TV mode disabled');
+
   if(base.startsWith('https://'))await page.waitForFunction(()=>document.querySelector('.video-card img')?.naturalWidth>0 &&
     document.querySelector('#spotlight-image')?.naturalWidth>0,{timeout:15000}).catch(async err=>{
       const details=await page.evaluate(()=>[...document.querySelectorAll('.video-card img, #spotlight-image')].map(im=>({src:im.src.slice(0,110),width:im.naturalWidth,complete:im.complete,fall:im.dataset.thumbFallback})));
-      console.log('DEVTUBE_THUMBNAIL_DIAGNOSTIC',JSON.stringify({base,width,details}));
+      console.log('STANTUBE_THUMBNAIL_DIAGNOSTIC',JSON.stringify({base,width,details}));
       throw err;
     });
   if(base.startsWith('https://')) assert.ok((await page.$eval('.video-card img',img=>new URL(img.src).origin))===new URL(base).origin,
@@ -52,25 +64,25 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   });
   await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
   await page.waitForSelector('.youtube-result');
-  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside DevTube');
+  assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside StanTube');
   await page.waitForFunction(()=>document.querySelector('.youtube-result img')?.naturalWidth>0,{timeout:15000});
   if(base.startsWith('https://')) assert.equal(await page.$eval('.youtube-result img',img=>new URL(img.src).pathname),'/api/devtube/thumbnail/M7lc1UVf-VE');
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'No player before click');
-  assert.ok(new URL(page.url()).pathname.startsWith('/devtube/'),'Global search must not redirect to YouTube');
+  assert.ok(new URL(page.url()).pathname.startsWith('/stantube/'),'Global search must not redirect to YouTube');
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
   await page.select('.youtube-result-actions select','astrid');
   await page.click('.youtube-result-actions>button:last-child');
-  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to DevTube');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
   await page.click('[data-filter="astrid"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Saved result persisted in Astrid Nova tab');
-  await page.select('.video-card:nth-child(3) .video-category select','music');
+  await page.select('.video-card:nth-child(3) .video-category select','stan6ix');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Moved result leaves Astrid Nova');
-  await page.click('[data-filter="music"]');
-  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in Music Lab');
+  await page.click('[data-filter="stan6ix"]');
+  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
-  await page.click('[data-filter="music"]');
+  await page.click('[data-filter="stan6ix"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Move persists after reload');
   await page.click('.video-card button.remove-video');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'Delete personal video from its tab');
@@ -99,7 +111,7 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),2,'Unavailable global API must show only true in-page library matches');
   assert.equal(await page.$eval('#youtube-search-help',el=>el.hidden),false,'In-page save-by-URL fallback');
   await page.click('#youtube-search-help button.add-trigger');
-  assert.equal(await page.$eval('#add-dialog',dialog=>dialog.open),true,'Fallback keeps user on DevTube');
+  assert.equal(await page.$eval('#add-dialog',dialog=>dialog.open),true,'Fallback keeps user on StanTube');
   await page.click('#close-dialog');
   await page.evaluate(()=>{for(const k of Object.keys(localStorage))if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
@@ -119,7 +131,7 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   await page.click('#add-queue');assert.equal(await page.$eval('#queue-number',el=>el.textContent),'1');
   await page.click('[data-panel="chapters"]');assert.match(await page.$eval('#inspector-content',el=>el.textContent),/No hay capítulos verificados/);
   await page.click('[data-panel="notes"]');assert.match(await page.$eval('#inspector-content',el=>el.textContent),/aún no tiene letras/);
-  // Native browser embed stays in the same page when navigating the DevTube catalog.
+  // Native browser embed stays in the same page when navigating the StanTube catalog.
   await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
   await page.waitForFunction(()=>document.querySelector('#theater').classList.contains('floating'),{timeout:5000});
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),1);
@@ -137,8 +149,8 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   await page.evaluate(()=>window.scrollTo(0,0));
   fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
   await page.screenshot({path:'apps/dev-b1/qa-evidence/devtube-'+width+'.png',fullPage:true});
-  assert.deepEqual(errors,[],'No DevTube page errors at '+width);
+  assert.deepEqual(errors,[],'No StanTube page errors at '+width);
   await page.close();
  }
- console.log('DevTube PASS: premium responsive cinema, zero pre-click iframes, universes, search, floating player, local library, queue and metadata integrity');
+ console.log('StanTube PASS: premium responsive cinema, zero pre-click iframes, universes, search, floating player, local library, queue and metadata integrity');
 };

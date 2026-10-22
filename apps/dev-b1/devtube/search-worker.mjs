@@ -9,19 +9,27 @@ async function thumbnail(id,request){
  const cache=typeof caches!=='undefined'?caches.default:null;
  const key=new Request(new URL('/api/devtube/thumbnail/'+id,request.url));
  if(cache){try{const found=await cache.match(key);if(found)return found}catch{}}
- for(const domain of ['i.ytimg.com','img.youtube.com']){
-  try{
-   const res=await fetch('https://'+domain+'/vi/'+id+'/hqdefault.jpg',{redirect:'error',signal:AbortSignal.timeout(4500)});
-   const size=Number(res.headers.get('content-length')||0);
-   if(!res.ok||!/^image\/(jpeg|jpg|webp)$/i.test(res.headers.get('content-type')||'')||size>1024*1024)continue;
-   const bytes=await res.arrayBuffer();
-   if(bytes.byteLength<100||bytes.byteLength>1024*1024)continue;
-   const result=photo(bytes,res.headers.get('content-type').split(';')[0],3600);
-   if(cache){try{await cache.put(key,result.clone())}catch{}}
-   return result;
-  }catch{}
+ const origins=[
+  'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',
+  'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg',
+  'https://img.youtube.com/vi/'+id+'/hqdefault.jpg',
+  'https://i.ytimg.com/vi_webp/'+id+'/hqdefault.webp',
+  'https://i3.ytimg.com/vi/'+id+'/hqdefault.jpg'
+ ];
+ async function sourceImage(origin){
+  const res=await fetch(origin,{redirect:'error',headers:{Accept:'image/webp,image/jpeg,image/*'},signal:AbortSignal.timeout(3800)});
+  const size=Number(res.headers.get('content-length')||0);
+  if(!res.ok||!/^image\/(jpeg|jpg|webp)$/i.test(res.headers.get('content-type')||'')||size>1024*1024)throw Error('Thumbnail source unavailable');
+  const bytes=await res.arrayBuffer();
+  if(bytes.byteLength<100||bytes.byteLength>1024*1024)throw Error('Thumbnail size invalid');
+  return photo(bytes,res.headers.get('content-type').split(';')[0],3600);
  }
- const fallback=photo(fallbackSVG,'image/svg+xml; charset=utf-8',300);
+ try{
+  const result=await Promise.any(origins.map(sourceImage));
+  if(cache){try{await cache.put(key,result.clone())}catch{}}
+  return result;
+ }catch{/* All official YouTube thumbnail CDNs unavailable: branded fallback instead of broken image. */}
+ const fallback=photo(fallbackSVG.replaceAll('DEVTUBE','STANTUBE'),'image/svg+xml; charset=utf-8',60);
  if(cache){try{await cache.put(key,fallback.clone())}catch{}}
  return fallback;
 }
