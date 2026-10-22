@@ -178,7 +178,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
    await page.click('#add-form button[type="submit"]');
    assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Personal import should be visible only locally');
    console.log('ST_QA_STAGE_8_MOBILE_IMPORT');
-   await page.waitForFunction(()=>document.querySelector('#account-status')?.textContent.includes('sincronizados')||document.querySelector('#account-status')?.textContent.includes('Sincroniz'));
+   await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.some(v=>v.youtubeId==='M7lc1UVf-VE'),{timeout:8000}).catch(async error=>{const state=await page.evaluate(()=>({status:document.querySelector('#account-status')?.textContent,snapshot:window.StanTubeBridge?.snapshot(),saved:sessionStorage.getItem('stannet_qa_private_library')}));console.log('ST_QA_MOBILE_SYNC_DIAGNOSTIC',JSON.stringify({state,errors}));throw error});
    await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
    await page.evaluate(()=>{sessionStorage.removeItem('stannet_qa_private_library');for(const k of Object.keys(localStorage)){if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)}});
   }
