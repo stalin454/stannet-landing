@@ -19,6 +19,28 @@ module.exports.checkDevTube=async function checkDevTube(browser,base){
   assert.equal(state.overflow,false,'DevTube horizontal overflow at '+width);
   assert.ok(state.css.includes('gradient'),'DevTube design CSS must load');
   assert.ok(state.videoLinks.some(x=>x.includes('LOUDER THAN FEAR')),'Existing published Astrid Nova metadata');
+
+  // Search all YouTube from the dedicated interface (mock only inside this browser QA).
+  const liveSearch=await page.evaluate(async()=>{
+   if(!location.protocol.startsWith('https'))return null;
+   const res=await fetch('/api/devtube/search?q=x',{cache:'no-store'});
+   return {status:res.status,code:(await res.json()).code};
+  });
+  if(liveSearch)assert.equal(liveSearch.status,400,'Worker route must validate YouTube search input');
+  await page.evaluate(()=>{
+   const original=window.fetch.bind(window);
+   window.fetch=(input,options)=>String(input).startsWith('/api/devtube/search?q=')
+    ?Promise.resolve(new Response(JSON.stringify({code:'OK',videos:[{youtubeId:'M7lc1UVf-VE',title:'YouTube API Demo',creator:'YouTube Developers',description:'Vídeo de ejemplo verificado en prueba de interfaz'}]}),{status:200,headers:{'Content-Type':'application/json'}}))
+    :original(input,options);
+  });
+  await page.type('#youtube-query','youtube api demo');await page.click('#youtube-find');
+  await page.waitForSelector('.youtube-result');
+  assert.equal(await page.$eval('.youtube-result',nodes=>nodes.length),1,'YouTube-wide search must show remote results');
+  assert.equal(await page.$eval('#screen iframe',nodes=>nodes.length),0,'Searching must not preload YouTube player');
+  await page.click('.youtube-result-actions button:nth-child(2)');
+  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),3,'Search result can be saved to local DevTube');
+  await page.evaluate(()=>{for(const key of Object.keys(localStorage))if(key.startsWith('stannet.devtube.v1.'))localStorage.removeItem(key)});
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
   await page.click('[data-filter="code"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'No fictitious technology videos');
   assert.equal(await page.$eval('body',b=>b.dataset.universe),'code');

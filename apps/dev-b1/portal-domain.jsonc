@@ -1,7 +1,19 @@
 {
-  "name":"stannet-dev-portal",
-  "compatibility_date":"2026-10-14",
-  "workers_dev":true,
-  "assets":{"directory":"./site-build"},
-  "routes":[{"pattern":"stannet.dev","custom_domain":true}]
+  "name": "stannet-dev-portal",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./site-build",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/devtube/*"
+    ]
+  },
+  "routes": [
+    {
+      "pattern": "stannet.dev",
+      "custom_domain": true
+    }
+  ],
+  "main": "./devtube/search-worker.mjs"
 }

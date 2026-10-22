@@ -1,1 +1,14 @@
-{"name":"stannet-dev-artists-preview","compatibility_date":"2026-10-14","workers_dev":true,"assets":{"directory":"./site-build"},"routes":[]}
+{
+  "name": "stannet-dev-artists-preview",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./site-build",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/devtube/*"
+    ]
+  },
+  "routes": [],
+  "main": "./devtube/search-worker.mjs"
+}

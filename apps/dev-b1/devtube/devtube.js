@@ -45,6 +45,65 @@
  personal.push(v);personal=personal.slice(-100);save('personal',personal);filter='all';document.body.dataset.universe='all';$$('.dimension').forEach(b=>{const yes=b.dataset.filter==='all';b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes))});onlyFavorites=false;$('#favorites-only').textContent='♡ Favoritos';$('#favorites-only').setAttribute('aria-pressed','false');$('#video-search').value='';renderGrid();$('#add-form').reset();$('#add-dialog').close();showNotice('Vídeo añadido a tu biblioteca local. No se publica para otros visitantes.')});
  $('#show-queue').addEventListener('click',()=>{renderQueue();$('#queue-dialog').showModal()});$('#close-queue').addEventListener('click',()=>$('#queue-dialog').close());$('#clear-queue').addEventListener('click',()=>{queue=[];save('queue',queue);updateQueueCount();renderQueue()});
  $('#float-close').addEventListener('click',()=>{miniDismissed=true;updateFloat()});window.addEventListener('scroll',updateFloat,{passive:true});window.addEventListener('resize',updateFloat,{passive:true});
+
+ // Search of public YouTube videos is separate from catalog-only filtering.
+ // The server-owned API secret is never serialized to the client.
+ let globalSearchSequence=0;
+ const globalForm=$('#youtube-discover-form'), globalStatus=$('#youtube-search-status'),globalGrid=$('#youtube-search-results'), globalExternal=$('#youtube-search-external');
+ function saveDiscovered(v){
+  if(allVideos().some(x=>x.youtubeId===v.youtubeId))return false;
+  personal=[...personal,normalize({...v,id:'personal-'+v.youtubeId,title:String(v.title).slice(0,130),universe:filter!=='all'?filter:'code',format:'YouTube · Descubierto',tags:[]})].slice(-100);
+  save('personal',personal);
+  renderGrid();
+  return true;
+ }
+ function showDiscovered(videos){
+  globalGrid.replaceChildren();
+  const frag=document.createDocumentFragment();
+  for(const v of videos){
+   if(!validId.test(v.youtubeId||'')||typeof v.title!=='string')continue;
+   const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
+   im.loading='lazy';im.src=thumb(v.youtubeId);im.alt='Miniatura de '+v.title;
+   thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+v.title);thumbButton.append(im,newEl('span',null,'▶ Reproducir'));
+   const video=normalize({id:'discover-'+v.youtubeId,youtubeId:v.youtubeId,title:v.title.slice(0,130),creator:v.creator||'YouTube',description:v.description||'',universe:filter==='all'?'code':filter,format:'YouTube · Búsqueda'});
+   thumbButton.addEventListener('click',()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})});
+   const body=newEl('div','youtube-result-body');body.append(newEl('small',null,video.creator),newEl('h3',null,video.title),newEl('p',null,video.description||'Vídeo de YouTube'));
+   const actions=newEl('div','youtube-result-actions'),playButton=newEl('button',null,'▶ Ver aquí'),saveButton=newEl('button',null,'+ Guardar en DevTube');
+   playButton.type='button';saveButton.type='button';
+   playButton.addEventListener('click',()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})});
+   function updateSave(){const exists=allVideos().some(x=>x.youtubeId===video.youtubeId);saveButton.disabled=exists;saveButton.textContent=exists?'✓ Ya está guardado':'+ Guardar en DevTube'}
+   saveButton.addEventListener('click',()=>{if(saveDiscovered(video)){globalStatus.textContent='Vídeo guardado en tu biblioteca de este navegador.'}updateSave()});updateSave();
+   actions.append(playButton,saveButton);body.append(actions);item.append(thumbButton,body);frag.append(item);
+  }
+  globalGrid.append(frag);
+ }
+ globalForm.addEventListener('submit',async event=>{
+  event.preventDefault();
+  const q=$('#youtube-query').value.trim().replace(/\s+/g,' ');
+  if(q.length<2||q.length>100){globalStatus.textContent='Escribe entre 2 y 100 caracteres.';return}
+  const sequence=++globalSearchSequence,button=$('#youtube-find');
+  const externalURL='https://www.youtube.com/results?'+new URLSearchParams({search_query:q});
+  globalExternal.href=externalURL;globalExternal.hidden=false;
+  globalGrid.replaceChildren();globalStatus.textContent='Buscando vídeos en YouTube…';button.disabled=true;
+  try{
+   const response=await fetch('/api/devtube/search?q='+encodeURIComponent(q),{headers:{Accept:'application/json'},signal:AbortSignal.timeout(12000)});
+   if(sequence!==globalSearchSequence)return;
+   const payload=await response.json().catch(()=>({}));
+   if(!response.ok){
+    globalStatus.textContent=payload.code==='YOUTUBE_NOT_CONFIGURED'
+      ?'Búsqueda integrada pendiente de activar: falta configurar la clave privada de YouTube Data API. Puedes abrir los resultados oficiales abajo.'
+      :'YouTube no está disponible desde DevTube en este momento. Abre la búsqueda oficial con el enlace de abajo.';
+    return;
+   }
+   const list=Array.isArray(payload.videos)?payload.videos:[];
+   showDiscovered(list);
+   globalStatus.textContent=list.length
+    ?list.length+' resultados de YouTube. Reprodúcelos aquí o guárdalos en DevTube.'
+    :'YouTube no devolvió vídeos para esta búsqueda. Prueba otras palabras.';
+  }catch{
+   if(sequence===globalSearchSequence)globalStatus.textContent='No se pudo conectar con la búsqueda integrada. Puedes continuar en YouTube mediante el enlace inferior.';
+  }finally{if(sequence===globalSearchSequence)button.disabled=false}
+ });
  (async()=>{try{const response=await fetch('/devtube/videos.json',{cache:'no-cache'});if(!response.ok)throw Error('HTTP '+response.status);const data=await response.json();if(data.schemaVersion!==1||!Array.isArray(data.videos))throw Error('Esquema incorrecto');catalog=data.videos.filter(videoOK).map(normalize)}catch{$('#result-count').textContent='El catálogo oficial no está disponible';catalog=[]}
  personal=load('personal',[]).filter(videoOK).slice(-100).map(normalize);
  updateQueueCount();renderGrid();if(allVideos().length)select(allVideos()[0]);else{renderInspector();$('#current-title').textContent='Añade tu primer vídeo';$('#screen-placeholder').querySelector('.screen-hint').textContent='TU UNIVERSO ESTÁ POR CREARSE';$('#hero-play').disabled=true}})();

@@ -39,6 +39,19 @@
    <button class="dimension" type="button" data-filter="music" aria-pressed="false"><span class="dimension-icon">♫</span><span><strong>Music Lab</strong><small>Create / Produce</small></span></button>
   </div>
  </section>
+ <section class="youtube-discovery" id="youtube-discovery" aria-labelledby="youtube-search-title">
+  <div class="section-kicker"><span>02</span><div class="rule"></div><span>DESCUBRE MÁS ALLÁ DE TU CATÁLOGO</span></div>
+  <div class="youtube-search-layout">
+   <div><p class="tiny-label">GLOBAL YOUTUBE DISCOVERY</p><h2 id="youtube-search-title">BUSCA EN <em>YOUTUBE</em></h2><p>Busca tutoriales, tecnología, videoclips y creadores de YouTube. Reprodúcelos aquí y guarda los que quieras en tu biblioteca.</p></div>
+   <form id="youtube-discover-form" role="search" aria-label="Buscar vídeos en YouTube">
+     <label for="youtube-query" class="sr-only">Buscar en todo YouTube</label>
+     <div class="youtube-search-input"><span aria-hidden="true">⌕</span><input id="youtube-query" name="q" type="search" autocomplete="off" minlength="2" maxlength="100" required placeholder="Buscar en todo YouTube: JavaScript, Astrid Nova…"><button type="submit" id="youtube-find">Buscar vídeos ↗</button></div>
+   </form>
+  </div>
+  <p class="youtube-search-status" id="youtube-search-status" role="status" aria-live="polite">Escribe lo que buscas y pulsa «Buscar vídeos». Es independiente del buscador de tu biblioteca.</p>
+  <a id="youtube-search-external" class="youtube-external" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" hidden>Ver resultados directamente en YouTube ↗</a>
+  <div id="youtube-search-results" class="youtube-results" aria-label="Resultados de búsqueda de YouTube"></div>
+ </section>
  <section class="studio-section" aria-labelledby="studio-title">
   <div class="section-kicker"><span>02</span><div class="rule"></div><span id="studio-title">THEATER STAGE</span><span class="special-tag">THE IMMERSIVE EXPERIENCE</span></div>
   <div class="studio-layout">
