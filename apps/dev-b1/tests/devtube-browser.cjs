@@ -198,6 +198,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
    });
    await guest.reload({waitUntil:'domcontentloaded'});
    await guest.waitForFunction(()=>document.querySelector('#result-count')?.textContent.includes('DISPONIBLES'));
+   await guest.waitForFunction(()=>document.querySelectorAll('.video-card').length===2,{timeout:20000});
    assert.equal(await guest.$$eval('.video-card',items=>items.length),2,'A visitor must never see saved personal videos from legacy localStorage');
    assert.equal(await guest.evaluate(()=>window.StanTubeBridge?.isAuthed()),false,'Private library must be gated by login');
    await guest.click('.add-trigger');
