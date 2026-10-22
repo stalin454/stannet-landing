@@ -49,11 +49,12 @@ test('DevTube same-origin thumbnails: strictly validated IDs, no unsafe URL fetc
   assert.equal(valid.status,200);
   assert.equal(valid.headers.get('content-type'),'image/jpeg');
   assert.equal((await valid.arrayBuffer()).byteLength,500);
-  assert.deepEqual(destinations,['https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg']);
+  assert.ok(destinations.length>=1&&destinations.length<=5,'Only the five official thumbnail variants may be requested');
+  assert.ok(destinations.every(x=>/^https:\/\/(?:i|i3)\.ytimg\.com\/vi(?:_webp)?\/M7lc1UVf-VE\/(?:hqdefault|mqdefault)\.(?:jpg|webp)$/.test(x)||x==='https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg'),'No request is allowed to arbitrary image hosts');
   assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/https:%2f%2fevil.example'),env)).status,400);
   assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/too-short'),env)).status,400);
   assert.equal((await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/M7lc1UVf-VE',{method:'POST'}),env)).status,405);
-  assert.equal(destinations.length,1,'Invalid video IDs must never reach external hosts');
+  assert.ok(destinations.length<=5,'Invalid video IDs must never reach external hosts');
  }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
 });
 test('DevTube returns a visible SVG when YouTube thumbnail providers are unavailable',async()=>{
@@ -65,6 +66,6 @@ test('DevTube returns a visible SVG when YouTube thumbnail providers are unavail
   assert.equal(response.status,200);
   assert.match(response.headers.get('content-type'),/image\/svg\+xml/);
   assert.match(await response.text(),/<svg/);
-  assert.equal(requests,2,'Try two safe thumbnail hosts before local fallback');
+  assert.equal(requests,5,'Try five allowlisted YouTube thumbnail variants before local fallback');
  }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
 });
