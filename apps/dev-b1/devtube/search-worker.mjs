@@ -1,3 +1,4 @@
+import stanTubePrivate from './private-worker.mjs';
 // DevTube discovery gateway. Keep YOUTUBE_API_KEY in Worker secrets, never in assets or GitHub.
 // Static routing remains asset-first; only /api/devtube/* invokes this script.
 // Strict same-origin thumbnail relay. Browsers on some networks cannot load i.ytimg.com.
@@ -39,6 +40,7 @@ const answer=(obj,status=200,cache='no-store')=>new Response(JSON.stringify(obj)
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
+  if(url.pathname.startsWith('/api/stantube/'))return stanTubePrivate.fetch(request,env);
   const thumb=url.pathname.match(thumbPattern);
   if(thumb){if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED'},405);return thumbnail(thumb[1],request)}
   if(url.pathname.startsWith('/api/devtube/thumbnail/'))return answer({code:'INVALID_VIDEO_ID'},400);

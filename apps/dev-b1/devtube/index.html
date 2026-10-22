@@ -10,6 +10,7 @@
 <title>StanTube · Tu videoteca StanNet</title>
 <link rel="stylesheet" href="/devtube/devtube.css">
 <script src="/devtube/devtube.js" defer></script>
+<script src="/devtube/stantube-private.js" defer></script>
 </head>
 <body data-universe="all">
 <a class="skip" href="#library">Saltar al catálogo de vídeos</a>
@@ -19,7 +20,7 @@
  <nav aria-label="Navegación StanTube">
   <a href="/">Infinity</a><a href="/explorar/">Ecosistema</a><a class="here" href="/stantube/" aria-current="page">StanTube</a>
  </nav>
- <div class="top-actions"><button type="button" id="tv-toggle" class="tv-toggle" aria-pressed="false">📺 Modo TV</button><button type="button" class="outline-btn add-trigger">+ Añadir vídeo</button></div>
+ <div class="top-actions"><button type="button" id="tv-toggle" class="tv-toggle" aria-pressed="false">📺 Modo TV</button><button type="button" id="stantube-login" class="account-button">🔐 Iniciar sesión</button><button type="button" id="stantube-logout" class="outline-btn" hidden>Cerrar sesión</button><button type="button" class="outline-btn add-trigger">+ Añadir vídeo</button></div>
 </header>
 <main>
  <section class="welcome" aria-labelledby="welcome-title">
@@ -95,10 +96,20 @@
   <div class="video-grid" id="video-grid"></div>
   <div id="empty-results" class="empty-results" hidden><strong>TODAVÍA SIN VÍDEOS EN ESTE UNIVERSO</strong><p>Puedes añadir uno de tus vídeos públicos con su enlace de YouTube. Se guardará solo en este navegador.</p><button type="button" class="outline-btn add-trigger">+ Añadir vídeo</button></div>
  </section>
- <section class="personal-section" aria-labelledby="personal-title"><div><p class="tiny-label">04 / YOUR CREATIVE SPACE</p><h2 id="personal-title">TU ESTUDIO.<br><em>TUS REGLAS.</em></h2><p>Organiza tu cola, recupera tus favoritos y añade vídeos propios. Todo sin cuentas ni claves expuestas.</p></div><div class="personal-actions"><button type="button" class="outline-btn add-trigger">+ Guardar un vídeo</button><button type="button" id="show-queue" class="solid-btn">Ver mi cola <span id="queue-number">0</span> ↗</button></div></section>
+ <section class="personal-section" aria-labelledby="personal-title"><div><p class="tiny-label">04 / YOUR CREATIVE SPACE</p><h2 id="personal-title">TU ESTUDIO.<br><em>TUS REGLAS.</em></h2><p>Organiza tu cola, guarda tus favoritos y sincroniza tu biblioteca privada al iniciar sesión.</p></div><div class="personal-actions"><button type="button" class="outline-btn add-trigger">+ Guardar un vídeo</button><button type="button" id="show-queue" class="solid-btn">Ver mi cola <span id="queue-number">0</span> ↗</button></div></section>
 </main>
 <footer><div><strong>DEV<span>TUBE</span></strong><small>AN ORIGINAL STANNET EXPERIENCE</small></div><p>Powered by YouTube · Diseño y curaduría StanNet</p><nav aria-label="Pie de página"><a href="/">Infinity</a><a href="/explorar/">Todas las apps</a><a href="/open/artists/">Artist Universe</a></nav></footer>
-<dialog id="add-dialog" aria-labelledby="add-title"><form id="add-form"><div class="dialog-head"><div><p class="tiny-label">TU BIBLIOTECA PERSONAL</p><h2 id="add-title">AÑADIR A STANTUBE</h2></div><button type="button" id="close-dialog" aria-label="Cerrar">×</button></div><p>Introduce un vídeo público de YouTube. Solo se guardará en este navegador; no aparecerá para otros visitantes.</p>
+<dialog id="stantube-account" class="stantube-account" aria-labelledby="account-title">
+ <div class="dialog-head"><div><p class="tiny-label">STANTUBE PRIVATE LIBRARY</p><h2 id="account-title">TU BIBLIOTECA PRIVADA</h2></div><button type="button" id="account-close" aria-label="Cerrar ventana">×</button></div>
+ <p id="account-description">Los vídeos oficiales son públicos. Tus listas, favoritos e historial solo se mostrarán con tu sesión iniciada.</p>
+ <p id="account-status" role="status" aria-live="polite">Comprobando inicio de sesión…</p>
+ <div class="account-buttons"><button id="google-login" class="solid-btn" type="button" disabled>Entrar con Google</button><button id="tv-pair-start" class="outline-btn" type="button" disabled>📺 Vincular esta televisión</button></div>
+ <section id="tv-pair" class="tv-pair" hidden aria-labelledby="tv-pair-title"><h3 id="tv-pair-title">VINCULAR DISPOSITIVO</h3><p>En tu PC o móvil, abre <strong>stannet.dev/stantube</strong>, inicia sesión y escribe este código:</p><output id="tv-pair-code" class="tv-pair-code" aria-live="polite">--------</output><p id="tv-pair-status" role="status">Esperando autorización…</p><button type="button" id="tv-pair-cancel" class="outline-btn">Cancelar</button></section>
+ <section id="tv-approve" class="tv-approve" hidden aria-labelledby="tv-approve-title"><h3 id="tv-approve-title">AUTORIZAR TU TELEVISIÓN</h3><p>Comprueba el código que aparece en tu Samsung antes de autorizar.</p><form id="tv-approve-form"><label for="tv-approve-code">Código del televisor</label><input id="tv-approve-code" autocomplete="off" inputmode="numeric" maxlength="8" minlength="8" pattern="[0-9]{8}" placeholder="8 dígitos" required><button type="submit" class="solid-btn">Autorizar dispositivo</button></form><p id="tv-approve-status" role="status"></p></section>
+ <section id="legacy-import" class="legacy-import" hidden><h3>VÍDEOS DEL NAVEGADOR ANTERIOR</h3><p id="legacy-count">Hay vídeos antiguos que todavía no están en tu cuenta.</p><button id="legacy-import-button" type="button" class="outline-btn">Importar a mi biblioteca privada</button></section>
+ <p class="account-fineprint">Tu biblioteca se guarda en una base de datos privada. Los demás visitantes solo ven los vídeos oficiales. No publicamos contraseñas ni códigos de acceso.</p>
+</dialog>
+<dialog id="add-dialog" aria-labelledby="add-title"><form id="add-form"><div class="dialog-head"><div><p class="tiny-label">TU BIBLIOTECA PERSONAL</p><h2 id="add-title">AÑADIR A STANTUBE</h2></div><button type="button" id="close-dialog" aria-label="Cerrar">×</button></div><p>Añade un vídeo de YouTube a tu cuenta privada. Se sincronizará en los dispositivos en los que inicies sesión.</p>
 <label>Enlace de YouTube<input id="add-url" type="url" required placeholder="https://www.youtube.com/watch?v=…"></label>
 <label>Título<input id="add-title-input" type="text" maxlength="130" required placeholder="Mi nuevo vídeo"></label>
 <label>Universo<select id="add-universe"><option value="code">Tecnología</option><option value="javascript">JavaScript</option><option value="ai">Inteligencia artificial</option><option value="cyber">Ciberseguridad</option><option value="astrid">Astrid Nova</option><option value="stan6ix">STAN6IX</option><option value="music">Música & DJ</option><option value="documentaries">Documentales</option><option value="languages">Idiomas</option></select></label>

@@ -4,9 +4,33 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
  for(const width of [390,1280]){
   const page=await browser.newPage();await page.setViewport({width,height:900});
   await page.setCacheEnabled(false);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  // Simulate a verified owner session and D1 versioned library, persisted across reloads.
+  // Never weaken live access controls or preload personal videos in public JSON.
+  await page.evaluateOnNewDocument(()=>{
+   const real=window.fetch.bind(window),key='stannet_qa_private_library';
+   window.fetch=(input,opts={})=>{
+    const url=String(input),method=opts.method||'GET';
+    const result=(obj,status=200)=>Promise.resolve(new Response(JSON.stringify(obj),{status,headers:{'content-type':'application/json'}}));
+    if(url==='/api/stantube/session')return result({ready:true,authenticated:true,user:{email:'test.user@example.invalid'}});
+    if(url==='/api/stantube/library'){
+     const record=JSON.parse(sessionStorage.getItem(key)||'null')||{revision:0,library:{personal:[],favorites:[],watched:[],queue:[]}};
+     if(method==='GET')return result({revision:record.revision,library:record.library,user:{email:'test.user@example.invalid'},authenticated:true});
+     if(method==='PUT'){
+      const next=JSON.parse(opts.body);
+      if(next.revision!==record.revision)return result({code:'REVISION_CONFLICT'},409);
+      const saved={revision:record.revision+1,library:next.library};
+      sessionStorage.setItem(key,JSON.stringify(saved));
+      return result({saved:true,revision:saved.revision});
+     }
+    }
+    return real(input,opts);
+   };
+  });
+
   const response=await page.goto(base+'/stantube/?qa='+width,{waitUntil:'domcontentloaded',timeout:45000});
   assert.ok([200,304].includes(response.status()),'StanTube route unavailable at '+width);
-  await page.waitForFunction(()=>document.querySelector('#result-count').textContent.includes('DISPONIBLES'),{timeout:15000});
+  await page.waitForFunction(()=>document.querySelector('#result-count').textContent.includes('DISPONIBLES')&&window.StanTubeBridge?.isAuthed(),{timeout:15000});
+  assert.ok(await page.$('#stantube-login'),'StanTube must offer private sign-in');
   assert.equal(await page.$$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
   const state=await page.evaluate(()=>({
    title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,
@@ -72,7 +96,8 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
   await page.select('.youtube-result-actions select','astrid');
   await page.click('.youtube-result-actions>button:last-child');
-  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
+  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),3,'Save a search result to StanTube');
+  await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.length===1,{timeout:7000});
   await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
   await page.click('[data-filter="astrid"]');
@@ -80,7 +105,8 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.select('.video-card:nth-child(3) .video-category select','stan6ix');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),2,'Moved result leaves Astrid Nova');
   await page.click('[data-filter="stan6ix"]');
-  assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
+  assert.equal(await page.$eval('.video-card',nodes=>nodes.length),1,'Moved result appears in STAN6IX');
+  await page.waitForFunction(()=>JSON.parse(sessionStorage.getItem('stannet_qa_private_library')||'null')?.library?.personal?.[0]?.universe==='stan6ix',{timeout:7000});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
   await page.click('[data-filter="stan6ix"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),1,'Move persists after reload');
@@ -111,9 +137,9 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),2,'Unavailable global API must show only true in-page library matches');
   assert.equal(await page.$eval('#youtube-search-help',el=>el.hidden),false,'In-page save-by-URL fallback');
   await page.click('#youtube-search-help button.add-trigger');
-  assert.equal(await page.$eval('#add-dialog',dialog=>dialog.open),true,'Fallback keeps user on StanTube');
+  assert.equal(await page.$eval('#add-dialog',dialog=>dialog.open),true,'Authenticated owner can save from in-page search');
   await page.click('#close-dialog');
-  await page.evaluate(()=>{for(const k of Object.keys(localStorage))if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)});
+  await page.evaluate(()=>{sessionStorage.removeItem('stannet_qa_private_library');for(const k of Object.keys(localStorage))if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)});
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2);
   await page.click('[data-filter="code"]');
   assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),0,'No fictitious technology videos');
@@ -143,14 +169,29 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
    await page.select('#add-universe','code');
    await page.click('#add-form button[type="submit"]');
    assert.equal(await page.$$eval('.video-card',nodes=>nodes.length),3,'Personal import should be visible only locally');
+   await page.waitForFunction(()=>document.querySelector('#account-status')?.textContent.includes('sincronizados')||document.querySelector('#account-status')?.textContent.includes('Sincroniz'));
    await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===3);
-   await page.evaluate(()=>{for(const k of Object.keys(localStorage)){if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)}});
+   await page.evaluate(()=>{sessionStorage.removeItem('stannet_qa_private_library');for(const k of Object.keys(localStorage)){if(k.startsWith('stannet.devtube.v1.'))localStorage.removeItem(k)}});
   }
   await page.evaluate(()=>window.scrollTo(0,0));
   fs.mkdirSync('apps/dev-b1/qa-evidence',{recursive:true});
   await page.screenshot({path:'apps/dev-b1/qa-evidence/devtube-'+width+'.png',fullPage:true});
   assert.deepEqual(errors,[],'No StanTube page errors at '+width);
   await page.close();
+  if(width===390){
+   const guest=await browser.newPage();
+   await guest.goto(base+'/stantube/?qa=guest',{waitUntil:'domcontentloaded'});
+   await guest.evaluate(()=>{
+    localStorage.setItem('stannet.devtube.v1.personal',JSON.stringify([{id:'personal-M7lc1UVf-VE',youtubeId:'M7lc1UVf-VE',title:'Este video es privado',universe:'cyber'}]));
+   });
+   await guest.reload({waitUntil:'domcontentloaded'});
+   await guest.waitForFunction(()=>document.querySelector('#result-count')?.textContent.includes('DISPONIBLES'));
+   assert.equal(await guest.$eval('.video-card',items=>items.length),2,'A visitor must never see saved personal videos from legacy localStorage');
+   assert.equal(await guest.evaluate(()=>window.StanTubeBridge?.isAuthed()),false,'Private library must be gated by login');
+   await guest.click('.add-trigger');
+   assert.equal(await guest.$eval('#stantube-account',el=>el.open),true,'Guest must see private sign-in instead of saving personal videos');
+   await guest.close();
+  }
  }
  console.log('StanTube PASS: premium responsive cinema, zero pre-click iframes, universes, search, floating player, local library, queue and metadata integrity');
 };

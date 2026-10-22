@@ -117,7 +117,7 @@ const infinityDir=new URL('infinity/',destination);
 mkdirSync(infinityDir,{recursive:true});
 for(const file of ['index.html','infinity.css','infinity.js','poster.webp','stannet_infinity_web.mp4'])copyFileSync(new URL('../../infinity/'+file,import.meta.url),new URL(file,infinityDir));
 const devtubeDir=new URL('devtube/',destination);mkdirSync(devtubeDir,{recursive:true});
-for(const file of ['index.html','devtube.css','devtube.js','videos.json'])copyFileSync(new URL('./devtube/'+file,import.meta.url),new URL(file,devtubeDir));
+for(const file of ['index.html','devtube.css','devtube.js','stantube-private.js','videos.json'])copyFileSync(new URL('./devtube/'+file,import.meta.url),new URL(file,devtubeDir));
 copyFileSync(new URL('./devtube/thumbnail-fallback.svg',import.meta.url),new URL('thumbnail-fallback.svg',devtubeDir));
 // StanTube is the canonical route; /devtube/ remains a stable backward-compatible alias.
 const stanTubeDir=new URL('stantube/',destination);mkdirSync(stanTubeDir,{recursive:true});copyFileSync(new URL('./devtube/index.html',import.meta.url),new URL('index.html',stanTubeDir));
