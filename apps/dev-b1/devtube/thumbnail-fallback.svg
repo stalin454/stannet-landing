@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Miniatura no disponible: StanTube">
+ <defs><radialGradient id="neb"><stop stop-color="#283669"/><stop offset="1" stop-color="#060a16"/></radialGradient><linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#61f8f7"/><stop offset=".6" stop-color="#738dff"/><stop offset="1" stop-color="#d57dff"/></linearGradient></defs>
+ <rect width="960" height="540" fill="url(#neb)"/><g opacity=".25" fill="none" stroke="#5a87bc"><circle cx="480" cy="210" r="175"/><circle cx="480" cy="210" r="235"/><path d="M0 428 H960 M0 448 H960 M0 468 H960"/></g>
+ <rect x="402" y="120" width="156" height="156" rx="34" fill="#0a1329" stroke="url(#neon)" stroke-width="10"/><path d="M455 155 L520 198 L455 241Z" fill="url(#neon)"/>
+ <text x="480" y="352" font-family="Arial,Helvetica,sans-serif" font-weight="900" font-size="70" fill="#f2f8ff" text-anchor="middle">STAN<tspan fill="#75dfff">TUBE</tspan></text>
+ <text x="480" y="398" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#b1c4e1" text-anchor="middle">VISTA PREVIA NO DISPONIBLE</text>
+ <text x="480" y="450" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#94a7bc" text-anchor="middle">Tu videoteca StanNet</text>
+ </svg>
