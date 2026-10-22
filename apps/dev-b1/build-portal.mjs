@@ -121,10 +121,13 @@ for(const file of ['index.html','devtube.css','devtube.js','stantube-private.js'
 copyFileSync(new URL('./devtube/thumbnail-fallback.svg',import.meta.url),new URL('thumbnail-fallback.svg',devtubeDir));
 // StanTube is the canonical route; /devtube/ remains a stable backward-compatible alias.
 const stanTubeDir=new URL('stantube/',destination);mkdirSync(stanTubeDir,{recursive:true});copyFileSync(new URL('./devtube/index.html',import.meta.url),new URL('index.html',stanTubeDir));
+// StanNet Mentor is published only in Dev. Its sandbox does not access account state.
+const mentorDir=new URL('mentor/',destination);mkdirSync(mentorDir,{recursive:true});
+for(const file of ['index.html','mentor.css','mentor.js','curriculum.mjs','favicon.svg'])copyFileSync(new URL('./mentor-public/'+file,import.meta.url),new URL(file,mentorDir));
 // The original Dev portal is preserved, fully interactive, at /explorar/.
 // Infinity is the homepage, not just a link in the previous homepage.
 const catalogDir=new URL('explorar/',destination);mkdirSync(catalogDir,{recursive:true});
-let catalogHtml=readFileSync(homePath,'utf8');
+let catalogHtml=readFileSync(homePath,'utf8').replace('<a class="button secondary" href="#catalog">Descubrir proyectos ↗</a>','<a class="button secondary" href="#catalog">Descubrir proyectos ↗</a><a class="button secondary" href="/mentor/">StanNet Mentor →</a>');
 const portalCanonical='<link rel="canonical" href="https://stannet.dev/">';
 if(!catalogHtml.includes(portalCanonical))throw Error('Unexpected original portal canonical');
 catalogHtml=catalogHtml.replace(portalCanonical,'<link rel="canonical" href="https://stannet.dev/explorar/">')
@@ -138,9 +141,9 @@ writeFileSync(homePath,infinityHome);
 const openURLs={infinity:'/infinity/',devtube:'/stantube/', music:'/open/radio/',denmark:'/open/denmark/',programming:'/open/programming/',cyber:'/open/cybersecurity/',labs:'/open/shortcuts/',artists:'/open/artists/',typing:'/open/typing/','london-english':'/open/london-english/'};
 writeFileSync(new URL('catalog.json',destination),JSON.stringify({catalog:catalog.map(x=>({...x,status:openURLs[x.id]?'open':'pending',url:openURLs[x.id]||null}))}));
 
-writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity','devtube']}));
+writeFileSync(new URL('version.json',destination),JSON.stringify({commit,module:'public-portal',auth:false,payments:false,typing:false,openLabs:[...openLabs.map(x=>x.id),'artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity','devtube','mentor']}));
 // Public-only discovery resources. Authentication paths are not indexed or published.
-const livePaths=['/','/explorar/','/infinity/','/stantube/','/devtube/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
+const livePaths=['/','/mentor/','/explorar/','/infinity/','/stantube/','/devtube/','/open/fp-study/','/open/cs-foundations/','/open/shortcuts/','/open/cybersecurity/','/open/typing/','/open/artists/','/artistas/astrid-nova/','/artistas/stan6ix/','/open/denmark/','/open/denmark/cv/','/open/programming/','/open/programming/coach/','/open/programming/web/','/open/programming/python/','/open/programming/computer-science/','/open/programming/fullstack/','/open/programming/course/','/open/radio/','/open/london-english/'];
 writeFileSync(new URL('sitemap.xml',destination),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+livePaths.map(path=>'  <url><loc>https://stannet.dev'+path+'</loc></url>').join('\n')+'\n</urlset>\n');
 writeFileSync(new URL('robots.txt',destination),'User-agent: *\nAllow: /\nSitemap: https://stannet.dev/sitemap.xml\n');
 // Preserve this static page under strict CSP; prevent edge-injected analytics scripts.

@@ -19,6 +19,7 @@ const puppeteer=require('puppeteer-core');
   await require('./artist-universe-browser.cjs').checkArtistUniverse(browser,base);
   await require('./infinity-browser.cjs').checkInfinity(browser,base);
   await require('./devtube-browser.cjs').checkDevTube(browser,base);
+  await require('./mentor-browser.cjs').checkMentor(browser,base);
   for(const width of [320,390,768,1280,1440]){
    const page=await browser.newPage();await page.setCacheEnabled(false);await page.setViewport({width,height:900});
    const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -84,7 +85,7 @@ const puppeteer=require('puppeteer-core');
    assert.equal(discovery.listed,24);assert.ok(discovery.artist&&discovery.typing&&discovery.denmark&&discovery.denmarkCv&&discovery.programming&&discovery.london&&discovery.radio&&discovery.botMap);
    assert.equal(discovery.canonical,'https://stannet.dev/explorar/');
    const version=await publishedVersion(page);
-   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity','devtube']);
+   assert.equal(version.commit,process.env.SOURCE_COMMIT||'local');assert.equal(version.auth,false);assert.equal(version.payments,false);assert.equal(version.typing,false);assert.deepEqual(version.openLabs,['fp-study','cs-foundations','shortcuts','cybersecurity','artists','typing','denmark','denmark-cv','programming','radio','london-english','infinity','devtube','mentor']);
    // London English Academy is a public landing page; authentication remains in Space.
    {
      const london=await browser.newPage();

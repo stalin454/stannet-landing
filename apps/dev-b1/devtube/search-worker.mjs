@@ -40,6 +40,13 @@ const answer=(obj,status=200,cache='no-store')=>new Response(JSON.stringify(obj)
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
+  if(url.pathname==='/mentor'||url.pathname.startsWith('/mentor/')){
+    const asset=await env.ASSETS.fetch(request);
+    const headers=new Headers(asset.headers);
+    headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'self' blob: data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    headers.set('Cache-Control','public, max-age=0, must-revalidate');
+    return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
+  }
   if(url.pathname.startsWith('/api/stantube/'))return stanTubePrivate.fetch(request,env);
   const thumb=url.pathname.match(thumbPattern);
   if(thumb){if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED'},405);return thumbnail(thumb[1],request)}
