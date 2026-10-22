@@ -137,7 +137,7 @@
     creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||guessUniverse(original,lastDiscoveryQuery),
     format:source==='library'?'En mi biblioteca':'YouTube · Resultado'});
    const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
-   im.loading='lazy';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;guardThumb(im);
+   im.loading='lazy';im.decoding='async';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;guardThumb(im);
    thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+video.title);
    thumbButton.append(im,newEl('span',null,'▶ Ver dentro de DevTube'));
    const goPlay=()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})};
