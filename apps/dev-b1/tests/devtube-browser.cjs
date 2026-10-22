@@ -32,7 +32,10 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.waitForFunction(()=>document.querySelector('#result-count')?.textContent.includes('DISPONIBLES'),{timeout:15000}).catch(async err=>{const diagnostic=await page.evaluate(()=>({html:document.documentElement.outerHTML.slice(0,180),resultCount:document.querySelector('#result-count')?.textContent,bridge:!!window.StanTubeBridge,accountStatus:document.querySelector('#account-status')?.textContent,loadedScripts:[...document.scripts].map(x=>x.src)}));console.log('STANTUBE_PAGE_DIAGNOSTIC',JSON.stringify({diagnostic,errors}));throw err});
   await page.waitForFunction(()=>window.StanTubeBridge?.isAuthed(),{timeout:6500}).catch(async err=>{const diagnostic=await page.evaluate(()=>({ready:document.readyState,bridge:!!window.StanTubeBridge,logged:window.StanTubeBridge?.isAuthed(),status:document.querySelector('#account-status')?.textContent,privateScript:!!document.querySelector('script[src="/devtube/stantube-private.js"]'),cards:document.querySelectorAll('.video-card').length}));console.log('STANTUBE_LOGIN_DIAGNOSTIC',JSON.stringify({diagnostic,errors}));throw err});
   assert.ok(await page.$('#stantube-login'),'StanTube must offer private sign-in');
-  assert.equal(await page.$$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
+  // The private bridge may render an empty library before the official JSON finishes.
+  // Wait for the required real catalog, retaining the exact content assertion below.
+  await page.waitForFunction(()=>document.querySelectorAll('.video-card').length===2,{timeout:20000});
+  assert.equal(await page.$eval('.video-card',list=>list.length),2,'Two verified original videos, no invented content');
   const state=await page.evaluate(()=>({
    title:document.title,canonical:document.querySelector('link[rel="canonical"]')?.href,
    hasIframe:Boolean(document.querySelector('iframe')),overflow:document.documentElement.scrollWidth>innerWidth+1,
