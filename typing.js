@@ -6,6 +6,7 @@
   const SOUND_KEY = 'stannet-typing-sound-v1';
   const REFLECTION_KEY = 'stannet-code-typing-reflections-v1';
   const catalog = window.StanNetCodeTypingCatalog || null;
+  const accents = window.StanNetTypingAccents || null;
 
   const lessons = {
     es: [
@@ -73,8 +74,9 @@
     { id:'lower-left', level:'07', title:'Fila inferior · izquierda', fingers:'Z X C V B', focus:'Bajar y volver a ASDF', pattern:'zxcv vcb zxcv zzzz xxxx cccc vvvv bbbb zxcvb' },
     { id:'lower-right', level:'08', title:'Fila inferior · derecha', fingers:'N M , . -', focus:'Bajar y volver a JKLÑ', pattern:'nm,.- -.,mn nm,. nnnn mmmm ,,,, .... ----' },
     { id:'numbers', level:'09', title:'Fila numérica', fingers:'1 2 3 4 5 · 6 7 8 9 0', focus:'Extensión vertical de todos los dedos', pattern:'12345 67890 13579 24680 12345 54321 67890 09876' },
-    { id:'words', level:'10', title:'Palabras y memoria', fingers:'Todo el alfabeto', focus:'Automatización sin mirar', pattern:'casa dedo fila tecla ritmo teclado datos mundo codigo practica memoria velocidad precision' },
-    { id:'full', level:'11', title:'Teclado completo', fingers:'QWERTY + Ñ + números', focus:'Fluidez global', pattern:'qwerty asdfg zxcvb yuiop hjklñ nm,.- 12345 67890 teclado completo sin mirar las manos' }
+    { id:'words', level:'10', title:'Palabras y memoria', fingers:'Todo el alfabeto', focus:'Automatización sin mirar', pattern:'casa dedo fila tecla ritmo teclado datos mundo código práctica memoria velocidad precisión' },
+    { id:'full', level:'11', title:'Teclado completo', fingers:'QWERTY + Ñ + números', focus:'Fluidez global', pattern:'qwerty asdfg zxcvb yuiop hjklñ nm,.- 12345 67890 teclado completo sin mirar las manos' },
+    ...(accents?.drills || [])
   ];
 
   const fingerInfo = {
@@ -98,13 +100,13 @@
   assign('67yuhjnm','ri');
   assign('8ik,','rm');
   assign('9ol.','rr');
-  assign('0pñ-','rp');
+  assign('0pñ-´¨','rp');
   keyFinger[' '] = 'th';
 
   const keyboardRows = [
     ['1','2','3','4','5','6','7','8','9','0','BACKSPACE'],
     ['TAB','Q','W','E','R','T','Y','U','I','O','P','ENTER'],
-    ['A','S','D','F','G','H','J','K','L','Ñ'],
+    ['A','S','D','F','G','H','J','K','L','Ñ','´'],
     ['SHIFT','Z','X','C','V','B','N','M',',','.','-','SHIFT'],
     ['ESPACIO']
   ];
@@ -112,6 +114,9 @@
   let mode = 'text';
   let activeDrill = drills[0].id;
   let target = '';
+  let composing = false;
+  let accentPending = false;
+  let lastInputValue = '';
   let spans = [];
   let start = 0;
   let timer = 0;
@@ -160,7 +165,7 @@
   function normalizeKey(ch) {
     if (ch === ' ') return 'ESPACIO';
     if (ch === '\n') return 'ENTER';
-    return String(ch || '').toUpperCase();
+    return accents ? accents.baseKey(ch || '') : String(ch || '').toUpperCase();
   }
 
   function normalizePhysicalKey(event) {
@@ -170,7 +175,8 @@
     if (event.key === 'Enter') return 'ENTER';
     if (event.key === 'Tab') return 'TAB';
     if (event.key === 'Shift') return 'SHIFT';
-    return String(event.key || '').toUpperCase();
+    if (event.key === 'Dead') return '´';
+    return normalizeKey(event.key || '');
   }
 
   function virtualKeys(label) {
@@ -185,8 +191,9 @@
 
     const input = $('typingInput');
     const typingFocused = document.activeElement === input;
-    const expected = typingFocused ? target[input.value.length] : '';
-    const expectedLabel = normalizeKey(expected);
+    const expected = typingFocused ? target[(composing ? lastInputValue : input.value).length] : '';
+    const combo = accents?.sequence(expected);
+    const expectedLabel = combo && !accentPending ? '´' : normalizeKey(expected);
     const correctness = typingFocused && !['SHIFT','TAB','BACKSPACE'].includes(label)
       ? (label === expectedLabel ? 'correct' : 'error')
       : '';
@@ -199,7 +206,7 @@
     });
 
     if (down && typingFocused) {
-      const finger = event.key === ' ' ? 'th' : keyFinger[String(event.key || '').toLowerCase()] || '';
+      const finger = event.key === ' ' ? 'th' : keyFinger[(event.key==='Dead'?'´':normalizeKey(event.key)).toLowerCase()] || '';
       if (finger) {
         document.querySelectorAll('.hands-diagram .active-finger').forEach(el => el.classList.remove('active-finger'));
         document.querySelectorAll('.hands-diagram .finger-' + finger).forEach(el => el.classList.add('active-finger'));
@@ -240,7 +247,7 @@
         const special = ['BACKSPACE','TAB','ENTER','SHIFT'].includes(label);
         key.className = 'finger-key ' + (finger ? 'finger-' + finger : '') + (label === 'ESPACIO' ? ' space-key' : '') + (special ? ' special-key' : '');
         key.dataset.char = label;
-        key.textContent = label;
+        key.textContent = label === '´' ? '´ ¨' : label;
         if (['F','J'].includes(label)) key.classList.add('home-marker');
         line.append(key);
       });
@@ -294,8 +301,10 @@
 
   function updateCoach(index = 0) {
     const next = target[index] ?? '';
-    const normalized = normalizeKey(next);
-    const finger = keyFinger[String(next).toLowerCase()] || '';
+    const combo = accents?.sequence(next);
+    const waitingForMark = !!combo && !accentPending;
+    const normalized = waitingForMark ? '´' : normalizeKey(next);
+    const finger = keyFinger[(waitingForMark ? '´' : normalizeKey(next)).toLowerCase()] || '';
     const info = fingerInfo[finger];
 
     document.querySelectorAll('.finger-key.next-key').forEach(k => k.classList.remove('next-key'));
@@ -314,6 +323,18 @@
     $('movementHint').textContent = info?.hint || (next === '\n' ? 'Pulsa Enter con el meñique derecho y vuelve a Ñ.' : 'Mantén los dedos sobre ASDF · JKLÑ');
 
     const coach = $('fingerCoach');
+    if (combo) {
+      const first = combo.diaeresis ? 'Mayús + tecla ¨' : 'Tecla ´';
+      const vowel = (combo.upper ? 'Mayús + ' : '') + combo.base;
+      const instruction = waitingForMark
+        ? first + ': pulsa y suelta; después ' + vowel + '. No escribas un apóstrofo.'
+        : 'Ahora pulsa ' + vowel + ' para completar ' + next + '.';
+      $('nextKey').textContent = waitingForMark ? combo.mark + ' → ' + next : combo.base + ' → ' + next;
+      $('movementHint').textContent = instruction;
+      coach.querySelector('b').textContent = waitingForMark ? combo.mark + ' → ' + next : next;
+      coach.querySelector('span').textContent = instruction;
+      return;
+    }
     coach.querySelector('b').textContent = next === ' ' ? 'SPACE' : next === '\n' ? 'ENTER' : (next || '—');
     coach.querySelector('span').textContent = info ? info.label + ' · vuelve a ' + info.home : next ? 'Tecla especial / símbolo' : 'Empieza un ejercicio';
   }
@@ -347,7 +368,7 @@
   }
 
   function stats(repaint = false) {
-    const value = $('typingInput').value;
+    const value = composing ? lastInputValue : $('typingInput').value;
     const { correct } = comparison(value);
     const totalCorrect = completedCorrect + correct;
     const totalTyped = completedTyped + value.length;
@@ -359,7 +380,7 @@
     $('liveWpm').textContent = wpm;
     $('liveAccuracy').textContent = accuracy;
     $('charCount').textContent = totalTyped;
-    if (repaint) paint(value);
+    if (repaint && !composing) paint(value);
 
     if (start && elapsed >= Number($('duration').value)) finish(elapsed, totalCorrect, totalTyped, accuracy, wpm);
     else if (start && value === target) {
@@ -371,6 +392,7 @@
       completedTyped += target.length;
       prepareTarget();
       $('typingInput').value = '';
+      lastInputValue = ''; accentPending = false;
       $('charCount').textContent = completedTyped;
       paint('');
       $('typingHint').textContent = mode === 'drill'
@@ -529,6 +551,7 @@
     finished = false;
     completedCorrect = 0;
     completedTyped = 0;
+    composing = false; accentPending = false; lastInputValue = '';
     prepareTarget();
     $('typingInput').disabled = false;
     $('typingInput').value = '';
@@ -565,6 +588,11 @@
     renderDrills();
     selectMode('drill');
     document.querySelector('.typing-workspace')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  $('startAccentPractice')?.addEventListener('click',()=>{
+    activeDrill='accent-vowels';renderDrills();selectMode('drill');
+    document.querySelector('.typing-workspace')?.scrollIntoView({behavior:'smooth',block:'start'});
   });
 
   for (const id of ['textLanguage', 'codeLanguage', 'codeLevel','duration']) $(id).addEventListener('change', reset);
@@ -608,11 +636,16 @@
   window.addEventListener('keydown', e => {
     if (e.repeat) return;
     setPhysicalKeyState(e, true);
+    if (e.key==='Dead' && document.activeElement===$('typingInput')) {
+      accentPending = true;
+      updateCoach(lastInputValue.length);
+    }
+    if (e.key==='Escape'||e.key==='Backspace') { accentPending=false; updateCoach(lastInputValue.length); }
   }, true);
 
   window.addEventListener('keyup', e => {
     setPhysicalKeyState(e, false);
-    if (document.activeElement === $('typingInput')) updateCoach($('typingInput').value.length);
+    if (document.activeElement === $('typingInput')) updateCoach((composing ? lastInputValue : $('typingInput').value).length);
   }, true);
 
   window.addEventListener('blur', () => {
@@ -630,26 +663,36 @@
     }
   });
 
-  $('typingInput').addEventListener('input', e => {
-    if (finished) return;
-
-    const value = $('typingInput').value;
-    const deleting = String(e.inputType || '').startsWith('delete');
-    if (deleting) {
-      playClick(true, false, true);
-    } else if (value.length) {
-      const index = value.length - 1;
-      const expected = target[index];
-      const typed = value[index];
-      playClick(typed === expected, typed === ' ');
+  function acceptInput(e) {
+    if (finished || composing || e.isComposing) return;
+    const input = $('typingInput');
+    const value = accents ? accents.normalize(input.value) : input.value.normalize('NFC');
+    if (value === lastInputValue) { accentPending=false; updateCoach(value.length); return; }
+    if (input.value !== value) {
+      const startAt = input.selectionStart, endAt = input.selectionEnd;
+      const startNfc = input.value.slice(0,startAt).normalize('NFC').length;
+      const endNfc = input.value.slice(0,endAt).normalize('NFC').length;
+      input.value = value; input.setSelectionRange(startNfc,endNfc);
     }
-
+    lastInputValue = value; accentPending = false;
+    const deleting = String(e.inputType || '').startsWith('delete');
+    if (deleting) playClick(true, false, true);
+    else if (value.length) {
+      const index = value.length - 1;
+      playClick(value[index] === target[index], value[index] === ' ');
+    }
     if (!start && value) {
       start = Date.now();
       timer = setInterval(stats, 250);
     }
     stats(true);
+  }
+  $('typingInput').addEventListener('compositionstart', () => { composing=true; });
+  $('typingInput').addEventListener('compositionend', () => {
+    composing=false;
+    acceptInput({inputType:'insertCompositionText',isComposing:false});
   });
+  $('typingInput').addEventListener('input', acceptInput);
 
   renderKeyboard();
   renderDrills();
@@ -679,5 +722,7 @@
     if(catalog.languages.some(item=>item.id===requested))$('codeLanguage').value=requested;
     if(catalog.levels.some(item=>item.id===level))$('codeLevel').value=level;
     selectMode('code');
+  } else if(params.get('mode')==='drill' && drills.some(drill=>drill.id===params.get('drill'))) {
+    activeDrill=params.get('drill');renderDrills();selectMode('drill');
   }
 })();

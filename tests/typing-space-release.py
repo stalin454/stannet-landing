@@ -1,0 +1,76 @@
+"""Guard the authorized Typing-only Space update; never serialize credentials."""
+import hashlib,json,os,pathlib,re,subprocess,sys,time,urllib.request
+
+ACCOUNT=os.environ.get('CLOUDFLARE_ACCOUNT_ID','')
+TOKEN=os.environ.get('CLOUDFLARE_API_TOKEN','')
+BASE='12767a4821cd92018c4a7dfe72c8a978afcad5a2'
+EXPECTED='934b04a3-69ef-41ec-8c99-e4d0d9469716'
+EXPECTED_DEPLOYMENT='412ca2b3-4d0c-4436-8584-64a029c1cb54'
+SNAPSHOT=pathlib.Path('/tmp/stannet-space-typing-before.json')
+PROTECTED=['stannet-dev-portal','stannet-academy-dev']
+ALLOWED={'typing.js','typing.css','typing-accents.js','pages/typing.html','tests/typing-accents.test.cjs','tests/typing-accents-browser.cjs','tests/typing-space-release.py','.github/workflows/deploy-cloudflare.yml','.github/workflows/code-typing-browser.yml'}
+
+def api(path,method='GET',data=None):
+    request=urllib.request.Request('https://api.cloudflare.com/client/v4/accounts/'+ACCOUNT+'/workers/scripts/'+path,data=json.dumps(data).encode() if data is not None else None,headers={'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'},method=method)
+    with urllib.request.urlopen(request,timeout=40) as response: result=json.load(response)
+    if not result.get('success'): raise RuntimeError('Cloudflare operation failed for '+path)
+    return result['result']
+
+def deployment(worker):
+    response=api(worker+'/deployments')
+    items=response.get('deployments',[]) if isinstance(response,dict) else response
+    if not items: raise RuntimeError('No deployment for '+worker)
+    return {'id':items[0]['id'],'versions':items[0]['versions']}
+
+def public_bytes(path):
+    request=urllib.request.Request('https://www.stannet.space/'+path,headers={'Cache-Control':'no-cache','User-Agent':'StanNet-Typing-Release-QA/1.0'})
+    with urllib.request.urlopen(request,timeout=35) as response: return response.read()
+
+def canonical_asset(path,data):
+    # Cloudflare adds this analytics script at the edge; retain every application byte.
+    if path=='' or path.endswith('.html'):
+        data=re.sub(rb'<script type="module" src="https://static\.cloudflareinsights\.com/beacon\.min\.js/[^"\r\n]+"[^>]*></script>\n',b'',data)
+    return data
+
+def public_hash(path):
+    return hashlib.sha256(canonical_asset(path,public_bytes(path))).hexdigest()
+
+phase=sys.argv[1]
+if phase=='before':
+    if not ACCOUNT or not TOKEN: raise RuntimeError('Missing deployment configuration')
+    changes=set(subprocess.check_output(['git','diff',BASE,'HEAD','--name-only'],text=True).splitlines())
+    if not changes or not changes<=ALLOWED: raise RuntimeError('Source changes exceed the Typing-only scope: '+','.join(sorted(changes-ALLOWED)))
+    config=json.loads(pathlib.Path('wrangler.jsonc').read_text())
+    assert config['name']=='stannet-landing' and config['main']=='worker.js'
+    assert {route['pattern'] for route in config['routes']}=={'stannet.space/*','www.stannet.space/*'}
+    current=deployment('stannet-landing')
+    assert current['id']==EXPECTED_DEPLOYMENT, 'Space deployment changed since the verified snapshot'
+    assert len(current['versions'])==1 and current['versions'][0]['version_id']==EXPECTED and current['versions'][0]['percentage']==100, 'Space differs from the verified published baseline; stop before writing'
+    for path in ['index.html','typing.js','typing.css','pages/typing.html','code-typing-catalog.js','typing-stories.js']:
+        original=subprocess.check_output(['git','show',BASE+':'+path])
+        assert public_hash(path)==hashlib.sha256(original).hexdigest(), 'Published baseline content differs from main: '+path
+    protected={name:deployment(name)['id'] for name in PROTECTED}
+    SNAPSHOT.write_text(json.dumps({'space':current,'protected':protected,'home':public_hash('')}))
+    print(json.dumps({'typing_only_source_verified':True,'space_baseline_verified':True,'protected':protected}))
+elif phase=='record':
+    snapshot=json.loads(SNAPSHOT.read_text());snapshot['published']=deployment('stannet-landing')['id'];SNAPSHOT.write_text(json.dumps(snapshot))
+    print('New Space deployment recorded for conditional recovery.')
+elif phase=='after':
+    snapshot=json.loads(SNAPSHOT.read_text())
+    assert {name:deployment(name)['id'] for name in PROTECTED}==snapshot['protected'], 'Dev or academy deployment changed'
+    assert public_hash('')==snapshot['home'], 'Space homepage changed unexpectedly'
+    for path in ['typing.js','typing.css','typing-accents.js','pages/typing.html']:
+        expected_hash=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+        for attempt in range(6):
+            if public_hash(path)==expected_hash: break
+            if attempt==5: raise RuntimeError('Public asset mismatch: '+path)
+            time.sleep(3)
+    print(json.dumps({'space_typing_published':True,'url':'https://www.stannet.space/pages/typing','public_assets_verified':True,'homepage_unchanged':True,'dev_and_academy_unchanged':True}))
+elif phase=='rollback':
+    if not SNAPSHOT.exists(): print('No publication snapshot; nothing to recover.');sys.exit(0)
+    snapshot=json.loads(SNAPSHOT.read_text());current=deployment('stannet-landing')
+    if current['versions']==snapshot['space']['versions']: print('Original Space version is still active; no rollback needed.');sys.exit(0)
+    if not snapshot.get('published') or current['id']!=snapshot['published']: raise RuntimeError('Cannot identify this release as current; no automatic overwrite performed')
+    api('stannet-landing/deployments','POST',{'strategy':'percentage','versions':snapshot['space']['versions']})
+    print('Previous Space version restored. Dev and academy were not modified.')
+else: raise RuntimeError('Unknown phase')

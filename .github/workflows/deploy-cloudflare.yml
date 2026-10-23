@@ -3,27 +3,68 @@ name: Deploy StanNet to Cloudflare Workers
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'typing.js'
+      - 'typing.css'
+      - 'typing-accents.js'
+      - 'pages/typing.html'
+      - 'tests/typing-accents*'
+      - 'tests/typing-space-release.py'
+      - '.github/workflows/deploy-cloudflare.yml'
+      - '.github/workflows/code-typing-browser.yml'
 
 permissions:
   contents: read
+concurrency:
+  group: stannet-space-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    if: >-
+      github.repository == 'stalin454/stannet-landing' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.head_ref == 'feat/typing-accents-space-20261023' &&
+      github.event.pull_request.head.repo.full_name == github.repository))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-
       - name: Run offline tests
         run: npm run test:ci
-
+      - name: Accent data and Unicode tests
+        run: node --test tests/typing-accents.test.cjs
+      - name: Prepare Chrome driver for Typing QA
+        if: github.event_name == 'pull_request'
+        run: npm install --prefix /tmp/stannet-typing-browser --no-save --no-audit --no-fund puppeteer-core@24
+      - name: Test existing code modes and accent composition before publication
+        if: github.event_name == 'pull_request'
+        env:
+          NODE_PATH: /tmp/stannet-typing-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: http://127.0.0.1:8765/
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/typing-space-http.log 2>&1 &
+          node tests/code-typing-browser.cjs
+          node tests/typing-accents-browser.cjs
+      - name: Verify exact published Space baseline and Typing-only changes
+        if: github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          git fetch --no-tags --depth=1 origin 12767a4821cd92018c4a7dfe72c8a978afcad5a2
+          python3 tests/typing-space-release.py before
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
@@ -31,3 +72,37 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.139.0"
           command: deploy
+      - name: Record authorized Space publication
+        if: github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python3 tests/typing-space-release.py record
+      - name: Verify public Typing in Chrome and preserve Dev and academy
+        if: github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NODE_PATH: /tmp/stannet-typing-browser/node_modules
+          CHROME_PATH: /usr/bin/google-chrome
+          STANNET_AUDIT_URL: https://www.stannet.space/
+        run: |
+          python3 tests/typing-space-release.py after
+          node tests/code-typing-browser.cjs
+          node tests/typing-accents-browser.cjs
+      - name: Restore previous Space version if this publication fails
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: python3 tests/typing-space-release.py rollback
+      - name: Keep Typing release evidence
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: space-typing-accents-evidence
+          path: |
+            output/code-typing-browser/
+            output/typing-accents-browser/
+            /tmp/stannet-space-typing-before.json
+          if-no-files-found: warn

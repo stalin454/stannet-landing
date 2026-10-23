@@ -1166,3 +1166,5 @@ body.typing-page{
 .code-typing-symbols button:last-child{font-size:12px;min-width:58px}
 .typing-page .typing-target{tab-size:2;overflow-wrap:anywhere}
 @media(max-width:620px){.code-typing-guide{padding:12px}.code-typing-actions button{flex:1}.code-typing-symbols button{min-width:40px}}
+
+.typing-accents-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:24px 0 32px;padding:24px;border:1px solid #69b7a1;border-radius:16px;background:linear-gradient(120deg,#e7f8f1,#eff7fc);color:#143830}.typing-accents-intro h2{font-size:clamp(25px,4vw,38px);letter-spacing:3px;margin:9px 0}.typing-accents-intro p{max-width:850px;line-height:1.75;font-size:14px;margin:8px 0}.typing-accents-intro button{background:#096b59;color:white;border:0;border-radius:9px;padding:14px 20px;font:700 14px system-ui;cursor:pointer;white-space:nowrap;min-height:48px}.typing-accents-intro button:focus-visible{outline:3px solid #063c32;outline-offset:4px}@media(max-width:600px){.typing-accents-intro{align-items:stretch;flex-direction:column;padding:18px;gap:12px}.typing-accents-intro button{width:100%}.typing-accents-intro p{font-size:13px}}
