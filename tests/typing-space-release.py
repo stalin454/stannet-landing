@@ -1,5 +1,5 @@
 """Guard the authorized Typing-only Space update; never serialize credentials."""
-import hashlib,json,os,pathlib,subprocess,sys,time,urllib.request
+import difflib,hashlib,json,os,pathlib,subprocess,sys,time,urllib.request
 
 ACCOUNT=os.environ.get('CLOUDFLARE_ACCOUNT_ID','')
 TOKEN=os.environ.get('CLOUDFLARE_API_TOKEN','')
@@ -37,11 +37,15 @@ if phase=='before':
     print(json.dumps({'observed_space':current,'expected_version':EXPECTED}),flush=True)
     if current['versions'][0]['version_id']!=EXPECTED:
         version=api('stannet-landing/versions/'+current['versions'][0]['version_id'])
-        print(json.dumps({'observed_version_id':version.get('id'),'metadata':version.get('metadata'),'annotations':version.get('annotations')}),flush=True)
+        print(json.dumps({'observed_version_id':version.get('id'),'created_on':version.get('metadata',{}).get('created_on'),'annotations':version.get('annotations')}),flush=True)
         for path in ['index.html','worker.js','typing.js','typing.css','pages/typing.html','code-typing-catalog.js','typing-stories.js']:
             original=subprocess.check_output(['git','show',BASE+':'+path])
             if path=='worker.js': continue
-            print(json.dumps({'baseline_asset':path,'matches_main':public_hash(path)==hashlib.sha256(original).hexdigest()}),flush=True)
+            matches=public_hash(path)==hashlib.sha256(original).hexdigest()
+            print(json.dumps({'baseline_asset':path,'matches_main':matches}),flush=True)
+            if not matches and path.endswith('.html'):
+                with urllib.request.urlopen('https://www.stannet.space/'+path,timeout=35) as response: live=response.read().decode()
+                print(''.join(list(difflib.unified_diff(original.decode().splitlines(True),live.splitlines(True),fromfile='main/'+path,tofile='live/'+path))[:100]),flush=True)
     assert len(current['versions'])==1 and current['versions'][0]['version_id']==EXPECTED and current['versions'][0]['percentage']==100, 'Space differs from the verified published baseline; stop before writing'
     protected={name:deployment(name)['id'] for name in PROTECTED}
     SNAPSHOT.write_text(json.dumps({'space':current,'protected':protected,'home':public_hash('')}))
