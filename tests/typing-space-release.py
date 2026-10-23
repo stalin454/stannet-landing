@@ -21,9 +21,12 @@ def deployment(worker):
     if not items: raise RuntimeError('No deployment for '+worker)
     return {'id':items[0]['id'],'versions':items[0]['versions']}
 
-def public_hash(path):
+def public_bytes(path):
     request=urllib.request.Request('https://www.stannet.space/'+path,headers={'Cache-Control':'no-cache','User-Agent':'StanNet-Typing-Release-QA/1.0'})
-    with urllib.request.urlopen(request,timeout=35) as response: return hashlib.sha256(response.read()).hexdigest()
+    with urllib.request.urlopen(request,timeout=35) as response: return response.read()
+
+def public_hash(path):
+    return hashlib.sha256(public_bytes(path)).hexdigest()
 
 phase=sys.argv[1]
 if phase=='before':
@@ -44,7 +47,7 @@ if phase=='before':
             matches=public_hash(path)==hashlib.sha256(original).hexdigest()
             print(json.dumps({'baseline_asset':path,'matches_main':matches}),flush=True)
             if not matches and path.endswith('.html'):
-                with urllib.request.urlopen('https://www.stannet.space/'+path,timeout=35) as response: live=response.read().decode()
+                live=public_bytes(path).decode()
                 print(''.join(list(difflib.unified_diff(original.decode().splitlines(True),live.splitlines(True),fromfile='main/'+path,tofile='live/'+path))[:100]),flush=True)
     assert len(current['versions'])==1 and current['versions'][0]['version_id']==EXPECTED and current['versions'][0]['percentage']==100, 'Space differs from the verified published baseline; stop before writing'
     protected={name:deployment(name)['id'] for name in PROTECTED}
