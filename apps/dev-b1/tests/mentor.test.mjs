@@ -57,7 +57,7 @@ test('La recuperación rechaza datos dañados y funciona si localStorage está b
 });
 
 // The teaching guide must cover real course lines, including closings and commands.
-import {lineGuide,compareLine,actionGuide,describeLine} from '../mentor-public/line-tutor.mjs';
+import {lineGuide,compareLine,actionGuide,describeLine,referenceLessons} from '../mentor-public/line-tutor.mjs';
 test('La guía explica cada línea del curso y conserva el código exacto',()=>{
  let total=0;
  for(const project of [{name:'Mi proyecto DAW'},{name:'Portfolio de Ana',os:'mac'}])for(const step of curriculum(project)){
@@ -105,4 +105,35 @@ test('El acompañamiento continúa con acciones individuales hasta publicar en P
  for(const step of steps.filter(s=>!s.code))for(const action of actionGuide(step)){
   assert.ok(action.instruction.length>5);assert.ok(action.why.length>15);
  }
+});
+
+test('La explicación detallada cubre CSS, JavaScript, Git y las reglas de archivo',()=>{
+ for(const step of steps)for(const line of lineGuide(step)){
+  assert.ok(line.effect.length>20,'Efecto de '+line.code);
+  assert.ok(line.mistake.length>20,'Revisión de '+line.code);
+  assert.ok(line.anatomy.length>0,'Anatomía de '+line.code);
+ }
+ const variable=describeLine('  --bg: #101827;',{file:'style.css'});
+ assert.match(variable.effect,/no pinta el fondo/);
+ assert.ok(variable.anatomy.some(([token])=>token==='--bg'));
+ const query=describeLine("const lista = document.querySelector('#lista');",{file:'script.js'});
+ assert.match(query.mistake,/null/);
+ assert.ok(query.anatomy.some(([token])=>token==='='));
+ assert.match(describeLine('function mostrar(elementos) {',{file:'script.js'}).effect,/no ejecuta/);
+ assert.match(describeLine('recursos.push({ nombre, descripcion });',{file:'script.js'}).mistake,/no redibuja/);
+ assert.match(describeLine('git push -u origin main',{command:true}).mistake,/sin commit/);
+ const ignore=describeLine('.env.*',{command:true,guideFile:'.gitignore'});
+ assert.match(ignore.effect,/no se ejecuta/);assert.ok(ignore.anatomy.some(([token])=>token==='*'));
+});
+test('Los cuatro manuales contienen los archivos del proyecto y separan comandos de acciones',()=>{
+ for(const [topic,index,file]of [['html',11,'index.html'],['css',16,'style.css'],['javascript',26,'script.js']]){
+  const manual=referenceLessons(steps,topic);assert.equal(manual.chapters[0].code,exampleAt(steps,index)[file]);
+  assert.equal(manual.chapters[0].lines.map(line=>line.code).join('\n'),manual.chapters[0].code);
+  for(const line of manual.chapters[0].lines)assert.ok(line.effect&&line.mistake&&line.anatomy.length);
+ }
+ const git=referenceLessons(steps,'git');const ignore=git.chapters.find(c=>c.target==='.gitignore');
+ assert.equal(ignore.lines.length,4);assert.equal(ignore.actions.length,0);
+ const publication=git.chapters.find(c=>/Publica la web/.test(c.title));
+ assert.equal(publication.lines.length,0);assert.equal(publication.actions.length,8);
+ assert.equal(referenceLessons(steps,'desconocido').key,'html');
 });

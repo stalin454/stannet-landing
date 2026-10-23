@@ -1,3 +1,5 @@
+import {teachingDepth} from './teaching-depth.mjs';
+import {exampleAt} from './curriculum.mjs';
 // Prepared teaching notes for the current HTML/CSS/JavaScript course.
 // No learner code is evaluated by this module.
 const tags={html:'el documento completo',head:'la zona de información para el navegador',body:'la zona con el contenido de la página',title:'el nombre de la pestaña',header:'la cabecera',nav:'el grupo de enlaces de navegación',a:'un enlace',main:'el contenido principal',section:'una sección de contenido relacionado',p:'un párrafo',h1:'el título principal',h2:'el título de una sección',h3:'el título de una tarjeta',label:'la etiqueta que explica un campo',input:'un campo donde escribir',div:'un contenedor para agrupar elementos',form:'el formulario',textarea:'un campo de texto de varias líneas',button:'un botón',footer:'el pie de página',script:'la conexión con JavaScript',link:'la conexión con otro archivo',meta:'un dato de configuración'};
@@ -116,7 +118,7 @@ function commandNote(line){
  ];return notes.find(([pattern])=>pattern.test(line))?.slice(1);
 }
 export function describeLine(line,step){
- const text=line.trim();if(!text)return {meaning:'Dejamos una línea vacía para separar partes del código.',why:'Facilita la lectura; no añade una instrucción.',pieces:['Pulsa Enter una vez.']};
+ const text=line.trim();if(!text)return {meaning:'Dejamos una línea vacía para separar partes del código.',why:'Facilita la lectura; no añade una instrucción.',pieces:['Pulsa Enter una vez.'],...teachingDepth(text,step)};
  let note;
  if(step.guideFile==='.gitignore')note=[`Escribimos el patrón ${text} en .gitignore. No es un comando.`,{'.env':'Evita incluir el archivo habitual de variables privadas.','.env.*':'Evita incluir sus variantes, como .env.local.','node_modules/':'Excluye la carpeta de dependencias que se puede reconstruir.','.DS_Store':'Excluye un archivo de configuración creado por macOS.'}[text],['Cada línea es un patrón de archivos o carpetas que Git debe ignorar.','* = cualquier secuencia de caracteres; / al final indica una carpeta.','Esto no elimina del historial los archivos que ya estaban versionados.']];
  else if(step.command)note=commandNote(text);
@@ -124,7 +126,7 @@ export function describeLine(line,step){
  else if(step.file==='style.css')note=cssNote(text);
  else if(step.file==='script.js')note=jsNotes.find(([pattern])=>pattern.test(text))?.slice(1);
  if(!note)throw new Error('Falta una explicación preparada para: '+text);
- return {meaning:note[0],why:note[1],pieces:note[2],...(step.file==='index.html'?htmlDepth(text):{})};
+ return {meaning:note[0],why:note[1],pieces:note[2],...(step.file==='index.html'?htmlDepth(text):teachingDepth(text,step))};
 }
 
 function htmlDepth(text){
@@ -218,4 +220,17 @@ export function actionGuide(step){
  };
  if(step.code)return [];
  return (prepared[step.title]||step.actions.map(action=>[action,step.why])).map(([instruction,why],index)=>({instruction,why,index}));
+}
+
+export function referenceLessons(steps,topic='html'){
+ const definitions={
+  html:{label:'HTML',file:'index.html',index:11,intro:'HTML (HyperText Markup Language) describe la estructura y el significado del contenido mediante etiquetas. CSS controla el aspecto y JavaScript añade comportamiento.'},
+  css:{label:'CSS',file:'style.css',index:16,intro:'CSS (Cascading Style Sheets) define cómo se presenta el contenido. Cada regla selecciona elementos y les asigna propiedades y valores: colores, espacios, tamaños y disposición. La cascada resuelve qué declaraciones se aplican cuando coinciden varias reglas.'},
+  javascript:{label:'JavaScript',file:'script.js',index:26,intro:'JavaScript es el lenguaje de programación de esta web. Representa datos, define tareas y responde a eventos. El DOM es la representación de la página con la que esas instrucciones pueden trabajar. Definir una función y ejecutarla son acciones distintas.'},
+  git:{label:'Git y publicación',intro:'Git conserva versiones en tu equipo; GitHub aloja el repositorio remoto y GitHub Pages publica la web estática. Un commit local no publica por sí solo la página. Aquí verás cada comando y cada acción de publicación por separado.'}
+ };
+ const key=Object.hasOwn(definitions,topic)?topic:'html';const definition=definitions[key];
+ if(key==='git')return {...definition,key,chapters:steps.filter(step=>step.stage===6).map(step=>({title:step.title,target:step.guideFile||'Terminal / GitHub',code:step.code||'',lines:lineGuide(step),actions:actionGuide(step),why:step.why}))};
+ const code=exampleAt(steps,definition.index)[definition.file];
+ return {...definition,key,chapters:[{title:definition.file,target:definition.file,code,lines:lineGuide({file:definition.file,mode:'replace',code}),actions:[]}]};
 }

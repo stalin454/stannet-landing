@@ -43,6 +43,15 @@ async function checkMentor(browser,base){
    assert.ok(await page.$$eval('.manual-line',e=>e.length>40),'Manual dissects the complete HTML document');
    assert.match(await page.$eval('#manual-view',e=>e.textContent),/píxeles CSS/);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Manual fits desktop');
+   for(const [topic,title,expected]of [['css','CSS','Propiedad:'],['javascript','JavaScript','querySelector'],['git','Git y publicación','Build and deployment']]){
+    await page.select('#manual-language',topic);
+    assert.match(await page.$eval('#manual-title',e=>e.textContent),new RegExp(title));
+    assert.ok((await page.$eval('#manual-view',e=>e.textContent)).includes(expected),'Manual contains '+topic+' explanations');
+    assert.ok(await page.$('.manual-line .anatomy-list')||topic==='git');
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Manual fits desktop '+topic);
+   }
+   await page.select('#manual-language','html');
+
    await page.click('#manual-return');
    assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 2 de 11/,'Reading the manual preserves the writing position');
 
@@ -88,6 +97,12 @@ async function checkMentor(browser,base){
      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Line guide fits mobile');
      await page.click('[data-view="manual"]');
      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Complete annotated manual fits mobile');
+     for(const topic of ['css','javascript','git']){
+      await page.select('#manual-language',topic);
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Manual fits mobile '+topic);
+     }
+     await page.select('#manual-language','html');
+
      await page.click('#manual-return');
      assert.match(await page.$eval('#line-position',e=>e.textContent),/Línea 1 de 11/);
 
@@ -98,6 +113,11 @@ async function checkMentor(browser,base){
      if(i===36){assert.equal(count,8,'Publishing is taught as eight individual actions');assert.match(await page.$eval('#action-instruction',e=>e.textContent),/Settings/);}
      for(let action=0;action<count;action++)await page.click('#action-next');
      assert.ok(await page.$('.action-tutor .tutor-finish'),'Screen actions have a result check');
+    }
+    if([12,17,31,32].includes(i)){
+     assert.ok((await page.$eval('.line-effect',e=>e.textContent)).length>40,'Active line explains its effect');
+     assert.ok((await page.$eval('.line-mistake',e=>e.textContent)).length>40,'Active line explains mistakes');
+     assert.ok(await page.$('.line-anatomy .anatomy-list'),'Active line has token anatomy');
     }
     if(await page.$('#line-next')){
      const count=Number((await page.$eval('#line-position',e=>e.textContent)).match(/de (\d+)/)[1]);
