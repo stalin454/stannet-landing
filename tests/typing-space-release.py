@@ -34,6 +34,14 @@ if phase=='before':
     assert config['name']=='stannet-landing' and config['main']=='worker.js'
     assert {route['pattern'] for route in config['routes']}=={'stannet.space/*','www.stannet.space/*'}
     current=deployment('stannet-landing')
+    print(json.dumps({'observed_space':current,'expected_version':EXPECTED}),flush=True)
+    if current['versions'][0]['version_id']!=EXPECTED:
+        version=api('stannet-landing/versions/'+current['versions'][0]['version_id'])
+        print(json.dumps({'observed_version_id':version.get('id'),'metadata':version.get('metadata'),'annotations':version.get('annotations')}),flush=True)
+        for path in ['index.html','worker.js','typing.js','typing.css','pages/typing.html','code-typing-catalog.js','typing-stories.js']:
+            original=subprocess.check_output(['git','show',BASE+':'+path])
+            if path=='worker.js': continue
+            print(json.dumps({'baseline_asset':path,'matches_main':public_hash(path)==hashlib.sha256(original).hexdigest()}),flush=True)
     assert len(current['versions'])==1 and current['versions'][0]['version_id']==EXPECTED and current['versions'][0]['percentage']==100, 'Space differs from the verified published baseline; stop before writing'
     protected={name:deployment(name)['id'] for name in PROTECTED}
     SNAPSHOT.write_text(json.dumps({'space':current,'protected':protected,'home':public_hash('')}))
