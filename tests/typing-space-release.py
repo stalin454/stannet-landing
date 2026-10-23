@@ -1,10 +1,11 @@
 """Guard the authorized Typing-only Space update; never serialize credentials."""
-import difflib,hashlib,json,os,pathlib,subprocess,sys,time,urllib.request
+import hashlib,json,os,pathlib,re,subprocess,sys,time,urllib.request
 
 ACCOUNT=os.environ.get('CLOUDFLARE_ACCOUNT_ID','')
 TOKEN=os.environ.get('CLOUDFLARE_API_TOKEN','')
 BASE='12767a4821cd92018c4a7dfe72c8a978afcad5a2'
-EXPECTED='a77b6723-ee67-4c9a-96de-c84b53e31738'
+EXPECTED='934b04a3-69ef-41ec-8c99-e4d0d9469716'
+EXPECTED_DEPLOYMENT='412ca2b3-4d0c-4436-8584-64a029c1cb54'
 SNAPSHOT=pathlib.Path('/tmp/stannet-space-typing-before.json')
 PROTECTED=['stannet-dev-portal','stannet-academy-dev']
 ALLOWED={'typing.js','typing.css','typing-accents.js','pages/typing.html','tests/typing-accents.test.cjs','tests/typing-accents-browser.cjs','tests/typing-space-release.py','.github/workflows/deploy-cloudflare.yml','.github/workflows/code-typing-browser.yml'}
@@ -25,8 +26,14 @@ def public_bytes(path):
     request=urllib.request.Request('https://www.stannet.space/'+path,headers={'Cache-Control':'no-cache','User-Agent':'StanNet-Typing-Release-QA/1.0'})
     with urllib.request.urlopen(request,timeout=35) as response: return response.read()
 
+def canonical_asset(path,data):
+    # Cloudflare adds this analytics script at the edge; retain every application byte.
+    if path=='' or path.endswith('.html'):
+        data=re.sub(rb'<script type="module" src="https://static\.cloudflareinsights\.com/beacon\.min\.js/[^"\r\n]+"[^>]*></script>\n',b'',data)
+    return data
+
 def public_hash(path):
-    return hashlib.sha256(public_bytes(path)).hexdigest()
+    return hashlib.sha256(canonical_asset(path,public_bytes(path))).hexdigest()
 
 phase=sys.argv[1]
 if phase=='before':
@@ -37,19 +44,11 @@ if phase=='before':
     assert config['name']=='stannet-landing' and config['main']=='worker.js'
     assert {route['pattern'] for route in config['routes']}=={'stannet.space/*','www.stannet.space/*'}
     current=deployment('stannet-landing')
-    print(json.dumps({'observed_space':current,'expected_version':EXPECTED}),flush=True)
-    if current['versions'][0]['version_id']!=EXPECTED:
-        version=api('stannet-landing/versions/'+current['versions'][0]['version_id'])
-        print(json.dumps({'observed_version_id':version.get('id'),'created_on':version.get('metadata',{}).get('created_on'),'annotations':version.get('annotations')}),flush=True)
-        for path in ['index.html','worker.js','typing.js','typing.css','pages/typing.html','code-typing-catalog.js','typing-stories.js']:
-            original=subprocess.check_output(['git','show',BASE+':'+path])
-            if path=='worker.js': continue
-            matches=public_hash(path)==hashlib.sha256(original).hexdigest()
-            print(json.dumps({'baseline_asset':path,'matches_main':matches}),flush=True)
-            if not matches and path.endswith('.html'):
-                live=public_bytes(path).decode()
-                print(''.join(list(difflib.unified_diff(original.decode().splitlines(True),live.splitlines(True),fromfile='main/'+path,tofile='live/'+path))[:100]),flush=True)
+    assert current['id']==EXPECTED_DEPLOYMENT, 'Space deployment changed since the verified snapshot'
     assert len(current['versions'])==1 and current['versions'][0]['version_id']==EXPECTED and current['versions'][0]['percentage']==100, 'Space differs from the verified published baseline; stop before writing'
+    for path in ['index.html','typing.js','typing.css','pages/typing.html','code-typing-catalog.js','typing-stories.js']:
+        original=subprocess.check_output(['git','show',BASE+':'+path])
+        assert public_hash(path)==hashlib.sha256(original).hexdigest(), 'Published baseline content differs from main: '+path
     protected={name:deployment(name)['id'] for name in PROTECTED}
     SNAPSHOT.write_text(json.dumps({'space':current,'protected':protected,'home':public_hash('')}))
     print(json.dumps({'typing_only_source_verified':True,'space_baseline_verified':True,'protected':protected}))
