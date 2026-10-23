@@ -6,6 +6,8 @@ on:
       - 'typing.js'
       - 'typing.css'
       - 'code-typing-catalog.js'
+      - 'typing-accents.js'
+      - 'tests/typing-accents*'
       - 'tests/code-typing*.cjs'
       - '.github/workflows/code-typing-browser.yml'
   workflow_dispatch:
@@ -24,6 +26,8 @@ jobs:
           node --check typing.js
           node --check code-typing-catalog.js
           node tests/code-typing.test.cjs
+          node --check typing-accents.js
+          node --test tests/typing-accents.test.cjs
       - name: Install Chrome browser driver
         run: npm install --prefix /tmp/stannet-code-browser --no-save --no-audit --no-fund puppeteer-core@24
       - name: Test original and code modes in Chrome (mobile and desktop)
@@ -35,10 +39,13 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/stannet-code-typing.log 2>&1 &
           sleep 2
           node tests/code-typing-browser.cjs
+          node tests/typing-accents-browser.cjs
       - name: Save screenshots and report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: code-typing-browser-evidence
-          path: output/code-typing-browser/
+          path: |
+            output/code-typing-browser/
+            output/typing-accents-browser/
           if-no-files-found: ignore
