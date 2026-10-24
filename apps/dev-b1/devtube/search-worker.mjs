@@ -1,0 +1,84 @@
+import stanTubePrivate from './private-worker.mjs';
+// DevTube discovery gateway. Keep YOUTUBE_API_KEY in Worker secrets, never in assets or GitHub.
+// Static routing remains asset-first; only /api/devtube/* invokes this script.
+// Strict same-origin thumbnail relay. Browsers on some networks cannot load i.ytimg.com.
+// Only canonical 11-character YouTube IDs are accepted; never accept arbitrary URLs.
+const thumbPattern=/^\/api\/devtube\/thumbnail\/([A-Za-z0-9_-]{11})$/;
+function photo(body,contentType,age=3600){return new Response(body,{status:200,headers:{'Content-Type':contentType,'Cache-Control':'public, max-age='+age+', s-maxage='+age,'X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin'}})}
+async function thumbnail(id,request){
+ const cache=typeof caches!=='undefined'?caches.default:null;
+ const key=new Request(new URL('/api/devtube/thumbnail/'+id+'?v=4',request.url));
+ if(cache){try{const found=await cache.match(key);if(found)return found}catch{}}
+ const origins=[
+  'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',
+  'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg',
+  'https://img.youtube.com/vi/'+id+'/hqdefault.jpg',
+  'https://i.ytimg.com/vi_webp/'+id+'/hqdefault.webp',
+  'https://i3.ytimg.com/vi/'+id+'/hqdefault.jpg'
+ ];
+ async function sourceImage(origin){
+  const res=await fetch(origin,{redirect:'follow',headers:{Accept:'image/webp,image/jpeg,image/*'},signal:AbortSignal.timeout(4800)});
+  const finalUrl=new URL(res.url);
+  if(finalUrl.protocol!=='https:'||!['i.ytimg.com','img.youtube.com','i3.ytimg.com'].includes(finalUrl.hostname))throw Error('Untrusted thumbnail redirect');
+  const size=Number(res.headers.get('content-length')||0);
+  if(!res.ok||!/^image\/(jpeg|jpg|webp)$/i.test(res.headers.get('content-type')||'')||size>1024*1024)throw Error('Thumbnail source unavailable');
+  const bytes=await res.arrayBuffer();
+  if(bytes.byteLength<100||bytes.byteLength>1024*1024)throw Error('Thumbnail size invalid');
+  const type=res.headers.get('content-type').split(';')[0];
+  const header=new Uint8Array(bytes.slice(0,12));
+  const jpeg=header[0]===0xff&&header[1]===0xd8;
+  const webp=header[0]===82&&header[1]===73&&header[2]===70&&header[3]===70&&header[8]===87&&header[9]===69&&header[10]===66&&header[11]===80;
+  if((type==='image/jpeg'&&!jpeg)||(type==='image/webp'&&!webp))throw Error('Invalid thumbnail content');
+  return photo(bytes,type,3600);
+ }
+ try{
+  const result=await Promise.any(origins.map(sourceImage));
+  if(cache){try{await cache.put(key,result.clone())}catch{}}
+  return result;
+ }catch{
+  // Do not return HTTP 200/SVG: it hides outages and prevents the browser trying YouTube directly.
+  return new Response('Thumbnail temporarily unavailable',{status:502,headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+ }
+}
+const JSON_HEADERS={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
+const VIDEO_ID=/^[A-Za-z0-9_-]{11}$/;
+const answer=(obj,status=200,cache='no-store')=>new Response(JSON.stringify(obj),{status,headers:{...JSON_HEADERS,'Cache-Control':cache,'Access-Control-Allow-Origin':'https://stannet.dev'}});
+export default {
+ async fetch(request,env){
+  const url=new URL(request.url);
+  if(url.pathname==='/mentor'||url.pathname.startsWith('/mentor/')){
+    const asset=await env.ASSETS.fetch(request);
+    const headers=new Headers(asset.headers);
+    headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; frame-src 'self' blob: data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    headers.set('Cache-Control','public, max-age=0, must-revalidate');
+    return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
+  }
+  if(url.pathname.startsWith('/api/stantube/'))return stanTubePrivate.fetch(request,env);
+  const thumb=url.pathname.match(thumbPattern);
+  if(thumb){if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED'},405);return thumbnail(thumb[1],request)}
+  if(url.pathname.startsWith('/api/devtube/thumbnail/'))return answer({code:'INVALID_VIDEO_ID'},400);
+  if(url.pathname!=='/api/devtube/search')return env.ASSETS.fetch(request);
+  if(request.method!=='GET')return answer({code:'METHOD_NOT_ALLOWED',error:'Utiliza GET.'},405);
+  const q=(url.searchParams.get('q')||'').trim().replace(/\s+/g,' ');
+  if(q.length<2||q.length>100)return answer({code:'INVALID_QUERY',error:'Escribe entre 2 y 100 caracteres.'},400);
+  if(!env.YOUTUBE_API_KEY)return answer({code:'YOUTUBE_NOT_CONFIGURED',error:'La búsqueda integrada necesita la clave privada de YouTube Data API.'},503);
+  const safeQuery=new URLSearchParams({q,part:'snippet',type:'video',videoEmbeddable:'true',maxResults:'12',safeSearch:'moderate',relevanceLanguage:'es',fields:'items(id/videoId,snippet(title,description,channelTitle,publishedAt)),nextPageToken'});
+  const cacheKey=new Request(url.origin+'/api/devtube/search?q='+encodeURIComponent(q.toLowerCase()),{method:'GET'});
+  const edge=typeof caches!=='undefined'?caches.default:null;
+  if(edge){const cached=await edge.match(cacheKey);if(cached)return cached}
+  const endpoint='https://www.googleapis.com/youtube/v3/search?'+safeQuery+'&key='+encodeURIComponent(env.YOUTUBE_API_KEY);
+  let remote;
+  try{remote=await fetch(endpoint,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(9000)})}
+  catch{return answer({code:'YOUTUBE_UNAVAILABLE',error:'YouTube no responde. Puedes abrir los resultados en YouTube.'},502)}
+  if(!remote.ok)return answer({code:remote.status===403||remote.status===429?'YOUTUBE_QUOTA':'YOUTUBE_UNAVAILABLE',error:'La API de YouTube no está disponible ahora.'},502);
+  let data;
+  try{data=await remote.json()}catch{return answer({code:'YOUTUBE_BAD_RESPONSE',error:'No se pudo leer la búsqueda.'},502)}
+  const videos=(Array.isArray(data.items)?data.items:[])
+   .filter(x=>VIDEO_ID.test(x?.id?.videoId||''))
+   .slice(0,12)
+   .map(x=>({youtubeId:x.id.videoId,title:String(x?.snippet?.title||'Vídeo de YouTube').slice(0,160),description:String(x?.snippet?.description||'').slice(0,360),creator:String(x?.snippet?.channelTitle||'YouTube').slice(0,100)}));
+  const response=answer({code:'OK',query:q,videos},200,'public, max-age=300, s-maxage=600');
+  if(edge){try{await edge.put(cacheKey,response.clone())}catch{/* best effort; no user data cached */}}
+  return response;
+ }
+};
