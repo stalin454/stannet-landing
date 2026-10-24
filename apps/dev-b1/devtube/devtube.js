@@ -24,22 +24,31 @@
  function guardThumb(img,id){
   if(!img)return;
   if(!validId.test(id||'')){fallbackImage(img);return}
-  const sources=[thumb(id),'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg'];
-  let index=0,timer=null;
+  const sources=['https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg',thumb(id)];
+  let index=0,timer=null,visible=img.loading!=='lazy';
   const next=()=>{
    if(img.dataset.thumbFallback)return;
    if(timer)clearTimeout(timer);
    if(++index>=sources.length){fallbackImage(img);return}
-   img.dataset.thumbSource=index===1?'ytimg':'youtube-img';
+   img.dataset.thumbSource=index===1?'youtube-img':'relay';
    img.src=sources[index];schedule();
   };
   const schedule=()=>{
-   if(img.loading==='lazy')return; // Lazy cards should not timeout while offscreen.
-   timer=setTimeout(()=>{if(img.isConnected&&!img.complete)next()},5500);
+   if(!visible)return; // Start the timeout only after a lazy image enters the viewport.
+   if(timer)clearTimeout(timer);
+   timer=setTimeout(()=>{if(!img.complete)next()},5500);
   };
+  if(!visible&&'IntersectionObserver' in window){
+   const observer=new IntersectionObserver(entries=>{
+    if(entries.some(entry=>entry.isIntersecting)){
+     visible=true;observer.disconnect();if(!img.complete)schedule();
+    }
+   },{rootMargin:'250px'});
+   observer.observe(img);
+  }else visible=true;
   img.addEventListener('load',()=>{if(timer)clearTimeout(timer);if(!img.dataset.thumbFallback&&img.naturalWidth<320)next()});
   img.addEventListener('error',next);
-  img.dataset.thumbSource='relay';
+  img.dataset.thumbSource='ytimg';
   img.src=sources[0];schedule();
  }
  function guessUniverse(v,q){

@@ -65,7 +65,7 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
       console.log('STANTUBE_THUMBNAIL_DIAGNOSTIC',JSON.stringify({base,width,details}));
       throw err;
     });
-  if(base.startsWith('https://')) assert.ok((await page.$eval('.video-card img',img=>['stannet.dev','i.ytimg.com','img.youtube.com'].includes(new URL(img.src).hostname))),
+  if(base.startsWith('https://')) assert.ok((await page.$eval('.video-card img',img=>['i.ytimg.com','img.youtube.com',location.hostname].includes(new URL(img.src).hostname))),
     'Video thumbnail must come from the relay or an explicitly allowed YouTube image CDN');
   if(base.startsWith('https://')){
    const proxyResponse=await page.evaluate(async()=>{
@@ -96,7 +96,8 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.waitForSelector('.youtube-result');
   assert.equal(await page.$$eval('.youtube-result',nodes=>nodes.length),1,'Remote result inside StanTube');
   await page.waitForFunction(()=>document.querySelector('.youtube-result img')?.naturalWidth>0,{timeout:15000});
-  if(base.startsWith('https://')) assert.equal(await page.$eval('.youtube-result img',img=>new URL(img.src).pathname),'/api/devtube/thumbnail/M7lc1UVf-VE');
+  if(base.startsWith('https://')) assert.ok(await page.$eval('.youtube-result img',img=>['i.ytimg.com','img.youtube.com',location.hostname].includes(new URL(img.src).hostname)),
+   'Discovery thumbnails must use a verified YouTube CDN or the same-origin relay');
   assert.equal(await page.$$eval('#screen iframe',nodes=>nodes.length),0,'No player before click');
   assert.ok(new URL(page.url()).pathname.startsWith('/stantube/'),'Global search must not redirect to YouTube');
   assert.equal(await page.$('#youtube-search-external'),null,'No external search redirect link');
