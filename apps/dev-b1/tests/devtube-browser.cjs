@@ -59,22 +59,24 @@ module.exports.checkDevTube=async function checkStanTube(browser,base){
   await page.click('#tv-toggle');
   assert.equal(await page.$eval('body',body=>body.classList.contains('tv-mode')),false,'TV mode disabled');
 
-  if(base.startsWith('https://'))await page.waitForFunction(()=>document.querySelector('.video-card img')?.naturalWidth>0 &&
-    document.querySelector('#spotlight-image')?.naturalWidth>0,{timeout:15000}).catch(async err=>{
+  if(base.startsWith('https://'))await page.waitForFunction(()=>[document.querySelector('.video-card img'),document.querySelector('#spotlight-image')]
+   .every(img=>img&&img.complete&&img.naturalWidth>=320&&!img.dataset.thumbFallback&&!img.src.includes('thumbnail-fallback')),{timeout:24000}).catch(async err=>{
       const details=await page.evaluate(()=>[...document.querySelectorAll('.video-card img, #spotlight-image')].map(im=>({src:im.src.slice(0,110),width:im.naturalWidth,complete:im.complete,fall:im.dataset.thumbFallback})));
       console.log('STANTUBE_THUMBNAIL_DIAGNOSTIC',JSON.stringify({base,width,details}));
       throw err;
     });
-  if(base.startsWith('https://')) assert.ok((await page.$eval('.video-card img',img=>new URL(img.src).origin))===new URL(base).origin,
-    'Video thumbnails must be served from stannet.dev rather than a third-party image CDN');
+  if(base.startsWith('https://')) assert.ok((await page.$eval('.video-card img',img=>['stannet.dev','i.ytimg.com','img.youtube.com'].includes(new URL(img.src).hostname))),
+    'Video thumbnail must come from the relay or an explicitly allowed YouTube image CDN');
   if(base.startsWith('https://')){
    const proxyResponse=await page.evaluate(async()=>{
     const r=await fetch('/api/devtube/thumbnail/M7lc1UVf-VE',{cache:'no-cache'});
     return {status:r.status,contentType:r.headers.get('content-type'),bytes:(await r.arrayBuffer()).byteLength};
    });
-   assert.equal(proxyResponse.status,200,'Same-origin thumbnail relay must serve an image');
-   assert.ok(/^image\/(jpeg|webp|svg\+xml)/.test(proxyResponse.contentType),'Relay must serve images only');
-   assert.ok(proxyResponse.bytes>100,'Relay image cannot be empty');
+   assert.ok([200,502].includes(proxyResponse.status),'Thumbnail relay must return a real image or a transparent upstream error');
+   if(proxyResponse.status===200){
+    assert.ok(/^image\/(jpeg|webp)/.test(proxyResponse.contentType),'Relay must return real YouTube imagery, never a placeholder SVG');
+    assert.ok(proxyResponse.bytes>100,'Relay image cannot be empty');
+   }
   }
 
   // Search results must stay on StanNet.Dev; save, move, persist and delete by universe.

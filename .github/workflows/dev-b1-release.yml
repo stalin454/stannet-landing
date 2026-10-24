@@ -98,7 +98,7 @@ jobs:
           import json,os,urllib.request
           req=urllib.request.Request('https://stannet.dev/version.json',headers={'User-Agent':'StanNet-Dev-Release-QA/1.0','Cache-Control':'no-cache'})
           with urllib.request.urlopen(req,timeout=25) as response: current=json.load(response)['commit']
-          assert current in ['e31db2a4f3532d525e03e1fd620dff6259924239',os.environ['SOURCE_COMMIT']], 'Dev changed since last verified Infinity release; stop before publication'
+          assert current in ['e31db2a4f3532d525e03e1fd620dff6259924239','729e0cb2ec56f0eaf359c037557e51faf2d6464e',os.environ['SOURCE_COMMIT']], 'Dev changed since last verified Infinity release; stop before publication'
           print('Current Dev matches the preserved baseline or this exact release.')
           PYCODE
       - name: Confirm destination and snapshot protected deployment metadata

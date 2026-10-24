@@ -17,9 +17,31 @@
  function normalize(v){return {id:escText(v.id),youtubeId:v.youtubeId,title:v.title,creator:escText(v.creator||'STANNET CREATOR'),universe:v.universe,format:escText(v.format||'Vídeo'),description:escText(v.description),tags:Array.isArray(v.tags)?v.tags.filter(x=>typeof x==='string').slice(0,16):[],chapters:Array.isArray(v.chapters)?v.chapters.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.title==='string').slice(0,100):[],transcript:Array.isArray(v.transcript)?v.transcript.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.text==='string').slice(0,300):[],lyrics:escText(v.lyrics),stylePrompt:escText(v.stylePrompt),code:escText(v.code)}}
  function allVideos(){const ids=new Set(catalog.map(v=>v.youtubeId));return [...catalog,...personal.filter(v=>!ids.has(v.youtubeId))]}
  const noThumb='/devtube/thumbnail-fallback.svg';
- function thumb(id){return '/api/devtube/thumbnail/'+id}
+ function thumb(id){return '/api/devtube/thumbnail/'+id+'?v=2'}
  function fallbackImage(img){if(img.dataset.thumbFallback)return;img.dataset.thumbFallback='true';img.src=noThumb}
- function guardThumb(img){if(!img)return;img.addEventListener('error',()=>fallbackImage(img),{once:true});setTimeout(()=>{if(img.isConnected&&img.complete&&!img.naturalWidth)fallbackImage(img)},6000)}
+ // A failed same-origin relay must not silently pass off an SVG as a YouTube thumbnail.
+ // Try two fixed YouTube image CDNs before showing the clearly labelled local fallback.
+ function guardThumb(img,id){
+  if(!img)return;
+  if(!validId.test(id||'')){fallbackImage(img);return}
+  const sources=[thumb(id),'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg'];
+  let index=0,timer=null;
+  const next=()=>{
+   if(img.dataset.thumbFallback)return;
+   if(timer)clearTimeout(timer);
+   if(++index>=sources.length){fallbackImage(img);return}
+   img.dataset.thumbSource=index===1?'ytimg':'youtube-img';
+   img.src=sources[index];schedule();
+  };
+  const schedule=()=>{
+   if(img.loading==='lazy')return; // Lazy cards should not timeout while offscreen.
+   timer=setTimeout(()=>{if(img.isConnected&&!img.complete)next()},5500);
+  };
+  img.addEventListener('load',()=>{if(timer)clearTimeout(timer);if(!img.dataset.thumbFallback&&img.naturalWidth<320)next()});
+  img.addEventListener('error',next);
+  img.dataset.thumbSource='relay';
+  img.src=sources[0];schedule();
+ }
  function guessUniverse(v,q){
   const sample=[v.title,v.creator,q].join(' ');
   if(/stan[\s_-]*6ix|bronx diaries|real ones/i.test(sample))return 'stan6ix';
@@ -33,7 +55,7 @@
   return filter==='all'?'code':filter;
  }
  function newEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=escText(txt);return e}
- function select(v){current=v;active=false;miniDismissed=false;$screen.innerHTML=$screenTemplate;$('#spotlight-image').src=thumb(v.youtubeId);guardThumb($('#spotlight-image'));$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';$note.textContent='Pulsa Reproducir para cargar YouTube. Mientras navegas por StanTube, el reproductor podrá flotar sin interrumpirse.';$('#theater').classList.remove('floating');$('#float-close').hidden=true;renderInspector()}
+ function select(v){current=v;active=false;miniDismissed=false;$screen.innerHTML=$screenTemplate;guardThumb($('#spotlight-image'),v.youtubeId);$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';$note.textContent='Pulsa Reproducir para cargar YouTube. Mientras navegas por StanTube, el reproductor podrá flotar sin interrumpirse.';$('#theater').classList.remove('floating');$('#float-close').hidden=true;renderInspector()}
  function play(v,seconds=0){if(!v)return;current=v;active=true;miniDismissed=false;$('#current-title').textContent=v.title;$('#current-creator').textContent=v.creator+' · '+v.format;$('#youtube-link').href='#youtube-discovery';const frame=document.createElement('iframe');const origin=new URL(location.href).origin;frame.src='https://www.youtube-nocookie.com/embed/'+v.youtubeId+'?autoplay=1&playsinline=1&rel=0&start='+Math.max(0,Math.floor(seconds))+'&origin='+encodeURIComponent(origin);frame.title='YouTube · '+v.title;frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';$screen.replaceChildren(frame);$note.textContent='YouTube se ha cargado tras tu clic. Algunos propietarios no permiten incrustar sus vídeos. El minirreproductor funciona dentro de StanTube.';renderInspector();updateFloat()}
  function updateFloat(){const beyond=$('.studio-section').getBoundingClientRect().bottom<70;if(!beyond)miniDismissed=false;const floating=active&&beyond&&!miniDismissed;$('#theater').classList.toggle('floating',floating);$('#float-close').hidden=!floating}
  function addToQueue(id){if(!allVideos().some(v=>v.id===id))return;queue.push(id);queue=queue.slice(-40);save('queue',queue);updateQueueCount();showNotice('Guardado en tu cola de reproducción.')}
@@ -93,7 +115,7 @@
   for(const {v,hit} of items){
    const card=newEl('article','video-card'),poster=newEl('button','video-thumb');poster.type='button';
    poster.setAttribute('aria-label','Reproducir '+v.title);
-   const img=newEl('img');img.src=thumb(v.youtubeId);img.loading='lazy';img.alt='Miniatura de '+v.title;guardThumb(img);
+   const img=newEl('img');img.loading='lazy';img.alt='Miniatura de '+v.title;guardThumb(img,v.youtubeId);
    poster.append(img,newEl('span','video-type',v.format.toUpperCase()),newEl('span','play-chip',hit.seconds===null?'▶ REPRODUCIR':'▶ IR A '+formatTime(hit.seconds)));
    poster.addEventListener('click',()=>{play(v,hit.seconds||0);window.scrollTo({top:$('.studio-section').offsetTop-15,behavior:'smooth'})});
    const info=newEl('div','video-info');info.append(newEl('small',null,v.creator+' / '+universeNames[v.universe]),newEl('h3',null,v.title),newEl('p',null,v.description));
@@ -191,7 +213,7 @@
     creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||guessUniverse(original,lastDiscoveryQuery),
     format:source==='library'?'En mi biblioteca':'YouTube · Resultado'});
    const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
-   im.loading='lazy';im.decoding='async';im.src=thumb(video.youtubeId);im.alt='Miniatura de '+video.title;guardThumb(im);
+   im.loading='lazy';im.decoding='async';im.alt='Miniatura de '+video.title;guardThumb(im,video.youtubeId);
    thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+video.title);
    thumbButton.append(im,newEl('span',null,'▶ Ver dentro de StanTube'));
    const goPlay=()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})};

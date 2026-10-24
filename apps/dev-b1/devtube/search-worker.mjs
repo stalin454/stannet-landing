@@ -4,11 +4,10 @@ import stanTubePrivate from './private-worker.mjs';
 // Strict same-origin thumbnail relay. Browsers on some networks cannot load i.ytimg.com.
 // Only canonical 11-character YouTube IDs are accepted; never accept arbitrary URLs.
 const thumbPattern=/^\/api\/devtube\/thumbnail\/([A-Za-z0-9_-]{11})$/;
-const fallbackSVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#11263a"/><stop offset="1" stop-color="#080c17"/></linearGradient></defs><rect width="480" height="270" fill="url(#g)"/><circle cx="240" cy="116" r="54" fill="#152d44" stroke="#64e7e9" stroke-width="3"/><path d="M230 91 L268 116 L230 141Z" fill="#64e7e9"/><text x="240" y="202" text-anchor="middle" fill="#a6dce8" font-size="18" font-family="Arial,sans-serif" letter-spacing="4">DEVTUBE</text><text x="240" y="226" text-anchor="middle" fill="#768aa2" font-size="11" font-family="Arial,sans-serif">Vista previa no disponible</text></svg>';
 function photo(body,contentType,age=3600){return new Response(body,{status:200,headers:{'Content-Type':contentType,'Cache-Control':'public, max-age='+age+', s-maxage='+age,'X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin'}})}
 async function thumbnail(id,request){
  const cache=typeof caches!=='undefined'?caches.default:null;
- const key=new Request(new URL('/api/devtube/thumbnail/'+id,request.url));
+ const key=new Request(new URL('/api/devtube/thumbnail/'+id+'?v=2',request.url));
  if(cache){try{const found=await cache.match(key);if(found)return found}catch{}}
  const origins=[
   'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',
@@ -18,21 +17,28 @@ async function thumbnail(id,request){
   'https://i3.ytimg.com/vi/'+id+'/hqdefault.jpg'
  ];
  async function sourceImage(origin){
-  const res=await fetch(origin,{redirect:'error',headers:{Accept:'image/webp,image/jpeg,image/*'},signal:AbortSignal.timeout(3800)});
+  const res=await fetch(origin,{redirect:'follow',headers:{Accept:'image/webp,image/jpeg,image/*'},signal:AbortSignal.timeout(4800)});
+  const finalUrl=new URL(res.url);
+  if(finalUrl.protocol!=='https:'||!['i.ytimg.com','img.youtube.com','i3.ytimg.com'].includes(finalUrl.hostname))throw Error('Untrusted thumbnail redirect');
   const size=Number(res.headers.get('content-length')||0);
   if(!res.ok||!/^image\/(jpeg|jpg|webp)$/i.test(res.headers.get('content-type')||'')||size>1024*1024)throw Error('Thumbnail source unavailable');
   const bytes=await res.arrayBuffer();
   if(bytes.byteLength<100||bytes.byteLength>1024*1024)throw Error('Thumbnail size invalid');
-  return photo(bytes,res.headers.get('content-type').split(';')[0],3600);
+  const type=res.headers.get('content-type').split(';')[0];
+  const header=new Uint8Array(bytes.slice(0,12));
+  const jpeg=header[0]===0xff&&header[1]===0xd8;
+  const webp=header[0]===82&&header[1]===73&&header[2]===70&&header[3]===70&&header[8]===87&&header[9]===69&&header[10]===66&&header[11]===80;
+  if((type==='image/jpeg'&&!jpeg)||(type==='image/webp'&&!webp))throw Error('Invalid thumbnail content');
+  return photo(bytes,type,3600);
  }
  try{
   const result=await Promise.any(origins.map(sourceImage));
   if(cache){try{await cache.put(key,result.clone())}catch{}}
   return result;
- }catch{/* All official YouTube thumbnail CDNs unavailable: branded fallback instead of broken image. */}
- const fallback=photo(fallbackSVG.replaceAll('DEVTUBE','STANTUBE'),'image/svg+xml; charset=utf-8',60);
- if(cache){try{await cache.put(key,fallback.clone())}catch{}}
- return fallback;
+ }catch{
+  // Do not return HTTP 200/SVG: it hides outages and prevents the browser trying YouTube directly.
+  return new Response('Thumbnail temporarily unavailable',{status:502,headers:{'Content-Type':'text/plain; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+ }
 }
 const JSON_HEADERS={'Content-Type':'application/json; charset=utf-8','X-Content-Type-Options':'nosniff'};
 const VIDEO_ID=/^[A-Za-z0-9_-]{11}$/;
