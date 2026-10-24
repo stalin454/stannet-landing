@@ -10,6 +10,7 @@ on:
       - 'apps/dev-b1/tests/mentor-browser.cjs'
       - 'apps/dev-b1/devtube/**'
       - 'apps/dev-b1/tests/devtube-browser.cjs'
+      - 'apps/dev-b1/tests/devtube-search.test.mjs'
       - 'apps/dev-b1/catalog.mjs'
       - 'apps/dev-b1/tests/infinity-browser.cjs'
       - 'apps/dev-b1/cloudflare-inventory.py'
