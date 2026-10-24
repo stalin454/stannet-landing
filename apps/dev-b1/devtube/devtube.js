@@ -19,37 +19,56 @@
  const noThumb='/devtube/thumbnail-fallback.svg';
  function thumb(id){return '/api/devtube/thumbnail/'+id+'?v=2'}
  function fallbackImage(img){if(img.dataset.thumbFallback)return;img.dataset.thumbFallback='true';img.src=noThumb}
- // A failed same-origin relay must not silently pass off an SVG as a YouTube thumbnail.
- // Try two fixed YouTube image CDNs before showing the clearly labelled local fallback.
+ // All cards with the same YouTube ID share one validated image, avoiding inconsistent CDN retries.
+ const thumbnails=new Map();
+ function cachedThumbnail(id){
+  if(!thumbnails.has(id))thumbnails.set(id,(async()=>{
+   for(let attempt=0;attempt<2;attempt++){
+    try{
+     const res=await fetch(thumb(id),{cache:'no-store',signal:AbortSignal.timeout(5000)});
+     if(!res.ok||!/^image\/(jpeg|webp)(;|$)/i.test(res.headers.get('content-type')||''))continue;
+     const blob=await res.blob();
+     if(blob.size>=100&&blob.size<=1024*1024)return URL.createObjectURL(blob);
+    }catch{/* Remote image is intermittent: retry the fixed same-origin relay once. */}
+   }
+   return null;
+  })());
+  return thumbnails.get(id);
+ }
  function guardThumb(img,id){
   if(!img)return;
   if(!validId.test(id||'')){fallbackImage(img);return}
-  const sources=['https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg',thumb(id)];
-  let index=0,timer=null,visible=img.loading!=='lazy';
-  const next=()=>{
+  const cdns=['https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg'];
+  let index=-1,timer=null,started=false;
+  const advance=()=>{
    if(img.dataset.thumbFallback)return;
    if(timer)clearTimeout(timer);
-   if(++index>=sources.length){fallbackImage(img);return}
-   img.dataset.thumbSource=index===1?'youtube-img':'relay';
-   img.src=sources[index];schedule();
+   index++;
+   if(index>=cdns.length){fallbackImage(img);return}
+   img.dataset.thumbSource='youtube-cdn';
+   img.src=cdns[index];
+   timer=setTimeout(()=>{if(!img.complete)advance()},5500);
   };
-  const schedule=()=>{
-   if(!visible)return; // Start the timeout only after a lazy image enters the viewport.
+  img.addEventListener('load',()=>{
    if(timer)clearTimeout(timer);
-   timer=setTimeout(()=>{if(!img.complete)next()},5500);
+   if(!img.dataset.thumbFallback&&img.naturalWidth<320)advance();
+  });
+  img.addEventListener('error',advance);
+  const start=async()=>{
+   if(started)return;started=true;
+   const url=await cachedThumbnail(id);
+   if(!img.isConnected)return;
+   if(!url){advance();return}
+   img.dataset.thumbSource='relay-cache';
+   img.src=url;
+   timer=setTimeout(()=>{if(!img.complete)advance()},5500);
   };
-  if(!visible&&'IntersectionObserver' in window){
+  if(img.loading==='lazy'&&'IntersectionObserver' in window){
    const observer=new IntersectionObserver(entries=>{
-    if(entries.some(entry=>entry.isIntersecting)){
-     visible=true;observer.disconnect();if(!img.complete)schedule();
-    }
-   },{rootMargin:'250px'});
+    if(entries.some(e=>e.isIntersecting)){observer.disconnect();start()}
+   },{rootMargin:'850px'});
    observer.observe(img);
-  }else visible=true;
-  img.addEventListener('load',()=>{if(timer)clearTimeout(timer);if(!img.dataset.thumbFallback&&img.naturalWidth<320)next()});
-  img.addEventListener('error',next);
-  img.dataset.thumbSource='ytimg';
-  img.src=sources[0];schedule();
+  }else start();
  }
  function guessUniverse(v,q){
   const sample=[v.title,v.creator,q].join(' ');
