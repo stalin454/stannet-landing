@@ -41,7 +41,10 @@ test('DevTube same-origin thumbnails: strictly validated IDs, no unsafe URL fetc
  const destinations=[];
  globalThis.fetch=async url=>{
   destinations.push(String(url));
-  return new Response(new Uint8Array(500).fill(123),{status:200,headers:{'Content-Type':'image/jpeg','Content-Length':'500'}});
+  const bytes=new Uint8Array(500).fill(123);bytes[0]=0xff;bytes[1]=0xd8;
+  const response=new Response(bytes,{status:200,headers:{'Content-Type':'image/jpeg','Content-Length':'500'}});
+  Object.defineProperty(response,'url',{value:String(url)}); // Cloudflare fetch supplies the final source URL.
+  return response;
  };
  const env={ASSETS:{fetch:async()=>new Response('asset')}};
  try{
@@ -57,15 +60,16 @@ test('DevTube same-origin thumbnails: strictly validated IDs, no unsafe URL fetc
   assert.ok(destinations.length<=5,'Invalid video IDs must never reach external hosts');
  }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
 });
-test('DevTube returns a visible SVG when YouTube thumbnail providers are unavailable',async()=>{
+test('DevTube signals unavailable upstream images instead of returning a misleading SVG success',async()=>{
  const original=globalThis.fetch,oldCaches=globalThis.caches;
  globalThis.caches=undefined;let requests=0;
  globalThis.fetch=async()=>{requests++;return new Response('Unavailable',{status:403,headers:{'Content-Type':'text/html'}})};
  try{
   const response=await gateway.fetch(new Request('https://stannet.dev/api/devtube/thumbnail/M7lc1UVf-VE'),{ASSETS:{fetch:async()=>new Response('asset')}});
-  assert.equal(response.status,200);
-  assert.match(response.headers.get('content-type'),/image\/svg\+xml/);
-  assert.match(await response.text(),/<svg/);
-  assert.equal(requests,5,'Try five allowlisted YouTube thumbnail variants before local fallback');
+  assert.equal(response.status,502);
+  assert.match(response.headers.get('content-type'),/text\/plain/);
+  assert.match(response.headers.get('cache-control'),/no-store/);
+  assert.doesNotMatch(await response.text(),/<svg/);
+  assert.equal(requests,5,'Try five allowlisted YouTube thumbnail variants before client-side fallback');
  }finally{globalThis.fetch=original;globalThis.caches=oldCaches}
 });
