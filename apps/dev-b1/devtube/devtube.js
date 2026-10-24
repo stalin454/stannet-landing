@@ -3,7 +3,7 @@
  const $=q=>document.querySelector(q),$$=q=>[...document.querySelectorAll(q)];
  const storePrefix='stannet.devtube.v1.',validId=/^[A-Za-z0-9_-]{11}$/,validDimensions=new Set(['code','javascript','ai','cyber','astrid','stan6ix','music','documentaries','languages']);
  const $grid=$('#video-grid'),$screen=$('#screen'),$note=$('#playing-note'),$screenTemplate=$screen.innerHTML;
- $screen.addEventListener('error',event=>{if(event.target instanceof HTMLImageElement)fallbackImage(event.target)},true);
+ // The per-image source chain owns errors, including the featured player image.
  let privateSession=false,catalog=[],personal=[],favorites=[],watched=[],queue=[],filter='all',current=null,panel='story',active=false,miniDismissed=false,onlyFavorites=false;
  const load=(key,fallback)=>{try{const value=JSON.parse(localStorage.getItem(storePrefix+key));return Array.isArray(value)?value:fallback}catch{return fallback}};
  const save=(key,value)=>{
@@ -17,58 +17,38 @@
  function normalize(v){return {id:escText(v.id),youtubeId:v.youtubeId,title:v.title,creator:escText(v.creator||'STANNET CREATOR'),universe:v.universe,format:escText(v.format||'Vídeo'),description:escText(v.description),tags:Array.isArray(v.tags)?v.tags.filter(x=>typeof x==='string').slice(0,16):[],chapters:Array.isArray(v.chapters)?v.chapters.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.title==='string').slice(0,100):[],transcript:Array.isArray(v.transcript)?v.transcript.filter(x=>Number.isFinite(x.seconds)&&x.seconds>=0&&typeof x.text==='string').slice(0,300):[],lyrics:escText(v.lyrics),stylePrompt:escText(v.stylePrompt),code:escText(v.code)}}
  function allVideos(){const ids=new Set(catalog.map(v=>v.youtubeId));return [...catalog,...personal.filter(v=>!ids.has(v.youtubeId))]}
  const noThumb='/devtube/thumbnail-fallback.svg';
- function thumb(id){return '/api/devtube/thumbnail/'+id+'?v=2'}
- function fallbackImage(img){if(img.dataset.thumbFallback)return;img.dataset.thumbFallback='true';img.src=noThumb}
- // All cards with the same YouTube ID share one validated image, avoiding inconsistent CDN retries.
- const thumbnails=new Map();
- function cachedThumbnail(id){
-  if(!thumbnails.has(id))thumbnails.set(id,(async()=>{
-   for(let attempt=0;attempt<2;attempt++){
-    try{
-     const res=await fetch(thumb(id),{cache:'no-store',signal:AbortSignal.timeout(5000)});
-     if(!res.ok||!/^image\/(jpeg|webp)(;|$)/i.test(res.headers.get('content-type')||''))continue;
-     const blob=await res.blob();
-     if(blob.size>=100&&blob.size<=1024*1024)return URL.createObjectURL(blob);
-    }catch{/* Remote image is intermittent: retry the fixed same-origin relay once. */}
-   }
-   return null;
-  })());
-  return thumbnails.get(id);
+ // Universal thumbnail pipeline for all valid YouTube IDs, public and private.
+ const thumb=id=>'/api/devtube/thumbnail/'+id+'?v=4';
+ function fallbackImage(img){
+  if(img.dataset.thumbFallback==='true')return;
+  img.dataset.thumbFallback='true';img.dataset.thumbSource='fallback';img.src=noThumb;
  }
  function guardThumb(img,id){
   if(!img)return;
   if(!validId.test(id||'')){fallbackImage(img);return}
-  const cdns=['https://i.ytimg.com/vi/'+id+'/hqdefault.jpg','https://img.youtube.com/vi/'+id+'/mqdefault.jpg'];
-  let index=-1,timer=null,started=false;
+  // Set src synchronously BEFORE the grid inserts the card into the DOM.
+  // The browser can then manage native loading/caching without a detached-card race.
+  const sources=[
+   thumb(id),
+   'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',
+   'https://img.youtube.com/vi/'+id+'/hqdefault.jpg',
+   'https://i.ytimg.com/vi/'+id+'/mqdefault.jpg',
+   'https://i3.ytimg.com/vi/'+id+'/hqdefault.jpg'
+  ];
+  let index=0;
   const advance=()=>{
-   if(img.dataset.thumbFallback)return;
-   if(timer)clearTimeout(timer);
+   if(img.dataset.thumbFallback==='true')return;
    index++;
-   if(index>=cdns.length){fallbackImage(img);return}
-   img.dataset.thumbSource='youtube-cdn';
-   img.src=cdns[index];
-   timer=setTimeout(()=>{if(!img.complete)advance()},5500);
+   if(index>=sources.length){fallbackImage(img);return}
+   img.dataset.thumbSource=index===1?'cdn-primary':index===2?'cdn-secondary':'cdn-alternative';
+   img.src=sources[index];
   };
-  img.addEventListener('load',()=>{
-   if(timer)clearTimeout(timer);
-   if(!img.dataset.thumbFallback&&img.naturalWidth<320)advance();
-  });
   img.addEventListener('error',advance);
-  const start=async()=>{
-   if(started)return;started=true;
-   const url=await cachedThumbnail(id);
-   if(!img.isConnected)return;
-   if(!url){advance();return}
-   img.dataset.thumbSource='relay-cache';
-   img.src=url;
-   timer=setTimeout(()=>{if(!img.complete)advance()},5500);
-  };
-  if(img.loading==='lazy'&&'IntersectionObserver' in window){
-   const observer=new IntersectionObserver(entries=>{
-    if(entries.some(e=>e.isIntersecting)){observer.disconnect();start()}
-   },{rootMargin:'850px'});
-   observer.observe(img);
-  }else start();
+  img.addEventListener('load',()=>{
+   // Small upstream "video unavailable" placeholders should be retried.
+   if(img.dataset.thumbFallback!=='true'&&img.naturalWidth<300)advance();
+  });
+  img.dataset.videoId=id;img.dataset.thumbSource='relay';img.src=sources[0];
  }
  function guessUniverse(v,q){
   const sample=[v.title,v.creator,q].join(' ');
@@ -143,7 +123,7 @@
   for(const {v,hit} of items){
    const card=newEl('article','video-card'),poster=newEl('button','video-thumb');poster.type='button';
    poster.setAttribute('aria-label','Reproducir '+v.title);
-   const img=newEl('img');img.loading='lazy';img.alt='Miniatura de '+v.title;guardThumb(img,v.youtubeId);
+   const img=newEl('img');img.loading='eager';img.decoding='async';img.alt='Miniatura de '+v.title;guardThumb(img,v.youtubeId);
    poster.append(img,newEl('span','video-type',v.format.toUpperCase()),newEl('span','play-chip',hit.seconds===null?'▶ REPRODUCIR':'▶ IR A '+formatTime(hit.seconds)));
    poster.addEventListener('click',()=>{play(v,hit.seconds||0);window.scrollTo({top:$('.studio-section').offsetTop-15,behavior:'smooth'})});
    const info=newEl('div','video-info');info.append(newEl('small',null,v.creator+' / '+universeNames[v.universe]),newEl('h3',null,v.title),newEl('p',null,v.description));
@@ -241,7 +221,7 @@
     creator:original.creator||'YouTube',description:original.description||'',universe:saved?.universe||original.universe||guessUniverse(original,lastDiscoveryQuery),
     format:source==='library'?'En mi biblioteca':'YouTube · Resultado'});
    const item=newEl('article','youtube-result'),thumbButton=newEl('button','youtube-result-thumb'),im=newEl('img');
-   im.loading='lazy';im.decoding='async';im.alt='Miniatura de '+video.title;guardThumb(im,video.youtubeId);
+   im.loading='eager';im.decoding='async';im.alt='Miniatura de '+video.title;guardThumb(im,video.youtubeId);
    thumbButton.type='button';thumbButton.setAttribute('aria-label','Reproducir '+video.title);
    thumbButton.append(im,newEl('span',null,'▶ Ver dentro de StanTube'));
    const goPlay=()=>{play(video);window.scrollTo({top:$('.studio-section').offsetTop-12,behavior:'smooth'})};

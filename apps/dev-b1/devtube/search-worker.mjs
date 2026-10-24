@@ -7,7 +7,7 @@ const thumbPattern=/^\/api\/devtube\/thumbnail\/([A-Za-z0-9_-]{11})$/;
 function photo(body,contentType,age=3600){return new Response(body,{status:200,headers:{'Content-Type':contentType,'Cache-Control':'public, max-age='+age+', s-maxage='+age,'X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'same-origin'}})}
 async function thumbnail(id,request){
  const cache=typeof caches!=='undefined'?caches.default:null;
- const key=new Request(new URL('/api/devtube/thumbnail/'+id+'?v=2',request.url));
+ const key=new Request(new URL('/api/devtube/thumbnail/'+id+'?v=4',request.url));
  if(cache){try{const found=await cache.match(key);if(found)return found}catch{}}
  const origins=[
   'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg',
